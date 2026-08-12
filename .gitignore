@@ -1,0 +1,28 @@
+# Build output
+/out/
+/build/
+CMakeUserPresets.json
+
+# User-owned game data and reverse-engineering workspace
+/profiles/*/game/
+/profiles/*/analysis/
+/profiles/*/progress/
+/profiles/*/captures/
+
+# Generated scratch output (the checked-in profile corpus is not ignored)
+*.generated
+*.tmp
+*.log
+*.pdb
+*.ilk
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Python
+__pycache__/
+*.pyc
