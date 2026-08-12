@@ -136,7 +136,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0225[4094] = {
     0, 358, 0, 0, 0, 0, 0, 0, 0, 0, 0, 359, 360, 0, 0, 0, 361, 0, 0, 0, 362, 363, 0, 0, 0, 0, 0, 0, 0, 0, 364, 365,
     0, 0, 0, 366, 0, 0, 0, 0, 367, 368, 0, 0, 0, 0, 0, 0, 369, 0, 0, 370, 0, 0, 0, 0, 0, 371, 0, 0, 0, 372,
 };
-void recomp_unit_0225_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0225_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -536,7 +536,7 @@ L_08B88024:
     ctx.execute_vfpu_compare3(73u, 115u, 76u, 1u, 6u);
     if (ctx.gpr[3] == ctx.gpr[12]) {
     ctx.execute_vfpu_vscl_ct<108u, 97u, 121u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 11u, 0x08BA05B8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 11u, 0x08BA05B8u>(ctx, &aot_mem); return;
     }
     goto L_08B88030;
 L_08B88030:
@@ -545,14 +545,14 @@ L_08B88030:
 L_08B8803C:
     if (ctx.gpr[3] == ctx.gpr[16]) {
     ctx.execute_vfpu_vscl_ct<108u, 97u, 121u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 9u, 0x08BA0574u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 9u, 0x08BA0574u>(ctx, &aot_mem); return;
     }
     goto L_08B88044;
 L_08B88044:
     ctx.execute_vfpu_vcmp_ct<67u, 111u, 1u, 2u>();
     if (ctx.gpr[3] != ctx.gpr[18]) {
     rt.unsupported(0x08B8804Cu, 0x7261436Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0232_entry, 232u, 186u, 0x08BA5608u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0232_entry, 232u, 186u, 0x08BA5608u>(ctx, &aot_mem); return;
     }
     goto L_08B88050;
 L_08B88050:
@@ -568,7 +568,7 @@ L_08B881C0:
 L_08B88250:
     rt.unsupported(0x08B88250u, 0x2061754Cu, "unknown not lowered yet"); return;
 L_08B88268:
-    hot_regs.g4 = (ctx.gpr[26] < static_cast<std::uint32_t>(20301) ? 1u : 0u);
+    ctx.gpr[4] = (ctx.gpr[26] < static_cast<std::uint32_t>(20301) ? 1u : 0u);
     rt.unsupported(0x08B8826Cu, 0x4142494Cu, "unknown not lowered yet"); return;
 L_08B8827C:
     { const std::int64_t product = static_cast<std::int64_t>(static_cast<std::int32_t>(0u)) * static_cast<std::int64_t>(static_cast<std::int32_t>(0u)); ctx.lo = static_cast<std::uint32_t>(product); ctx.hi = static_cast<std::uint32_t>(static_cast<std::uint64_t>(product) >> 32u); }
@@ -576,17 +576,17 @@ L_08B8827C:
 L_08B88280:
     rt.unsupported(0x08B88280u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B8828C:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B88290u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B88298u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 11u, 0x08B9CBBCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 11u, 0x08B9CBBCu>(ctx, &aot_mem); return;
     }
     goto L_08B8829C;
 L_08B8829C:
     if (ctx.gpr[1] == ctx.gpr[15]) {
     rt.unsupported(0x08B882A0u, 0x4D2F5053u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 21u, 0x08B987F0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 21u, 0x08B987F0u>(ctx, &aot_mem); return;
     }
     goto L_08B882A4;
 L_08B882A4:
@@ -598,9 +598,9 @@ L_08B88384:
 L_08B883C8:
     rt.unsupported(0x08B883CCu, 0x08B2542Cu, "control flow in delay slot"); return;
 L_08B883E0:
-    if (ctx.gpr[27] == hot_regs.g4) {
+    if (ctx.gpr[27] == ctx.gpr[4]) {
     rt.unsupported(0x08B883E4u, 0x74697270u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 43u, 0x08BA14E8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 43u, 0x08BA14E8u>(ctx, &aot_mem); return;
     }
     goto L_08B883E8;
 L_08B883E8:
@@ -615,7 +615,7 @@ L_08B88418:
     ctx.execute_vfpu_compare3(118u, 101u, 76u, 1u, 6u);
     if (ctx.gpr[19] == ctx.gpr[12]) {
     rt.unsupported(0x08B88424u, 0x72616461u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 17u, 0x08BA09B0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 17u, 0x08BA09B0u>(ctx, &aot_mem); return;
     }
     goto L_08B88428;
 L_08B88428:
@@ -631,7 +631,7 @@ L_08B8844C:
 L_08B88450:
     if (ctx.gpr[19] == ctx.gpr[20]) {
     rt.unsupported(0x08B88454u, 0x72616461u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 53u, 0x08BA19A0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 53u, 0x08BA19A0u>(ctx, &aot_mem); return;
     }
     goto L_08B88458;
 L_08B88458:
@@ -639,7 +639,7 @@ L_08B88458:
 L_08B88464:
     if (ctx.gpr[19] == ctx.gpr[20]) {
     rt.unsupported(0x08B88468u, 0x72616461u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 54u, 0x08BA19B4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 54u, 0x08BA19B4u>(ctx, &aot_mem); return;
     }
     goto L_08B8846C;
 L_08B8846C:
@@ -651,9 +651,9 @@ L_08B8847C:
 L_08B884E8:
     rt.unsupported(0x08B884E8u, 0x4E414843u, "unknown not lowered yet"); return;
 L_08B884F8:
-    if (ctx.gpr[26] == hot_regs.g31) {
+    if (ctx.gpr[26] == ctx.gpr[31]) {
     (void)(ctx.gpr[9] < static_cast<std::uint32_t>(21573) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 15u, 0x08B9CE50u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 15u, 0x08B9CE50u>(ctx, &aot_mem); return;
     }
     goto L_08B88500;
 L_08B88500:
@@ -677,15 +677,15 @@ L_08B88708:
     rt.unsupported(0x08B88708u, 0x495F454Cu, "cop2/vfpu not lowered yet"); return;
 L_08B88718:
     rt.unsupported(0x08B88718u, 0x444E5552u, "unsupported CFC1 control register"); return;
-    if (static_cast<std::int32_t>(hot_regs.g2) > 0) {
+    if (static_cast<std::int32_t>(ctx.gpr[2]) > 0) {
     rt.unsupported(0x08B88720u, 0x4D5C7325u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 18u, 0x08B9D824u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 18u, 0x08B9D824u>(ctx, &aot_mem); return;
     }
     goto L_08B88724;
 L_08B88724:
-    if (hot_regs.g2 == ctx.gpr[1]) {
+    if (ctx.gpr[2] == ctx.gpr[1]) {
     rt.unsupported(0x08B88728u, 0x492E7325u, "cop2/vfpu not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 41u, 0x08B99464u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 41u, 0x08B99464u>(ctx, &aot_mem); return;
     }
     goto L_08B8872C;
 L_08B8872C:
@@ -703,9 +703,9 @@ L_08B88770:
 L_08B88790:
     ctx.execute_vfpu_vscl_ct<71u, 101u, 110u, 1u>();
     ctx.execute_vfpu_vscl_ct<114u, 97u, 116u, 1u>();
-    if (ctx.gpr[19] == hot_regs.g5) {
+    if (ctx.gpr[19] == ctx.gpr[5]) {
     ctx.execute_vfpu_compare3(97u, 110u, 100u, 1u, 6u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0232_entry, 232u, 4u, 0x08BA40D8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0232_entry, 232u, 4u, 0x08BA40D8u>(ctx, &aot_mem); return;
     }
     goto L_08B887A0;
 L_08B8879C:
@@ -757,7 +757,7 @@ L_08B88980:
     ctx.execute_vfpu_vscl_ct<101u, 114u, 103u, 1u>();
     if (ctx.gpr[27] == ctx.gpr[25]) {
     rt.unsupported(0x08B88988u, 0x00706F74u, "special? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 45u, 0x08BA1740u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 45u, 0x08BA1740u>(ctx, &aot_mem); return;
     }
     goto L_08B8898C;
 L_08B8898C:
@@ -776,7 +776,7 @@ L_08B889C8:
 L_08B889D0:
     if (ctx.gpr[19] != ctx.gpr[20]) {
     rt.unsupported(0x08B889D4u, 0x63696865u, "vfpu0 not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 86u, 0x08BA1EF0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 86u, 0x08BA1EF0u>(ctx, &aot_mem); return;
     }
     goto L_08B889D8;
 L_08B889D8:
@@ -828,25 +828,19 @@ L_08B88BF8:
 L_08B88C04:
     rt.unsupported(0x08B88C04u, 0x4F4C5F32u, "unknown not lowered yet"); return;
 L_08B88C1C:
-    hot_regs.g4 = (rt.memory().aot_load_word_left(ctx.gpr[20] + static_cast<std::uint32_t>(-32143), hot_regs.g4));
+    ctx.gpr[4] = (rt.memory().aot_load_word_left(ctx.gpr[20] + static_cast<std::uint32_t>(-32143), ctx.gpr[4]));
     ctx.gpr[18] = (ctx.gpr[17] & 12850u);
     rt.unsupported(0x08B88C24u, 0x44454B46u, "unsupported CFC1 control register"); return;
     goto L_08B88C28;
 L_08B88C28:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
-    hot_regs.flush_to(ctx);
-    { const bool signed_ok = ctx.execute_signed_add(0u, 0u, 0u);
-      hot_regs.reload_from(ctx);
-      if (!signed_ok) { rt.arithmetic_overflow(0x08B88C2Cu, 0x00000020u); return; } }
+    if (!ctx.execute_signed_add(0u, 0u, 0u)) { rt.arithmetic_overflow(0x08B88C2Cu, 0x00000020u); return; }
     (void)(0u << 16u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_load8(0u + static_cast<std::uint32_t>(0))))));
     goto L_08B88C38;
 L_08B88C38:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
-    hot_regs.flush_to(ctx);
-    { const bool signed_ok = ctx.execute_signed_add(0u, 0u, 0u);
-      hot_regs.reload_from(ctx);
-      if (!signed_ok) { rt.arithmetic_overflow(0x08B88C3Cu, 0x00000020u); return; } }
+    if (!ctx.execute_signed_add(0u, 0u, 0u)) { rt.arithmetic_overflow(0x08B88C3Cu, 0x00000020u); return; }
     (void)(0u << 16u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_load8(0u + static_cast<std::uint32_t>(0))))));
     goto L_08B88C48;
@@ -861,7 +855,7 @@ L_08B88C60:
     rt.unsupported(0x08B88C60u, 0x6362696Cu, "vfpu0 not lowered yet"); return;
 L_08B88C8C:
     rt.unsupported(0x08B88C90u, 0x72657355u, "unknown not lowered yet"); return;
-    ctx.pc = 0x02D54A70u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D54A70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B88C90:
     rt.unsupported(0x08B88C90u, 0x72657355u, "unknown not lowered yet"); return;
 L_08B88CA0:
@@ -875,7 +869,7 @@ L_08B88DA0:
 L_08B88F48:
     ctx.execute_vfpu_vscl_ct<97u, 115u, 115u, 1u>();
     ctx.execute_vfpu_compare3(114u, 116u, 105u, 1u, 6u);
-    hot_regs.g2 = (ctx.gpr[9] + static_cast<std::uint32_t>(8302));
+    ctx.gpr[2] = (ctx.gpr[9] + static_cast<std::uint32_t>(8302));
     ctx.execute_vfpu_vhdp(115u, 34u, 32u, 1u);
     ctx.execute_vfpu_vscl_ct<97u, 105u, 108u, 1u>();
     ctx.execute_vfpu_vhdp(100u, 58u, 32u, 1u);
@@ -910,10 +904,7 @@ L_08B89048:
 L_08B89050:
     rt.unsupported(0x08B89050u, 0x20646142u, "unknown not lowered yet"); return;
 L_08B8905C:
-    hot_regs.flush_to(ctx);
-    { const bool signed_ok = ctx.execute_signed_sub(12u, 3u, 18u);
-      hot_regs.reload_from(ctx);
-      if (!signed_ok) { rt.arithmetic_overflow(0x08B8905Cu, 0x00726562u); return; } }
+    if (!ctx.execute_signed_sub(12u, 3u, 18u)) { rt.arithmetic_overflow(0x08B8905Cu, 0x00726562u); return; }
     goto L_08B89060;
 L_08B89060:
     rt.unsupported(0x08B89060u, 0x63206F4Eu, "vfpu0 not lowered yet"); return;
@@ -1087,7 +1078,7 @@ L_08B89858:
     ctx.gpr[13] = (0x08B89868u);
     rt.unsupported(0x08B89864u, 0x004E614Eu, "special? not lowered yet"); return;
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B89868u) goto L_08B89868;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B89868u) goto L_08B89868;
     return;
 L_08B89868:
     ctx.gpr[18] = (ctx.gpr[25] & 12592u);
@@ -1095,7 +1086,7 @@ L_08B89868:
     rt.unsupported(0x08B89870u, 0x62613938u, "vfpu0 not lowered yet"); return;
 L_08B8987C:
     ctx.execute_vfpu_vcmp_ct<110u, 117u, 1u, 8u>();
-    hot_regs.g5 = (static_cast<std::int32_t>(0u) > static_cast<std::int32_t>(0u) ? 0u : 0u);
+    ctx.gpr[5] = (static_cast<std::int32_t>(0u) > static_cast<std::int32_t>(0u) ? 0u : 0u);
     goto L_08B89884;
 L_08B89884:
     ctx.gpr[18] = (ctx.gpr[25] & 12592u);
@@ -1109,7 +1100,7 @@ L_08B89AB0:
     rt.unsupported(0x08B89AB8u, 0x62613938u, "vfpu0 not lowered yet"); return;
 L_08B89AC4:
     ctx.execute_vfpu_vcmp_ct<110u, 117u, 1u, 8u>();
-    hot_regs.g5 = (static_cast<std::int32_t>(0u) > static_cast<std::int32_t>(0u) ? 0u : 0u);
+    ctx.gpr[5] = (static_cast<std::int32_t>(0u) > static_cast<std::int32_t>(0u) ? 0u : 0u);
     goto L_08B89ACC;
 L_08B89ACC:
     ctx.gpr[18] = (ctx.gpr[25] & 12592u);
@@ -1159,7 +1150,7 @@ L_08B89E88:
     // nop
     goto L_08B89EA0;
 L_08B89EA0:
-    (void)(hot_regs.g2 << 4u);
+    (void)(ctx.gpr[2] << 4u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[3]) >> 12u));
     rt.unsupported(0x08B89EA8u, 0x04040404u, "regimm? not lowered yet"); return;
 L_08B89ED8:
@@ -1175,9 +1166,9 @@ L_08B89FA0:
 L_08B89FB8:
     rt.unsupported(0x08B89FB8u, 0x62733C00u, "vfpu0 not lowered yet"); return;
 L_08B89FC4:
-    if (ctx.gpr[27] != hot_regs.g5) {
+    if (ctx.gpr[27] != ctx.gpr[5]) {
     rt.unsupported(0x08B89FC8u, 0x4D657661u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 107u, 0x08BA2D14u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 107u, 0x08BA2D14u>(ctx, &aot_mem); return;
     }
     goto L_08B89FCC;
 L_08B89FC8:
@@ -1202,12 +1193,12 @@ L_08B8A000:
 L_08B8A00C:
     rt.unsupported(0x08B8A00Cu, 0x050A0609u, "regimm? not lowered yet"); return;
 L_08B8A540:
-    hot_regs.g4 = (static_cast<std::int32_t>(hot_regs.g4) > static_cast<std::int32_t>(0u) ? hot_regs.g4 : 0u);
-    { const std::int32_t dividend = static_cast<std::int32_t>(hot_regs.g4); const std::int32_t divisor = static_cast<std::int32_t>(hot_regs.g2); if (divisor == 0) { ctx.lo = dividend >= 0 ? 0xFFFFFFFFu : 1u; ctx.hi = static_cast<std::uint32_t>(dividend); } else if (dividend == static_cast<std::int32_t>(0x80000000u) && divisor == -1) { ctx.lo = 0x80000000u; ctx.hi = 0u; } else { ctx.lo = static_cast<std::uint32_t>(dividend / divisor); ctx.hi = static_cast<std::uint32_t>(dividend % divisor); } }
+    ctx.gpr[4] = (static_cast<std::int32_t>(ctx.gpr[4]) > static_cast<std::int32_t>(0u) ? ctx.gpr[4] : 0u);
+    { const std::int32_t dividend = static_cast<std::int32_t>(ctx.gpr[4]); const std::int32_t divisor = static_cast<std::int32_t>(ctx.gpr[2]); if (divisor == 0) { ctx.lo = dividend >= 0 ? 0xFFFFFFFFu : 1u; ctx.hi = static_cast<std::uint32_t>(dividend); } else if (dividend == static_cast<std::int32_t>(0x80000000u) && divisor == -1) { ctx.lo = 0x80000000u; ctx.hi = 0u; } else { ctx.lo = static_cast<std::uint32_t>(dividend / divisor); ctx.hi = static_cast<std::uint32_t>(dividend % divisor); } }
     (void)(ctx.lo);
     rt.unsupported(0x08B8A54Cu, 0x0084201Eu, "special? not lowered yet"); return;
 L_08B8A588:
-    ctx.lo = hot_regs.g4;
+    ctx.lo = ctx.gpr[4];
     rt.unsupported(0x08B8A58Cu, 0x00972014u, "special? not lowered yet"); return;
 L_08B8A5D8:
     // nop
@@ -1350,73 +1341,63 @@ L_08B8A790:
     // nop
     goto L_08B8A7B8;
 L_08B8A7B8:
-{
-    std::uint32_t g12 = ctx.gpr[12];
-    std::uint32_t g19 = ctx.gpr[19];
     // nop
     // nop
     // nop
     (void)(0u << 16u);
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
     // nop
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
     // nop
     // nop
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
-    g19 = (13107u << 16u);
+    ctx.gpr[19] = (13107u << 16u);
     // nop
-    g19 = (13107u << 16u);
+    ctx.gpr[19] = (13107u << 16u);
     // nop
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
-    g19 = (13107u << 16u);
+    ctx.gpr[19] = (13107u << 16u);
     // nop
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
     // nop
-    ctx.gpr[12] = g12;
-    ctx.gpr[19] = g19;
     goto L_08B8A830;
-}
 L_08B8A830:
     rt.unsupported(0x08B8A834u, 0x08BAA6E0u, "control flow in delay slot"); return;
 L_08B8A85C:
-    if (ctx.gpr[26] == hot_regs.g5) {
+    if (ctx.gpr[26] == ctx.gpr[5]) {
     ctx.gpr[19] = (ctx.gpr[10] < static_cast<std::uint32_t>(17740) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 72u, 0x08B9B11Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 72u, 0x08B9B11Cu>(ctx, &aot_mem); return;
     }
     goto L_08B8A864;
 L_08B8A864:
     ctx.gpr[16] = (ctx.gpr[17] | 12597u);
     rt.unsupported(0x08B8A868u, 0x41544731u, "unknown not lowered yet"); return;
 L_08B8A898:
-{
-    std::uint32_t g25 = ctx.gpr[25];
     ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
-    g25 = (39322u << 16u);
-    hot_regs.g6 = (26214u << 16u);
-    g25 = (39322u << 16u);
-    g25 = (39322u << 16u);
-    ctx.gpr[25] = g25;
+    ctx.gpr[25] = (39322u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
     goto L_08B8A8B0;
-}
 L_08B8A8B0:
     rt.unsupported(0x08B8A8B0u, 0x000001F4u, "special? not lowered yet"); return;
 L_08B8AC1C:
     jump_target = 0u;
     rt.unsupported(0x08B8AC20u, 0x000003E8u, "special? not lowered yet"); return;
     local_pc = jump_target;
-    if (++local_transfers < 2048u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
     return;
 L_08B8AC38:
@@ -1434,14 +1415,14 @@ L_08B8AC8C:
     jump_target = 0u;
     rt.unsupported(0x08B8AC94u, 0x000003E8u, "special? not lowered yet"); return;
     local_pc = jump_target;
-    if (++local_transfers < 2048u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
     return;
 L_08B8AE14:
     jump_target = 0u;
     rt.unsupported(0x08B8AE18u, 0x000003E8u, "special? not lowered yet"); return;
     local_pc = jump_target;
-    if (++local_transfers < 2048u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
     return;
 L_08B8AE20:
@@ -1459,7 +1440,7 @@ L_08B8B0C4:
     rt.unsupported(0x08B8B0CCu, 0x08BAAEF0u, "control flow in delay slot"); return;
 L_08B8B0E0:
     // nop
-    ctx.pc = 0x02EABC00u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02EABC00u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B8B0FC:
     rt.unsupported(0x08B8B0FCu, 0x00000001u, "special? not lowered yet"); return;
 L_08B8B118:
@@ -1467,13 +1448,13 @@ L_08B8B118:
 L_08B8B488:
     rt.unsupported(0x08B8B488u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B8B494:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B8B498u, 0x44525355u, "unsupported CFC1 control register"); return;
     jump_target = ctx.gpr[1];
     ctx.gpr[10] = (0x08B8B4A4u);
     // nop
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B8B4A4u) goto L_08B8B4A4;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B8B4A4u) goto L_08B8B4A4;
     return;
 L_08B8B4A4:
     // nop
@@ -1504,28 +1485,28 @@ L_08B8B4A4:
     goto L_08B8B508;
 L_08B8B508:
     // nop
-    ctx.pc = 0x02EACB70u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02EACB70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B8B534:
     // nop
     // nop
-    ctx.pc = 0x02EACC30u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02EACC30u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B8B550:
     // nop
-    ctx.pc = 0x02EACC90u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02EACC90u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B8B558:
     jump_target = 0u;
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
     local_pc = jump_target;
-    if (++local_transfers < 2048u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
     return;
 L_08B8B56C:
     (void)(0u >> 0u);
     jump_target = 0u;
-    hot_regs.g31 = (0x08B8B578u);
+    ctx.gpr[31] = (0x08B8B578u);
     (void)(0u >> (0u & 31u));
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B8B578u) goto L_08B8B578;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B8B578u) goto L_08B8B578;
     return;
 L_08B8B578:
     rt.unsupported(0x08B8B578u, 0x00000005u, "special? not lowered yet"); return;
@@ -1635,19 +1616,15 @@ L_08B8B7B8:
     // nop
     goto L_08B8B7C8;
 L_08B8B7C8:
-{
-    std::uint32_t g25 = ctx.gpr[25];
     (void)(0u << 16u);
-    g25 = (39322u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     ctx.gpr[12] = (52429u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     ctx.gpr[19] = (13107u << 16u);
-    g25 = (39322u << 16u);
-    g25 = (39322u << 16u);
-    ctx.gpr[25] = g25;
+    ctx.gpr[25] = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
     goto L_08B8B7E8;
-}
 L_08B8B7E8:
     // nop
     rt.unsupported(0x08B8B7ECu, 0x42700000u, "unknown not lowered yet"); return;
@@ -1658,21 +1635,17 @@ L_08B8B8C4:
 L_08B8B910:
     rt.unsupported(0x08B8B910u, 0x40000000u, "unknown not lowered yet"); return;
 L_08B8B93C:
-{
-    std::uint32_t g12 = ctx.gpr[12];
     (void)(0u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     ctx.gpr[19] = (13107u << 16u);
     ctx.gpr[19] = (13107u << 16u);
     // nop
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     (void)(0u << 16u);
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
-    ctx.gpr[12] = g12;
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     goto L_08B8B964;
-}
 L_08B8B964:
     (void)(0u << 16u);
     (void)(0u << 16u);
@@ -1682,7 +1655,7 @@ L_08B8B964:
 L_08B8B9A4:
     // nop
     ctx.gpr[12] = (52429u << 16u);
-    hot_regs.g5 = (7864u << 16u);
+    ctx.gpr[5] = (7864u << 16u);
     ctx.gpr[12] = (52429u << 16u);
     ctx.gpr[19] = (13107u << 16u);
     ctx.gpr[25] = (39322u << 16u);
@@ -1694,13 +1667,13 @@ L_08B8B9C0:
     goto L_08B8B9C8;
 L_08B8B9C8:
     // nop
-    hot_regs.g6 = (26214u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     (void)(0u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     goto L_08B8B9DC;
 L_08B8B9DC:
-    hot_regs.g5 = (7864u << 16u);
+    ctx.gpr[5] = (7864u << 16u);
     ctx.gpr[21] = (49807u << 16u);
     ctx.gpr[19] = (13107u << 16u);
     ctx.gpr[12] = (52429u << 16u);
@@ -1708,13 +1681,13 @@ L_08B8B9DC:
 L_08B8B9EC:
     (void)(0u << 16u);
     ctx.gpr[19] = (13107u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     goto L_08B8B9F8;
 L_08B8B9F8:
     (void)(0u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     (void)(0u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     (void)(0u << 16u);
     ctx.gpr[12] = (52429u << 16u);
     goto L_08B8BA10;
@@ -1797,12 +1770,12 @@ L_08B8BAD0:
     // nop
     goto L_08B8BB10;
 L_08B8BB10:
-    (void)(hot_regs.g5 << 0u);
+    (void)(ctx.gpr[5] << 0u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> (0u & 31u)));
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g2) >> (0u & 31u)));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[2]) >> (0u & 31u)));
     goto L_08B8BB1C;
 L_08B8BB1C:
-    (void)(hot_regs.g7 << 0u);
+    (void)(ctx.gpr[7] << 0u);
     rt.unsupported(0x08B8BB20u, 0x00000005u, "special? not lowered yet"); return;
 L_08B8BB34:
     (void)(ctx.gpr[9] << 0u);
@@ -1810,22 +1783,22 @@ L_08B8BB34:
     rt.unsupported(0x08B8BB3Cu, 0x00090005u, "special? not lowered yet"); return;
 L_08B8BB44:
     (void)(0u >> (0u & 31u));
-    (void)(hot_regs.g5 >> (0u & 31u));
-    (void)(hot_regs.g6 << 0u);
+    (void)(ctx.gpr[5] >> (0u & 31u));
+    (void)(ctx.gpr[6] << 0u);
     rt.unsupported(0x08B8BB50u, 0x00000001u, "special? not lowered yet"); return;
 L_08B8BB6C:
     rt.unsupported(0x08B8BB6Cu, 0x00080005u, "special? not lowered yet"); return;
 L_08B8BB70:
     // PSP CACHE is a no-op in coherent host memory.
     ctx.gpr[24] = (20972u << 16u);
-    hot_regs.g5 = (58196u << 16u);
+    ctx.gpr[5] = (58196u << 16u);
     ctx.gpr[24] = (20972u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BB88;
 L_08B8BB88:
-    hot_regs.g5 = (58196u << 16u);
-    hot_regs.g5 = (58196u << 16u);
+    ctx.gpr[5] = (58196u << 16u);
+    ctx.gpr[5] = (58196u << 16u);
     // nop
     goto L_08B8BB94;
 L_08B8BB94:
@@ -1840,18 +1813,14 @@ L_08B8BBB8:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BBBC;
 L_08B8BBBC:
-{
-    std::uint32_t g12 = ctx.gpr[12];
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g12 = (52429u << 16u);
-    ctx.gpr[12] = g12;
+    ctx.gpr[12] = (52429u << 16u);
     goto L_08B8BBD8;
-}
 L_08B8BBD8:
     ctx.gpr[12] = (52429u << 16u);
     ctx.gpr[12] = (52429u << 16u);
@@ -1865,94 +1834,70 @@ L_08B8BBE4:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BBF8;
 L_08B8BBF8:
-{
-    std::uint32_t g12 = ctx.gpr[12];
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[12] = g12;
     goto L_08B8BC0C;
-}
 L_08B8BC0C:
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BC18;
 L_08B8BC18:
-{
-    std::uint32_t g3 = ctx.gpr[3];
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[3] = g3;
     goto L_08B8BC34;
-}
 L_08B8BC34:
     ctx.gpr[3] = (55050u << 16u);
     goto L_08B8BC38;
 L_08B8BC38:
-{
-    std::uint32_t g3 = ctx.gpr[3];
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[3] = g3;
     goto L_08B8BC58;
-}
 L_08B8BC58:
     ctx.gpr[3] = (55050u << 16u);
     goto L_08B8BC5C;
 L_08B8BC5C:
-{
-    std::uint32_t g3 = ctx.gpr[3];
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[3] = g3;
     goto L_08B8BC78;
-}
 L_08B8BC78:
     // PSP CACHE is a no-op in coherent host memory.
     ctx.gpr[25] = (39322u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BC84;
 L_08B8BC84:
-{
-    std::uint32_t g25 = ctx.gpr[25];
-    g25 = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g25 = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g25 = (39322u << 16u);
-    ctx.gpr[25] = g25;
+    ctx.gpr[25] = (39322u << 16u);
     goto L_08B8BC98;
-}
 L_08B8BC98:
-{
-    std::uint32_t g25 = ctx.gpr[25];
-    g25 = (39322u << 16u);
-    g25 = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
+    ctx.gpr[25] = (39322u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    g25 = (39322u << 16u);
-    ctx.gpr[25] = g25;
+    ctx.gpr[25] = (39322u << 16u);
     goto L_08B8BCAC;
-}
 L_08B8BCAC:
     ctx.gpr[25] = (39322u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
@@ -1973,18 +1918,14 @@ L_08B8BCD4:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BCD8;
 L_08B8BCD8:
-{
-    std::uint32_t g3 = ctx.gpr[3];
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[3] = g3;
     goto L_08B8BCF4;
-}
 L_08B8BCF4:
     ctx.gpr[3] = (55050u << 16u);
     goto L_08B8BCF8;
@@ -1992,27 +1933,19 @@ L_08B8BCF8:
     ctx.gpr[3] = (55050u << 16u);
     goto L_08B8BCFC;
 L_08B8BCFC:
-{
-    std::uint32_t g3 = ctx.gpr[3];
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    ctx.gpr[3] = g3;
     goto L_08B8BD18;
-}
 L_08B8BD18:
-{
-    std::uint32_t g12 = ctx.gpr[12];
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
-    g12 = (52429u << 16u);
-    ctx.gpr[12] = g12;
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
+    ctx.gpr[12] = (52429u << 16u);
     goto L_08B8BD24;
-}
 L_08B8BD24:
     ctx.gpr[12] = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
@@ -2023,22 +1956,22 @@ L_08B8BD2C:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8BD38;
 L_08B8BD38:
-    (void)(hot_regs.g2 << 0u);
+    (void)(ctx.gpr[2] << 0u);
     rt.unsupported(0x08B8BD3Cu, 0x00010001u, "special? not lowered yet"); return;
 L_08B8BD4C:
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g5) >> (0u & 31u)));
-    (void)(hot_regs.g7 >> 0u);
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g2) >> 0u));
-    (void)(hot_regs.g7 >> (0u & 31u));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[5]) >> (0u & 31u)));
+    (void)(ctx.gpr[7] >> 0u);
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[2]) >> 0u));
+    (void)(ctx.gpr[7] >> (0u & 31u));
     (void)(0u << (0u & 31u));
     rt.unsupported(0x08B8BD60u, 0x00040001u, "special? not lowered yet"); return;
 L_08B8BD70:
     (void)(0u >> 0u);
     goto L_08B8BD74;
 L_08B8BD74:
-    (void)(hot_regs.g5 >> (0u & 31u));
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g6) >> (0u & 31u)));
-    (void)(hot_regs.g5 << (0u & 31u));
+    (void)(ctx.gpr[5] >> (0u & 31u));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[6]) >> (0u & 31u)));
+    (void)(ctx.gpr[5] << (0u & 31u));
     goto L_08B8BD80;
 L_08B8BD80:
     // PSP CACHE is a no-op in coherent host memory.
@@ -2061,12 +1994,12 @@ L_08B8BD9C:
 L_08B8BDB0:
     (void)(ctx.gpr[1] << 0u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g2) >> 0u));
-    (void)(hot_regs.g5 << (0u & 31u));
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g4) >> (0u & 31u)));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[2]) >> 0u));
+    (void)(ctx.gpr[5] << (0u & 31u));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[4]) >> (0u & 31u)));
     goto L_08B8BDC4;
 L_08B8BDC4:
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(hot_regs.g6) >> (0u & 31u)));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[6]) >> (0u & 31u)));
     // nop
     // nop
     goto L_08B8BDD0;
@@ -2137,7 +2070,7 @@ L_08B8BF54:
     ctx.gpr[12] = (52429u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     ctx.gpr[12] = (52429u << 16u);
-    hot_regs.g6 = (26214u << 16u);
+    ctx.gpr[6] = (26214u << 16u);
     (void)(0u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     (void)(839u << 16u);
@@ -2181,9 +2114,7 @@ L_08B8BFF4:
 
 void recomp_unit_0225(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0225_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0225_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_225(Runtime &runtime) {

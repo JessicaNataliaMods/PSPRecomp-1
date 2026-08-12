@@ -128,7 +128,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0221[3812] = {
     0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 101, 0, 102, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 104,
 };
-void recomp_unit_0221_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0221_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -262,11 +262,11 @@ L_08B79C88:
 L_08B79CB0:
     rt.unsupported(0x08B79CB0u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79CBC:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79CC0u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B79CC8u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 112u, 0x08B8E5ECu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 112u, 0x08B8E5ECu>(ctx, &aot_mem); return;
     }
     goto L_08B79CCC;
 L_08B79CCC:
@@ -278,23 +278,23 @@ L_08B79CD8:
 L_08B79CE0:
     rt.unsupported(0x08B79CE0u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79CEC:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79CF0u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79CF4u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79D10:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79D14u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79D18u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79D2C:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B79D30u, 0x454D4147u, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 114u, 0x08B8EA70u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 114u, 0x08B8EA70u>(ctx, &aot_mem); return;
     }
     goto L_08B79D34;
 L_08B79D34:
     if (ctx.gpr[18] == ctx.gpr[19]) {
     ctx.gpr[18] = (ctx.gpr[26] < static_cast<std::uint32_t>(18756) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 123u, 0x08B8F1F4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 123u, 0x08B8F1F4u>(ctx, &aot_mem); return;
     }
     goto L_08B79D3C;
 L_08B79D3C:
@@ -327,61 +327,61 @@ L_08B79E64:
 L_08B79E78:
     rt.unsupported(0x08B79E78u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79E84:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79E88u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79E8Cu, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79EA8:
     rt.unsupported(0x08B79EA8u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79EB4:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79EB8u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79EBCu, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79ED4:
     rt.unsupported(0x08B79ED4u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79EE0:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79EE4u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79EE8u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79F04:
     rt.unsupported(0x08B79F04u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79F10:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79F14u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79F18u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79F38:
     rt.unsupported(0x08B79F38u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79F44:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79F48u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79F4Cu, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79F60:
     rt.unsupported(0x08B79F60u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79F6C:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79F70u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79F74u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79F8C:
     rt.unsupported(0x08B79F8Cu, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79F98:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79F9Cu, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79FA0u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79FBC:
     rt.unsupported(0x08B79FBCu, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79FC8:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79FCCu, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B79FD0u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B79FEC:
     rt.unsupported(0x08B79FECu, 0x43534944u, "unknown not lowered yet"); return;
 L_08B79FF8:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B79FFCu, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B7A000u, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B7A018:
     rt.unsupported(0x08B7A018u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7A024:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7A028u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B7A02Cu, 0x4C2F5249u, "unknown not lowered yet"); return;
 L_08B7A038:
@@ -391,13 +391,13 @@ L_08B7A038:
 L_08B7A090:
     rt.unsupported(0x08B7A090u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7A09C:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7A0A0u, 0x44525355u, "unsupported CFC1 control register"); return;
     jump_target = ctx.gpr[1];
     ctx.gpr[10] = (0x08B7A0ACu);
-    hot_regs.g5 = (static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(ctx.gpr[10]) ? 1u : 0u);
+    ctx.gpr[5] = (static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(ctx.gpr[10]) ? 1u : 0u);
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B7A0ACu) goto L_08B7A0AC;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B7A0ACu) goto L_08B7A0AC;
     return;
 L_08B7A0AC:
     // nop
@@ -431,55 +431,37 @@ L_08B7A408:
 L_08B7A420:
     rt.unsupported(0x08B7A420u, 0x2061754Cu, "unknown not lowered yet"); return;
 L_08B7A438:
-{
-    std::uint32_t g12 = ctx.gpr[12];
-    std::uint32_t g15 = ctx.gpr[15];
-    std::uint32_t g17 = ctx.gpr[17];
-    std::uint32_t g23 = ctx.gpr[23];
-    std::uint32_t g24 = ctx.gpr[24];
-    std::uint32_t g25 = ctx.gpr[25];
-    std::uint32_t g29 = hot_regs.g29;
-    std::uint32_t g30 = ctx.gpr[30];
-    ctx.gpr[8] = (g15 << 9u);
-    ctx.gpr[28] = (hot_regs.g4 << 7u);
-    ctx.gpr[22] = (g15 << 6u);
-    g17 = (ctx.gpr[27] << 22u);
-    g29 = (ctx.gpr[1] << 11u);
-    g17 = (g23 << 9u);
+    ctx.gpr[8] = (ctx.gpr[15] << 9u);
+    ctx.gpr[28] = (ctx.gpr[4] << 7u);
+    ctx.gpr[22] = (ctx.gpr[15] << 6u);
+    ctx.gpr[17] = (ctx.gpr[27] << 22u);
+    ctx.gpr[29] = (ctx.gpr[1] << 11u);
+    ctx.gpr[17] = (ctx.gpr[23] << 9u);
     ctx.gpr[21] = (ctx.gpr[18] << 2u);
-    g23 = (g12 << 10u);
-    ctx.gpr[16] = (g30 << 18u);
+    ctx.gpr[23] = (ctx.gpr[12] << 10u);
+    ctx.gpr[16] = (ctx.gpr[30] << 18u);
     ctx.gpr[19] = (ctx.gpr[21] << 30u);
     ctx.gpr[16] = (ctx.gpr[26] << 5u);
-    ctx.gpr[18] = (g24 << 26u);
-    hot_regs.g5 = (g17 << 20u);
-    g25 = (hot_regs.g6 << 18u);
-    ctx.gpr[1] = (g29 << 4u);
-    g12 = (ctx.gpr[3] << 25u);
-    g15 = (g29 << 1u);
-    (void)(g25 << 23u);
-    hot_regs.g2 = (ctx.gpr[26] << 8u);
-    hot_regs.g4 = (ctx.gpr[20] << 16u);
-    ctx.gpr[9] = (g12 << 13u);
-    hot_regs.g6 = (ctx.gpr[14] << 24u);
-    g24 = (ctx.gpr[9] << 14u);
-    g25 = (ctx.gpr[10] << 31u);
-    ctx.gpr[27] = (hot_regs.g7 << 3u);
+    ctx.gpr[18] = (ctx.gpr[24] << 26u);
+    ctx.gpr[5] = (ctx.gpr[17] << 20u);
+    ctx.gpr[25] = (ctx.gpr[6] << 18u);
+    ctx.gpr[1] = (ctx.gpr[29] << 4u);
+    ctx.gpr[12] = (ctx.gpr[3] << 25u);
+    ctx.gpr[15] = (ctx.gpr[29] << 1u);
+    (void)(ctx.gpr[25] << 23u);
+    ctx.gpr[2] = (ctx.gpr[26] << 8u);
+    ctx.gpr[4] = (ctx.gpr[20] << 16u);
+    ctx.gpr[9] = (ctx.gpr[12] << 13u);
+    ctx.gpr[6] = (ctx.gpr[14] << 24u);
+    ctx.gpr[24] = (ctx.gpr[9] << 14u);
+    ctx.gpr[25] = (ctx.gpr[10] << 31u);
+    ctx.gpr[27] = (ctx.gpr[7] << 3u);
     ctx.gpr[13] = (0u << 29u);
-    ctx.gpr[3] = (g23 << 12u);
-    g24 = (ctx.gpr[13] << 27u);
-    g30 = (g30 << 15u);
+    ctx.gpr[3] = (ctx.gpr[23] << 12u);
+    ctx.gpr[24] = (ctx.gpr[13] << 27u);
+    ctx.gpr[30] = (ctx.gpr[30] << 15u);
     // nop
-    ctx.gpr[12] = g12;
-    ctx.gpr[15] = g15;
-    ctx.gpr[17] = g17;
-    ctx.gpr[23] = g23;
-    ctx.gpr[24] = g24;
-    ctx.gpr[25] = g25;
-    hot_regs.g29 = g29;
-    ctx.gpr[30] = g30;
     goto L_08B7A4B0;
-}
 L_08B7A4B0:
     rt.unsupported(0x08B7A4B0u, 0x6973756Du, "unknown not lowered yet"); return;
 L_08B7A4C4:
@@ -487,7 +469,7 @@ L_08B7A4C4:
 L_08B7A4D8:
     rt.unsupported(0x08B7A4D8u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7A4E4:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7A4E8u, 0x44525355u, "unsupported CFC1 control register"); return;
     rt.unsupported(0x08B7A4ECu, 0x412F5249u, "unknown not lowered yet"); return;
 L_08B7A6E0:
@@ -510,7 +492,7 @@ L_08B7A8A8:
     rt.unsupported(0x08B7A8B0u, 0x45564153u, "cop1? not lowered yet"); return;
 L_08B7A8C0:
     (void)(ctx.gpr[1] << 4u);
-    (void)(hot_regs.g2 >> 8u);
+    (void)(ctx.gpr[2] >> 8u);
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[3]) >> 12u));
     if (static_cast<std::int32_t>(0u) >= 0) {
     rt.unsupported(0x08B7A8D0u, 0x04040404u, "regimm? not lowered yet"); return;
@@ -522,7 +504,7 @@ L_08B7A8D4:
 L_08B7A9C8:
     if (ctx.gpr[19] != ctx.gpr[20]) {
     rt.unsupported(0x08B7A9CCu, 0x63696865u, "vfpu0 not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 100u, 0x08B93F18u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 100u, 0x08B93F18u>(ctx, &aot_mem); return;
     }
     goto L_08B7A9D0;
 L_08B7A9D0:
@@ -531,7 +513,7 @@ L_08B7A9D0:
 L_08B7A9DC:
     if (ctx.gpr[3] == ctx.gpr[20]) {
     ctx.execute_vfpu_vscl_ct<108u, 97u, 121u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 101u, 0x08B93F2Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 101u, 0x08B93F2Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7A9E4;
 L_08B7A9E4:
@@ -552,7 +534,7 @@ L_08B7AA40:
 L_08B7AA44:
     if (ctx.gpr[26] == ctx.gpr[19]) {
     rt.unsupported(0x08B7AA48u, 0x61726147u, "vfpu0 not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 75u, 0x08B9776Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 75u, 0x08B9776Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7AA4C;
 L_08B7AA4C:
@@ -590,13 +572,13 @@ L_08B7BF38:
 L_08B7BF80:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B7BF84u, 0x454E4F5Au, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 106u, 0x08B8D4D0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 106u, 0x08B8D4D0u>(ctx, &aot_mem); return;
     }
     goto L_08B7BF88;
 L_08B7BF88:
     if (ctx.gpr[18] == ctx.gpr[1]) {
     rt.unsupported(0x08B7BF8Cu, 0x464E495Fu, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 103u, 0x08B8CD08u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 103u, 0x08B8CD08u>(ctx, &aot_mem); return;
     }
     goto L_08B7BF90;
 L_08B7BF90:
@@ -610,9 +592,7 @@ L_08B7BFC0:
 
 void recomp_unit_0221(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0221_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0221_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_221(Runtime &runtime) {

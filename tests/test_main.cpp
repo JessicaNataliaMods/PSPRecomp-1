@@ -133,83 +133,6 @@ static void test_chained_call_context_guard() {
 }
 
 
-// Cross-unit cache regression: generated units share a compact hot-register cache
-// across native boundaries. The full AllegrexContext must remain lazy during a
-// normal chain, but scheduler/HLE visibility boundaries must materialize the
-// cache and then reload any context changes made by the boundary hook.
-static std::uint32_t hot_cache_scheduler_observed_g4 = 0u;
-static void hot_cache_unit_wrapper(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
-    ctx.pc = 0x08805020u;
-}
-static void hot_cache_unit_entry(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx,
-                                 std::uint16_t, psprecomp::GuestMemory::AotFastView &,
-                                 psprecomp::AotHotRegisterCache &hot_regs) {
-    hot_regs.g4 = 0x12345678u;
-    hot_regs.f12 = 37.25f;
-    ctx.pc = 0x08805020u;
-}
-static void hot_cache_scheduler(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
-    hot_cache_scheduler_observed_g4 = ctx.gpr[4];
-    ctx.gpr[4] = 0xCAFEBABEu;
-    ctx.fpr[12] = -6.5f;
-}
-static void test_cross_unit_hot_register_cache() {
-    constexpr std::uint32_t base = 0x08804000u;
-    constexpr std::uint32_t span = 0x00004000u;
-
-    // No scheduler boundary: the chain must update only the shared cache and
-    // avoid materializing the hot architectural values into ctx.
-    {
-        psprecomp::Runtime runtime;
-        runtime.register_generated_unit(0u, base, span, &hot_cache_unit_wrapper,
-                                        &hot_cache_unit_entry);
-        psprecomp::AllegrexContext ctx{};
-        ctx.pc = base;
-        ctx.gpr[4] = 0x11111111u;
-        ctx.fpr[12] = 1.0f;
-        auto mem = runtime.memory().aot_fast_view();
-        psprecomp::AotHotRegisterCache hot_regs(ctx);
-        psprecomp::set_runtime_thread_identity(3, "threadmain");
-        require(runtime.invoke_chained_direct<&hot_cache_unit_entry, 0u, 1u, base>(
-                    ctx, &mem, &hot_regs),
-                "hot-register direct chain was rejected");
-        require(hot_regs.g4 == 0x12345678u && hot_regs.f12 == 37.25f,
-                "Generated entry did not update the shared hot-register cache");
-        require(ctx.gpr[4] == 0x11111111u && ctx.fpr[12] == 1.0f,
-                "Hot-register chain eagerly materialized ctx instead of staying cached");
-        hot_regs.flush_to(ctx);
-        require(ctx.gpr[4] == 0x12345678u && ctx.fpr[12] == 37.25f,
-                "Hot-register cache did not materialize correctly at outer boundary");
-        psprecomp::set_runtime_thread_identity(-1, "none");
-    }
-
-    // Scheduler boundary: hook must see the cache's latest value and changes
-    // made by the hook must be reloaded into the shared cache before native
-    // execution resumes.
-    {
-        psprecomp::Runtime runtime;
-        runtime.register_generated_unit(0u, base, span, &hot_cache_unit_wrapper,
-                                        &hot_cache_unit_entry);
-        psprecomp::AllegrexContext ctx{};
-        ctx.pc = base;
-        auto mem = runtime.memory().aot_fast_view();
-        psprecomp::AotHotRegisterCache hot_regs(ctx);
-        hot_cache_scheduler_observed_g4 = 0u;
-        psprecomp::set_runtime_thread_identity(3, "threadmain");
-        psprecomp::set_runtime_starvation_hook(&hot_cache_scheduler, 1u);
-        require(runtime.invoke_chained_direct<&hot_cache_unit_entry, 0u, 1u, base>(
-                    ctx, &mem, &hot_regs),
-                "Hot-register direct chain failed at scheduler visibility boundary");
-        require(hot_cache_scheduler_observed_g4 == 0x12345678u,
-                "Scheduler hook observed stale ctx instead of the hot-register cache");
-        require(hot_regs.g4 == 0xCAFEBABEu && hot_regs.f12 == -6.5f,
-                "Scheduler changes were not reloaded into hot-register cache");
-        psprecomp::set_runtime_starvation_hook(nullptr, 0u);
-        psprecomp::set_runtime_thread_identity(-1, "none");
-    }
-}
-
-
 // Direct-chain regression: the compile-time direct chain once guarded only the
 // scheduler boundary that actually performed a switch. An outer native direct
 // chain could therefore return true after a descendant had already changed the
@@ -799,14 +722,19 @@ static void test_automatic_cross_unit_tail_chaining() {
         std::ifstream generated(generated_dir / "generated_unit_0000.cpp");
         text.assign((std::istreambuf_iterator<char>(generated)), std::istreambuf_iterator<char>());
     }
-    require(text.find("(void)rt.invoke_chained_direct<&recomp_unit_0001_entry, 1u, 1u, 0x08804040u>(ctx, &aot_mem, &hot_regs); return;") != std::string::npos,
+    require(text.find("(void)rt.invoke_chained_direct<&recomp_unit_0001_entry, 1u, 1u, 0x08804040u>(ctx, &aot_mem); return;") != std::string::npos,
             "Automatic codegen did not emit a direct-entry native chain across AOT units");
     require(text.find("ctx.pc = 0x08804040u; (void)rt.invoke_chained_direct") == std::string::npos,
             "Direct-entry chain still dirties ctx.pc on its successful hot path");
-    require(text.find("GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs") != std::string::npos &&
-            text.find("AotHotRegisterCache hot_regs(ctx)") != std::string::npos &&
-            text.find("_entry(rt, ctx, 0u, aot_mem, hot_regs)") != std::string::npos,
-            "Shared AOT memory/hot-GPR state was not threaded across generated-unit direct chains");
+    require(text.find("GuestMemory::AotFastView &aot_mem)") != std::string::npos &&
+            text.find("_entry(rt, ctx, 0u, aot_mem)") != std::string::npos,
+            "Shared AOT memory was not threaded across generated-unit direct chains");
+    // The register-cache lowering passes were removed: generated units must
+    // address AllegrexContext directly rather than a second long-lived cache
+    // object, which is what made MSVC's optimizer non-convergent on this corpus.
+    require(text.find("AotHotRegisterCache") == std::string::npos &&
+            text.find("hot_regs") == std::string::npos,
+            "Generated unit still carries the removed hot-register cache");
     require(text.find("#include \"generated_units.hpp\"") != std::string::npos,
             "Automatic codegen did not include cross-unit native declarations");
     require(text.find("runtime.register_generated_unit(0u, 0x08804000u, 64u, &recomp_unit_0000, &recomp_unit_0000_entry);") != std::string::npos,
@@ -875,7 +803,6 @@ int main() {
     try {
         test_import_return_context_guard();
         test_chained_call_context_guard();
-        test_cross_unit_hot_register_cache();
         test_nested_direct_chain_context_guard();
 
         psprecomp::GuestMemory mem;

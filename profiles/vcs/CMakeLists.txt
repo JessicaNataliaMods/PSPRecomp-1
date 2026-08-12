@@ -17,6 +17,25 @@ if(NOT PSPRECOMP_HOT_GENERATED_OPT_LEVEL MATCHES "^[0-3]$")
     message(FATAL_ERROR "PSPRECOMP_HOT_GENERATED_OPT_LEVEL must be 0, 1, 2 or 3")
 endif()
 
+# Inline expansion is what makes MSVC pathological on parts of this corpus.
+# Measured on generated_unit_0000/0002/0004/0005: /Ob3 and /Ob1 never finish (>90 s,
+# 0.6-2.5 GB each and still climbing), while /Ob0 compiles the same unit in ~10 s
+# at 0.18 GB.  Healthy units are unaffected by the level (0104: 9.1 s at /Ob3,
+# 9.4 s at /Ob1).  The blow-up therefore comes from expanding the explicitly
+# inline runtime helpers inside the very large generated entry functions, not
+# from the units' size or control-flow density.
+#
+# Default to /Ob0 so the build completes.  This costs AOT runtime performance --
+# the object drops from 2.77 MB to 0.68 MB, so a lot of helper inlining is being
+# given up.  Raise this once the offending helper is identified and marked
+# noinline individually.
+set(PSPRECOMP_GENERATED_INLINE_LEVEL "0" CACHE STRING
+    "MSVC /Ob level for generated VCS AOT units (0, 1, 2 or 3)")
+set_property(CACHE PSPRECOMP_GENERATED_INLINE_LEVEL PROPERTY STRINGS 0 1 2 3)
+if(NOT PSPRECOMP_GENERATED_INLINE_LEVEL MATCHES "^[0-3]$")
+    message(FATAL_ERROR "PSPRECOMP_GENERATED_INLINE_LEVEL must be 0, 1, 2 or 3")
+endif()
+
 file(GLOB VCS_GENERATED CONFIGURE_DEPENDS "${VCS_PROFILE_DIR}/generated/*.cpp")
 if(MSVC)
     if(PSPRECOMP_GENERATED_OPT_LEVEL STREQUAL "0")
@@ -27,7 +46,7 @@ if(MSVC)
         set(VCS_GENERATED_MSVC_OPT "/O${PSPRECOMP_GENERATED_OPT_LEVEL}")
     endif()
     set(VCS_GENERATED_MSVC_OPTIONS
-        "${VCS_GENERATED_MSVC_OPT};/Ob3;/bigobj;/MP")
+        "${VCS_GENERATED_MSVC_OPT};/Ob${PSPRECOMP_GENERATED_INLINE_LEVEL};/bigobj;${PSPRECOMP_MSVC_MP_FLAG}")
     if(PSPRECOMP_LTO AND NOT PSPRECOMP_VCS_AOT_LTO)
         # CMAKE_INTERPROCEDURAL_OPTIMIZATION adds /GL at target scope.  /GL- on
         # these sources overrides it so the linker receives native .obj code
@@ -61,7 +80,8 @@ if(PSPRECOMP_PROFILE_GUIDED_AOT)
         else()
             set(VCS_HOT_MSVC_OPT "/O${PSPRECOMP_HOT_GENERATED_OPT_LEVEL}")
         endif()
-        set(VCS_HOT_MSVC_OPTIONS "${VCS_HOT_MSVC_OPT};/Ob3;/bigobj;/MP")
+        set(VCS_HOT_MSVC_OPTIONS
+            "${VCS_HOT_MSVC_OPT};/Ob${PSPRECOMP_GENERATED_INLINE_LEVEL};/bigobj;${PSPRECOMP_MSVC_MP_FLAG}")
         if(PSPRECOMP_LTO AND NOT PSPRECOMP_VCS_AOT_LTO)
             string(APPEND VCS_HOT_MSVC_OPTIONS ";/GL-")
         endif()
@@ -152,8 +172,16 @@ add_executable(VCSNative
 vcs_target_common(VCSNative)
 vcs_set_runtime_output(VCSNative)
 if(MSVC)
-    target_compile_options(VCSNative PRIVATE /MP
-        $<$<CONFIG:Release>:/Ob3> $<$<CONFIG:RelWithDebInfo>:/Ob3>)
+    # /Ob3 must stay off the target: target_compile_options lands in the vcxproj
+    # AdditionalOptions, which cl.exe sees *after* the per-source
+    # InlineFunctionExpansion, so a target-wide /Ob3 silently overrides the
+    # /Ob${PSPRECOMP_GENERATED_INLINE_LEVEL} set on the generated corpus above
+    # (MSVC reports this as "D9025: overriding '/Ob0' with '/Ob3'").  Apply it to
+    # the host sources only.
+    target_compile_options(VCSNative PRIVATE ${PSPRECOMP_MSVC_MP_FLAG})
+    set_source_files_properties(host/main.cpp ${VCS_HOST_SOURCES}
+        DIRECTORY "${VCS_PROFILE_DIR}" PROPERTIES COMPILE_OPTIONS
+        "$<$<CONFIG:Release>:/Ob3>;$<$<CONFIG:RelWithDebInfo>:/Ob3>")
     target_link_options(VCSNative PRIVATE /STACK:67108864)
     if(PSPRECOMP_LTO)
         # Make the otherwise silent LTCG phase visible in the console.

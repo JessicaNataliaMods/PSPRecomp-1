@@ -136,7 +136,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0222[4095] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 322, 0, 323, 0, 0, 0, 0, 0, 0, 0, 324, 0, 325, 0, 0, 0, 0, 0, 0, 0, 326, 0, 0,
     327, 0, 0, 0, 0, 0, 0, 328, 0, 0, 329, 0, 330, 0, 0, 0, 0, 331, 0, 332, 0, 0, 0, 0, 0, 0, 0, 333, 0, 0, 334,
 };
-void recomp_unit_0222_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0222_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -540,7 +540,7 @@ L_08B7C6E4:
 L_08B7C6EC:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B7C6F0u, 0x4E554F43u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 2u, 0x08B90014u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 2u, 0x08B90014u>(ctx, &aot_mem); return;
     }
     goto L_08B7C6F4;
 L_08B7C6F4:
@@ -574,9 +574,9 @@ L_08B7C938:
 L_08B7CC38:
     rt.unsupported(0x08B7CC38u, 0x000000D4u, "special? not lowered yet"); return;
 L_08B7CC80:
-    if (hot_regs.g2 == ctx.gpr[1]) {
+    if (ctx.gpr[2] == ctx.gpr[1]) {
     rt.unsupported(0x08B7CC84u, 0x4D204E4Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 111u, 0x08B8E1E0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 111u, 0x08B8E1E0u>(ctx, &aot_mem); return;
     }
     goto L_08B7CC88;
 L_08B7CC88:
@@ -607,17 +607,17 @@ L_08B7D378:
 L_08B7D3F8:
     rt.unsupported(0x08B7D3F8u, 0x63736964u, "vfpu0 not lowered yet"); return;
 L_08B7D404:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7D408u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7D410u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 41u, 0x08B91D34u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 41u, 0x08B91D34u>(ctx, &aot_mem); return;
     }
     goto L_08B7D414;
 L_08B7D414:
     if (ctx.gpr[1] == ctx.gpr[15]) {
     rt.unsupported(0x08B7D418u, 0x4D2F5053u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 107u, 0x08B8D968u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 107u, 0x08B8D968u>(ctx, &aot_mem); return;
     }
     goto L_08B7D41C;
 L_08B7D41C:
@@ -625,17 +625,17 @@ L_08B7D41C:
 L_08B7D42C:
     rt.unsupported(0x08B7D42Cu, 0x63736964u, "vfpu0 not lowered yet"); return;
 L_08B7D438:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7D43Cu, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7D444u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 42u, 0x08B91D68u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 42u, 0x08B91D68u>(ctx, &aot_mem); return;
     }
     goto L_08B7D448;
 L_08B7D448:
     if (ctx.gpr[1] == ctx.gpr[15]) {
     rt.unsupported(0x08B7D44Cu, 0x4D2F5053u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 108u, 0x08B8D99Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 108u, 0x08B8D99Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7D450;
 L_08B7D450:
@@ -646,11 +646,11 @@ L_08B7D460:
 L_08B7D464:
     rt.unsupported(0x08B7D464u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7D470:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7D474u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7D47Cu, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 43u, 0x08B91DA0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 43u, 0x08B91DA0u>(ctx, &aot_mem); return;
     }
     goto L_08B7D480;
 L_08B7D480:
@@ -662,7 +662,7 @@ L_08B7D4A0:
 L_08B7D4A8:
     rt.unsupported(0x08B7D4A8u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7D4B4:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     // nop
     // nop
     rt.unsupported(0x08B7D4C4u, 0x08936800u, "control flow in delay slot"); return;
@@ -682,10 +682,7 @@ L_08B7D518:
     // nop
     // nop
     // nop
-    hot_regs.flush_to(ctx);
-    { const bool signed_ok = ctx.execute_signed_add(0u, 0u, 0u);
-      hot_regs.reload_from(ctx);
-      if (!signed_ok) { rt.arithmetic_overflow(0x08B7D554u, 0x00000020u); return; } }
+    if (!ctx.execute_signed_add(0u, 0u, 0u)) { rt.arithmetic_overflow(0x08B7D554u, 0x00000020u); return; }
     // nop
     // nop
     // nop
@@ -698,9 +695,9 @@ L_08B7D5A8:
 L_08B7D5C0:
     rt.unsupported(0x08B7D5C0u, 0x63736964u, "vfpu0 not lowered yet"); return;
 L_08B7D5E0:
-    if (ctx.gpr[27] == hot_regs.g4) {
+    if (ctx.gpr[27] == ctx.gpr[4]) {
     rt.unsupported(0x08B7D5E4u, 0x61657274u, "vfpu0 not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 34u, 0x08B98B38u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 34u, 0x08B98B38u>(ctx, &aot_mem); return;
     }
     goto L_08B7D5E8;
 L_08B7D5E8:
@@ -762,11 +759,11 @@ L_08B7DCB0:
 L_08B7DCC8:
     rt.unsupported(0x08B7DCC8u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DCD4:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DCD8u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DCE0u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 65u, 0x08B92604u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 65u, 0x08B92604u>(ctx, &aot_mem); return;
     }
     goto L_08B7DCE4;
 L_08B7DCE4:
@@ -774,11 +771,11 @@ L_08B7DCE4:
 L_08B7DCF4:
     rt.unsupported(0x08B7DCF4u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DD00:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DD04u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DD0Cu, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 67u, 0x08B92630u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 67u, 0x08B92630u>(ctx, &aot_mem); return;
     }
     goto L_08B7DD10;
 L_08B7DD10:
@@ -786,11 +783,11 @@ L_08B7DD10:
 L_08B7DD20:
     rt.unsupported(0x08B7DD20u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DD2C:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DD30u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DD38u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 68u, 0x08B9265Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 68u, 0x08B9265Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7DD3C;
 L_08B7DD3C:
@@ -798,11 +795,11 @@ L_08B7DD3C:
 L_08B7DD4C:
     rt.unsupported(0x08B7DD4Cu, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DD58:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DD5Cu, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DD64u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 69u, 0x08B92688u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 69u, 0x08B92688u>(ctx, &aot_mem); return;
     }
     goto L_08B7DD68;
 L_08B7DD68:
@@ -810,11 +807,11 @@ L_08B7DD68:
 L_08B7DD78:
     rt.unsupported(0x08B7DD78u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DD84:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DD88u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DD90u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 70u, 0x08B926B4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 70u, 0x08B926B4u>(ctx, &aot_mem); return;
     }
     goto L_08B7DD94;
 L_08B7DD94:
@@ -822,11 +819,11 @@ L_08B7DD94:
 L_08B7DDA0:
     rt.unsupported(0x08B7DDA0u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7DDAC:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7DDB0u, 0x44525355u, "unsupported CFC1 control register"); return;
     if (ctx.gpr[17] == ctx.gpr[15]) {
     rt.unsupported(0x08B7DDB8u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 71u, 0x08B926DCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 71u, 0x08B926DCu>(ctx, &aot_mem); return;
     }
     goto L_08B7DDBC;
 L_08B7DDBC:
@@ -887,7 +884,7 @@ L_08B7E434:
 L_08B7E438:
     if (ctx.gpr[27] == ctx.gpr[14]) {
     rt.unsupported(0x08B7E43Cu, 0x70697263u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 82u, 0x08B9B984u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 82u, 0x08B9B984u>(ctx, &aot_mem); return;
     }
     goto L_08B7E440;
 L_08B7E440:
@@ -899,7 +896,7 @@ L_08B7E458:
 L_08B7E464:
     if (ctx.gpr[19] != ctx.gpr[20]) {
     ctx.execute_vfpu_compare3(101u, 99u, 116u, 1u, 6u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 81u, 0x08B979B4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 81u, 0x08B979B4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E46C;
 L_08B7E46C:
@@ -941,9 +938,9 @@ L_08B7E628:
 L_08B7E634:
     ctx.gpr[16] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
-    if (hot_regs.g2 == ctx.gpr[19]) {
+    if (ctx.gpr[2] == ctx.gpr[19]) {
     // nop
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 73u, 0x08B927BCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 73u, 0x08B927BCu>(ctx, &aot_mem); return;
     }
     goto L_08B7E644;
 L_08B7E644:
@@ -951,9 +948,9 @@ L_08B7E644:
 L_08B7E650:
     ctx.gpr[16] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
-    if (hot_regs.g2 == ctx.gpr[19]) {
+    if (ctx.gpr[2] == ctx.gpr[19]) {
     // nop
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 75u, 0x08B927D8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 75u, 0x08B927D8u>(ctx, &aot_mem); return;
     }
     goto L_08B7E660;
 L_08B7E660:
@@ -961,9 +958,9 @@ L_08B7E660:
 L_08B7E66C:
     ctx.gpr[16] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
-    if (hot_regs.g2 == ctx.gpr[19]) {
+    if (ctx.gpr[2] == ctx.gpr[19]) {
     // nop
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 76u, 0x08B927F4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 76u, 0x08B927F4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E67C;
 L_08B7E67C:
@@ -971,9 +968,9 @@ L_08B7E67C:
 L_08B7E688:
     ctx.gpr[16] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
     ctx.gpr[24] = (ctx.gpr[26] | 18003u);
-    if (hot_regs.g2 == ctx.gpr[19]) {
+    if (ctx.gpr[2] == ctx.gpr[19]) {
     // nop
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 77u, 0x08B92810u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 77u, 0x08B92810u>(ctx, &aot_mem); return;
     }
     goto L_08B7E698;
 L_08B7E698:
@@ -981,9 +978,9 @@ L_08B7E698:
 L_08B7E6A4:
     ctx.gpr[16] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
     ctx.gpr[24] = (ctx.gpr[10] ^ 18003u);
-    if (hot_regs.g2 == ctx.gpr[19]) {
+    if (ctx.gpr[2] == ctx.gpr[19]) {
     // nop
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 79u, 0x08B9282Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 79u, 0x08B9282Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7E6B4;
 L_08B7E6B4:
@@ -993,7 +990,7 @@ L_08B7E6C0:
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 29u, 0x08B96390u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 29u, 0x08B96390u>(ctx, &aot_mem); return;
     }
     goto L_08B7E6D0;
 L_08B7E6D0:
@@ -1003,7 +1000,7 @@ L_08B7E6DC:
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 30u, 0x08B963B4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 30u, 0x08B963B4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E6EC;
 L_08B7E6EC:
@@ -1013,7 +1010,7 @@ L_08B7E6F8:
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 31u, 0x08B963D8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 31u, 0x08B963D8u>(ctx, &aot_mem); return;
     }
     goto L_08B7E708;
 L_08B7E708:
@@ -1023,7 +1020,7 @@ L_08B7E714:
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 32u, 0x08B963FCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 32u, 0x08B963FCu>(ctx, &aot_mem); return;
     }
     goto L_08B7E724;
 L_08B7E724:
@@ -1033,7 +1030,7 @@ L_08B7E730:
     ctx.gpr[24] = (ctx.gpr[10] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 34u, 0x08B96420u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 34u, 0x08B96420u>(ctx, &aot_mem); return;
     }
     goto L_08B7E740;
 L_08B7E740:
@@ -1043,7 +1040,7 @@ L_08B7E74C:
     ctx.gpr[24] = (ctx.gpr[18] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 33u, 0x08B9641Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 33u, 0x08B9641Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7E75C;
 L_08B7E75C:
@@ -1053,7 +1050,7 @@ L_08B7E768:
     ctx.gpr[24] = (ctx.gpr[18] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 35u, 0x08B96440u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 35u, 0x08B96440u>(ctx, &aot_mem); return;
     }
     goto L_08B7E778;
 L_08B7E778:
@@ -1063,7 +1060,7 @@ L_08B7E784:
     ctx.gpr[24] = (ctx.gpr[18] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 36u, 0x08B96464u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 36u, 0x08B96464u>(ctx, &aot_mem); return;
     }
     goto L_08B7E794;
 L_08B7E794:
@@ -1073,7 +1070,7 @@ L_08B7E7A0:
     ctx.gpr[24] = (ctx.gpr[18] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 37u, 0x08B96488u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 37u, 0x08B96488u>(ctx, &aot_mem); return;
     }
     goto L_08B7E7B0;
 L_08B7E7B0:
@@ -1083,7 +1080,7 @@ L_08B7E7BC:
     ctx.gpr[24] = (ctx.gpr[18] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 39u, 0x08B964ACu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 39u, 0x08B964ACu>(ctx, &aot_mem); return;
     }
     goto L_08B7E7CC;
 L_08B7E7CC:
@@ -1093,7 +1090,7 @@ L_08B7E7D8:
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 38u, 0x08B964A8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 38u, 0x08B964A8u>(ctx, &aot_mem); return;
     }
     goto L_08B7E7E8;
 L_08B7E7E8:
@@ -1103,7 +1100,7 @@ L_08B7E7F4:
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 41u, 0x08B964CCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 41u, 0x08B964CCu>(ctx, &aot_mem); return;
     }
     goto L_08B7E804;
 L_08B7E804:
@@ -1113,7 +1110,7 @@ L_08B7E810:
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 43u, 0x08B964F0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 43u, 0x08B964F0u>(ctx, &aot_mem); return;
     }
     goto L_08B7E820;
 L_08B7E820:
@@ -1123,7 +1120,7 @@ L_08B7E82C:
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 46u, 0x08B96514u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 46u, 0x08B96514u>(ctx, &aot_mem); return;
     }
     goto L_08B7E83C;
 L_08B7E83C:
@@ -1133,57 +1130,57 @@ L_08B7E848:
     ctx.gpr[24] = (ctx.gpr[26] & 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 48u, 0x08B96538u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 48u, 0x08B96538u>(ctx, &aot_mem); return;
     }
     goto L_08B7E858;
 L_08B7E858:
     rt.unsupported(0x08B7E858u, 0x46532F34u, "cop1? not lowered yet"); return;
 L_08B7E864:
     ctx.gpr[20] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
-    ctx.gpr[24] = (hot_regs.g2 | 18003u);
+    ctx.gpr[24] = (ctx.gpr[2] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 47u, 0x08B96534u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 47u, 0x08B96534u>(ctx, &aot_mem); return;
     }
     goto L_08B7E874;
 L_08B7E874:
     rt.unsupported(0x08B7E874u, 0x46532F34u, "cop1? not lowered yet"); return;
 L_08B7E880:
     ctx.gpr[20] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
-    ctx.gpr[24] = (hot_regs.g2 | 18003u);
+    ctx.gpr[24] = (ctx.gpr[2] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 50u, 0x08B96558u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 50u, 0x08B96558u>(ctx, &aot_mem); return;
     }
     goto L_08B7E890;
 L_08B7E890:
     rt.unsupported(0x08B7E890u, 0x46532F34u, "cop1? not lowered yet"); return;
 L_08B7E89C:
     ctx.gpr[20] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
-    ctx.gpr[24] = (hot_regs.g2 | 18003u);
+    ctx.gpr[24] = (ctx.gpr[2] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 52u, 0x08B9657Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 52u, 0x08B9657Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7E8AC;
 L_08B7E8AC:
     rt.unsupported(0x08B7E8ACu, 0x46532F34u, "cop1? not lowered yet"); return;
 L_08B7E8B8:
     ctx.gpr[20] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
-    ctx.gpr[24] = (hot_regs.g2 | 18003u);
+    ctx.gpr[24] = (ctx.gpr[2] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 53u, 0x08B965A0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 53u, 0x08B965A0u>(ctx, &aot_mem); return;
     }
     goto L_08B7E8C8;
 L_08B7E8C8:
     rt.unsupported(0x08B7E8C8u, 0x46532F34u, "cop1? not lowered yet"); return;
 L_08B7E8D4:
     ctx.gpr[20] = (ctx.gpr[25] < static_cast<std::uint32_t>(0) ? 1u : 0u);
-    ctx.gpr[24] = (hot_regs.g2 | 18003u);
+    ctx.gpr[24] = (ctx.gpr[2] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 55u, 0x08B965C4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 55u, 0x08B965C4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E8E4;
 L_08B7E8E4:
@@ -1193,7 +1190,7 @@ L_08B7E8F0:
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 54u, 0x08B965C0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 54u, 0x08B965C0u>(ctx, &aot_mem); return;
     }
     goto L_08B7E900;
 L_08B7E900:
@@ -1203,7 +1200,7 @@ L_08B7E90C:
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 56u, 0x08B965E4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 56u, 0x08B965E4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E91C;
 L_08B7E91C:
@@ -1213,7 +1210,7 @@ L_08B7E928:
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 57u, 0x08B96608u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 57u, 0x08B96608u>(ctx, &aot_mem); return;
     }
     goto L_08B7E938;
 L_08B7E938:
@@ -1223,7 +1220,7 @@ L_08B7E944:
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 58u, 0x08B9662Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 58u, 0x08B9662Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7E954;
 L_08B7E954:
@@ -1233,7 +1230,7 @@ L_08B7E960:
     ctx.gpr[24] = (ctx.gpr[10] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 60u, 0x08B96650u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 60u, 0x08B96650u>(ctx, &aot_mem); return;
     }
     goto L_08B7E970;
 L_08B7E970:
@@ -1243,7 +1240,7 @@ L_08B7E97C:
     ctx.gpr[24] = (ctx.gpr[18] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 59u, 0x08B9664Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 59u, 0x08B9664Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7E98C;
 L_08B7E98C:
@@ -1253,7 +1250,7 @@ L_08B7E998:
     ctx.gpr[24] = (ctx.gpr[18] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 61u, 0x08B96670u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 61u, 0x08B96670u>(ctx, &aot_mem); return;
     }
     goto L_08B7E9A8;
 L_08B7E9A8:
@@ -1263,7 +1260,7 @@ L_08B7E9B4:
     ctx.gpr[24] = (ctx.gpr[18] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 62u, 0x08B96694u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 62u, 0x08B96694u>(ctx, &aot_mem); return;
     }
     goto L_08B7E9C4;
 L_08B7E9C4:
@@ -1273,13 +1270,13 @@ L_08B7E9D0:
     ctx.gpr[24] = (ctx.gpr[18] | 18003u);
     if (ctx.gpr[26] == ctx.gpr[16]) {
     (void)(ctx.hi);
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 63u, 0x08B966B8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 63u, 0x08B966B8u>(ctx, &aot_mem); return;
     }
     goto L_08B7E9E0;
 L_08B7E9E0:
     if (ctx.gpr[10] != ctx.gpr[1]) {
     ctx.gpr[15] = (ctx.gpr[26] < static_cast<std::uint32_t>(18756) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 77u, 0x08B9B678u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 77u, 0x08B9B678u>(ctx, &aot_mem); return;
     }
     goto L_08B7E9E8;
 L_08B7E9E8:
@@ -1290,13 +1287,13 @@ L_08B7E9F4:
 L_08B7E9F8:
     rt.unsupported(0x08B7E9F8u, 0x43534944u, "unknown not lowered yet"); return;
 L_08B7EA04:
-    hot_regs.g5 = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
     rt.unsupported(0x08B7EA08u, 0x44525355u, "unsupported CFC1 control register"); return;
     jump_target = ctx.gpr[1];
     ctx.gpr[10] = (0x08B7EA14u);
     rt.unsupported(0x08B7EA10u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B7EA14u) goto L_08B7EA14;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B7EA14u) goto L_08B7EA14;
     return;
 L_08B7EA10:
     rt.unsupported(0x08B7EA10u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
@@ -1307,7 +1304,7 @@ L_08B7EA20:
 L_08B7EA24:
     if (ctx.gpr[10] != ctx.gpr[1]) {
     ctx.gpr[15] = (ctx.gpr[26] < static_cast<std::uint32_t>(18756) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 79u, 0x08B9B6BCu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 79u, 0x08B9B6BCu>(ctx, &aot_mem); return;
     }
     goto L_08B7EA2C;
 L_08B7EA2C:
@@ -1325,7 +1322,7 @@ L_08B7EA88:
       ctx.write_vfpu_vector_with_destination_prefix_ct<76u, 1u>(vfpu_d); }
     if (ctx.gpr[1] == 0u) {
     rt.unsupported(0x08B7EA90u, 0x43206465u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 85u, 0x08B97C24u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 85u, 0x08B97C24u>(ctx, &aot_mem); return;
     }
     goto L_08B7EA94;
 L_08B7EA94:
@@ -1401,36 +1398,28 @@ L_08B7EBDC:
 L_08B7EBF4:
     rt.unsupported(0x08B7EBF4u, 0x20776F6Eu, "unknown not lowered yet"); return;
 L_08B7EC84:
-    hot_regs.g5 = (ctx.gpr[17] < static_cast<std::uint32_t>(8224) ? 1u : 0u);
+    ctx.gpr[5] = (ctx.gpr[17] < static_cast<std::uint32_t>(8224) ? 1u : 0u);
     (void)(ctx.gpr[1] + static_cast<std::uint32_t>(26162));
     rt.unsupported(0x08B7EC8Cu, 0x20732520u, "unknown not lowered yet"); return;
 L_08B7EC98:
-    hot_regs.g4 = (ctx.gpr[9] + static_cast<std::uint32_t>(8224));
+    ctx.gpr[4] = (ctx.gpr[9] + static_cast<std::uint32_t>(8224));
     rt.unsupported(0x08B7EC9Cu, 0x2066322Eu, "unknown not lowered yet"); return;
 L_08B7ED48:
-{
-    std::uint32_t g3 = ctx.gpr[3];
     ctx.gpr[21] = (49807u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     ctx.gpr[25] = (39322u << 16u);
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
-    ctx.gpr[3] = g3;
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     goto L_08B7ED5C;
-}
 L_08B7ED5C:
-{
-    std::uint32_t g3 = ctx.gpr[3];
     ctx.gpr[12] = (52429u << 16u);
-    g3 = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     ctx.gpr[25] = (39322u << 16u);
-    g3 = (55050u << 16u);
-    g3 = (55050u << 16u);
-    ctx.gpr[3] = g3;
+    ctx.gpr[3] = (55050u << 16u);
+    ctx.gpr[3] = (55050u << 16u);
     goto L_08B7ED70;
-}
 L_08B7ED70:
-    hot_regs.g5 = (7864u << 16u);
+    ctx.gpr[5] = (7864u << 16u);
     ctx.gpr[12] = (52429u << 16u);
     ctx.gpr[25] = (39322u << 16u);
     ctx.gpr[21] = (49807u << 16u);
@@ -1477,7 +1466,7 @@ L_08B7F4C0:
 L_08B7F4CC:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B7F4D0u, 0x415F4E49u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 5u, 0x08B90A00u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 5u, 0x08B90A00u>(ctx, &aot_mem); return;
     }
     goto L_08B7F4D4;
 L_08B7F4D4:
@@ -1548,7 +1537,7 @@ L_08B7FA78:
       ctx.read_vfpu_vector_with_source_prefix_ct<32u, 1u, 1u>(vfpu_t);
       for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] + vfpu_t[i];
       ctx.write_vfpu_vector_with_destination_prefix_ct<97u, 1u>(vfpu_d); }
-    ctx.gpr[14] = (ctx.gpr[1] | hot_regs.g7);
+    ctx.gpr[14] = (ctx.gpr[1] | ctx.gpr[7]);
     goto L_08B7FA8C;
 L_08B7FA8C:
     ctx.execute_vfpu_vscl_ct<108u, 105u, 110u, 1u>();
@@ -1637,7 +1626,7 @@ L_08B7FE34:
 L_08B7FE5C:
     if (ctx.gpr[18] == ctx.gpr[16]) {
     ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 8u, 0x08B90BB8u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 8u, 0x08B90BB8u>(ctx, &aot_mem); return;
     }
     goto L_08B7FE64;
 L_08B7FE64:
@@ -1658,9 +1647,9 @@ L_08B7FEDC:
 L_08B7FEFC:
     rt.unsupported(0x08B7FEFCu, 0x41505345u, "unknown not lowered yet"); return;
 L_08B7FF24:
-    if (hot_regs.g2 != ctx.gpr[15]) {
+    if (ctx.gpr[2] != ctx.gpr[15]) {
     ctx.gpr[14] = (ctx.gpr[18] < static_cast<std::uint32_t>(20297) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 95u, 0x08B9343Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 95u, 0x08B9343Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7FF2C;
 L_08B7FF2C:
@@ -1668,7 +1657,7 @@ L_08B7FF2C:
 L_08B7FF4C:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
     ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 57u, 0x08B9245Cu>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 57u, 0x08B9245Cu>(ctx, &aot_mem); return;
     }
     goto L_08B7FF54;
 L_08B7FF54:
@@ -1697,7 +1686,7 @@ L_08B7FFB0:
 L_08B7FFC4:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
     ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 59u, 0x08B924D4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 59u, 0x08B924D4u>(ctx, &aot_mem); return;
     }
     goto L_08B7FFCC;
 L_08B7FFCC:
@@ -1717,9 +1706,7 @@ L_08B7FFF8:
 
 void recomp_unit_0222(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0222_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0222_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_222(Runtime &runtime) {

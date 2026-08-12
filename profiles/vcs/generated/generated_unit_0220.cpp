@@ -84,7 +84,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0220[2427] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50,
 };
-void recomp_unit_0220_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0220_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -155,7 +155,7 @@ LOCAL_DISPATCH:
 L_08B74000:
     ctx.execute_vfpu_vhdp(32u, 105u, 110u, 1u);
     ctx.gpr[10] = (static_cast<std::int32_t>(ctx.gpr[17]) < 8303 ? 1u : 0u);
-    hot_regs.g5 = (static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(0u) ? 1u : 0u);
+    ctx.gpr[5] = (static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(0u) ? 1u : 0u);
     goto L_08B7400C;
 L_08B7400C:
     rt.unsupported(0x08B7400Cu, 0x20746573u, "unknown not lowered yet"); return;
@@ -248,17 +248,17 @@ L_08B744B8:
 L_08B744CC:
     rt.unsupported(0x08B744CCu, 0x61646172u, "vfpu0 not lowered yet"); return;
 L_08B74650:
-    if (hot_regs.g2 == ctx.gpr[20]) {
+    if (ctx.gpr[2] == ctx.gpr[20]) {
     rt.unsupported(0x08B74654u, 0x4559414Cu, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0224_entry, 224u, 43u, 0x08B85BA0u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0224_entry, 224u, 43u, 0x08B85BA0u>(ctx, &aot_mem); return;
     }
     goto L_08B74658;
 L_08B74658:
     rt.unsupported(0x08B74658u, 0x494C4252u, "cop2/vfpu not lowered yet"); return;
 L_08B74664:
-    if (hot_regs.g2 != ctx.gpr[1]) {
+    if (ctx.gpr[2] != ctx.gpr[1]) {
     rt.unsupported(0x08B74668u, 0x00000045u, "special? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 193u, 0x08B897B4u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 193u, 0x08B897B4u>(ctx, &aot_mem); return;
     }
     goto L_08B7466C;
 L_08B7466C:
@@ -274,28 +274,28 @@ L_08B746DC:
 L_08B746F4:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B746F8u, 0x43455053u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 194u, 0x08B89800u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 194u, 0x08B89800u>(ctx, &aot_mem); return;
     }
     goto L_08B746FC;
 L_08B746FC:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B74700u, 0x464E4F43u, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0224_entry, 224u, 40u, 0x08B84C24u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0224_entry, 224u, 40u, 0x08B84C24u>(ctx, &aot_mem); return;
     }
     goto L_08B74704;
 L_08B74704:
-    jump_target = hot_regs.g2;
+    jump_target = ctx.gpr[2];
     ctx.gpr[10] = (0x08B7470Cu);
     rt.unsupported(0x08B74708u, 0x464E4F43u, "cop1? not lowered yet"); return;
     ctx.pc = jump_target;
-    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == 0x08B7470Cu) goto L_08B7470C;
+    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == 0x08B7470Cu) goto L_08B7470C;
     return;
 L_08B74708:
     rt.unsupported(0x08B74708u, 0x464E4F43u, "cop1? not lowered yet"); return;
 L_08B7470C:
     if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
     rt.unsupported(0x08B74710u, 0x44414F4Cu, "unsupported CFC1 control register"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 124u, 0x08B89034u>(ctx, &aot_mem, &hot_regs); return;
+        (void)rt.invoke_chained_direct<&recomp_unit_0225_entry, 225u, 124u, 0x08B89034u>(ctx, &aot_mem); return;
     }
     goto L_08B74714;
 L_08B74714:
@@ -314,9 +314,7 @@ L_08B765E8:
 
 void recomp_unit_0220(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0220_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0220_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_220(Runtime &runtime) {

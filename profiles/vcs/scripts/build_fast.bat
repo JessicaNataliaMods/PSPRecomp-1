@@ -2,8 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 for %%I in ("%~dp0..\..\..") do set "REPO=%%~fI"
 set "BUILD=%REPO%\out\vcs-fast"
-set "JOBS=%NUMBER_OF_PROCESSORS%"
-if not defined JOBS set "JOBS=8"
+call "%~dp0pick_jobs.bat"
 set "CMAKE_EXE="
 set "VSWHERE="
 
@@ -23,23 +22,26 @@ if not defined CMAKE_EXE for %%E in (Community Professional Enterprise BuildTool
 )
 if not defined CMAKE_EXE goto :NO_CMAKE
 
-set "CMAKE_BUILD_PARALLEL_LEVEL=%JOBS%"
+rem MSBuild /m and cl.exe /MP multiply: keep MSBuild serial across projects and
+rem let /MP%JOBS% be the single source of compile parallelism.
+set "CMAKE_BUILD_PARALLEL_LEVEL=1"
 echo ================================================================
 echo VCS - FAST INCREMENTAL BUILD
 echo Build pipeline restored to the last known-good pre-reorganization behavior.
-echo CMake: !CMAKE_EXE! ^| Workers: %JOBS% ^| LTCG: OFF
+echo CMake: !CMAKE_EXE! ^| Workers: %JOBS% (/MP%JOBS%, MSBuild /m:1) ^| LTCG: OFF
 echo ================================================================
 "%CMAKE_EXE%" -S "%REPO%" -B "%BUILD%" -G "Visual Studio 17 2022" -A x64 ^
   -DPSPRECOMP_PROFILE=vcs ^
   -DPSPRECOMP_GENERATED_OPT_LEVEL=2 ^
   -DPSPRECOMP_LTO=OFF ^
   -DPSPRECOMP_VCS_AOT_LTO=OFF ^
+  -DPSPRECOMP_MSVC_MP_JOBS=%JOBS% ^
   -DPSPRECOMP_BUILD_TESTS=ON ^
   -DPSPRECOMP_BUILD_PROFILE_TESTS=ON
 if errorlevel 1 goto :FAIL
-"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel %JOBS% --target ^
+"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel 1 --target ^
   VCSNative psprecomp_tests vcs_config_tests audio_resampler_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
-  -- /m:%JOBS%
+  -- /m:1
 if errorlevel 1 goto :FAIL
 copy /Y "%REPO%\profiles\vcs\config\VCSNative.ini" "%BUILD%\bin\Release\VCSNative.ini" >nul
 echo BUILD FAST OK: %BUILD%\bin\Release\VCSNative.exe
