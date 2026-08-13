@@ -261,6 +261,30 @@ float3 PreviousCloudNdc(float3 dir){
  return float3(q.xy/max(q.z,1e-8),q.z);
 }
 
+float CloudSlabEntry(float cameraZ,float rayZ,float bottom,float top){
+ if(abs(rayZ)<1e-6)return 50000.0;
+ if(cameraZ>=bottom&&cameraZ<=top)return 0.0;
+ float a=(bottom-cameraZ)/rayZ,b=(top-cameraZ)/rayZ;
+ float entry=min(a,b),leave=max(a,b);
+ return leave<0.0?50000.0:max(entry,0.0);
+}
+
+// Reproject translation as well as rotation. CloudPadding carries the previous
+// camera position. A world point on the nearest enabled physical cloud slab is
+// stable under the orbiting VCS third-person camera, unlike a direction-only
+// reprojection that forces the history to reset whenever the camera moves.
+float3 PreviousCloudDirection(float2 uv){
+ float3 dir=WorldRay(uv);
+ float distance=CloudSlabEntry(CloudCameraPosition.z,dir.z,500.0,900.0);
+ if((g_Settings&3u)>=2u)
+  distance=min(distance,CloudSlabEntry(CloudCameraPosition.z,dir.z,3500.0,3600.0));
+ if((g_Settings&3u)>=3u)
+  distance=min(distance,CloudSlabEntry(CloudCameraPosition.z,dir.z,1500.0,1900.0));
+ distance=min(max(distance,1.0),50000.0);
+ float3 worldPoint=CloudCameraPosition+dir*distance;
+ return normalize(worldPoint-CloudPadding);
+}
+
 // Literal SM5 adaptation of ProperShaders' PS_TemporalResolve. The march fills
 // one Bayer slot per 2x2 block; every other pixel keeps its own reprojected
 // history and leaks slightly toward the smooth current-frame reconstruction.
@@ -287,7 +311,7 @@ float4 CloudTemporalResolvePS(PresentVertexOutput i):SV_TARGET {
  float4 t11=CloudTexture0.SampleLevel(CloudSampler,sb+marchTexel,0.0);
  float4 spatial=lerp(lerp(t00,t10,sf.x),lerp(t01,t11,sf.x),sf.y);
 
- float3 previous=PreviousCloudNdc(WorldRay(uv));
+ float3 previous=PreviousCloudNdc(PreviousCloudDirection(uv));
  float2 prevUV=float2(previous.x*0.5+0.5,0.5-previous.y*0.5);
  float2 inside=step(float2(0,0),prevUV)*step(prevUV,float2(1,1));
  float valid=CloudHistoryValid*inside.x*inside.y*step(1e-8,previous.z);

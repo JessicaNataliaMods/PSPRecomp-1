@@ -2176,7 +2176,11 @@ CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
         out.ray_forward_opacity[axis] = static_cast<float>(center_world[axis]);
         out.camera_settings[axis] = camera->camera_position[axis];
     }
-    out.ray_right_time[3] = static_cast<float>(s.frame_epoch) * (1.0f / 60.0f);
+    // ProperShaders supplies g_Time in milliseconds. The stochastic march
+    // offset deliberately changes every frame so temporal accumulation can
+    // average it away; seconds made adjacent samples nearly identical and left
+    // the high-frequency grain fixed on screen.
+    out.ray_right_time[3] = static_cast<float>(s.frame_epoch) * (1000.0f / 60.0f);
     out.ray_up_seed[3] = config.random_seed;
     out.ray_forward_opacity[3] = config.opacity;
     const std::uint32_t settings = std::clamp<std::uint32_t>(config.layers, 1u, 3u) |
@@ -2202,7 +2206,8 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
         !s.cloud_march.image || !s.cloud_target_pipeline ||
         !s.cloud_resolve_pipeline || !s.cloud_composite_pipeline)
         return;
-    const std::uint32_t settings = std::bit_cast<std::uint32_t>(clouds.camera_settings[3]);
+    CloudShaderConstants draw_clouds = clouds;
+    const std::uint32_t settings = std::bit_cast<std::uint32_t>(draw_clouds.camera_settings[3]);
     if ((settings & 0x10000u) == 0u) return;
 
     const std::uint32_t previous_index = s.cloud_history_index & 1u;
@@ -2214,16 +2219,18 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     float camera_delta_squared = 0.0f;
     if (s.cloud_history_valid) {
         for (std::size_t axis = 0u; axis < 3u; ++axis) {
-            const float delta = clouds.camera_settings[axis] - s.cloud_previous_camera[axis];
+            const float delta = draw_clouds.camera_settings[axis] - s.cloud_previous_camera[axis];
             camera_delta_squared += delta * delta;
         }
     }
-    // Like ProperShaders, rotation is reprojected while positional movement
-    // gets one complete current-frame march. A composite of several cloud
-    // depths cannot be translated correctly with a single motion vector.
-    const bool camera_translated = s.cloud_history_valid &&
-        camera_delta_squared > 0.0004f;
-    const bool full_current_frame = !s.cloud_history_valid || camera_translated;
+    // VCS' third-person camera translates while orbiting the player. Reproject
+    // ordinary translation against the physical cloud slabs in the shader and
+    // reset only for an actual cut/teleport (50 world units in one frame).
+    const bool camera_cut = s.cloud_history_valid && camera_delta_squared > 2500.0f;
+    const bool full_current_frame = !s.cloud_history_valid || camera_cut;
+    for (std::size_t axis = 0u; axis < 3u; ++axis)
+        draw_clouds.brightness_padding[1u + axis] = s.cloud_history_valid
+            ? s.cloud_previous_camera[axis] : draw_clouds.camera_settings[axis];
     constexpr std::array<std::array<float, 2>, 4> kBayerSlots{{
         {{0.0f, 0.0f}}, {{1.0f, 1.0f}}, {{1.0f, 0.0f}}, {{0.0f, 1.0f}}}};
     const auto &subpixel = kBayerSlots[s.cloud_temporal_frame & 3u];
@@ -2234,15 +2241,15 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
         for (std::size_t axis = 0u; axis < 3u; ++axis)
             destination[axis] = s.cloud_history_valid
                 ? s.cloud_previous_ray_basis[offset + axis]
-                : (offset == 0u ? clouds.ray_right_time[axis]
-                   : offset == 3u ? clouds.ray_up_seed[axis]
-                                  : clouds.ray_forward_opacity[axis]);
+                : (offset == 0u ? draw_clouds.ray_right_time[axis]
+                   : offset == 3u ? draw_clouds.ray_up_seed[axis]
+                                  : draw_clouds.ray_forward_opacity[axis]);
     };
     copy_previous_basis(temporal.previous_right_history, 0u);
     copy_previous_basis(temporal.previous_up_blend, 3u);
     copy_previous_basis(temporal.previous_forward_spatial, 6u);
     temporal.previous_right_history[3] =
-        s.cloud_history_valid && !camera_translated ? 1.0f : 0.0f;
+        s.cloud_history_valid && !camera_cut ? 1.0f : 0.0f;
     temporal.previous_up_blend[3] = std::clamp(config.temporal_blend, 0.0f, 0.95f);
     temporal.previous_forward_spatial[3] =
         std::clamp(config.temporal_denoise * 0.012f, 0.0f, 0.25f);
@@ -2259,7 +2266,7 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     ID3D12DescriptorHeap *heaps[]{s.srv_heap.Get(), s.sampler_heap.Get()};
     s.list->SetDescriptorHeaps(2u, heaps);
     s.list->SetGraphicsRootSignature(s.cloud_root_signature.Get());
-    s.list->SetGraphicsRoot32BitConstants(0u, 40u, &clouds, 0u);
+    s.list->SetGraphicsRoot32BitConstants(0u, 40u, &draw_clouds, 0u);
     s.list->SetGraphicsRoot32BitConstants(3u, 20u, &temporal, 0u);
     s.list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     constexpr float clear_cloud[4]{0.0f, 0.0f, 0.0f, 1.0f};
@@ -2324,10 +2331,10 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     s.cloud_history_index = current_index;
     ++s.cloud_temporal_frame;
     for (std::size_t axis = 0u; axis < 3u; ++axis) {
-        s.cloud_previous_camera[axis] = clouds.camera_settings[axis];
-        s.cloud_previous_ray_basis[axis] = clouds.ray_right_time[axis];
-        s.cloud_previous_ray_basis[3u + axis] = clouds.ray_up_seed[axis];
-        s.cloud_previous_ray_basis[6u + axis] = clouds.ray_forward_opacity[axis];
+        s.cloud_previous_camera[axis] = draw_clouds.camera_settings[axis];
+        s.cloud_previous_ray_basis[axis] = draw_clouds.ray_right_time[axis];
+        s.cloud_previous_ray_basis[3u + axis] = draw_clouds.ray_up_seed[axis];
+        s.cloud_previous_ray_basis[6u + axis] = draw_clouds.ray_forward_opacity[axis];
     }
     s.cloud_history_valid = true;
 
@@ -2344,7 +2351,7 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     s.list->RSSetScissorRects(1u, &scissor);
     s.list->SetPipelineState(s.cloud_composite_pipeline.Get());
     s.list->SetGraphicsRootSignature(s.cloud_root_signature.Get());
-    s.list->SetGraphicsRoot32BitConstants(0u, 40u, &clouds, 0u);
+    s.list->SetGraphicsRoot32BitConstants(0u, 40u, &draw_clouds, 0u);
     temporal.control[0] = 0.0f;
     s.list->SetGraphicsRoot32BitConstants(3u, 20u, &temporal, 0u);
     s.list->SetGraphicsRootDescriptorTable(1u, srv_gpu(s, current.srv_index));
