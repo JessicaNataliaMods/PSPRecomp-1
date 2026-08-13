@@ -180,8 +180,8 @@ struct WidescreenConfiguration {
 // materially changes CloudWorks' appearance.
 struct VolumetricCloudsConfiguration {
     bool enabled{false};
-    std::uint32_t downscale_div{2u};
-    std::uint32_t layers{3u};
+    std::uint32_t downscale_div{4u};
+    std::uint32_t layers{2u};
     std::uint32_t shadow_steps{4u};
     float coverage_low{0.35f};
     float coverage_mid{0.25f};

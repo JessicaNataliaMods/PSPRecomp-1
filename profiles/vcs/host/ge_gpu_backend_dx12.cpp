@@ -148,6 +148,15 @@ struct CloudShaderConstants {
 };
 static_assert(sizeof(CloudShaderConstants) == 40u * sizeof(std::uint32_t));
 
+struct CloudTemporalConstants {
+    std::array<float, 4> previous_right_history{};
+    std::array<float, 4> previous_up_blend{};
+    std::array<float, 4> previous_forward_spatial{};
+    std::array<float, 4> texel_subpixel{};
+    std::array<float, 4> control{};
+};
+static_assert(sizeof(CloudTemporalConstants) == 20u * sizeof(std::uint32_t));
+
 struct Dx12FrameResources {
     ComPtr<ID3D12CommandAllocator> allocator;
     ComPtr<ID3D12Resource> upload_buffer;
@@ -292,12 +301,21 @@ struct Dx12GeState {
     std::uint32_t swap_height{};
     ComPtr<ID3D12PipelineState> present_pipeline;
     ComPtr<ID3D12PipelineState> cloud_target_pipeline;
+    ComPtr<ID3D12PipelineState> cloud_resolve_pipeline;
     ComPtr<ID3D12PipelineState> cloud_composite_pipeline;
     ComPtr<ID3DBlob> present_vertex_shader;
     ComPtr<ID3DBlob> present_pixel_shader;
     ComPtr<ID3DBlob> cloud_target_pixel_shader;
+    ComPtr<ID3DBlob> cloud_resolve_pixel_shader;
     ComPtr<ID3DBlob> cloud_composite_pixel_shader;
-    CloudRenderTarget cloud_render_target;
+    std::array<CloudRenderTarget, 2> cloud_history;
+    CloudRenderTarget cloud_march;
+    std::array<std::uint32_t, 2> cloud_resolve_srv_base{};
+    std::uint32_t cloud_history_index{};
+    std::uint32_t cloud_temporal_frame{};
+    std::array<float, 3> cloud_previous_camera{};
+    std::array<float, 9> cloud_previous_ray_basis{};
+    bool cloud_history_valid{};
     bool direct_present_ok{};
     std::uint32_t presented_framebuffer{};
     std::uint32_t missed_display_intervals{};
@@ -1103,13 +1121,23 @@ float4 PSMain(VSOut input) : SV_TARGET {
     // but compile this faithful large port with the same optimisation and let
     // genuine HLSL errors remain fatal.
     const UINT cloud_flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
-    hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GECloudTarget",
-                    nullptr, nullptr, "CloudTargetPS", "ps_5_1", cloud_flags, 0u,
+    hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GECloudMarch",
+                    nullptr, nullptr, "CloudMarchPS", "ps_5_1", cloud_flags, 0u,
                     &s.cloud_target_pixel_shader, &errors);
     if (FAILED(hr)) {
         error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
                                      errors->GetBufferSize())
                        : hr_text(hr, "D3DCompile(DX12 GE cloud target PS)");
+        return false;
+    }
+    errors.Reset();
+    hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GECloudTemporalResolve",
+                    nullptr, nullptr, "CloudTemporalResolvePS", "ps_5_1", cloud_flags, 0u,
+                    &s.cloud_resolve_pixel_shader, &errors);
+    if (FAILED(hr)) {
+        error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                     errors->GetBufferSize())
+                       : hr_text(hr, "D3DCompile(DX12 GE cloud temporal resolve PS)");
         return false;
     }
     errors.Reset();
@@ -1274,49 +1302,78 @@ bool create_targets(Dx12GeState &s, std::string &error) noexcept {
     if (vcs_configuration().volumetric_clouds.enabled) {
         const std::uint32_t divisor = std::clamp<std::uint32_t>(
             vcs_configuration().volumetric_clouds.downscale_div, 1u, 8u);
-        CloudRenderTarget &cloud = s.cloud_render_target;
-        cloud.width = std::max(1u, (s.target_width + divisor - 1u) / divisor);
-        cloud.height = std::max(1u, (s.target_height + divisor - 1u) / divisor);
-        if (s.next_rtv >= kFramebufferTargetCapacity || s.next_srv >= kSrvCapacity) {
-            error = "DX12 GE descriptor capacity exhausted by CloudWorks target";
+        std::uint32_t cloud_width = std::max(2u, (s.target_width + divisor - 1u) / divisor);
+        std::uint32_t cloud_height = std::max(2u, (s.target_height + divisor - 1u) / divisor);
+        cloud_width = (cloud_width + 1u) & ~1u;
+        cloud_height = (cloud_height + 1u) & ~1u;
+        if (s.next_rtv + 3u > kFramebufferTargetCapacity ||
+            s.next_srv + 7u > kSrvCapacity) {
+            error = "DX12 GE descriptor capacity exhausted by CloudWorks temporal targets";
             return false;
         }
-        cloud.rtv_index = s.next_rtv++;
-        cloud.srv_index = s.next_srv++;
-        D3D12_RESOURCE_DESC image{};
-        image.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-        image.Width = cloud.width;
-        image.Height = cloud.height;
-        image.DepthOrArraySize = 1u;
-        image.MipLevels = 1u;
-        image.Format = kCloudFormat;
-        image.SampleDesc.Count = 1u;
-        image.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        image.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-        D3D12_HEAP_PROPERTIES heap_properties{};
-        heap_properties.Type = D3D12_HEAP_TYPE_DEFAULT;
-        D3D12_CLEAR_VALUE clear{};
-        clear.Format = kCloudFormat;
-        clear.Color[0] = clear.Color[1] = clear.Color[2] = clear.Color[3] = 0.0f;
-        hr = s.device->CreateCommittedResource(
-            &heap_properties, D3D12_HEAP_FLAG_NONE, &image,
-            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear,
-            IID_PPV_ARGS(&cloud.image));
-        if (FAILED(hr)) {
-            error = hr_text(hr, "CreateCommittedResource(DX12 GE CloudWorks target)");
-            return false;
-        }
-        s.device->CreateRenderTargetView(cloud.image.Get(), nullptr,
-                                         rtv_cpu(s, cloud.rtv_index));
         D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
         srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srv.Format = kCloudFormat;
         srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srv.Texture2D.MipLevels = 1u;
-        s.device->CreateShaderResourceView(cloud.image.Get(), &srv,
-                                           srv_cpu(s, cloud.srv_index));
-        runtime_log_line("CloudWorks render target " + std::to_string(cloud.width) + "x" +
-                         std::to_string(cloud.height) + " (DownscaleDiv=" +
+        const auto create_cloud_target = [&](CloudRenderTarget &target,
+                                             std::uint32_t width,
+                                             std::uint32_t height,
+                                             const char *name) -> bool {
+            target.width = width;
+            target.height = height;
+            target.rtv_index = s.next_rtv++;
+            target.srv_index = s.next_srv++;
+            D3D12_RESOURCE_DESC image{};
+            image.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            image.Width = width;
+            image.Height = height;
+            image.DepthOrArraySize = 1u;
+            image.MipLevels = 1u;
+            image.Format = kCloudFormat;
+            image.SampleDesc.Count = 1u;
+            image.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+            image.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+            D3D12_HEAP_PROPERTIES heap{};
+            heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+            D3D12_CLEAR_VALUE clear{};
+            clear.Format = kCloudFormat;
+            // Cloud buffers store premultiplied light + remaining transmittance.
+            clear.Color[3] = 1.0f;
+            const HRESULT create_hr = s.device->CreateCommittedResource(
+                &heap, D3D12_HEAP_FLAG_NONE, &image,
+                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear,
+                IID_PPV_ARGS(&target.image));
+            if (FAILED(create_hr)) {
+                error = hr_text(create_hr, name);
+                return false;
+            }
+            s.device->CreateRenderTargetView(target.image.Get(), nullptr,
+                                             rtv_cpu(s, target.rtv_index));
+            s.device->CreateShaderResourceView(target.image.Get(), &srv,
+                                               srv_cpu(s, target.srv_index));
+            return true;
+        };
+        if (!create_cloud_target(s.cloud_history[0], cloud_width, cloud_height,
+                                 "Create CloudWorks history 0") ||
+            !create_cloud_target(s.cloud_history[1], cloud_width, cloud_height,
+                                 "Create CloudWorks history 1") ||
+            !create_cloud_target(s.cloud_march, cloud_width / 2u, cloud_height / 2u,
+                                 "Create CloudWorks sparse march"))
+            return false;
+        // Resolve needs t0=march and t1=the selected previous history in one
+        // contiguous descriptor table. Duplicate the SRVs for each ping-pong side.
+        for (std::uint32_t index = 0u; index < 2u; ++index) {
+            s.cloud_resolve_srv_base[index] = s.next_srv;
+            s.device->CreateShaderResourceView(s.cloud_march.image.Get(), &srv,
+                                               srv_cpu(s, s.next_srv++));
+            s.device->CreateShaderResourceView(s.cloud_history[index].image.Get(), &srv,
+                                               srv_cpu(s, s.next_srv++));
+        }
+        runtime_log_line("CloudWorks temporal buffers history=" +
+                         std::to_string(cloud_width) + "x" + std::to_string(cloud_height) +
+                         " march=" + std::to_string(cloud_width / 2u) + "x" +
+                         std::to_string(cloud_height / 2u) + " (DownscaleDiv=" +
                          std::to_string(divisor) + ")");
     }
     return true;
@@ -1787,16 +1844,44 @@ std::uint32_t present_sampler(Dx12GeState &s) noexcept {
     return ensure_sampler(s, draw);
 }
 
+std::uint32_t cloud_linear_sampler(Dx12GeState &s) noexcept {
+    GeGpuDrawDescriptor draw{};
+    draw.texture_min_linear = true;
+    draw.texture_mag_linear = true;
+    draw.texture_clamp_u = true;
+    draw.texture_clamp_v = true;
+    return ensure_sampler(s, draw);
+}
+
 bool create_cloud_root_signature(Dx12GeState &s, std::string &error) noexcept {
-    D3D12_ROOT_PARAMETER parameter{};
-    parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-    parameter.Constants.ShaderRegister = 0u;
-    parameter.Constants.RegisterSpace = 0u;
-    parameter.Constants.Num32BitValues = 40u;
-    parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    D3D12_DESCRIPTOR_RANGE srv_range{};
+    srv_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    srv_range.NumDescriptors = 2u;
+    srv_range.BaseShaderRegister = 0u;
+    D3D12_DESCRIPTOR_RANGE sampler_range{};
+    sampler_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+    sampler_range.NumDescriptors = 1u;
+    sampler_range.BaseShaderRegister = 0u;
+    std::array<D3D12_ROOT_PARAMETER, 4> parameters{};
+    parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    parameters[0].Constants.ShaderRegister = 0u;
+    parameters[0].Constants.Num32BitValues = 40u;
+    parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    parameters[1].DescriptorTable.NumDescriptorRanges = 1u;
+    parameters[1].DescriptorTable.pDescriptorRanges = &srv_range;
+    parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    parameters[2].DescriptorTable.NumDescriptorRanges = 1u;
+    parameters[2].DescriptorTable.pDescriptorRanges = &sampler_range;
+    parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    parameters[3].Constants.ShaderRegister = 2u;
+    parameters[3].Constants.Num32BitValues = 20u;
+    parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     D3D12_ROOT_SIGNATURE_DESC desc{};
-    desc.NumParameters = 1u;
-    desc.pParameters = &parameter;
+    desc.NumParameters = static_cast<UINT>(parameters.size());
+    desc.pParameters = parameters.data();
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
     ComPtr<ID3DBlob> blob, errors;
     HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1,
@@ -1894,9 +1979,36 @@ bool create_cloud_target_pipeline(Dx12GeState &s, std::string &error) noexcept {
     return true;
 }
 
+bool create_cloud_resolve_pipeline(Dx12GeState &s, std::string &error) noexcept {
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
+    pso.pRootSignature = s.cloud_root_signature.Get();
+    pso.VS = {s.present_vertex_shader->GetBufferPointer(),
+              s.present_vertex_shader->GetBufferSize()};
+    pso.PS = {s.cloud_resolve_pixel_shader->GetBufferPointer(),
+              s.cloud_resolve_pixel_shader->GetBufferSize()};
+    pso.SampleMask = UINT_MAX;
+    pso.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+    pso.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    pso.RasterizerState.DepthClipEnable = TRUE;
+    pso.BlendState.RenderTarget[0].BlendEnable = FALSE;
+    pso.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    pso.DepthStencilState.DepthEnable = FALSE;
+    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    pso.NumRenderTargets = 1u;
+    pso.RTVFormats[0] = kCloudFormat;
+    pso.SampleDesc.Count = 1u;
+    const HRESULT hr = s.device->CreateGraphicsPipelineState(
+        &pso, IID_PPV_ARGS(&s.cloud_resolve_pipeline));
+    if (FAILED(hr)) {
+        error = hr_text(hr, "CreateGraphicsPipelineState(DX12 GE cloud temporal resolve)");
+        return false;
+    }
+    return true;
+}
+
 bool create_cloud_composite_pipeline(Dx12GeState &s, std::string &error) noexcept {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
-    pso.pRootSignature = s.root_signature.Get();
+    pso.pRootSignature = s.cloud_root_signature.Get();
     pso.VS = {s.present_vertex_shader->GetBufferPointer(),
               s.present_vertex_shader->GetBufferSize()};
     pso.PS = {s.cloud_composite_pixel_shader->GetBufferPointer(),
@@ -1910,10 +2022,15 @@ bool create_cloud_composite_pipeline(Dx12GeState &s, std::string &error) noexcep
     blend.SrcBlend = D3D12_BLEND_ONE;
     blend.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
     blend.BlendOp = D3D12_BLEND_OP_ADD;
-    blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-    blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+    // Alpha in the PSP world framebuffer is composition metadata, not spare
+    // storage for cloud opacity. Preserve it exactly; changing it makes the
+    // later framebuffer/HUD composite treat clouds as foreground content.
+    blend.SrcBlendAlpha = D3D12_BLEND_ZERO;
+    blend.DestBlendAlpha = D3D12_BLEND_ONE;
     blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-    blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_RED |
+                                  D3D12_COLOR_WRITE_ENABLE_GREEN |
+                                  D3D12_COLOR_WRITE_ENABLE_BLUE;
     pso.DepthStencilState.DepthEnable = TRUE;
     pso.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
     pso.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
@@ -1956,20 +2073,25 @@ const CloudCameraCandidate *select_cloud_camera(const Dx12GeState &s) noexcept {
         }
     }
 
-    const CloudCameraCandidate *best = nullptr;
+    // VCS' main 3D world surface is 0x00088000. Prefer it strictly over the
+    // later display/HUD target; choosing the latter makes clouds cover the HUD
+    // and every transparent entity regardless of the insertion boundary.
+    constexpr std::uint32_t kVcsWorldFramebuffer = 0x00088000u;
+    const CloudCameraCandidate *best_world = nullptr;
     for (const CloudCameraCandidate &candidate : s.cloud_cameras) {
-        if (!contains(candidate.target) || candidate.occluding_weight == 0u) continue;
-        // Match the camera selector already proven by Project2DFX: the camera
-        // with the most genuinely occluding geometry wins, then total weight.
-        // Prioritising depth writes selected auxiliary/reflection passes in VCS.
-        if (best == nullptr ||
-            candidate.occluding_weight > best->occluding_weight ||
-            (candidate.occluding_weight == best->occluding_weight &&
-             candidate.weight > best->weight)) {
-            best = &candidate;
-        }
+        if ((candidate.target & 0x001FFFF0u) != kVcsWorldFramebuffer ||
+            candidate.occluding_weight == 0u)
+            continue;
+        if (best_world == nullptr ||
+            candidate.occluding_weight > best_world->occluding_weight ||
+            (candidate.occluding_weight == best_world->occluding_weight &&
+             candidate.weight > best_world->weight))
+            best_world = &candidate;
     }
-    return best;
+    // Never fall back to a later framebuffer. Missing clouds are safer and
+    // correctable; clouds composited over HUD/transparency are categorically
+    // the wrong render phase.
+    return best_world;
 }
 
 CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
@@ -2076,46 +2198,158 @@ CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
 
 void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &target,
                                      const CloudShaderConstants &clouds) noexcept {
-    CloudRenderTarget &cloud = s.cloud_render_target;
-    if (!cloud.image) return;
-    transition(s.list.Get(), cloud.image.Get(), cloud.state,
-               D3D12_RESOURCE_STATE_RENDER_TARGET);
-    cloud.state = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    const D3D12_CPU_DESCRIPTOR_HANDLE cloud_rtv = rtv_cpu(s, cloud.rtv_index);
-    s.list->OMSetRenderTargets(1u, &cloud_rtv, FALSE, nullptr);
-    constexpr float transparent[4]{0.0f, 0.0f, 0.0f, 0.0f};
-    s.list->ClearRenderTargetView(cloud_rtv, transparent, 0u, nullptr);
-    D3D12_VIEWPORT cloud_viewport{0.0f, 0.0f, static_cast<float>(cloud.width),
-                                  static_cast<float>(cloud.height), 0.0f, 1.0f};
-    D3D12_RECT cloud_scissor{0, 0, static_cast<LONG>(cloud.width),
-                             static_cast<LONG>(cloud.height)};
-    s.list->RSSetViewports(1u, &cloud_viewport);
-    s.list->RSSetScissorRects(1u, &cloud_scissor);
-    s.list->SetPipelineState(s.cloud_target_pipeline.Get());
+    if (!s.cloud_history[0].image || !s.cloud_history[1].image ||
+        !s.cloud_march.image || !s.cloud_target_pipeline ||
+        !s.cloud_resolve_pipeline || !s.cloud_composite_pipeline)
+        return;
+    const std::uint32_t settings = std::bit_cast<std::uint32_t>(clouds.camera_settings[3]);
+    if ((settings & 0x10000u) == 0u) return;
+
+    const std::uint32_t previous_index = s.cloud_history_index & 1u;
+    const std::uint32_t current_index = 1u - previous_index;
+    CloudRenderTarget &previous = s.cloud_history[previous_index];
+    CloudRenderTarget &current = s.cloud_history[current_index];
+    const auto &config = vcs_configuration().volumetric_clouds;
+
+    float camera_delta_squared = 0.0f;
+    if (s.cloud_history_valid) {
+        for (std::size_t axis = 0u; axis < 3u; ++axis) {
+            const float delta = clouds.camera_settings[axis] - s.cloud_previous_camera[axis];
+            camera_delta_squared += delta * delta;
+        }
+    }
+    // Like ProperShaders, rotation is reprojected while positional movement
+    // gets one complete current-frame march. A composite of several cloud
+    // depths cannot be translated correctly with a single motion vector.
+    const bool camera_translated = s.cloud_history_valid &&
+        camera_delta_squared > 0.0004f;
+    const bool full_current_frame = !s.cloud_history_valid || camera_translated;
+    constexpr std::array<std::array<float, 2>, 4> kBayerSlots{{
+        {{0.0f, 0.0f}}, {{1.0f, 1.0f}}, {{1.0f, 0.0f}}, {{0.0f, 1.0f}}}};
+    const auto &subpixel = kBayerSlots[s.cloud_temporal_frame & 3u];
+
+    CloudTemporalConstants temporal{};
+    const auto copy_previous_basis = [&](std::array<float, 4> &destination,
+                                         std::size_t offset) {
+        for (std::size_t axis = 0u; axis < 3u; ++axis)
+            destination[axis] = s.cloud_history_valid
+                ? s.cloud_previous_ray_basis[offset + axis]
+                : (offset == 0u ? clouds.ray_right_time[axis]
+                   : offset == 3u ? clouds.ray_up_seed[axis]
+                                  : clouds.ray_forward_opacity[axis]);
+    };
+    copy_previous_basis(temporal.previous_right_history, 0u);
+    copy_previous_basis(temporal.previous_up_blend, 3u);
+    copy_previous_basis(temporal.previous_forward_spatial, 6u);
+    temporal.previous_right_history[3] =
+        s.cloud_history_valid && !camera_translated ? 1.0f : 0.0f;
+    temporal.previous_up_blend[3] = std::clamp(config.temporal_blend, 0.0f, 0.95f);
+    temporal.previous_forward_spatial[3] =
+        std::clamp(config.temporal_denoise * 0.012f, 0.0f, 0.25f);
+    temporal.texel_subpixel = {
+        1.0f / static_cast<float>(current.width),
+        1.0f / static_cast<float>(current.height), subpixel[0], subpixel[1]};
+    temporal.control = {
+        full_current_frame ? 1.0f : 0.0f,
+        config.temporal_clamp <= 0.0f ? 1000.0f
+                                      : std::clamp(config.temporal_clamp * 2.0f,
+                                                   0.5f, 16.0f),
+        0.0f, 0.0f};
+
+    ID3D12DescriptorHeap *heaps[]{s.srv_heap.Get(), s.sampler_heap.Get()};
+    s.list->SetDescriptorHeaps(2u, heaps);
     s.list->SetGraphicsRootSignature(s.cloud_root_signature.Get());
     s.list->SetGraphicsRoot32BitConstants(0u, 40u, &clouds, 0u);
+    s.list->SetGraphicsRoot32BitConstants(3u, 20u, &temporal, 0u);
     s.list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    s.list->DrawInstanced(3u, 1u, 0u, 0u);
-    transition(s.list.Get(), cloud.image.Get(), cloud.state,
-               D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    cloud.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    constexpr float clear_cloud[4]{0.0f, 0.0f, 0.0f, 1.0f};
+    const auto bind_cloud_target = [&](CloudRenderTarget &destination,
+                                       bool clear) {
+        transition(s.list.Get(), destination.image.Get(), destination.state,
+                   D3D12_RESOURCE_STATE_RENDER_TARGET);
+        destination.state = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        const D3D12_CPU_DESCRIPTOR_HANDLE rtv = rtv_cpu(s, destination.rtv_index);
+        s.list->OMSetRenderTargets(1u, &rtv, FALSE, nullptr);
+        if (clear) s.list->ClearRenderTargetView(rtv, clear_cloud, 0u, nullptr);
+        const D3D12_VIEWPORT viewport{
+            0.0f, 0.0f, static_cast<float>(destination.width),
+            static_cast<float>(destination.height), 0.0f, 1.0f};
+        const D3D12_RECT scissor{0, 0, static_cast<LONG>(destination.width),
+                                 static_cast<LONG>(destination.height)};
+        s.list->RSSetViewports(1u, &viewport);
+        s.list->RSSetScissorRects(1u, &scissor);
+    };
+    const auto make_shader_readable = [&](CloudRenderTarget &source) {
+        transition(s.list.Get(), source.image.Get(), source.state,
+                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        source.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    };
+
+    if (full_current_frame) {
+        bind_cloud_target(current, true);
+        s.list->SetPipelineState(s.cloud_target_pipeline.Get());
+        s.list->DrawInstanced(3u, 1u, 0u, 0u);
+        make_shader_readable(current);
+    } else {
+        temporal.control[0] = 0.0f;
+        s.list->SetGraphicsRoot32BitConstants(3u, 20u, &temporal, 0u);
+        bind_cloud_target(s.cloud_march, true);
+        s.list->SetPipelineState(s.cloud_target_pipeline.Get());
+        s.list->DrawInstanced(3u, 1u, 0u, 0u);
+        make_shader_readable(s.cloud_march);
+
+        bind_cloud_target(current, true);
+        s.list->SetPipelineState(s.cloud_resolve_pipeline.Get());
+        s.list->SetGraphicsRootDescriptorTable(
+            1u, srv_gpu(s, s.cloud_resolve_srv_base[previous_index]));
+        s.list->SetGraphicsRootDescriptorTable(
+            2u, sampler_gpu(s, cloud_linear_sampler(s)));
+        s.list->DrawInstanced(3u, 1u, 0u, 0u);
+        make_shader_readable(current);
+    }
+
+    static std::uint32_t temporal_trace_count = 0u;
+    if (temporal_trace_count < 8u) {
+        runtime_log_line("CLOUD_TEMPORAL frame=" + std::to_string(s.frame_epoch) +
+                         " mode=" + (full_current_frame ? std::string("full")
+                                                        : std::string("sparse")) +
+                         " delta2=" + std::to_string(camera_delta_squared) +
+                         " history=" + std::to_string(previous_index) + "->" +
+                         std::to_string(current_index) + " bayer=" +
+                         std::to_string(static_cast<unsigned>(subpixel[0])) + "," +
+                         std::to_string(static_cast<unsigned>(subpixel[1])));
+        ++temporal_trace_count;
+    }
+
+    s.cloud_history_index = current_index;
+    ++s.cloud_temporal_frame;
+    for (std::size_t axis = 0u; axis < 3u; ++axis) {
+        s.cloud_previous_camera[axis] = clouds.camera_settings[axis];
+        s.cloud_previous_ray_basis[axis] = clouds.ray_right_time[axis];
+        s.cloud_previous_ray_basis[3u + axis] = clouds.ray_up_seed[axis];
+        s.cloud_previous_ray_basis[6u + axis] = clouds.ray_forward_opacity[axis];
+    }
+    s.cloud_history_valid = true;
 
     prepare_target_for_render(s, target);
     const D3D12_CPU_DESCRIPTOR_HANDLE rtv = rtv_cpu(s, target.rtv_index);
     const D3D12_CPU_DESCRIPTOR_HANDLE dsv = dsv_cpu(s, target.dsv_index);
     s.list->OMSetRenderTargets(1u, &rtv, FALSE, &dsv);
-    D3D12_VIEWPORT viewport{0.0f, 0.0f, static_cast<float>(s.target_width),
-                            static_cast<float>(s.target_height), 0.0f, 1.0f};
-    D3D12_RECT scissor{0, 0, static_cast<LONG>(s.target_width),
-                       static_cast<LONG>(s.target_height)};
+    const D3D12_VIEWPORT viewport{
+        0.0f, 0.0f, static_cast<float>(s.target_width),
+        static_cast<float>(s.target_height), 0.0f, 1.0f};
+    const D3D12_RECT scissor{0, 0, static_cast<LONG>(s.target_width),
+                             static_cast<LONG>(s.target_height)};
     s.list->RSSetViewports(1u, &viewport);
     s.list->RSSetScissorRects(1u, &scissor);
     s.list->SetPipelineState(s.cloud_composite_pipeline.Get());
-    s.list->SetGraphicsRootSignature(s.root_signature.Get());
-    ID3D12DescriptorHeap *heaps[]{s.srv_heap.Get(), s.sampler_heap.Get()};
-    s.list->SetDescriptorHeaps(2u, heaps);
-    s.list->SetGraphicsRootDescriptorTable(0u, srv_gpu(s, cloud.srv_index));
-    s.list->SetGraphicsRootDescriptorTable(1u, sampler_gpu(s, present_sampler(s)));
+    s.list->SetGraphicsRootSignature(s.cloud_root_signature.Get());
+    s.list->SetGraphicsRoot32BitConstants(0u, 40u, &clouds, 0u);
+    temporal.control[0] = 0.0f;
+    s.list->SetGraphicsRoot32BitConstants(3u, 20u, &temporal, 0u);
+    s.list->SetGraphicsRootDescriptorTable(1u, srv_gpu(s, current.srv_index));
+    s.list->SetGraphicsRootDescriptorTable(
+        2u, sampler_gpu(s, cloud_linear_sampler(s)));
     s.list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     s.list->DrawInstanced(3u, 1u, 0u, 0u);
 }
@@ -2635,6 +2869,7 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
     if (!create_targets(s, error)) return false;
     if (!create_present_pipeline(s, error)) return false;
     if (!create_cloud_target_pipeline(s, error)) return false;
+    if (!create_cloud_resolve_pipeline(s, error)) return false;
     if (!create_cloud_composite_pipeline(s, error)) return false;
     s.vertices.reserve(262144u);
     s.packed_0115_vertices.reserve(2621440u);
@@ -2677,10 +2912,19 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.swap_rtv_heap.Reset();
     s.present_pipeline.Reset();
     s.cloud_target_pipeline.Reset();
+    s.cloud_resolve_pipeline.Reset();
     s.cloud_composite_pipeline.Reset();
     s.cloud_target_pixel_shader.Reset();
+    s.cloud_resolve_pixel_shader.Reset();
     s.cloud_composite_pixel_shader.Reset();
-    s.cloud_render_target = {};
+    s.cloud_history = {};
+    s.cloud_march = {};
+    s.cloud_resolve_srv_base = {};
+    s.cloud_history_index = 0u;
+    s.cloud_temporal_frame = 0u;
+    s.cloud_previous_camera = {};
+    s.cloud_previous_ray_basis = {};
+    s.cloud_history_valid = false;
     s.present_pixel_shader.Reset();
     s.present_vertex_shader.Reset();
     s.pipelines.clear();
@@ -3492,38 +3736,61 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     const std::uint32_t cloud_target_address = cloud_camera != nullptr
         ? cloud_camera->target : 0u;
     bool clouds_injected = false;
-    bool cloud_opaque_seen = false;
+    bool cloud_depth_writing_world_seen = false;
+    static bool cloud_trace_done = false;
+    const bool trace_cloud_frame = !cloud_trace_done && cloud_camera != nullptr;
+    std::size_t cloud_batch_index = 0u;
+    if (trace_cloud_frame) {
+        std::ostringstream line;
+        line << "CLOUD_TRACE build=temporal-fading-v4 frame=" << s.frame_epoch
+             << " selected=0x" << std::hex << cloud_target_address
+             << " display=0x" << s.display_framebuffer << std::dec
+             << " batches=" << s.batches.size();
+        runtime_log_line(line.str());
+    }
 
     constexpr float black[4]{0.0f, 0.0f, 0.0f, 1.0f};
     for (const Dx12Batch &batch : s.batches) {
         const std::uint32_t address = batch.draw.framebuffer_address & 0x001FFFF0u;
         const bool cloud_target_batch = address == cloud_target_address;
-        const bool opaque_world_batch = cloud_target_batch && !batch.draw.clear_mode &&
-            batch.draw.depth_test_enabled && batch.draw.depth_write_enabled &&
-            !batch.draw.blend_enabled && !batch.draw.alpha_test_enabled;
-        if (opaque_world_batch) cloud_opaque_seen = true;
-        // PSP has no named RenderFadingEntities marker in its GE stream, but
-        // the same boundary is visible in render state: after depth-writing,
-        // non-blended world geometry, fading/foliage starts using blend, alpha
-        // test, or depth-test without depth writes. Inject before that first
-        // batch so every transparent object composites over the clouds.
-        const bool fading_entities_boundary = cloud_target_batch && cloud_opaque_seen &&
-            !batch.draw.clear_mode &&
-            (batch.draw.blend_enabled || batch.draw.alpha_test_enabled ||
-             (batch.draw.depth_test_enabled && !batch.draw.depth_write_enabled));
-        // Conservative fallback for unusual frames without a recognizable
-        // fading pass: inject before the world target is sampled by composition.
-        const bool world_target_consumer = batch.framebuffer_feedback &&
-            (batch.feedback_address & 0x001FFFF0u) == cloud_target_address &&
-            address != cloud_target_address;
+        if (trace_cloud_frame && (cloud_target_batch || address == s.display_framebuffer)) {
+            std::ostringstream line;
+            line << "CLOUD_BATCH i=" << cloud_batch_index << " target=0x" << std::hex
+                 << address << std::dec << " clear=" << batch.draw.clear_mode
+                 << " depth_test=" << batch.draw.depth_test_enabled
+                 << " depth_write=" << batch.draw.depth_write_enabled
+                 << " blend=" << batch.draw.blend_enabled
+                 << " alpha_test=" << batch.draw.alpha_test_enabled
+                 << " feedback=" << batch.framebuffer_feedback;
+            runtime_log_line(line.str());
+        }
+        // Captured VCS frame: opaque/alpha-tested world geometry is the run
+        // with depth writes (batches 2..92); FadingEntities starts at the first
+        // depth-tested draw without depth writes (batch 93). Blend and alpha
+        // test stay enabled throughout and cannot identify this boundary.
+        if (cloud_target_batch && !batch.draw.clear_mode &&
+            batch.draw.depth_test_enabled && batch.draw.depth_write_enabled)
+            cloud_depth_writing_world_seen = true;
+        const bool fading_entities_boundary = cloud_target_batch &&
+            cloud_depth_writing_world_seen && !batch.draw.clear_mode &&
+            batch.draw.depth_test_enabled && !batch.draw.depth_write_enabled;
         if (!clouds_injected && cloud_camera != nullptr &&
-            (fading_entities_boundary || world_target_consumer)) {
+            fading_entities_boundary) {
+            if (trace_cloud_frame) {
+                runtime_log_line("CLOUD_INJECT before_batch=" +
+                                 std::to_string(cloud_batch_index) +
+                                 " reason=fading_entities");
+            }
             if (Dx12FramebufferTarget *cloud_target =
                     find_framebuffer_target(s, cloud_target_address);
                 cloud_target != nullptr && cloud_target->color && cloud_target->depth) {
                 if (current_target != nullptr && current_target != cloud_target)
                     resolve_target_for_sampling(s, *current_target, false);
                 record_clouds_into_world_target(s, *cloud_target, clouds);
+                // The cloud passes use their own 62-DWORD root layout. Restore
+                // the GE layout before recording the first FadingEntities draw;
+                // all cached bindings below are invalidated and repopulated.
+                s.list->SetGraphicsRootSignature(s.root_signature.Get());
                 current_target = cloud_target;
                 current_address = cloud_target_address;
                 clouds_injected = true;
@@ -3538,6 +3805,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                 active_topology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
             }
         }
+        ++cloud_batch_index;
         Dx12FramebufferTarget *target = address == current_address
             ? current_target : find_framebuffer_target(s, address);
         if (target == nullptr || !target->color || !target->depth) continue;
@@ -3764,6 +4032,11 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                     s.report.mip_linear_game_draw_calls += batch.logical_draw_count;
             }
         }
+    }
+    if (trace_cloud_frame) {
+        runtime_log_line(std::string("CLOUD_TRACE_END injected=") +
+                         (clouds_injected ? "1" : "0"));
+        cloud_trace_done = true;
     }
 
     if (current_target != nullptr)

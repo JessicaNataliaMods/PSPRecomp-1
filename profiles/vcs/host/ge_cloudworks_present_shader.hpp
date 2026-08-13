@@ -9,8 +9,14 @@ namespace vcs {
 // fullscreen input/ray contract used by VCSNative's DX12 backend.
 // CloudWorks: Brian Tu (RTU), CC BY-NC-SA 3.0.
 inline constexpr char kCloudWorksPresentShaderHlsl[] = R"CLOUD_HLSL(
-Texture2D<float4> SourceTexture : register(t0);
-SamplerState SourceSampler : register(s0);
+// Cloud pass descriptor contract:
+//   t0 = sparse march texture for CloudTemporalResolvePS, or resolved cloud
+//        history for CloudCompositePS/PresentPS
+//   t1 = previous resolved cloud history for CloudTemporalResolvePS
+//   s0 = clamp sampler (linear for resolve/composite)
+Texture2D<float4> CloudTexture0 : register(t0);
+Texture2D<float4> CloudTexture1 : register(t1);
+SamplerState CloudSampler : register(s0);
 
 cbuffer CloudState : register(b0) {
     float3 CloudRayRight; float g_Time;
@@ -25,6 +31,24 @@ cbuffer CloudState : register(b0) {
     float g_Brightness; float3 CloudPadding;
 };
 
+// Temporal pass contract (20 DWORDs). Together with CloudState's 40 DWORDs,
+// a two-SRV descriptor table and one sampler table this consumes 62 of the
+// D3D12 root signature's 64 DWORD budget.
+//
+// Translation invalidates history on the CPU.  The previous ray basis below
+// therefore only has to reproject camera rotation; it is the same world-ray
+// basis used by CloudState and avoids importing matrix-layout conventions from
+// either the PSP GE or D3D9 ProperShaders implementation.
+cbuffer CloudTemporalState : register(b2) {
+    float3 PrevCloudRayRight; float CloudHistoryValid;
+    float3 PrevCloudRayUp; float CloudTemporalBlend;
+    float3 PrevCloudRayForward; float CloudSpatialMix;
+    float2 CloudTexelSize; float2 CloudSubPixel;
+    float CloudFullResolutionMarch;
+    float CloudClampExpand;
+    float2 CloudTemporalPadding;
+};
+
 struct PresentVertexOutput { float4 position : SV_POSITION; float2 uv : TEXCOORD0; };
 PresentVertexOutput PresentVS(uint id : SV_VertexID) {
     PresentVertexOutput o;
@@ -34,7 +58,7 @@ PresentVertexOutput PresentVS(uint id : SV_VertexID) {
     return o;
 }
 float4 PresentPS(PresentVertexOutput i) : SV_TARGET {
-    return SourceTexture.SampleLevel(SourceSampler, i.uv, 0.0);
+    return CloudTexture0.SampleLevel(CloudSampler, i.uv, 0.0);
 }
 
 static const float VC_HASH_MUL = 1332.03398875;
@@ -110,6 +134,8 @@ float3 atmosphere_scattering(float strength,float3 color,float3 camera,float3 ra
     float3 scattered=AtmosphereScattering(color,Game2Atm_Alt(camera),step,ray,light,lightDir,1.0,sphere);
     return lerp(color,scattered,fade);
 }
+)CLOUD_HLSL"
+R"CLOUD_HLSL(
 
 struct CloudBaseColor {float3 BaseColor;float3 BaseColor_Day;float3 BaseColor_Sunset;};
 struct CloudProfile {
@@ -152,6 +178,9 @@ float4 CloudAtRay(CloudProfile a,CloudBaseColor b,float3 dir,float3 cam,float3 l
     if(d.x>=distance)cd*=d.z/d.w;if(cd>0)d.y=d.y*(1-fx.z)+fx.z*d.x;fx.y+=cd;fx.z=(exp(-fx.y)-a.cutoff.y)/(1-a.cutoff.y);d.z=distance-d.x;
     if(fx.y<2.3)fx.x+=cd*exp(-ShadowMarching(cd,p,a,a.range,lightDir)-fx.y);}
    d.w=clampMap(2*df-pdf,cs.z*0.85,a.cutoff.x,a.march.x,a.march.y);d.w*=clampMap(d.x,0,a.fade,1,a.march.z);
+   // The stochastic step offset is intentional. ProperShaders averages it in
+   // the reprojected temporal history instead of exposing one undersampled
+   // march directly on screen.
    d.w+=noise2d(p+g_Time)*a.march.x;pdf=df;p+=dir*d.w;d.x+=d.w;}
   if(fx.z<1){fx=saturate(fx);float3 z=float3(0,0,cam.z);float3 cbright=SunLight(light,Game2Atm(z+dir*d.y),lightDir,earth)*a.brightness;
    float3 C=cbright*fx.x*MiePhase(dot(lightDir,dir))+(b.BaseColor*g_vCloudBaseColor)*(1-fx.z);
@@ -190,11 +219,111 @@ float4 RenderClouds(float3 dir,float3 cam){float time=gameTime();CloudBaseColor 
  if(layers>=2u&&result.w>.01){float4 high=CloudAtRay(BuildProfile2(time,g_CloudCoverage.z),base,dir,cam,light,lightDir,time,distance);result.rgb+=high.rgb*result.w;result.w*=high.w;}
  return result;}
 float3 WorldRay(float2 uv){float2 ndc=float2(uv.x*2-1,1-uv.y*2);return normalize(CloudRayForward+CloudRayRight*ndc.x+CloudRayUp*ndc.y);}
-float4 CloudTargetPS(PresentVertexOutput i):SV_TARGET {if((g_Settings&0x10000u)==0u)discard;float3 dir=WorldRay(i.uv);if(dir.z<=1e-6)discard;
- float4 clouds=RenderClouds(dir,CloudCameraPosition);float alpha=saturate((1-clouds.a)*g_Opacity);if(alpha<=1e-4)discard;
- return float4(clouds.rgb*g_Opacity*g_Brightness,alpha);}
+
+static const float VC_TEMPORAL_DIV=2.0;
+static const float VC_INV_TEMPORAL_DIV=0.5;
+static const float VC_RAIL_FLOOR=4.0;
+
+// A sparse march target contains one texel for each 2x2 block of the resolved
+// cloud history. SV_POSITION identifies the sparse texel exactly; deriving UV
+// from it avoids interpolation and half-pixel disagreements between APIs.
+float2 CloudMarchUV(float2 position){
+ float2 pixel=floor(position);
+ float2 sparseUV=(pixel*VC_TEMPORAL_DIV+CloudSubPixel+0.5)*CloudTexelSize;
+ float2 fullUV=(pixel+0.5)*CloudTexelSize;
+ return lerp(sparseUV,fullUV,saturate(CloudFullResolutionMarch));
+}
+
+// History stores CloudWorks' native representation: premultiplied scattered
+// light in rgb and TRANSMITTANCE in alpha (clear sky is 0,0,0,1).
+float4 CloudMarchPS(PresentVertexOutput i):SV_TARGET {
+ if((g_Settings&0x10000u)==0u)return float4(0,0,0,1);
+ float3 dir=WorldRay(CloudMarchUV(i.position.xy));
+ return RenderClouds(dir,CloudCameraPosition);
+}
+
+// Kept as an entry-point alias while the backend moves from its former direct
+// cloud target to the full/sparse march paths.
+float4 CloudTargetPS(PresentVertexOutput i):SV_TARGET {
+ return CloudMarchPS(i);
+}
+
+// Reproject a current world direction into the previous camera's ray basis.
+// If d = q.x*R + q.y*U + q.z*F, previous NDC is q.xy/q.z. Cramer's rule keeps
+// this exact for asymmetric projections and avoids a separate 4x4 matrix.
+float3 PreviousCloudNdc(float3 dir){
+ float det=dot(PrevCloudRayRight,cross(PrevCloudRayUp,PrevCloudRayForward));
+ float safeDet=(abs(det)>1e-8)?det:((det<0)?-1e-8:1e-8);
+ float3 q=float3(
+  dot(dir,cross(PrevCloudRayUp,PrevCloudRayForward)),
+  dot(PrevCloudRayRight,cross(dir,PrevCloudRayForward)),
+  dot(PrevCloudRayRight,cross(PrevCloudRayUp,dir)))/safeDet;
+ return float3(q.xy/max(q.z,1e-8),q.z);
+}
+
+// Literal SM5 adaptation of ProperShaders' PS_TemporalResolve. The march fills
+// one Bayer slot per 2x2 block; every other pixel keeps its own reprojected
+// history and leaks slightly toward the smooth current-frame reconstruction.
+float4 CloudTemporalResolvePS(PresentVertexOutput i):SV_TARGET {
+ float2 pixel=floor(i.position.xy);
+ float2 uv=(pixel+0.5)*CloudTexelSize;
+ float2 marchTexel=CloudTexelSize*VC_TEMPORAL_DIV;
+
+ float2 block=floor(pixel*VC_INV_TEMPORAL_DIV);
+ float2 slot=pixel-block*VC_TEMPORAL_DIV;
+ float2 blockUV=(block+0.5)*marchTexel;
+ float4 c=CloudTexture0.SampleLevel(CloudSampler,blockUV,0.0);
+
+ float2 freshDelta=abs(slot-CloudSubPixel);
+ float fresh=step(freshDelta.x+freshDelta.y,0.5);
+
+ float2 spatialUV=uv-(CloudSubPixel-(VC_TEMPORAL_DIV-1.0)*0.5)*CloudTexelSize;
+ float2 sp=spatialUV/marchTexel-0.5;
+ float2 sf=frac(sp);
+ float2 sb=(floor(sp)+0.5)*marchTexel;
+ float4 t00=CloudTexture0.SampleLevel(CloudSampler,sb,0.0);
+ float4 t10=CloudTexture0.SampleLevel(CloudSampler,sb+float2(marchTexel.x,0),0.0);
+ float4 t01=CloudTexture0.SampleLevel(CloudSampler,sb+float2(0,marchTexel.y),0.0);
+ float4 t11=CloudTexture0.SampleLevel(CloudSampler,sb+marchTexel,0.0);
+ float4 spatial=lerp(lerp(t00,t10,sf.x),lerp(t01,t11,sf.x),sf.y);
+
+ float3 previous=PreviousCloudNdc(WorldRay(uv));
+ float2 prevUV=float2(previous.x*0.5+0.5,0.5-previous.y*0.5);
+ float2 inside=step(float2(0,0),prevUV)*step(prevUV,float2(1,1));
+ float valid=CloudHistoryValid*inside.x*inside.y*step(1e-8,previous.z);
+ float4 hist=CloudTexture1.SampleLevel(CloudSampler,prevUV,0.0);
+
+ // Loose safety rail from ProperShaders. RGB and transmittance must move as a
+ // single value; clamping channels independently creates black pinholes.
+ float4 mn=min(min(min(t00,t10),min(t01,t11)),c);
+ float4 mx=max(max(max(t00,t10),max(t01,t11)),c);
+ float4 mid=(mn+mx)*0.5;
+ float3 spanRGB=mx.rgb-mn.rgb;
+ float span=max(max(spanRGB.r,spanRGB.g),max(spanRGB.b,mx.a-mn.a));
+ float ext=max(span*CloudClampExpand,VC_RAIL_FLOOR);
+ float4 dev=abs(hist-mid)-ext;
+ float over=max(max(dev.r,dev.g),max(dev.b,dev.a));
+ hist=lerp(hist,mid,saturate(over));
+
+ float4 src=lerp(spatial,c,fresh);
+ float w=lerp(1.0-CloudSpatialMix,CloudTemporalBlend,fresh)*valid;
+ return lerp(src,hist,w);
+}
+
+// Manual four-tap bilinear upscale matches ProperShaders even if the bound
+// sampler is point-filtered. The backend blends this premultiplied result over
+// the world target with ONE / INV_SRC_ALPHA.
 float4 CloudCompositePS(PresentVertexOutput i):SV_TARGET {
- return SourceTexture.SampleLevel(SourceSampler,i.uv,0.0);
+ float2 texelPos=i.uv/CloudTexelSize-0.5;
+ float2 f=frac(texelPos);
+ float2 base=(floor(texelPos)+0.5)*CloudTexelSize;
+ float4 c00=CloudTexture0.SampleLevel(CloudSampler,base,0.0);
+ float4 c10=CloudTexture0.SampleLevel(CloudSampler,base+float2(CloudTexelSize.x,0),0.0);
+ float4 c01=CloudTexture0.SampleLevel(CloudSampler,base+float2(0,CloudTexelSize.y),0.0);
+ float4 c11=CloudTexture0.SampleLevel(CloudSampler,base+CloudTexelSize,0.0);
+ float4 clouds=lerp(lerp(c00,c10,f.x),lerp(c01,c11,f.x),f.y);
+ float alpha=saturate((1.0-clouds.a)*g_Opacity);
+ return float4(clouds.rgb*g_Opacity*g_Brightness,alpha);
 }
 )CLOUD_HLSL";
 
