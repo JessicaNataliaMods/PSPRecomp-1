@@ -1405,7 +1405,14 @@ ComPtr<ID3D12PipelineState> create_pipeline(Dx12GeState &s,
     pso.SampleMask = UINT_MAX;
     pso.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
     pso.RasterizerState.CullMode = cull_enabled ? D3D12_CULL_MODE_BACK : D3D12_CULL_MODE_NONE;
-    pso.RasterizerState.FrontCounterClockwise = accept_counter_clockwise ? TRUE : FALSE;
+    // The transform's Y row is negated to convert the PSP framebuffer origin to
+    // D3D's (see the row1 construction in the constant setup).  Mirroring an axis
+    // reverses the screen-space winding of every triangle, so the guest's
+    // front-face bit from GE command 0x9B must be inverted here.  The software
+    // rasterizer classifies winding on the CPU, before that matrix, which is why
+    // only the hardware path was affected: it culled the visible faces and kept
+    // the hidden ones, dropping parts of models.
+    pso.RasterizerState.FrontCounterClockwise = accept_counter_clockwise ? FALSE : TRUE;
     pso.RasterizerState.DepthClipEnable = TRUE;
     pso.BlendState.AlphaToCoverageEnable = FALSE;
     pso.BlendState.IndependentBlendEnable = FALSE;
