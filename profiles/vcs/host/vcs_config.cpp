@@ -155,15 +155,67 @@ void load_proper_shaders_configuration(VcsConfiguration &config,
         if (key == "enabled") {
             if (!parse_bool(value, config.volumetric_clouds.enabled))
                 warning(config, line_number, "ProperShaders.ini: Enabled expects true/false");
-        } else if (key == "marchsteps") {
-            if (!parse_u32(value, 4u, 64u, config.volumetric_clouds.march_steps))
-                warning(config, line_number, "ProperShaders.ini: MarchSteps must be between 4 and 64");
-        } else if (key == "coverage") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage)) bad_float("Coverage");
+        } else if (key == "downscalediv") {
+            if (!parse_u32(value, 1u, 8u, config.volumetric_clouds.downscale_div))
+                warning(config, line_number, "ProperShaders.ini: DownscaleDiv must be between 1 and 8");
+        } else if (key == "layers") {
+            if (!parse_u32(value, 1u, 3u, config.volumetric_clouds.layers))
+                warning(config, line_number, "ProperShaders.ini: Layers must be between 1 and 3");
+        } else if (key == "shadowsteps") {
+            if (!parse_u32(value, 2u, 8u, config.volumetric_clouds.shadow_steps))
+                warning(config, line_number, "ProperShaders.ini: ShadowSteps must be between 2 and 8");
+        } else if (key == "coveragelow") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_low)) bad_float("CoverageLow");
+        } else if (key == "coveragemid") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_mid)) bad_float("CoverageMid");
+        } else if (key == "coveragehigh") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_high)) bad_float("CoverageHigh");
         } else if (key == "opacity") {
             if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.opacity)) bad_float("Opacity");
         } else if (key == "speed") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.speed)) bad_float("Speed");
+            if (!parse_float(value, 0.0f, 1000.0f, config.volumetric_clouds.speed)) bad_float("Speed");
+        } else if (key == "brightness") {
+            if (!parse_float(value, 0.0f, 8.0f, config.volumetric_clouds.brightness)) bad_float("Brightness");
+        } else if (key == "randomseed") {
+            if (!parse_float(value, 0.0f, 6.2831855f, config.volumetric_clouds.random_seed)) bad_float("RandomSeed");
+        } else if (key == "sundirectionx") {
+            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_x)) bad_float("SunDirectionX");
+        } else if (key == "sundirectiony") {
+            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_y)) bad_float("SunDirectionY");
+        } else if (key == "sundirectionz") {
+            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_z)) bad_float("SunDirectionZ");
+        } else if (key == "suncolorr") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_r)) bad_float("SunColorR");
+        } else if (key == "suncolorg") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_g)) bad_float("SunColorG");
+        } else if (key == "suncolorb") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_b)) bad_float("SunColorB");
+        } else if (key == "cloudbasecolorr") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_r)) bad_float("CloudBaseColorR");
+        } else if (key == "cloudbasecolorg") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_g)) bad_float("CloudBaseColorG");
+        } else if (key == "cloudbasecolorb") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_b)) bad_float("CloudBaseColorB");
+        } else if (key == "atmospheredensity") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.atmosphere_density)) bad_float("AtmosphereDensity");
+        } else if (key == "mist") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.mist)) bad_float("Mist");
+        } else if (key == "fogcolorr") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_r)) bad_float("FogColorR");
+        } else if (key == "fogcolorg") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_g)) bad_float("FogColorG");
+        } else if (key == "fogcolorb") {
+            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_b)) bad_float("FogColorB");
+        } else if (key == "fogstart") {
+            if (!parse_float(value, 1.0f, 100000.0f, config.volumetric_clouds.fog_start)) bad_float("FogStart");
+        } else if (key == "dayprogression") {
+            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.day_progression)) bad_float("DayProgression");
+        } else if (key == "temporalblend") {
+            if (!parse_float(value, 0.0f, 0.95f, config.volumetric_clouds.temporal_blend)) bad_float("TemporalBlend");
+        } else if (key == "temporaldenoise") {
+            if (!parse_float(value, 0.0f, 16.0f, config.volumetric_clouds.temporal_denoise)) bad_float("TemporalDenoise");
+        } else if (key == "temporalclamp") {
+            if (!parse_float(value, 0.0f, 16.0f, config.volumetric_clouds.temporal_clamp)) bad_float("TemporalClamp");
         } else {
             warning(config, line_number, "ProperShaders.ini: unknown [VolumetricClouds] key '" + key + "'");
         }
