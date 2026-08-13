@@ -31,7 +31,10 @@ void collision_fast_path(psprecomp::Runtime &runtime, psprecomp::AllegrexContext
     static const bool enabled = [] {
         if (truthy(std::getenv("PSPRECOMP_NO_FAST_088B1554"))) return false;
         if (truthy(std::getenv("PSPRECOMP_VALIDATE_FAST_088B1554"))) return true;
-        return truthy(std::getenv("PSPRECOMP_ENABLE_FAST_088B1554"));
+        // This leaf has already matched the generated AOT reference across
+        // real gameplay validation runs. Keep it on in production; the NO_
+        // switch remains available for an immediate A/B or compatibility bisect.
+        return true;
     }();
 
     if (!enabled) {

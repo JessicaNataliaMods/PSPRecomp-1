@@ -71,7 +71,7 @@ public:
     using RecompiledEntryFunction = void (*)(Runtime &, AllegrexContext &, std::uint16_t,
                                              GuestMemory::AotFastView &);
     using HleFunction = std::function<void(Runtime &, AllegrexContext &)>;
-    using NativeFastPath = std::function<void(Runtime &, AllegrexContext &)>;
+    using NativeFastPath = void (*)(Runtime &, AllegrexContext &);
 
     explicit Runtime(std::uint32_t ram_size = 32u * 1024u * 1024u);
 

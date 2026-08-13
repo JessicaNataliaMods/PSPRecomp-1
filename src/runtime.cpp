@@ -254,8 +254,8 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
     // Generation alone is sufficient: it increments on every PSP thread
     // ownership change. Avoid constructing/checking a two-field token on every
     // dynamic native chain boundary in the city hot path.
-#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint64_t caller_generation = g_runtime_thread_switch_generation_fast;
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_pre_chained_call_hook != nullptr)
         g_pre_chained_call_hook(*this, ctx, target_pc, native_depth);
 #endif
@@ -275,21 +275,14 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
     if (track_dispatch_counters_) ++chained_dispatches_;
 #endif
 
-#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-    // Any scheduler boundary that actually switches PSP ownership marks the
-    // complete native chain invalid. The direct-chain path already uses this
-    // byte; dynamic JR/JALR chains can use the same invariant and avoid two
-    // process-global generation loads per call in production.
-    if (chain_context_invalidated_) {
-        (void)account_dispatch_work(ctx, false);
-        return false;
-    }
-#else
+    // Dynamic targets may enter a profile/native function which switches PSP
+    // ownership without passing through run_starvation_boundary(). Keep the
+    // generation guard here even in production; compile-time direct chains use
+    // chain_context_invalidated_ and retain their cheaper hot path.
     if (caller_generation != g_runtime_thread_switch_generation_fast) {
         (void)account_dispatch_work(ctx, false);
         return false;
     }
-#endif
     return account_dispatch_work(ctx, true);
 }
 

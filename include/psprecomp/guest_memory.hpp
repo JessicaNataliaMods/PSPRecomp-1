@@ -126,7 +126,7 @@ public:
             : owner_(owner), ram_data_(ram_data), ram_limit8_(limit8),
               ram_limit16_(limit16), ram_limit32_(limit32),
               write_watch_enabled_(write_watch) {}
-        [[nodiscard]] static constexpr std::uint32_t ram_offset_of_fast(
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static constexpr std::uint32_t ram_offset_of_fast(
             std::uint32_t address) noexcept {
             return (address & 0x1FFFFFFFu) - GuestMemory::kPhysicalBase;
         }
@@ -261,20 +261,20 @@ private:
     // Canonicalize and rebase in one step.  An address below kPhysicalBase --
     // EDRAM included -- wraps to a value far above any RAM size, so a single
     // unsigned compare rejects it along with every out-of-range access.
-    [[nodiscard]] static std::uint32_t ram_offset_of(std::uint32_t address) noexcept {
+    [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static std::uint32_t ram_offset_of(std::uint32_t address) noexcept {
         return (address & 0x1FFFFFFFu) - kPhysicalBase;
     }
 
     // Guest memory is little-endian, so on a little-endian host these are the
     // same bytes the previous per-byte assembly produced, in one access.
-    [[nodiscard]] static std::uint16_t read_le16(const std::uint8_t *source) noexcept {
+    [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static std::uint16_t read_le16(const std::uint8_t *source) noexcept {
         std::uint16_t value{};
         std::memcpy(&value, source, sizeof(value));
         if constexpr (std::endian::native == std::endian::big)
             value = static_cast<std::uint16_t>((value >> 8u) | (value << 8u));
         return value;
     }
-    [[nodiscard]] static std::uint32_t read_le32(const std::uint8_t *source) noexcept {
+    [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static std::uint32_t read_le32(const std::uint8_t *source) noexcept {
         std::uint32_t value{};
         std::memcpy(&value, source, sizeof(value));
         if constexpr (std::endian::native == std::endian::big)
@@ -282,12 +282,12 @@ private:
                     ((value << 8u) & 0x00FF0000u) | ((value << 24u) & 0xFF000000u);
         return value;
     }
-    static void write_le16(std::uint8_t *destination, std::uint16_t value) noexcept {
+    PSPRECOMP_MEMORY_FAST_PATH static void write_le16(std::uint8_t *destination, std::uint16_t value) noexcept {
         if constexpr (std::endian::native == std::endian::big)
             value = static_cast<std::uint16_t>((value >> 8u) | (value << 8u));
         std::memcpy(destination, &value, sizeof(value));
     }
-    static void write_le32(std::uint8_t *destination, std::uint32_t value) noexcept {
+    PSPRECOMP_MEMORY_FAST_PATH static void write_le32(std::uint8_t *destination, std::uint32_t value) noexcept {
         if constexpr (std::endian::native == std::endian::big)
             value = ((value >> 24u) & 0x000000FFu) | ((value >> 8u) & 0x0000FF00u) |
                     ((value << 8u) & 0x00FF0000u) | ((value << 24u) & 0xFF000000u);
