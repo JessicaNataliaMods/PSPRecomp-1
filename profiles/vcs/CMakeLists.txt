@@ -223,6 +223,8 @@ add_custom_command(TARGET VCSNative POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/config/VCSNative.ini" "$<TARGET_FILE_DIR:VCSNative>/VCSNative.ini"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${VCS_PROFILE_DIR}/config/ProperShaders.ini" "$<TARGET_FILE_DIR:VCSNative>/ProperShaders.ini"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/data/VCSProject2DFX_Lights.bin"
         "$<TARGET_FILE_DIR:VCSNative>/VCSProject2DFX_Lights.bin"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -230,7 +232,10 @@ add_custom_command(TARGET VCSNative POST_BUILD
         "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_ATTRIBUTION.md"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/third_party/project2dfx/LICENSE.txt"
-        "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_LICENSE.txt")
+        "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_LICENSE.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${VCS_PROFILE_DIR}/third_party/cloudworks/ATTRIBUTION.md"
+        "$<TARGET_FILE_DIR:VCSNative>/CLOUDWORKS_ATTRIBUTION.md")
 
 # Profile-specific generator. The root psp_recomp target stays game-neutral.
 add_executable(vcs_recomp tools/vcs_codegen_main.cpp)

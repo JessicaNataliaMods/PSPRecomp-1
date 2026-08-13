@@ -153,6 +153,23 @@ int main() {
 
         const vcs::VcsConfiguration missing =
             vcs::load_vcs_configuration(root / "missing.ini");
+        {
+            std::ofstream proper(root / "ProperShaders.ini", std::ios::trunc);
+            proper << "[VolumetricClouds]\n"
+                   << "Enabled=true\n"
+                   << "MarchSteps=28\n"
+                   << "Coverage=0.61\n"
+                   << "Opacity=0.72\n"
+                   << "Speed=0.03\n";
+        }
+        vcs::initialize_vcs_configuration(root);
+        const auto &clouds = vcs::vcs_configuration().volumetric_clouds;
+        require(clouds.enabled, "ProperShaders.ini VolumetricClouds.Enabled was not parsed");
+        require(clouds.march_steps == 28u, "ProperShaders.ini MarchSteps was not parsed");
+        require(std::abs(clouds.coverage - 0.61f) < 0.0001f &&
+                std::abs(clouds.opacity - 0.72f) < 0.0001f &&
+                std::abs(clouds.speed - 0.03f) < 0.0001f,
+                "ProperShaders.ini cloud parameters were not parsed");
         // Widescreen: explicit ratio, "auto", and off.  The correction must be
         // exactly neutral when disabled -- PSP parity stays the baseline.
         require(config.widescreen.enabled, "Widescreen.Enabled was not parsed");

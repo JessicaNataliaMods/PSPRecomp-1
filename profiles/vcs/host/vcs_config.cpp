@@ -106,10 +106,68 @@ bool parse_u64(std::string value, std::uint64_t minimum, std::uint64_t maximum,
     return true;
 }
 
+bool parse_float(std::string value, float minimum, float maximum, float &out) {
+    value = trim_copy(std::move(value));
+    if (value.empty()) return false;
+    errno = 0;
+    char *end = nullptr;
+    const float parsed = std::strtof(value.c_str(), &end);
+    if (errno == ERANGE || end == value.c_str() || *end != '\0' ||
+        !std::isfinite(parsed) || parsed < minimum || parsed > maximum) {
+        return false;
+    }
+    out = parsed;
+    return true;
+}
+
 void warning(VcsConfiguration &config, std::size_t line, const std::string &message) {
     std::ostringstream stream;
     stream << "line " << line << ": " << message;
     config.warnings.push_back(stream.str());
+}
+
+void load_proper_shaders_configuration(VcsConfiguration &config,
+                                       const std::filesystem::path &path) {
+    std::ifstream input(path);
+    if (!input) return;
+    std::string section;
+    std::string raw_line;
+    std::size_t line_number = 0u;
+    while (std::getline(input, raw_line)) {
+        ++line_number;
+        std::string line = trim_copy(raw_line);
+        if (line.empty() || line[0] == ';' || line[0] == '#') continue;
+        if (line.front() == '[' && line.back() == ']') {
+            section = lowercase_copy(trim_copy(line.substr(1u, line.size() - 2u)));
+            continue;
+        }
+        if (section != "volumetricclouds" && section != "volumetric clouds") continue;
+        const std::size_t separator = line.find('=');
+        if (separator == std::string::npos) {
+            warning(config, line_number, "ProperShaders.ini: expected key=value");
+            continue;
+        }
+        const std::string key = lowercase_copy(trim_copy(line.substr(0u, separator)));
+        const std::string value = strip_inline_comment(line.substr(separator + 1u));
+        auto bad_float = [&](const char *name) {
+            warning(config, line_number, std::string("ProperShaders.ini: invalid ") + name);
+        };
+        if (key == "enabled") {
+            if (!parse_bool(value, config.volumetric_clouds.enabled))
+                warning(config, line_number, "ProperShaders.ini: Enabled expects true/false");
+        } else if (key == "marchsteps") {
+            if (!parse_u32(value, 4u, 64u, config.volumetric_clouds.march_steps))
+                warning(config, line_number, "ProperShaders.ini: MarchSteps must be between 4 and 64");
+        } else if (key == "coverage") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage)) bad_float("Coverage");
+        } else if (key == "opacity") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.opacity)) bad_float("Opacity");
+        } else if (key == "speed") {
+            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.speed)) bad_float("Speed");
+        } else {
+            warning(config, line_number, "ProperShaders.ini: unknown [VolumetricClouds] key '" + key + "'");
+        }
+    }
 }
 
 void apply_display_key(VcsConfiguration &config, const std::string &key,
@@ -635,6 +693,7 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
     }
 
     VcsConfiguration loaded = load_vcs_configuration(path);
+    load_proper_shaders_configuration(loaded, executable_directory / "ProperShaders.ini");
     loaded.initialized = true;
     loaded.executable_directory = executable_directory;
     {

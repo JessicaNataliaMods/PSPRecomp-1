@@ -413,6 +413,15 @@ void shutdown_ge_gpu_backend() noexcept;
 [[nodiscard]] bool ge_gpu_backend_graphics_ready() noexcept;
 void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &draw) noexcept;
 
+// Captures the dominant projected world camera for optional native post effects.
+// The matrices are observed with the draw, before the GE state advances.
+void ge_gpu_backend_observe_camera(const std::array<float, 12> &view,
+                                   const std::array<float, 16> &projection,
+                                   const std::array<float, 6> &viewport,
+                                   const std::array<float, 3> &camera_position,
+                                   const GeGpuDrawDescriptor &draw,
+                                   std::uint32_t vertex_weight) noexcept;
+
 // Stages already-decoded vertices into a persistently mapped Vulkan buffer.
 // This does not replace the software rasterizer yet; it proves that real VCS
 // geometry can cross the host->Vulkan boundary with no per-draw allocation.

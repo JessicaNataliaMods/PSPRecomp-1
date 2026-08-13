@@ -4188,6 +4188,31 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
             gpu_draw.texture_content_signature = any_signature ? signature : 0u;
         }
         ge_gpu_backend_record_draw(gpu_draw);
+        if (!gpu_draw.through && !gpu_draw.clear_mode &&
+            primitive >= 3u && primitive <= 5u) {
+            const std::array<float, 6> cloud_viewport{
+                decode_float24(data24(commands[0x42u])),
+                decode_float24(data24(commands[0x43u])),
+                decode_float24(data24(commands[0x45u])),
+                decode_float24(data24(commands[0x46u])),
+                static_cast<float>(data24(commands[0x4Cu]) & 0xFFFFu) / 16.0f,
+                static_cast<float>(data24(commands[0x4Du]) & 0xFFFFu) / 16.0f};
+            // VCS' authoritative camera origin. The affine GE view used by
+            // individual passes is not guaranteed to encode this position as
+            // a rigid inverse (reflections and camera-relative passes do not),
+            // which made a world-space cloud slab orbit while only turning.
+            constexpr std::uint32_t kVcsCameraPosition = 0x08BC87E0u;
+            std::array<float, 3> cloud_camera_position{};
+            if (memory.contains(kVcsCameraPosition, 12u)) {
+                cloud_camera_position = {
+                    std::bit_cast<float>(memory.load32(kVcsCameraPosition + 0u)),
+                    std::bit_cast<float>(memory.load32(kVcsCameraPosition + 4u)),
+                    std::bit_cast<float>(memory.load32(kVcsCameraPosition + 8u))};
+            }
+            ge_gpu_backend_observe_camera(transform.view, transform.projection,
+                                          cloud_viewport, cloud_camera_position,
+                                          gpu_draw, count);
+        }
         if (!gpu_draw.clear_mode && primitive >= 3u && primitive <= 6u)
             fps_overlay_observe_draw(gpu_draw, count);
         if (!gpu_draw.through && !gpu_draw.clear_mode &&

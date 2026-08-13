@@ -1,9 +1,12 @@
 #include "ge_gpu_backend.hpp"
+#include "ge_cloud_camera_math.hpp"
+#include "ge_cloudworks_present_shader.hpp"
 #include "vcs_config.hpp"
 #include "vcs_runtime_log.hpp"
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -117,6 +120,27 @@ struct Dx12PixelConstants {
 };
 static_assert(sizeof(Dx12PixelConstants) == 5u * sizeof(std::uint32_t));
 
+struct CloudCameraCandidate {
+    std::array<float, 12> view{};
+    std::array<float, 16> projection{};
+    // scale X/Y, center X/Y and offset X/Y from the GE viewport. Keeping this
+    // with the exact draw camera lets the present shader reconstruct the same
+    // rays that the native geometry path rasterized.
+    std::array<float, 6> viewport{};
+    std::array<float, 3> camera_position{};
+    std::uint32_t target{};
+    std::uint64_t weight{};
+    std::uint64_t occluding_weight{};
+};
+
+struct CloudPresentConstants {
+    std::array<float, 4> ray_right_time{};
+    std::array<float, 4> ray_up_coverage{};
+    std::array<float, 4> ray_forward_opacity{};
+    std::array<float, 4> camera_settings{};
+};
+static_assert(sizeof(CloudPresentConstants) == 16u * sizeof(std::uint32_t));
+
 struct Dx12FrameResources {
     ComPtr<ID3D12CommandAllocator> allocator;
     ComPtr<ID3D12Resource> upload_buffer;
@@ -188,6 +212,7 @@ struct Dx12GeState {
     std::vector<std::byte> packed_0115_vertices;
     std::vector<std::uint32_t> indices;
     std::vector<Dx12Batch> batches;
+    std::vector<CloudCameraCandidate> cloud_cameras;
     std::vector<std::byte> frame_rgba;
     std::vector<std::byte> last_texture_rgba;
 
@@ -249,8 +274,10 @@ struct Dx12GeState {
     std::uint32_t swap_width{};
     std::uint32_t swap_height{};
     ComPtr<ID3D12PipelineState> present_pipeline;
+    ComPtr<ID3D12PipelineState> cloud_target_pipeline;
     ComPtr<ID3DBlob> present_vertex_shader;
     ComPtr<ID3DBlob> present_pixel_shader;
+    ComPtr<ID3DBlob> cloud_target_pixel_shader;
     bool direct_present_ok{};
     std::uint32_t presented_framebuffer{};
     std::uint32_t missed_display_intervals{};
@@ -813,6 +840,16 @@ cbuffer DrawPixelState : register(b1) {
     uint TextureEnvPacked;
     uint FogControlPacked;
     uint FramebufferFormat;
+    float3 CloudRight;
+    float CloudInvProjectionX;
+    float3 CloudUp;
+    float CloudInvProjectionY;
+    float3 CloudCameraPosition;
+    float CloudTime;
+    float CloudCoverage;
+    float CloudOpacity;
+    float CloudMarchSteps;
+    float CloudEnabled;
 };
 struct VSIn {
     float4 position : POSITION;
@@ -1022,19 +1059,7 @@ float4 PSMain(VSOut input) : SV_TARGET {
         return false;
     }
 
-    const char *present = R"HLSL(
-Texture2D<float4> SourceTexture : register(t0);
-SamplerState SourceSampler : register(s0);
-struct VSOut { float4 position : SV_POSITION; float2 uv : TEXCOORD0; };
-VSOut PresentVS(uint id : SV_VertexID) {
-    VSOut o;
-    if (id == 0u) { o.position=float4(-1.0,-1.0,0.0,1.0); o.uv=float2(0.0,1.0); }
-    else if (id == 1u) { o.position=float4(-1.0,3.0,0.0,1.0); o.uv=float2(0.0,-1.0); }
-    else { o.position=float4(3.0,-1.0,0.0,1.0); o.uv=float2(2.0,1.0); }
-    return o;
-}
-float4 PresentPS(VSOut input) : SV_TARGET { return SourceTexture.Sample(SourceSampler, input.uv); }
-)HLSL";
+    const char *present = kCloudWorksPresentShaderHlsl;
     errors.Reset();
     hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GEPresent", nullptr, nullptr,
                     "PresentVS", "vs_5_1", flags, 0u, &s.present_vertex_shader, &errors);
@@ -1049,6 +1074,16 @@ float4 PresentPS(VSOut input) : SV_TARGET { return SourceTexture.Sample(SourceSa
     if (FAILED(hr)) {
         error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()), errors->GetBufferSize())
                        : hr_text(hr, "D3DCompile(DX12 GE Present PS)");
+        return false;
+    }
+    errors.Reset();
+    hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GECloudTarget",
+                    nullptr, nullptr, "CloudTargetPS", "ps_5_1", flags, 0u,
+                    &s.cloud_target_pixel_shader, &errors);
+    if (FAILED(hr)) {
+        error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                     errors->GetBufferSize())
+                       : hr_text(hr, "D3DCompile(DX12 GE cloud target PS)");
         return false;
     }
     return true;
@@ -1087,7 +1122,10 @@ bool create_root_signature(Dx12GeState &s, std::string &error) noexcept {
     parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
     parameters[3].Constants.ShaderRegister = 1u;
     parameters[3].Constants.RegisterSpace = 0u;
-    parameters[3].Constants.Num32BitValues = 5u;
+    // 5 draw-state DWORDs plus 16 cloud-present DWORDs. Together with the
+    // 40-DWORD vertex transform and two descriptor tables this uses 63 of the
+    // D3D12 root signature's 64 DWORD budget.
+    parameters[3].Constants.Num32BitValues = 21u;
     parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     D3D12_ROOT_SIGNATURE_DESC desc{};
     desc.NumParameters = static_cast<UINT>(parameters.size());
@@ -1664,6 +1702,254 @@ std::uint32_t present_sampler(Dx12GeState &s) noexcept {
     return ensure_sampler(s, draw);
 }
 
+bool invert_cloud_matrix(const std::array<float, 16> &matrix,
+                         std::array<double, 16> &inverse) noexcept {
+    // Gauss-Jordan in double precision. GE projection matrices are small, but
+    // the far plane can still make a float-only inverse needlessly fragile.
+    double rows[4][8]{};
+    double scale = 0.0;
+    for (std::size_t row = 0u; row < 4u; ++row) {
+        for (std::size_t column = 0u; column < 4u; ++column) {
+            const double value = matrix[column * 4u + row];
+            if (!std::isfinite(value)) return false;
+            rows[row][column] = value;
+            scale = std::max(scale, std::abs(value));
+        }
+        rows[row][4u + row] = 1.0;
+    }
+    if (!(scale > 0.0)) return false;
+    const double epsilon = scale * 1.0e-12;
+    for (std::size_t column = 0u; column < 4u; ++column) {
+        std::size_t pivot = column;
+        for (std::size_t row = column + 1u; row < 4u; ++row) {
+            if (std::abs(rows[row][column]) > std::abs(rows[pivot][column]))
+                pivot = row;
+        }
+        if (std::abs(rows[pivot][column]) <= epsilon) return false;
+        if (pivot != column) {
+            for (std::size_t entry = 0u; entry < 8u; ++entry)
+                std::swap(rows[pivot][entry], rows[column][entry]);
+        }
+        const double divisor = rows[column][column];
+        for (double &entry : rows[column]) entry /= divisor;
+        for (std::size_t row = 0u; row < 4u; ++row) {
+            if (row == column) continue;
+            const double factor = rows[row][column];
+            for (std::size_t entry = 0u; entry < 8u; ++entry)
+                rows[row][entry] -= factor * rows[column][entry];
+        }
+    }
+    std::array<double, 16> result{};
+    for (std::size_t row = 0u; row < 4u; ++row) {
+        for (std::size_t column = 0u; column < 4u; ++column) {
+            const double value = rows[row][4u + column];
+            if (!std::isfinite(value)) return false;
+            result[column * 4u + row] = value;
+        }
+    }
+    inverse = result;
+    return true;
+}
+
+bool create_cloud_target_pipeline(Dx12GeState &s, std::string &error) noexcept {
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
+    pso.pRootSignature = s.root_signature.Get();
+    pso.VS = {s.present_vertex_shader->GetBufferPointer(),
+              s.present_vertex_shader->GetBufferSize()};
+    pso.PS = {s.cloud_target_pixel_shader->GetBufferPointer(),
+              s.cloud_target_pixel_shader->GetBufferSize()};
+    pso.SampleMask = UINT_MAX;
+    pso.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+    pso.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    pso.RasterizerState.DepthClipEnable = TRUE;
+    auto &blend = pso.BlendState.RenderTarget[0];
+    blend.BlendEnable = TRUE;
+    blend.SrcBlend = D3D12_BLEND_ONE;
+    blend.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    blend.BlendOp = D3D12_BLEND_OP_ADD;
+    blend.SrcBlendAlpha = D3D12_BLEND_ONE;
+    blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+    blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    pso.DepthStencilState.DepthEnable = TRUE;
+    pso.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+    // World targets are cleared to reverse-depth zero. Equality therefore
+    // restricts the fullscreen pass to pixels untouched by world geometry.
+    pso.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
+    pso.DepthStencilState.StencilEnable = FALSE;
+    pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    pso.NumRenderTargets = 1u;
+    pso.RTVFormats[0] = kColorFormat;
+    pso.DSVFormat = s.depth_format;
+    pso.SampleDesc.Count = s.sample_count;
+    pso.SampleDesc.Quality = s.sample_quality;
+    const HRESULT hr = s.device->CreateGraphicsPipelineState(
+        &pso, IID_PPV_ARGS(&s.cloud_target_pipeline));
+    if (FAILED(hr)) {
+        error = hr_text(hr, "CreateGraphicsPipelineState(DX12 GE cloud target)");
+        return false;
+    }
+    return true;
+}
+
+const CloudCameraCandidate *select_cloud_camera(const Dx12GeState &s) noexcept {
+    if (s.display_framebuffer == 0u) return nullptr;
+    std::vector<std::uint32_t> ancestors;
+    ancestors.reserve(std::min<std::size_t>(s.frame_targets.size() + 1u,
+                                             kFramebufferTargetCapacity));
+    ancestors.push_back(s.display_framebuffer & 0x001FFFF0u);
+    const auto contains = [&](std::uint32_t address) {
+        address &= 0x001FFFF0u;
+        return std::find(ancestors.begin(), ancestors.end(), address) != ancestors.end();
+    };
+    bool changed = true;
+    while (changed && ancestors.size() < kFramebufferTargetCapacity) {
+        changed = false;
+        for (const Dx12Batch &batch : s.batches) {
+            if (!batch.framebuffer_feedback) continue;
+            const std::uint32_t source = batch.feedback_address & 0x001FFFF0u;
+            const std::uint32_t destination = batch.draw.framebuffer_address & 0x001FFFF0u;
+            if (source == destination || !contains(destination) || contains(source)) continue;
+            ancestors.push_back(source);
+            changed = true;
+            if (ancestors.size() == kFramebufferTargetCapacity) break;
+        }
+    }
+
+    const CloudCameraCandidate *best = nullptr;
+    for (const CloudCameraCandidate &candidate : s.cloud_cameras) {
+        if (!contains(candidate.target) || candidate.occluding_weight == 0u) continue;
+        // Match the camera selector already proven by Project2DFX: the camera
+        // with the most genuinely occluding geometry wins, then total weight.
+        // Prioritising depth writes selected auxiliary/reflection passes in VCS.
+        if (best == nullptr ||
+            candidate.occluding_weight > best->occluding_weight ||
+            (candidate.occluding_weight == best->occluding_weight &&
+             candidate.weight > best->weight)) {
+            best = &candidate;
+        }
+    }
+    return best;
+}
+
+CloudPresentConstants cloud_present_constants(const Dx12GeState &s) noexcept {
+    CloudPresentConstants out{};
+    const auto &config = vcs_configuration().volumetric_clouds;
+    if (!config.enabled || s.cloud_cameras.empty()) return out;
+    const CloudCameraCandidate *camera = select_cloud_camera(s);
+    if (camera == nullptr) return out;
+
+    GeCloudCameraFrame frame{};
+    if (!ge_cloud_camera_frame_from_view(camera->view, frame)) return out;
+    const Dx12FramebufferTarget *target = find_framebuffer_target(s, camera->target);
+    const float logical_width = static_cast<float>(std::max<std::uint32_t>(
+        1u, target != nullptr ? target->logical_width : kReferenceWidth));
+    const float logical_height = static_cast<float>(std::max<std::uint32_t>(
+        1u, target != nullptr ? target->logical_height : kReferenceHeight));
+    const float x_a = camera->viewport[0] * (2.0f / logical_width);
+    const float y_a = camera->viewport[1] * (2.0f / logical_height);
+    const float x_b = (camera->viewport[2] - camera->viewport[4]) *
+                          (2.0f / logical_width) - 1.0f;
+    const float y_b = (camera->viewport[3] - camera->viewport[5]) *
+                          (2.0f / logical_height) - 1.0f;
+    if (!std::isfinite(x_a) || !std::isfinite(y_a) ||
+        std::abs(x_a) < 1.0e-6f || std::abs(y_a) < 1.0e-6f)
+        return out;
+
+    // Fold the GE viewport into projection exactly as make_transform_constants
+    // does for native geometry. This eliminates the camera-relative drift that
+    // came from treating raw P00/P11 as if every pass occupied the full target.
+    std::array<float, 16> effective_projection{};
+    for (std::size_t column = 0u; column < 4u; ++column) {
+        const std::size_t base = column * 4u;
+        effective_projection[base + 0u] =
+            x_a * camera->projection[base + 0u] + x_b * camera->projection[base + 3u];
+        effective_projection[base + 1u] =
+            -y_a * camera->projection[base + 1u] - y_b * camera->projection[base + 3u];
+        effective_projection[base + 2u] = camera->projection[base + 2u];
+        effective_projection[base + 3u] = camera->projection[base + 3u];
+    }
+    std::array<double, 16> inverse_projection{};
+    if (!invert_cloud_matrix(effective_projection, inverse_projection)) return out;
+
+    const auto view_direction = [&](double ndc_x, double ndc_y,
+                                    std::array<double, 3> &direction) {
+        constexpr double clip_z = 0.5;
+        const std::array<double, 4> clip{ndc_x, ndc_y, clip_z, 1.0};
+        std::array<double, 4> point{};
+        for (std::size_t row = 0u; row < 4u; ++row) {
+            for (std::size_t column = 0u; column < 4u; ++column)
+                point[row] += inverse_projection[column * 4u + row] * clip[column];
+        }
+        if (!std::isfinite(point[3]) || std::abs(point[3]) < 1.0e-12) return false;
+        for (std::size_t axis = 0u; axis < 3u; ++axis) {
+            direction[axis] = point[axis] / point[3];
+            if (!std::isfinite(direction[axis])) return false;
+        }
+        return true;
+    };
+    std::array<double, 3> center_view{}, right_view{}, up_view{};
+    if (!view_direction(0.0, 0.0, center_view) ||
+        !view_direction(1.0, 0.0, right_view) ||
+        !view_direction(0.0, 1.0, up_view)) return out;
+    const auto to_world = [&](const std::array<double, 3> &value) {
+        return std::array<double, 3>{
+            frame.view_to_world[0] * value[0] + frame.view_to_world[1] * value[1] +
+                frame.view_to_world[2] * value[2],
+            frame.view_to_world[3] * value[0] + frame.view_to_world[4] * value[1] +
+                frame.view_to_world[5] * value[2],
+            frame.view_to_world[6] * value[0] + frame.view_to_world[7] * value[1] +
+                frame.view_to_world[8] * value[2]};
+    };
+    const std::array<double, 3> center_world = to_world(center_view);
+    const std::array<double, 3> right_world = to_world(right_view);
+    const std::array<double, 3> up_world = to_world(up_view);
+    for (std::size_t axis = 0u; axis < 3u; ++axis) {
+        const double ray_right = right_world[axis] - center_world[axis];
+        const double ray_up = up_world[axis] - center_world[axis];
+        if (!std::isfinite(ray_right) || !std::isfinite(ray_up) ||
+            !std::isfinite(center_world[axis])) return {};
+        out.ray_right_time[axis] = static_cast<float>(ray_right);
+        out.ray_up_coverage[axis] = static_cast<float>(ray_up);
+        out.ray_forward_opacity[axis] = static_cast<float>(center_world[axis]);
+        out.camera_settings[axis] = camera->camera_position[axis];
+    }
+    out.ray_right_time[3] =
+        static_cast<float>(s.frame_epoch) * (1.0f / 60.0f) * config.speed;
+    out.ray_up_coverage[3] = config.coverage;
+    out.ray_forward_opacity[3] = config.opacity;
+    const std::uint32_t settings =
+        std::clamp<std::uint32_t>(config.march_steps, 4u, 64u) | 0x100u;
+    out.camera_settings[3] = std::bit_cast<float>(settings);
+    return out;
+}
+
+void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &target,
+                                     const CloudPresentConstants &clouds) noexcept {
+    prepare_target_for_render(s, target);
+    const D3D12_CPU_DESCRIPTOR_HANDLE rtv = rtv_cpu(s, target.rtv_index);
+    const D3D12_CPU_DESCRIPTOR_HANDLE dsv = dsv_cpu(s, target.dsv_index);
+    s.list->OMSetRenderTargets(1u, &rtv, FALSE, &dsv);
+    D3D12_VIEWPORT viewport{0.0f, 0.0f, static_cast<float>(s.target_width),
+                            static_cast<float>(s.target_height), 0.0f, 1.0f};
+    D3D12_RECT scissor{0, 0, static_cast<LONG>(s.target_width),
+                       static_cast<LONG>(s.target_height)};
+    s.list->RSSetViewports(1u, &viewport);
+    s.list->RSSetScissorRects(1u, &scissor);
+    s.list->SetPipelineState(s.cloud_target_pipeline.Get());
+    s.list->SetGraphicsRootSignature(s.root_signature.Get());
+    ID3D12DescriptorHeap *heaps[]{s.srv_heap.Get(), s.sampler_heap.Get()};
+    s.list->SetDescriptorHeaps(2u, heaps);
+    s.list->SetGraphicsRootDescriptorTable(0u, srv_gpu(s, 0u));
+    s.list->SetGraphicsRootDescriptorTable(1u, sampler_gpu(s, 0u));
+    std::array<std::uint32_t, 21> constants{};
+    std::memcpy(constants.data() + 5u, &clouds, sizeof(clouds));
+    s.list->SetGraphicsRoot32BitConstants(
+        3u, static_cast<UINT>(constants.size()), constants.data(), 0u);
+    s.list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    s.list->DrawInstanced(3u, 1u, 0u, 0u);
+}
+
 bool record_direct_present(Dx12GeState &s, Dx12FramebufferTarget &source,
                            std::string &error) noexcept {
     if (!ensure_swapchain(s, error)) return false;
@@ -1692,6 +1978,14 @@ bool record_direct_present(Dx12GeState &s, Dx12FramebufferTarget &source,
     s.list->SetDescriptorHeaps(2u, heaps);
     s.list->SetGraphicsRootDescriptorTable(0u, srv_gpu(s, source.srv_index));
     s.list->SetGraphicsRootDescriptorTable(1u, sampler_gpu(s, present_sampler(s)));
+    // Clouds are rendered into the selected 3D world target before VCS samples
+    // it for composition. Applying them here would mix world-camera rays with
+    // final-display pixels and make the layer follow the screen.
+    const CloudPresentConstants clouds{};
+    std::array<std::uint32_t, 21> present_constants{};
+    std::memcpy(present_constants.data() + 5u, &clouds, sizeof(clouds));
+    s.list->SetGraphicsRoot32BitConstants(
+        3u, static_cast<UINT>(present_constants.size()), present_constants.data(), 0u);
     s.list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     s.list->DrawInstanced(3u, 1u, 0u, 0u);
     transition(s.list.Get(), backbuffer, D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -2082,6 +2376,7 @@ void clear_accumulation(Dx12GeState &s) noexcept {
     s.packed_0115_vertices.clear();
     s.indices.clear();
     s.batches.clear();
+    s.cloud_cameras.clear();
 }
 
 bool create_backend(Dx12GeState &s, std::string &error) noexcept {
@@ -2168,6 +2463,7 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
     if (!create_root_signature(s, error)) return false;
     if (!create_targets(s, error)) return false;
     if (!create_present_pipeline(s, error)) return false;
+    if (!create_cloud_target_pipeline(s, error)) return false;
     s.vertices.reserve(262144u);
     s.packed_0115_vertices.reserve(2621440u);
     s.indices.reserve(524288u);
@@ -2208,6 +2504,8 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.swapchain.Reset();
     s.swap_rtv_heap.Reset();
     s.present_pipeline.Reset();
+    s.cloud_target_pipeline.Reset();
+    s.cloud_target_pixel_shader.Reset();
     s.present_pixel_shader.Reset();
     s.present_vertex_shader.Reset();
     s.pipelines.clear();
@@ -2415,6 +2713,43 @@ void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &draw) noexcept {
             }
         }
     }
+}
+
+void ge_gpu_backend_observe_camera(const std::array<float, 12> &view,
+                                   const std::array<float, 16> &projection,
+                                   const std::array<float, 6> &viewport,
+                                   const std::array<float, 3> &camera_position,
+                                   const GeGpuDrawDescriptor &draw,
+                                   std::uint32_t vertex_weight) noexcept {
+    Dx12GeState &s = state();
+    if (!s.enabled || !vcs_configuration().volumetric_clouds.enabled ||
+        vertex_weight == 0u || !draw.depth_test_enabled) return;
+    if (!std::all_of(view.begin(), view.end(), [](float value) { return std::isfinite(value); }) ||
+        !std::all_of(projection.begin(), projection.end(), [](float value) { return std::isfinite(value); }) ||
+        !std::all_of(viewport.begin(), viewport.end(), [](float value) { return std::isfinite(value); }) ||
+        !std::all_of(camera_position.begin(), camera_position.end(),
+                     [](float value) { return std::isfinite(value); }))
+        return;
+    const std::uint32_t target = draw.framebuffer_address & 0x001FFFF0u;
+    const auto found = std::find_if(
+        s.cloud_cameras.begin(), s.cloud_cameras.end(),
+        [&](const CloudCameraCandidate &candidate) {
+            return candidate.target == target && candidate.view == view &&
+                   candidate.projection == projection && candidate.viewport == viewport;
+        });
+    if (found != s.cloud_cameras.end()) {
+        found->weight += vertex_weight;
+        found->camera_position = camera_position;
+        if ((draw.depth_function & 7u) >= 2u) found->occluding_weight += vertex_weight;
+        return;
+    }
+    // Normal gameplay has only a handful of camera variants per frame. A hard
+    // cap prevents malformed guest state from growing this host-only observer.
+    if (s.cloud_cameras.size() >= 16u) return;
+    const std::uint64_t occluding_weight = (draw.depth_function & 7u) >= 2u
+        ? vertex_weight : 0u;
+    s.cloud_cameras.push_back({view, projection, viewport, camera_position,
+                               target, vertex_weight, occluding_weight});
 }
 
 bool ge_gpu_backend_stage_vertices(const GeGpuDrawDescriptor &, std::span<const GeGpuVertex> vertices) noexcept {
@@ -2976,10 +3311,42 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     bool active_vertex_layout_valid = false;
     D3D12_PRIMITIVE_TOPOLOGY active_topology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
     bool touched_display = false;
+    const CloudCameraCandidate *cloud_camera = select_cloud_camera(s);
+    const CloudPresentConstants clouds = cloud_present_constants(s);
+    const std::uint32_t cloud_target_address = cloud_camera != nullptr
+        ? cloud_camera->target : 0u;
+    bool clouds_injected = false;
 
     constexpr float black[4]{0.0f, 0.0f, 0.0f, 1.0f};
     for (const Dx12Batch &batch : s.batches) {
         const std::uint32_t address = batch.draw.framebuffer_address & 0x001FFFF0u;
+        // Insert immediately before the first non-self pass samples the chosen
+        // world target. At this point its geometry/depth are complete, while
+        // the later VCS composition has not consumed its color yet.
+        if (!clouds_injected && cloud_camera != nullptr &&
+            batch.framebuffer_feedback &&
+            (batch.feedback_address & 0x001FFFF0u) == cloud_target_address &&
+            address != cloud_target_address) {
+            if (Dx12FramebufferTarget *cloud_target =
+                    find_framebuffer_target(s, cloud_target_address);
+                cloud_target != nullptr && cloud_target->color && cloud_target->depth) {
+                if (current_target != nullptr && current_target != cloud_target)
+                    resolve_target_for_sampling(s, *current_target, false);
+                record_clouds_into_world_target(s, *cloud_target, clouds);
+                current_target = cloud_target;
+                current_address = cloud_target_address;
+                clouds_injected = true;
+                active_pipeline = nullptr;
+                active_pipeline_key = std::numeric_limits<std::uint64_t>::max();
+                bound_srv = bound_sampler = std::numeric_limits<std::uint32_t>::max();
+                active_transform_valid = false;
+                active_pixel_valid = false;
+                active_scissor_valid = false;
+                active_blend_fix = std::numeric_limits<std::uint32_t>::max();
+                active_vertex_layout_valid = false;
+                active_topology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+            }
+        }
         Dx12FramebufferTarget *target = address == current_address
             ? current_target : find_framebuffer_target(s, address);
         if (target == nullptr || !target->color || !target->depth) continue;
@@ -3381,6 +3748,12 @@ bool ge_gpu_backend_active() noexcept { return false; }
 bool ge_gpu_backend_transfer_ready() noexcept { return false; }
 bool ge_gpu_backend_graphics_ready() noexcept { return false; }
 void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &) noexcept {}
+void ge_gpu_backend_observe_camera(const std::array<float, 12> &,
+                                   const std::array<float, 16> &,
+                                   const std::array<float, 6> &,
+                                   const std::array<float, 3> &,
+                                   const GeGpuDrawDescriptor &,
+                                   std::uint32_t) noexcept {}
 bool ge_gpu_backend_stage_vertices(const GeGpuDrawDescriptor &, std::span<const GeGpuVertex>) noexcept { return false; }
 bool ge_gpu_backend_texture_needed(const GeGpuDrawDescriptor &) noexcept { return false; }
 void ge_gpu_backend_prepare_texture_keys(GeGpuDrawDescriptor &) noexcept {}

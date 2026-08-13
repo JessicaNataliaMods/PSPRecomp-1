@@ -173,6 +173,17 @@ struct WidescreenConfiguration {
     std::uint32_t aspect_y{0u};
 };
 
+// Standalone ProperShaders.ini feature. These values deliberately do not read
+// the guest timecycle/weather: the first port is a fixed, independently
+// configurable CloudWorks sky layer.
+struct VolumetricCloudsConfiguration {
+    bool enabled{false};
+    std::uint32_t march_steps{20u};
+    float coverage{0.52f};
+    float opacity{0.78f};
+    float speed{0.018f};
+};
+
 // The aspect the game itself builds its projection with.  VCS loads the
 // constant 0x3FE38E39 -- exactly 16/9 -- and everything is relative to it.
 inline constexpr float kGameNativeAspectRatio = 16.0f / 9.0f;
@@ -211,6 +222,7 @@ struct VcsConfiguration {
     TimingConfiguration timing{};
     DiagnosticsConfiguration diagnostics{};
     WidescreenConfiguration widescreen{};
+    VolumetricCloudsConfiguration volumetric_clouds{};
     std::filesystem::path source_path{};
     // Where the executable lives. Saves go beside it rather than into the game
     // data, so a player who points the runtime at a read-only or shared copy of
