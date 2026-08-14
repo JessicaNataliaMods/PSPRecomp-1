@@ -15,6 +15,13 @@ static float get_effective_aspect_ratio(float default_aspect) noexcept {
     const float aspect = vcs::resolve_widescreen_aspect_ratio(config, output.width, output.height);
     return (aspect > 0.0f) ? aspect : default_aspect;
 }
+static float widen_horizontal_extent(float native_extent) noexcept {
+    const vcs::VcsConfiguration &config = vcs::vcs_configuration();
+    if (!config.initialized) return native_extent;
+    const vcs::DisplaySurfaceDimensions output =
+        vcs::resolve_display_surface_dimensions(config.display);
+    return native_extent * vcs::widescreen_stretch_factor(config, output.width, output.height);
+}
 static const std::uint16_t kEntryIds_recomp_unit_0076[4092] = {
     1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2673,6 +2680,7 @@ L_08934A78:
     ctx.gpr[5] = (16355u << 16u);
     ctx.gpr[5] = (ctx.gpr[5] | 36409u);
     ctx.fpr[13] = get_effective_aspect_ratio(std::bit_cast<float>(ctx.gpr[5]));
+    ctx.fpr[12] = widen_horizontal_extent(ctx.fpr[12]);
     ctx.gpr[31] = (0x08934AE4u);
     ctx.gpr[5] = (0u | 0u);
     if (rt.invoke_chained_direct<&recomp_unit_0077_entry, 77u, 586u, 0x0893A7A4u>(ctx, &aot_mem) && ctx.pc == 0x08934AE4u) goto L_08934AE4;
@@ -2835,6 +2843,7 @@ L_08934C44:
     ctx.gpr[5] = (0u | 0u);
     ctx.gpr[31] = (0x08934C60u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
+    ctx.fpr[12] = widen_horizontal_extent(ctx.fpr[12]);
     if (rt.invoke_chained_direct<&recomp_unit_0077_entry, 77u, 586u, 0x0893A7A4u>(ctx, &aot_mem) && ctx.pc == 0x08934C60u) goto L_08934C60;
     return;
 L_08934C60:
@@ -6543,6 +6552,7 @@ L_08936770:
     ctx.gpr[6] = (ctx.gpr[6] | 36409u);
     ctx.gpr[31] = (0x089367B8u);
     ctx.fpr[13] = get_effective_aspect_ratio(std::bit_cast<float>(ctx.gpr[6]));
+    ctx.fpr[12] = widen_horizontal_extent(ctx.fpr[12]);
     if (rt.invoke_chained_direct<&recomp_unit_0077_entry, 77u, 586u, 0x0893A7A4u>(ctx, &aot_mem) && ctx.pc == 0x089367B8u) goto L_089367B8;
     return;
 L_089367B8:
@@ -9742,6 +9752,7 @@ L_08937E6C:
     ctx.gpr[5] = (16355u << 16u);
     ctx.gpr[5] = (ctx.gpr[5] | 36409u);
     ctx.fpr[13] = get_effective_aspect_ratio(std::bit_cast<float>(ctx.gpr[5]));
+    ctx.fpr[12] = widen_horizontal_extent(ctx.fpr[12]);
     ctx.gpr[31] = (0x08937EB8u);
     ctx.gpr[5] = (0u | 0u);
     if (rt.invoke_chained_direct<&recomp_unit_0077_entry, 77u, 586u, 0x0893A7A4u>(ctx, &aot_mem) && ctx.pc == 0x08937EB8u) goto L_08937EB8;
