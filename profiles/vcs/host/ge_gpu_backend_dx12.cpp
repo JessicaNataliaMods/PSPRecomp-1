@@ -2176,11 +2176,10 @@ CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
         out.ray_forward_opacity[axis] = static_cast<float>(center_world[axis]);
         out.camera_settings[axis] = camera->camera_position[axis];
     }
-    // ProperShaders supplies g_Time in milliseconds. The stochastic march
-    // offset deliberately changes every frame so temporal accumulation can
-    // average it away; seconds made adjacent samples nearly identical and left
-    // the high-frequency grain fixed on screen.
-    out.ray_right_time[3] = static_cast<float>(s.frame_epoch) * (1000.0f / 60.0f);
+    // ProperShaders converts CTimer's milliseconds to seconds before setting
+    // g_Time. Keep the same unit: both the stochastic march and the animated
+    // density field use this value directly.
+    out.ray_right_time[3] = static_cast<float>(s.frame_epoch) * (1.0f / 60.0f);
     out.ray_up_seed[3] = config.random_seed;
     out.ray_forward_opacity[3] = config.opacity;
     const std::uint32_t settings = std::clamp<std::uint32_t>(config.layers, 1u, 3u) |

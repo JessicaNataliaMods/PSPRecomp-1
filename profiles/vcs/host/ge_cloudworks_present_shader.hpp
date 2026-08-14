@@ -158,9 +158,13 @@ float DetailB(float lump,float3 pos,float3 density,float3 scale,float4 dp,float3
  dens+=density.y*noise3d((pD+d/3)*scale.y);dens+=dens*density.z*noise3d((pD+d*8)*scale.z);return dens;}
 float GetDensity(float df,float height,float low,float high,float2 vb,float2 sol){return clampMap(df,low,high,0,clampMap(height,vb.y,vb.x,sol.y,sol.x));}
 float ShadowMarching(float dens,float3 p,CloudProfile a,float3 threshold,float3 sunDir){
- if(dens<=0.025)return dens*a.shadow.x;float stepLen=a.shadow.x*2.0;
- float limit=2.0/a.shadow.w/stepLen,d=0;float4 st=float4(sunDir*stepLen,stepLen);
  uint shadowSteps=(g_Settings>>8)&15u;
+ if(dens<=0.025)return dens*a.shadow.x;
+ // ProperShaders used four large samples for the DX9/SM3 instruction budget.
+ // DX12 can split the same physical shadow-march reach into up to eight
+ // samples, removing the dark density contours without changing its extent.
+ float stepLen=a.shadow.x*(8.0/max((float)shadowSteps,1.0));
+ float limit=2.0/a.shadow.w/stepLen,d=0;float4 st=float4(sunDir*stepLen,stepLen);
  [loop]for(uint i=0;i<8;i++){if(i>=shadowSteps||d>=limit||p.z>=a.volumeBox.x||p.z<=a.volumeBox.y)break;
   p+=st.xyz;float4 cs=CloudShape(p.z,a.shape,threshold);float d1=Chunk(p,a.densityChunk,a.scaleChunk,a.cloudShift,a.offsetA,a.offsetB,cs.x);
   float d2=DetailA(p,a.densityDetail,a.scaleDetail,a.offsetC,DistortionVec(d1,a.distortion))*a.shadow.y;
@@ -185,6 +189,34 @@ float4 CloudAtRay(CloudProfile a,CloudBaseColor b,float3 dir,float3 cam,float3 l
   if(fx.z<1){fx=saturate(fx);float3 z=float3(0,0,cam.z);float3 cbright=SunLight(light,Game2Atm(z+dir*d.y),lightDir,earth)*a.brightness;
    float3 C=cbright*fx.x*MiePhase(dot(lightDir,dir))+(b.BaseColor*g_vCloudBaseColor)*(1-fx.z);
    C=atmosphere_scattering(1-fx.z,C,Game2Atm(z),dir,d.y/game2atm,lightDir,earth);
+   distance=distance*fx.z+d.y*(1-fx.z);return float4(C,fx.z);}}
+ return float4(0,0,0,1);}
+
+float4 CloudAtRayHighLite(CloudBaseColor b,float3 dir,float3 cam,float3 light,float3 lightDir,float time,inout float distance){
+ const float top=3600.0,bottom=3500.0;float4 d=float4(0,0,0,75);
+ float3 p=PosOnPlane(cam,dir,clamp(cam.z,bottom+.001,top-.001),d.x);d.y=d.x;
+ if(d.x>=0&&distance>d.x){
+  float coverage=g_CloudCoverage.z;float3 range=float3(1+coverage*.3,.2,.35);
+  float grow=noise3d(float3(3800,bottom,time/2000))*.45+.65;
+  range.x*=grow*(1-coverage)+coverage;range.x=1/range.x;
+  const float2 volumeBox=float2(top,bottom),solidness=float2(.25,0),densityChunk=float2(.4,.3);
+  const float3 scaleChunk=float3(.00016,.0008,1.5),densityDetail=float3(.2,.1,.6),scaleDetail=float3(.004,.006667,.02);
+  const float4 distortion=float4(2.5,15000,0,0);
+  float3 oA=float3(1.3,-1.8,0)*-time,oB=float3(1.6,.8,0)*-time;
+  float3 oC=float3(2.5,.2,.5)*-time,oD=float3(3,.1,-.1)*-time;
+  float3 fx=float3(0,0,1);float last=0,pdf=0;
+  [loop]for(int i=0;i<32;i++){
+   if(fx.z<=0||p.z>top||p.z<bottom||d.x-d.w>=distance||d.x>=60000)break;
+   float3 cs=CloudShape(p.z,float4(3800,3520,3450,0),range).xyz;
+   float d1=Chunk(p,densityChunk,scaleChunk,0,oA,oB,cs.x);
+   float d2=DetailB(d1,p,densityDetail,scaleDetail,distortion,oC,oD,cs.x);float df=d1*d2+d1;
+   if(df>cs.z){float dens=GetDensity(df,p.z,cs.z,cs.y,volumeBox,solidness);float cd=(dens+last)*2.5;last=dens;
+    if(d.x>=distance)cd*=d.z/d.w;if(cd>0)d.y=d.y*(1-fx.z)+fx.z*d.x;
+    fx.y+=cd;fx.z=(exp(-fx.y)-.2)/.8;d.z=distance-d.x;if(fx.y<2.3)fx.x+=cd*exp(-fx.y);}
+   d.w=clampMap(2*df-pdf,cs.z*.85,0,5,75);d.w*=clampMap(d.x,0,2000000,1,500);
+   d.w+=noise2d(p+g_Time)*5;pdf=df;p+=dir*d.w;d.x+=d.w;}
+  if(fx.z<1){fx=saturate(fx);float3 cbright=light*(.5/LightingDecay);
+   float3 C=cbright*fx.x*MiePhase(dot(lightDir,dir))+(b.BaseColor*g_vCloudBaseColor)*(1-fx.z);
    distance=distance*fx.z+d.y*(1-fx.z);return float4(C,fx.z);}}
  return float4(0,0,0,1);}
 
@@ -216,7 +248,7 @@ float4 RenderClouds(float3 dir,float3 cam){float time=gameTime();CloudBaseColor 
  float3 lightDir=normalize(vSunLightDir);float3 light=LightSource(lightDir,fDayProgression,g_vSunColor,lightDir);float distance=100000;
  float4 result=CloudAtRay(BuildProfile0(time,g_CloudCoverage.x),base,dir,cam,light,lightDir,time,distance);
  uint layers=g_Settings&3u;if(layers>=3u&&result.w>.01){float4 mid=CloudAtRay(BuildProfile1(time,g_CloudCoverage.y),base,dir,cam,light,lightDir,time,distance);result.rgb+=mid.rgb*result.w;result.w*=mid.w;}
- if(layers>=2u&&result.w>.01){float4 high=CloudAtRay(BuildProfile2(time,g_CloudCoverage.z),base,dir,cam,light,lightDir,time,distance);result.rgb+=high.rgb*result.w;result.w*=high.w;}
+ if(layers>=2u&&result.w>.01){float4 high=CloudAtRayHighLite(base,dir,cam,light,lightDir,time,distance);result.rgb+=high.rgb*result.w;result.w*=high.w;}
  return result;}
 float3 WorldRay(float2 uv){float2 ndc=float2(uv.x*2-1,1-uv.y*2);return normalize(CloudRayForward+CloudRayRight*ndc.x+CloudRayUp*ndc.y);}
 
