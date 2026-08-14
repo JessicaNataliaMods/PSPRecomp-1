@@ -67,7 +67,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0233[1874] = {
     0, 88, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 90,
 };
-void recomp_unit_0233_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0233_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -180,545 +180,543 @@ L_08BA8018:
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B16570u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02B16570u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8090:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B44E30u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02B44E30u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8148:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B65C60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02B65C60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8190:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DC2FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DC2FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA81A0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B8CD60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02B8CD60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8218:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA83C0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DCA020u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DCA020u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8420:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8608:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA86E0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C6F0E0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C6F0E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA87A0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C798F0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C798F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8850:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C7E200u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C7E200u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA88C8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA89D0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C91AF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C91AF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8A40:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02CF9370u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02CF9370u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8A68:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02CFB690u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02CFB690u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8AE0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D3FB60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D3FB60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8BE0:
     // nop
-    ctx.pc = 0x020134F0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x020134F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8F9C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02010200u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02010200u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FAC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x020102E0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x020102E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FBC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D952B0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D952B0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FCC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02010420u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02010420u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FDC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D95420u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D95420u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FEC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02018AE0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02018AE0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA8FFC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D96310u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D96310u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA900C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02032FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02032FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA901C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02033100u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02033100u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA902C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0206A890u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0206A890u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA903C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D986D0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D986D0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA904C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D98930u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D98930u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA905C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D98BD0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D98BD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA906C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D98EB0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D98EB0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA907C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0206BD60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0206BD60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA913C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D99940u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D99940u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA914C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0208DC70u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0208DC70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA91F4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02096F10u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02096F10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA92B4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D99A70u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D99A70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA92C4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D81FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D81FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA92D4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02131FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02131FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA92E4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02186220u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02186220u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA92F4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x021AED00u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x021AED00u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA93B4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D9BBF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D9BBF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA93C4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x021BE400u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x021BE400u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA93D4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D9C0A0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D9C0A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA93E4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x021D4160u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x021D4160u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA93F4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D9CA30u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D9CA30u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9404:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x022142F0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x022142F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9414:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DA07C0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DA07C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9424:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0221D950u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0221D950u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA945C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02279BD0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02279BD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA946C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x022DCAE0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x022DCAE0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA947C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DA1020u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DA1020u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA948C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02316500u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02316500u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA949C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DA8D60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DA8D60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA94FC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x023E1990u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x023E1990u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA951C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D81FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02D81FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA952C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x023F41A0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x023F41A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA953C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x024E82F0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x024E82F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA954C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DAD570u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DAD570u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA955C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0255D0D0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0255D0D0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA956C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DAEFB0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DAEFB0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA957C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB2CF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB2CF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA958C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02594DB0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02594DB0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA963C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB2E20u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB2E20u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA964C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x025D4270u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x025D4270u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA965C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB34D0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB34D0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA966C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x026E9470u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x026E9470u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA967C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x026E95B0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x026E95B0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA968C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02718D80u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02718D80u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA969C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027387A0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x027387A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA975C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB4DF0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB4DF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA976C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB52E0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB52E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA977C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02749D20u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02749D20u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA982C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027AEB60u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x027AEB60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA983C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB5E50u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB5E50u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA984C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027DC800u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x027DC800u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA990C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02827E10u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02827E10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA99B4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB6610u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB6610u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA99C4:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB6850u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB6850u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9A24:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028FACD0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x028FACD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9ACC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB6D00u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB6D00u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9ADC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02949B80u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02949B80u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9AEC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0295A2C0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x0295A2C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9AFC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB6FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DB6FC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9B0C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DC1670u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DC1670u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9B1C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02A92630u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02A92630u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9BDC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C6F0E0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C6F0E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9C9C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DCB230u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DCB230u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9CAC:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02C798F0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02C798F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08BA9D5C:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DCB820u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02DCB820u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 }
 
 void recomp_unit_0233(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0233_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0233_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_233(Runtime &runtime) {

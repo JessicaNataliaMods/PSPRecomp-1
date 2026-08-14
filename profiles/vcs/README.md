@@ -10,6 +10,9 @@ Run `BUILD_VCS.bat` from this directory for the normal performance build. Genera
 
 The launchers automatically locate CMake from PATH, Visual Studio 2022 (including the bundled CMake component), `vswhere`, or a standard standalone CMake installation. `BUILD_VCS_FAST.bat` remains the quickest development/debug-oriented build.
 
+For the single-configuration Ninja workflow used during incremental renderer and
+generated-code development, see [`../../docs/VCS_NINJA_BUILD.md`](../../docs/VCS_NINJA_BUILD.md).
+
 
 ## Source layout
 

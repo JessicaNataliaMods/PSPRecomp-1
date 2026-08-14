@@ -2,8 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 for %%I in ("%~dp0..\..\..") do set "REPO=%%~fI"
 set "BUILD=%REPO%\out\vcs-release"
-set "JOBS=%NUMBER_OF_PROCESSORS%"
-if not defined JOBS set "JOBS=8"
+call "%~dp0pick_jobs.bat"
 set "CMAKE_EXE="
 set "VSWHERE="
 
@@ -25,12 +24,15 @@ if not defined CMAKE_EXE goto :NO_CMAKE
 for %%I in ("!CMAKE_EXE!") do set "CTEST_EXE=%%~dpIctest.exe"
 if not exist "!CTEST_EXE!" set "CTEST_EXE=ctest.exe"
 
-set "CMAKE_BUILD_PARALLEL_LEVEL=%JOBS%"
+rem MSBuild /m and cl.exe /MP multiply: keep MSBuild serial across projects and
+rem let /MP%JOBS% be the single source of compile parallelism.
+set "CMAKE_BUILD_PARALLEL_LEVEL=1"
 echo ================================================================
 echo VCS - PERFORMANCE INCREMENTAL BUILD
 echo Build pipeline restored to the last known-good pre-reorganization behavior.
 echo CMake: !CMAKE_EXE!
-echo Compile workers: %JOBS% ^| AOT /MP ^| MSBuild /m:%JOBS%
+echo Compile workers: %JOBS% ^| AOT /MP%JOBS% ^| MSBuild /m:1
+echo AOT inlining: /Ob3 hot measured units ^| /Ob0 cold units
 echo Link: host/core LTCG only ^| generated AOT /GL- ^| LTCG status visible
 echo Build dir preserved: %BUILD%
 echo ================================================================
@@ -44,6 +46,11 @@ echo [1/7] Configuring without deleting existing objects...
   -DPSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH=ON ^
   -DPSPRECOMP_AOT_PRODUCTION_FASTPATHS=ON ^
   -DPSPRECOMP_MSVC_CGTHREADS=0 ^
+  -DPSPRECOMP_MSVC_MP_JOBS=%JOBS% ^
+  -DPSPRECOMP_PROFILE_GUIDED_AOT=ON ^
+  -DPSPRECOMP_HOT_GENERATED_OPT_LEVEL=3 ^
+  -DPSPRECOMP_GENERATED_INLINE_LEVEL=0 ^
+  -DPSPRECOMP_HOT_GENERATED_INLINE_LEVEL=3 ^
   -DPSPRECOMP_VCS_AOT_LTO=OFF ^
   -DPSPRECOMP_BUILD_TESTS=ON ^
   -DPSPRECOMP_BUILD_PROFILE_TESTS=ON
@@ -51,13 +58,13 @@ if errorlevel 1 goto :FAIL
 
 echo [2/7] Building VCS executable first...
 echo       The generated AOT units compile normally; the final link no longer receives their LTCG IR.
-"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel %JOBS% --target VCSNative -- /m:%JOBS%
+"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel 1 --target VCSNative -- /m:1
 if errorlevel 1 goto :FAIL
 
 echo [2b/7] Building tests and probes...
-"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel %JOBS% --target ^
+"%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel 1 --target ^
   psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
-  -- /m:%JOBS%
+  -- /m:1
 if errorlevel 1 goto :FAIL
 
 echo [3/7] Running regression tests...

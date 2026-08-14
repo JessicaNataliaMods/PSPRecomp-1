@@ -160,6 +160,28 @@ Runtime::Runtime(std::uint32_t ram_size) : memory_(ram_size) {
     if (std::getenv("PSPRECOMP_NO_CHAIN") != nullptr) chain_depth_limit_ = 0u;
 }
 
+namespace {
+// The six registers the dispatch error messages print are rarely enough to tell
+// which operand produced a bad guest address.  Note that the hot-register cache
+// (r2/r4-r7/r29/r31) is only materialized back into AllegrexContext by the
+// generated outer wrapper on a normal return -- an exception unwinds past that
+// flush, so exactly those six read stale here.  Every other register, including
+// the callee-saved ones, is current.
+void append_gpr_dump(std::ostringstream &message, const AllegrexContext &ctx) {
+    static const char *const kGprNames[32] = {
+        "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
+        "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
+        "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+        "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra"};
+    message << "\n  gpr:";
+    for (std::size_t index = 0u; index < 32u; ++index) {
+        if (index % 8u == 0u) message << "\n   ";
+        message << ' ' << kGprNames[index] << '=' << hex32(ctx.gpr[index]);
+    }
+    message << "\n  (r2/r4-r7/r29/r31 may be stale: hot-register cache not flushed on unwind)";
+}
+}
+
 bool Runtime::run_starvation_boundary(AllegrexContext &ctx) {
     const std::uint64_t interval = g_runtime_starvation_interval_fast;
     if (g_starvation_hook == nullptr || interval == 0u) return true;
@@ -172,8 +194,7 @@ bool Runtime::run_starvation_boundary(AllegrexContext &ctx) {
     return same_context;
 }
 
-bool Runtime::account_dispatch_work(AllegrexContext &ctx, bool allow_preemption,
-                                    AotHotRegisterCache *shared_hot_regs) {
+bool Runtime::account_dispatch_work(AllegrexContext &ctx, bool allow_preemption) {
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (track_dispatch_counters_) ++dispatch_work_count_;
 #endif
@@ -181,14 +202,10 @@ bool Runtime::account_dispatch_work(AllegrexContext &ctx, bool allow_preemption,
     if (interval == 0u) return true;
     ++dispatches_since_import_;
     if (!allow_preemption || dispatches_since_import_ < interval) return true;
-    if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
-    const bool same_context = run_starvation_boundary(ctx);
-    if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-    return same_context;
+    return run_starvation_boundary(ctx);
 }
 
-bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem,
-                                  AotHotRegisterCache *shared_hot_regs) {
+bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem) {
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     count_pc(ctx.pc);
 #endif
@@ -237,62 +254,40 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
     // Generation alone is sufficient: it increments on every PSP thread
     // ownership change. Avoid constructing/checking a two-field token on every
     // dynamic native chain boundary in the city hot path.
-#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint64_t caller_generation = g_runtime_thread_switch_generation_fast;
-    if (g_pre_chained_call_hook != nullptr) {
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    if (g_pre_chained_call_hook != nullptr)
         g_pre_chained_call_hook(*this, ctx, target_pc, native_depth);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-    }
 #endif
     struct DepthGuard {
         std::uint32_t &depth;
         explicit DepthGuard(std::uint32_t &value) : depth(value) { ++depth; }
         ~DepthGuard() { --depth; }
     } guard(chain_depth_);
-    if (entry_function != nullptr && shared_aot_mem != nullptr && shared_hot_regs != nullptr) {
-        entry_function(*this, ctx, 0u, *shared_aot_mem, *shared_hot_regs);
-    } else if (entry_function != nullptr && shared_aot_mem != nullptr) {
-        AotHotRegisterCache local_hot_regs(ctx);
-        entry_function(*this, ctx, 0u, *shared_aot_mem, local_hot_regs);
-        local_hot_regs.flush_to(ctx);
+    if (entry_function != nullptr && shared_aot_mem != nullptr) {
+        entry_function(*this, ctx, 0u, *shared_aot_mem);
     } else {
-        // Exact/host/HLE fallback observes AllegrexContext directly. Materialize
-        // the cross-unit cache before the call and refresh it afterwards.
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
         function(*this, ctx);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
     }
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-    if (g_post_chained_call_hook != nullptr) {
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
+    if (g_post_chained_call_hook != nullptr)
         g_post_chained_call_hook(*this, ctx, target_pc, native_depth);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-    }
     if (track_dispatch_counters_) ++chained_dispatches_;
 #endif
 
-#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-    // Any scheduler boundary that actually switches PSP ownership marks the
-    // complete native chain invalid. The direct-chain path already uses this
-    // byte; dynamic JR/JALR chains can use the same invariant and avoid two
-    // process-global generation loads per call in production.
-    if (chain_context_invalidated_) {
-        (void)account_dispatch_work(ctx, false, shared_hot_regs);
-        return false;
-    }
-#else
+    // Dynamic targets may enter a profile/native function which switches PSP
+    // ownership without passing through run_starvation_boundary(). Keep the
+    // generation guard here even in production; compile-time direct chains use
+    // chain_context_invalidated_ and retain their cheaper hot path.
     if (caller_generation != g_runtime_thread_switch_generation_fast) {
-        (void)account_dispatch_work(ctx, false, shared_hot_regs);
+        (void)account_dispatch_work(ctx, false);
         return false;
     }
-#endif
-    return account_dispatch_work(ctx, true, shared_hot_regs);
+    return account_dispatch_work(ctx, true);
 }
 
 bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index,
-                                  GuestMemory::AotFastView *shared_aot_mem,
-                                  AotHotRegisterCache *shared_hot_regs) {
+                                  GuestMemory::AotFastView *shared_aot_mem) {
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     count_pc(ctx.pc);
 #endif
@@ -305,45 +300,32 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
     const std::uint32_t native_depth = chain_depth_;
     const std::uint64_t caller_generation = g_runtime_thread_switch_generation_fast;
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-    if (g_pre_chained_call_hook != nullptr) {
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
+    if (g_pre_chained_call_hook != nullptr)
         g_pre_chained_call_hook(*this, ctx, target_pc, native_depth);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-    }
 #endif
     struct DepthGuard {
         std::uint32_t &depth;
         explicit DepthGuard(std::uint32_t &value) : depth(value) { ++depth; }
         ~DepthGuard() { --depth; }
     } guard(chain_depth_);
-    if (shared_aot_mem != nullptr && shared_hot_regs != nullptr &&
-        generated_unit_entries_[unit_index] != nullptr) {
-        generated_unit_entries_[unit_index](*this, ctx, 0u, *shared_aot_mem, *shared_hot_regs);
-    } else if (shared_aot_mem != nullptr && generated_unit_entries_[unit_index] != nullptr) {
-        AotHotRegisterCache local_hot_regs(ctx);
-        generated_unit_entries_[unit_index](*this, ctx, 0u, *shared_aot_mem, local_hot_regs);
-        local_hot_regs.flush_to(ctx);
+    if (shared_aot_mem != nullptr && generated_unit_entries_[unit_index] != nullptr) {
+        generated_unit_entries_[unit_index](*this, ctx, 0u, *shared_aot_mem);
     } else {
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
         function(*this, ctx);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
     }
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-    if (g_post_chained_call_hook != nullptr) {
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
+    if (g_post_chained_call_hook != nullptr)
         g_post_chained_call_hook(*this, ctx, target_pc, native_depth);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-    }
     if (track_dispatch_counters_) ++chained_dispatches_;
 #endif
 
     // A descendant scheduler boundary may have switched the PSP context while
     // this frame was active. Never let a stale native caller resume it.
     if (caller_generation != g_runtime_thread_switch_generation_fast) {
-        (void)account_dispatch_work(ctx, false, shared_hot_regs);
+        (void)account_dispatch_work(ctx, false);
         return false;
     }
-    return account_dispatch_work(ctx, true, shared_hot_regs);
+    return account_dispatch_work(ctx, true);
 }
 
 void Runtime::register_generated_unit(std::uint32_t unit_index,
@@ -616,6 +598,7 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
                         << " (a0=" << hex32(cpu_.gpr[4]) << ", a1=" << hex32(cpu_.gpr[5])
                         << ", a2=" << hex32(cpu_.gpr[6]) << ", a3=" << hex32(cpu_.gpr[7])
                         << ", sp=" << hex32(cpu_.gpr[29]) << ", ra=" << hex32(cpu_.gpr[31]) << ")";
+                append_gpr_dump(message, cpu_);
                 throw Error(message.str());
             }
             cpu_.gpr[0] = 0u;
@@ -692,6 +675,7 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
                         << " (a0=" << hex32(cpu_.gpr[4]) << ", a1=" << hex32(cpu_.gpr[5])
                         << ", a2=" << hex32(cpu_.gpr[6]) << ", a3=" << hex32(cpu_.gpr[7])
                         << ", sp=" << hex32(cpu_.gpr[29]) << ", ra=" << hex32(cpu_.gpr[31]) << ")";
+                append_gpr_dump(message, cpu_);
                 throw Error(message.str());
             }
             // `$zero` is now enforced at every generated/HLE write site. Do not
@@ -1001,6 +985,7 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
                     << " (a0=" << hex32(cpu_.gpr[4]) << ", a1=" << hex32(cpu_.gpr[5])
                     << ", a2=" << hex32(cpu_.gpr[6]) << ", a3=" << hex32(cpu_.gpr[7])
                     << ", sp=" << hex32(cpu_.gpr[29]) << ", ra=" << hex32(cpu_.gpr[31]) << ")";
+            append_gpr_dump(message, cpu_);
             throw Error(message.str());
         }
         cpu_.gpr[0] = 0u;
@@ -1126,15 +1111,7 @@ void Runtime::register_native_fast_path(std::uint32_t address, NativeFastPath fu
     native_fast_paths_[canonical_address] = std::move(function);
 }
 
-void Runtime::invoke_native_fast_path(std::uint32_t address, AllegrexContext &ctx,
-                                      AotHotRegisterCache *shared_hot_regs) {
-    if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
-    struct HotRegisterReloadGuard {
-        AllegrexContext &ctx;
-        AotHotRegisterCache *hot;
-        ~HotRegisterReloadGuard() { if (hot != nullptr) hot->reload_from(ctx); }
-    } hot_reload{ctx, shared_hot_regs};
-
+void Runtime::invoke_native_fast_path(std::uint32_t address, AllegrexContext &ctx) {
     const std::uint32_t canonical_address = memory_.canonical(address);
     const std::uint32_t current_pc = memory_.canonical(ctx.pc);
 

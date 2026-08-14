@@ -173,6 +173,44 @@ struct WidescreenConfiguration {
     std::uint32_t aspect_y{0u};
 };
 
+// Standalone ProperShaders.ini feature. Values normally supplied by the San
+// Andreas timecycle/weather integration remain explicit placeholders until the
+// equivalent VCS guest hooks exist. Keeping the inputs separate is important:
+// collapsing the three decks and lighting state into one "coverage" value
+// materially changes CloudWorks' appearance.
+struct VolumetricCloudsConfiguration {
+    bool enabled{false};
+    std::uint32_t downscale_div{2u};
+    std::uint32_t layers{2u};
+    std::uint32_t shadow_steps{8u};
+    float coverage_low{0.35f};
+    float coverage_mid{0.25f};
+    float coverage_high{0.18f};
+    float opacity{1.0f};
+    float speed{0.0f};
+    float brightness{1.0f};
+    float random_seed{0.0f};
+    float sun_direction_x{0.38f};
+    float sun_direction_y{-0.28f};
+    float sun_direction_z{0.88f};
+    float sun_color_r{1.0f};
+    float sun_color_g{0.97f};
+    float sun_color_b{0.88f};
+    float cloud_base_color_r{0.70f};
+    float cloud_base_color_g{0.70f};
+    float cloud_base_color_b{0.70f};
+    float atmosphere_density{0.0f};
+    float mist{0.50f};
+    float fog_color_r{0.58f};
+    float fog_color_g{0.68f};
+    float fog_color_b{0.78f};
+    float fog_start{4500.0f};
+    float day_progression{0.88f};
+    float temporal_blend{0.50f};
+    float temporal_denoise{1.0f};
+    float temporal_clamp{1.0f};
+};
+
 // The aspect the game itself builds its projection with.  VCS loads the
 // constant 0x3FE38E39 -- exactly 16/9 -- and everything is relative to it.
 inline constexpr float kGameNativeAspectRatio = 16.0f / 9.0f;
@@ -211,6 +249,7 @@ struct VcsConfiguration {
     TimingConfiguration timing{};
     DiagnosticsConfiguration diagnostics{};
     WidescreenConfiguration widescreen{};
+    VolumetricCloudsConfiguration volumetric_clouds{};
     std::filesystem::path source_path{};
     // Where the executable lives. Saves go beside it rather than into the game
     // data, so a player who points the runtime at a read-only or shared copy of

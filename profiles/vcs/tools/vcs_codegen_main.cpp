@@ -9,6 +9,7 @@
 #include <bit>
 #include <cctype>
 #include <charconv>
+#include <chrono>
 #include <filesystem>
 #include <cmath>
 #include <limits>
@@ -843,11 +844,11 @@ std::string direct_unit_chain_expression(
         if (found != direct_entry_ids->end() && found->second != 0u) {
             return "rt.invoke_chained_direct<&" + generated_unit_cpp_entry_name(unit) + ", " +
                 std::to_string(unit) + "u, " + std::to_string(found->second) + "u, " +
-                psprecomp::hex32(target) + "u>(ctx, &aot_mem, &hot_regs)";
+                psprecomp::hex32(target) + "u>(ctx, &aot_mem)";
         }
     }
     return "rt.invoke_chained_direct<&" + generated_unit_cpp_name(unit) + ", " +
-        std::to_string(unit) + "u>(ctx, &aot_mem, &hot_regs)";
+        std::to_string(unit) + "u>(ctx, &aot_mem)";
 }
 
 void emit_target(std::ostringstream &body, std::uint32_t target,
@@ -882,7 +883,7 @@ void emit_target(std::ostringstream &body, std::uint32_t target,
              << "; return;\n";
     } else {
         body << indent << "ctx.pc = " << psprecomp::hex32(target)
-             << "u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;\n";
+             << "u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;\n";
     }
 }
 
@@ -933,7 +934,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
         }
         body << "\n};\n";
 
-        body << "void " << cpp_name << "_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {\n"
+        body << "void " << cpp_name << "_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {\n"
              << "    std::uint32_t jump_target = 0u;\n"
              << "    std::uint32_t local_transfers = 0u;\n"
              << "    std::uint32_t local_pc = ctx.pc;\n"
@@ -952,11 +953,15 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
         }
         body << "    default:\n"
              << "        if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, \"invalid internal function entry\");\n"
+             // See tools/codegen_main.cpp: the outer dispatcher resumes from
+             // ctx.pc, so a unit leaving through this arm after local transfers
+             // must materialize local_pc into it first.
+             << "        else ctx.pc = local_pc;\n"
              << "        return;\n"
              << "    }\n"
              << "    }\n";
     } else {
-        body << "void " << cpp_name << "_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {\n"
+        body << "void " << cpp_name << "_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {\n"
              << "    (void)direct_entry_id;\n"
              << "    std::uint32_t jump_target = 0u;\n"
              << "    std::uint32_t local_transfers = 0u;\n"
@@ -968,6 +973,10 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
         }
         body << "    default:\n"
              << "        if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, \"invalid internal function entry\");\n"
+             // See tools/codegen_main.cpp: the outer dispatcher resumes from
+             // ctx.pc, so a unit leaving through this arm after local transfers
+             // must materialize local_pc into it first.
+             << "        else ctx.pc = local_pc;\n"
              << "        return;\n"
              << "    }\n";
     }
@@ -1084,7 +1093,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                     } else if (target == 0x088B1554u) {
                         const std::uint32_t return_pc = pc + 8u;
                         body << "    ctx.pc = 0x088B1554u;\n"
-                             << "    rt.invoke_native_fast_path(0x088B1554u, ctx, &hot_regs);\n"
+                             << "    rt.invoke_native_fast_path(0x088B1554u, ctx);\n"
 ;
                         if (function.entry_labels.contains(return_pc)) {
                             body << "    if (ctx.pc == " << psprecomp::hex32(return_pc)
@@ -1102,7 +1111,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                     } else if (target == 0x088B1780u) {
                         const std::uint32_t return_pc = pc + 8u;
                         body << "    ctx.pc = " << psprecomp::hex32(target) << "u;\n"
-                             << "    rt.invoke_native_fast_path(0x088B1780u, ctx, &hot_regs);\n"
+                             << "    rt.invoke_native_fast_path(0x088B1780u, ctx);\n"
 ;
                         if (function.entry_labels.contains(return_pc)) {
                             body << "    if (ctx.pc == " << psprecomp::hex32(return_pc)
@@ -1136,14 +1145,14 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                             if (direct_unit)
                                 body << direct_unit_chain_expression(target_unit, target, function.direct_entry_ids);
                             else
-                                body << "rt.invoke_chained_call(ctx, &aot_mem, &hot_regs)";
+                                body << "rt.invoke_chained_call(ctx, &aot_mem)";
                             body << " && ctx.pc == " << psprecomp::hex32(return_pc)
                                  << "u) goto L_" << psprecomp::hex32(return_pc).substr(2) << ";\n";
                         } else {
                             if (direct_unit)
                                 body << "    (void)" << direct_unit_chain_expression(target_unit, target, function.direct_entry_ids) << ";\n";
                             else
-                                body << "    (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs);\n";
+                                body << "    (void)rt.invoke_chained_call(ctx, &aot_mem);\n";
                         }
                         body << "    return;\n";
                     }
@@ -1157,7 +1166,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                     if (decoded.kind == psprecomp::OpcodeKind::Jalr && pc == 0x0886269Cu) {
                         const std::uint32_t return_pc = pc + 8u;
                         body << "    ctx.pc = jump_target;\n"
-                             << "    rt.invoke_native_fast_path(0x088B1780u, ctx, &hot_regs);\n"
+                             << "    rt.invoke_native_fast_path(0x088B1780u, ctx);\n"
 ;
                         if (function.entry_labels.contains(return_pc)) {
                             body << "    if (ctx.pc == " << psprecomp::hex32(return_pc)
@@ -1173,11 +1182,11 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                         const std::uint32_t return_pc = pc + 8u;
                         body << "    ctx.pc = jump_target;\n";
                         if (function.entry_labels.contains(return_pc)) {
-                            body << "    if (rt.invoke_chained_call(ctx, &aot_mem, &hot_regs) && ctx.pc == "
+                            body << "    if (rt.invoke_chained_call(ctx, &aot_mem) && ctx.pc == "
                                  << psprecomp::hex32(return_pc) << "u) goto L_"
                                  << psprecomp::hex32(return_pc).substr(2) << ";\n";
                         } else {
-                            body << "    (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs);\n";
+                            body << "    (void)rt.invoke_chained_call(ctx, &aot_mem);\n";
                         }
                         body << "    return;\n";
                     } else {
@@ -1218,9 +1227,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
     body << "}\n\n";
     body << "void " << cpp_name << "(Runtime &rt, AllegrexContext &ctx) {\n"
          << "    auto aot_mem = rt.memory().aot_fast_view();\n"
-         << "    AotHotRegisterCache hot_regs(ctx);\n"
-         << "    " << cpp_name << "_entry(rt, ctx, 0u, aot_mem, hot_regs);\n"
-         << "    hot_regs.flush_to(ctx);\n}\n\n";
+         << "    " << cpp_name << "_entry(rt, ctx, 0u, aot_mem);\n}\n\n";
     return body.str();
 }
 
@@ -1359,305 +1366,6 @@ std::string lower_constant_gpr_writes(std::string text) {
 }
 
 
-
-// Stage 45.9: cross-unit hot GPR cache. Stage 45.8 reduced register traffic
-// inside individual guest labels, but every label boundary and every native
-// unit boundary still materialized the hottest architectural registers through
-// AllegrexContext. The generated entry ABI now carries AotHotRegisterCache by
-// reference across direct/dynamic generated-unit chains. Replace the seven
-// dominant GPR/FPR array references with that shared native cache. They represent
-// the majority of the remaining architectural register traffic in the VCS corpus.
-//
-// Runtime/HLE visibility is preserved by Runtime::invoke_chained_* and the
-// generated outer wrapper, which materialize/reload the cache at scheduler,
-// host/HLE and outer-dispatch boundaries. Signed ADD/SUB are the only generated
-// AllegrexContext helpers that read/write GPRs internally, so synchronize around
-// those rare helpers explicitly.
-std::string lower_cross_unit_hot_regs_cache(std::string text) {
-    static constexpr std::array<std::uint32_t, 7> kHotRegs{2u, 4u, 5u, 6u, 7u, 29u, 31u};
-    for (const auto reg_index : kHotRegs) {
-        const std::string from = "ctx.gpr[" + std::to_string(reg_index) + "]";
-        const std::string to = "hot_regs.g" + std::to_string(reg_index);
-        std::size_t pos = 0u;
-        while ((pos = text.find(from, pos)) != std::string::npos) {
-            text.replace(pos, from.size(), to);
-            pos += to.size();
-        }
-    }
-    static constexpr std::array<std::uint32_t, 6> kHotFprs{12u, 13u, 14u, 15u, 20u, 22u};
-    for (const auto reg_index : kHotFprs) {
-        const std::string from = "ctx.fpr[" + std::to_string(reg_index) + "]";
-        const std::string to = "hot_regs.f" + std::to_string(reg_index);
-        std::size_t pos = 0u;
-        while ((pos = text.find(from, pos)) != std::string::npos) {
-            text.replace(pos, from.size(), to);
-            pos += to.size();
-        }
-    }
-
-    // These helpers directly access AllegrexContext::gpr. The hot cache must be
-    // visible to them and must observe their destination write before execution
-    // continues. emit_regular() intentionally places execute_signed_add/sub in
-    // a standalone `signed_ok` statement so the cache can be reloaded BEFORE
-    // the following overflow-return branch. This also makes the lowering pass
-    // idempotent when generated source is transformed more than once.
-    std::istringstream input(text);
-    std::ostringstream output;
-    std::string line;
-    bool previous_was_flush = false;
-    bool previous_was_reload = false;
-    while (std::getline(input, line)) {
-        const bool is_flush = line.find("hot_regs.flush_to(ctx);") != std::string::npos;
-        const bool is_reload = line.find("hot_regs.reload_from(ctx);") != std::string::npos;
-        const bool signed_gpr_helper = line.find("const bool signed_ok = ctx.execute_signed_add(") != std::string::npos ||
-                                       line.find("const bool signed_ok = ctx.execute_signed_sub(") != std::string::npos;
-        if (is_flush && previous_was_flush) continue;
-        // Collapse accidental duplicate syncs left by older Stage 45.9
-        // transformer runs.
-        if (is_reload && previous_was_reload) continue;
-        if (signed_gpr_helper && !previous_was_flush) {
-            const std::size_t indent_len = line.find_first_not_of(" \t");
-            const std::string indent = indent_len == std::string::npos ? std::string{} : line.substr(0u, indent_len);
-            output << indent << "hot_regs.flush_to(ctx);\n";
-            output << line << '\n';
-            output << indent << "hot_regs.reload_from(ctx);\n";
-            previous_was_flush = false;
-            previous_was_reload = true;
-            continue;
-        }
-        output << line << '\n';
-        previous_was_flush = is_flush;
-        previous_was_reload = is_reload;
-    }
-    return output.str();
-}
-
-// Stage 45.8: conservative host-register cache for hot automatic AOT basic
-// blocks.  Generated C++ previously addressed ctx.gpr[] more than 1.2 million
-// times statically. Even with /GL, calls and the enormous control-flow graph
-// make MSVC spill/reload those array elements aggressively. For guest labels
-// that contain no Runtime call and no execute_* helper, cache any architectural
-// GPR referenced at least three times in a C++ local and commit dirty values
-// before control leaves the label. Each label gets its own scope, so arbitrary
-// generated gotos never jump across a local initialization.
-//
-// This intentionally stops at Runtime/execute_* boundaries: those paths can
-// inspect or mutate the complete Allegrex context and are synchronization
-// points for the register cache. AotFastView/FPR/VFPU helpers do not mutate GPRs
-// behind the emitted code and remain eligible.
-std::string lower_basic_block_gpr_cache(std::string text) {
-    static const std::regex label_pattern(R"((^|\n)(L_[0-9A-F]+:\n))");
-    static const std::regex gpr_pattern(R"(ctx\.gpr\[([1-9]|[12][0-9]|3[01])\])");
-    std::vector<std::pair<std::size_t, std::size_t>> labels;
-    for (std::sregex_iterator it(text.begin(), text.end(), label_pattern), end; it != end; ++it) {
-        const std::size_t prefix = (*it)[1].length();
-        const std::size_t begin = static_cast<std::size_t>((*it).position()) + prefix;
-        labels.emplace_back(begin, begin + static_cast<std::size_t>((*it)[2].length()));
-    }
-    if (labels.empty()) return text;
-
-    std::string output;
-    output.reserve(text.size() + text.size() / 20u);
-    std::size_t last = 0u;
-    for (std::size_t li = 0; li < labels.size(); ++li) {
-        const std::size_t label_begin = labels[li].first;
-        const std::size_t body_begin = labels[li].second;
-        std::size_t body_end = li + 1u < labels.size() ? labels[li + 1u].first : text.find("\n}\n\nvoid ", body_begin);
-        if (body_end == std::string::npos) body_end = text.size();
-        output.append(text, last, label_begin - last);
-        const std::string label = text.substr(label_begin, body_begin - label_begin);
-        std::string block = text.substr(body_begin, body_end - body_begin);
-
-        if (block.find("rt.") != std::string::npos || block.find("ctx.execute_") != std::string::npos) {
-            output += label;
-            output += block;
-            last = body_end;
-            continue;
-        }
-
-        std::array<std::uint32_t, 32> counts{};
-        for (std::sregex_iterator it(block.begin(), block.end(), gpr_pattern), end; it != end; ++it) {
-            const auto reg_index = static_cast<std::uint32_t>(std::strtoul((*it)[1].str().c_str(), nullptr, 10));
-            if (reg_index < counts.size()) ++counts[reg_index];
-        }
-        std::vector<std::uint32_t> selected;
-        std::array<bool, 32> dirty{};
-        for (std::uint32_t reg_index = 1u; reg_index < 32u; ++reg_index) {
-            if (counts[reg_index] < 3u) continue;
-            selected.push_back(reg_index);
-            const std::string lhs = "ctx.gpr[" + std::to_string(reg_index) + "]";
-            std::size_t pos = 0u;
-            while ((pos = block.find(lhs, pos)) != std::string::npos) {
-                std::size_t cursor = pos + lhs.size();
-                while (cursor < block.size() && std::isspace(static_cast<unsigned char>(block[cursor]))) ++cursor;
-                if (cursor < block.size() && block[cursor] == '=' &&
-                    (cursor + 1u >= block.size() || block[cursor + 1u] != '=')) {
-                    dirty[reg_index] = true;
-                    break;
-                }
-                pos = cursor;
-            }
-        }
-        if (selected.empty()) {
-            output += label;
-            output += block;
-            last = body_end;
-            continue;
-        }
-
-        for (const auto reg_index : selected) {
-            const std::string from = "ctx.gpr[" + std::to_string(reg_index) + "]";
-            const std::string to = "g" + std::to_string(reg_index);
-            std::size_t pos = 0u;
-            while ((pos = block.find(from, pos)) != std::string::npos) {
-                block.replace(pos, from.size(), to);
-                pos += to.size();
-            }
-        }
-
-        output += label;
-        output += "{\n";
-        for (const auto reg_index : selected)
-            output += "    std::uint32_t g" + std::to_string(reg_index) + " = ctx.gpr[" + std::to_string(reg_index) + "];\n";
-
-        std::array<bool, 32> active_dirty{};
-        auto flush = [&]() {
-            for (const auto reg_index : selected) {
-                if (!active_dirty[reg_index]) continue;
-                output += "    ctx.gpr[" + std::to_string(reg_index) + "] = g" + std::to_string(reg_index) + ";\n";
-                active_dirty[reg_index] = false;
-            }
-        };
-
-        std::istringstream lines(block);
-        std::string line;
-        while (std::getline(lines, line)) {
-            line += '\n';
-            if (line.find("if (branch_taken)") != std::string::npos) flush();
-            for (const auto reg_index : selected) {
-                if (!dirty[reg_index]) continue;
-                const std::string token = "g" + std::to_string(reg_index);
-                std::size_t pos = line.find(token);
-                while (pos != std::string::npos) {
-                    const bool left_ok = pos == 0u || !(std::isalnum(static_cast<unsigned char>(line[pos - 1u])) || line[pos - 1u] == '_');
-                    std::size_t cursor = pos + token.size();
-                    const bool right_ok = cursor >= line.size() || !(std::isalnum(static_cast<unsigned char>(line[cursor])) || line[cursor] == '_');
-                    if (left_ok && right_ok) {
-                        while (cursor < line.size() && std::isspace(static_cast<unsigned char>(line[cursor]))) ++cursor;
-                        if (cursor < line.size() && line[cursor] == '=' &&
-                            (cursor + 1u >= line.size() || line[cursor + 1u] != '=')) {
-                            active_dirty[reg_index] = true;
-                            break;
-                        }
-                    }
-                    pos = line.find(token, pos + token.size());
-                }
-            }
-            if ((line.find("goto ") != std::string::npos || line.find("return;") != std::string::npos)) flush();
-            output += line;
-        }
-        flush();
-        output += "}\n";
-        last = body_end;
-    }
-    output.append(text, last, std::string::npos);
-    return output;
-}
-
-
-// Stage 45.8 companion FPR cache. Constant FPR helper accesses have already
-// been lowered to ctx.fpr[N], so blocks without Runtime/context-execute calls
-// can keep frequently reused scalar floats in host locals and commit dirty
-// values on control-flow exits just like the GPR cache above.
-std::string lower_basic_block_fpr_cache(std::string text) {
-    static const std::regex label_pattern(R"((^|\n)(L_[0-9A-F]+:\n))");
-    static const std::regex fpr_pattern(R"(ctx\.fpr\[([0-9]|[12][0-9]|3[01])\])");
-    std::vector<std::pair<std::size_t, std::size_t>> labels;
-    for (std::sregex_iterator it(text.begin(), text.end(), label_pattern), end; it != end; ++it) {
-        const std::size_t prefix = (*it)[1].length();
-        const std::size_t begin = static_cast<std::size_t>((*it).position()) + prefix;
-        labels.emplace_back(begin, begin + static_cast<std::size_t>((*it)[2].length()));
-    }
-    if (labels.empty()) return text;
-    std::string output;
-    output.reserve(text.size() + text.size() / 30u);
-    std::size_t last = 0u;
-    for (std::size_t li = 0; li < labels.size(); ++li) {
-        const std::size_t label_begin = labels[li].first;
-        const std::size_t body_begin = labels[li].second;
-        std::size_t body_end = li + 1u < labels.size() ? labels[li + 1u].first : text.find("\n}\n\nvoid ", body_begin);
-        if (body_end == std::string::npos) body_end = text.size();
-        output.append(text, last, label_begin - last);
-        const std::string label = text.substr(label_begin, body_begin - label_begin);
-        std::string block = text.substr(body_begin, body_end - body_begin);
-        if (block.find("rt.") != std::string::npos || block.find("ctx.execute_") != std::string::npos ||
-            block.find("ctx.set_fpr_bits") != std::string::npos || block.find("ctx.fpr_bits(") != std::string::npos) {
-            output += label; output += block; last = body_end; continue;
-        }
-        std::array<std::uint32_t, 32> counts{};
-        for (std::sregex_iterator it(block.begin(), block.end(), fpr_pattern), end; it != end; ++it) {
-            const auto reg_index = static_cast<std::uint32_t>(std::strtoul((*it)[1].str().c_str(), nullptr, 10));
-            if (reg_index < counts.size()) ++counts[reg_index];
-        }
-        std::vector<std::uint32_t> selected;
-        std::array<bool, 32> dirty{};
-        for (std::uint32_t reg_index = 0u; reg_index < 32u; ++reg_index) {
-            if (counts[reg_index] < 3u) continue;
-            selected.push_back(reg_index);
-            const std::string lhs = "ctx.fpr[" + std::to_string(reg_index) + "]";
-            std::size_t pos = 0u;
-            while ((pos = block.find(lhs, pos)) != std::string::npos) {
-                std::size_t cursor = pos + lhs.size();
-                while (cursor < block.size() && std::isspace(static_cast<unsigned char>(block[cursor]))) ++cursor;
-                if (cursor < block.size() && block[cursor] == '=' &&
-                    (cursor + 1u >= block.size() || block[cursor + 1u] != '=')) { dirty[reg_index] = true; break; }
-                pos = cursor;
-            }
-        }
-        if (selected.empty()) { output += label; output += block; last = body_end; continue; }
-        for (const auto reg_index : selected) {
-            const std::string from = "ctx.fpr[" + std::to_string(reg_index) + "]";
-            const std::string to = "f" + std::to_string(reg_index);
-            std::size_t pos = 0u;
-            while ((pos = block.find(from, pos)) != std::string::npos) { block.replace(pos, from.size(), to); pos += to.size(); }
-        }
-        output += label; output += "{\n";
-        for (const auto reg_index : selected)
-            output += "    float f" + std::to_string(reg_index) + " = ctx.fpr[" + std::to_string(reg_index) + "];\n";
-        std::array<bool, 32> active_dirty{};
-        auto flush = [&]() {
-            for (const auto reg_index : selected) if (active_dirty[reg_index]) {
-                output += "    ctx.fpr[" + std::to_string(reg_index) + "] = f" + std::to_string(reg_index) + ";\n";
-                active_dirty[reg_index] = false;
-            }
-        };
-        std::istringstream lines(block); std::string line;
-        while (std::getline(lines, line)) {
-            line += '\n';
-            if (line.find("if (branch_taken)") != std::string::npos) flush();
-            for (const auto reg_index : selected) if (dirty[reg_index]) {
-                const std::string token = "f" + std::to_string(reg_index);
-                std::size_t pos = line.find(token);
-                while (pos != std::string::npos) {
-                    const bool left_ok = pos == 0u || !(std::isalnum(static_cast<unsigned char>(line[pos - 1u])) || line[pos - 1u] == '_');
-                    std::size_t cursor = pos + token.size();
-                    const bool right_ok = cursor >= line.size() || !(std::isalnum(static_cast<unsigned char>(line[cursor])) || line[cursor] == '_');
-                    if (left_ok && right_ok) {
-                        while (cursor < line.size() && std::isspace(static_cast<unsigned char>(line[cursor]))) ++cursor;
-                        if (cursor < line.size() && line[cursor] == '=' &&
-                            (cursor + 1u >= line.size() || line[cursor + 1u] != '=')) { active_dirty[reg_index] = true; break; }
-                    }
-                    pos = line.find(token, pos + token.size());
-                }
-            }
-            if (line.find("goto ") != std::string::npos || line.find("return;") != std::string::npos) flush();
-            output += line;
-        }
-        flush(); output += "}\n"; last = body_end;
-    }
-    output.append(text, last, std::string::npos);
-    return output;
-}
 
 std::string lower_aot_memory_accesses(std::string text) {
     // Stage 45.6: the outer generated-unit wrapper creates one AotFastView and
@@ -1880,12 +1588,12 @@ int generate_auto(const std::filesystem::path &elf_path,
     // instead of forcing every known edge through a function-pointer branch.
     const auto units_header_path = output_dir / "generated_units.hpp";
     std::ostringstream units_header;
-    units_header << "#pragma once\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\nstruct AotHotRegisterCache;\n";
+    units_header << "#pragma once\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\n";
     for (const auto &unit : units) {
         units_header << "void " << generated_unit_cpp_name(unit.bucket)
                      << "(Runtime &, AllegrexContext &);\n";
         units_header << "void " << generated_unit_cpp_entry_name(unit.bucket)
-                     << "(Runtime &, AllegrexContext &, std::uint16_t, GuestMemory::AotFastView &, AotHotRegisterCache &);\n";
+                     << "(Runtime &, AllegrexContext &, std::uint16_t, GuestMemory::AotFastView &);\n";
     }
     units_header << "} // namespace psprecomp\n";
     (void)write_text_if_changed(units_header_path, units_header.str());
@@ -1913,13 +1621,30 @@ int generate_auto(const std::filesystem::path &elf_path,
 
         std::ostringstream out;
         out << "#include \"psprecomp/runtime.hpp\"\n#include \"generated_units.hpp\"\n#include <bit>\n#include <cmath>\n#include <cstdint>\n#include <limits>\n\nnamespace psprecomp {\n";
-        out << lower_cross_unit_hot_regs_cache(
-            lower_basic_block_fpr_cache(
-                lower_basic_block_gpr_cache(
-                    lower_constant_vfpu_accesses(
-                        lower_aot_memory_accesses(
-                            lower_constant_fpr_accesses(
-                                lower_constant_gpr_writes(emit_function_source(generated_unit, memory, generated_unit.name))))))));
+        // See tools/codegen_main.cpp: the register-cache lowering passes are
+        // deliberately absent because they made MSVC's optimizer non-convergent
+        // on the large single functions this corpus emits.
+        //
+        // Per-stage timing on stderr: emitting this corpus is long enough that a
+        // silent run is indistinguishable from a hang.
+        {
+            using clock = std::chrono::steady_clock;
+            const auto stage = [&](const char *name, const auto &fn, std::string input) {
+                const auto start = clock::now();
+                std::string result = fn(std::move(input));
+                const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - start).count();
+                std::cerr << "[codegen] unit " << suffix_text << " " << name << " " << ms << " ms\n" << std::flush;
+                return result;
+            };
+            std::string text = stage("emit", [&](std::string) {
+                return emit_function_source(generated_unit, memory, generated_unit.name);
+            }, std::string{});
+            text = stage("gpr_writes", lower_constant_gpr_writes, std::move(text));
+            text = stage("fpr_accesses", lower_constant_fpr_accesses, std::move(text));
+            text = stage("aot_memory", lower_aot_memory_accesses, std::move(text));
+            text = stage("vfpu", lower_constant_vfpu_accesses, std::move(text));
+            out << text;
+        }
         out << "void register_generated_unit_" << unit.bucket << "(Runtime &runtime) {\n";
         out << "    runtime.register_generated_unit(" << unit.bucket << "u, "
             << psprecomp::hex32(generated_unit.address) << "u, " << unit_span_bytes

@@ -40,43 +40,13 @@ extern std::uint64_t g_runtime_thread_switch_generation_fast;
 #define PSPRECOMP_RESTRICT
 #endif
 
-// Cross-unit hot-register cache. Seven Allegrex GPRs plus six scalar FPRs account
-// for the majority of the remaining generated GPR/FPR context traffic after the
-// per-basic-block cache. A native direct chain shares one cache
-// across generated units and materializes it back to AllegrexContext only at
-// scheduler/HLE/outer-dispatch visibility boundaries.
-struct AotHotRegisterCache {
-    std::uint32_t g2{};
-    std::uint32_t g4{};
-    std::uint32_t g5{};
-    std::uint32_t g6{};
-    std::uint32_t g7{};
-    std::uint32_t g29{};
-    std::uint32_t g31{};
-    float f12{};
-    float f13{};
-    float f14{};
-    float f15{};
-    float f20{};
-    float f22{};
-
-    AotHotRegisterCache() = default;
-    explicit PSPRECOMP_RUNTIME_FORCEINLINE AotHotRegisterCache(const AllegrexContext &ctx) noexcept { reload_from(ctx); }
-
-    PSPRECOMP_RUNTIME_FORCEINLINE void reload_from(const AllegrexContext &ctx) noexcept {
-        g2 = ctx.gpr[2]; g4 = ctx.gpr[4]; g5 = ctx.gpr[5]; g6 = ctx.gpr[6];
-        g7 = ctx.gpr[7]; g29 = ctx.gpr[29]; g31 = ctx.gpr[31];
-        f12 = ctx.fpr[12]; f13 = ctx.fpr[13]; f14 = ctx.fpr[14];
-        f15 = ctx.fpr[15]; f20 = ctx.fpr[20]; f22 = ctx.fpr[22];
-    }
-    PSPRECOMP_RUNTIME_FORCEINLINE void flush_to(AllegrexContext &ctx) const noexcept {
-        ctx.gpr[2] = g2; ctx.gpr[4] = g4; ctx.gpr[5] = g5; ctx.gpr[6] = g6;
-        ctx.gpr[7] = g7; ctx.gpr[29] = g29; ctx.gpr[31] = g31;
-        ctx.fpr[12] = f12; ctx.fpr[13] = f13; ctx.fpr[14] = f14;
-        ctx.fpr[15] = f15; ctx.fpr[20] = f20; ctx.fpr[22] = f22;
-    }
-};
-
+// The cross-unit hot-register cache (AotHotRegisterCache) was removed here.  It
+// kept seven GPRs and six scalar FPRs live in a second object alongside
+// AllegrexContext for the whole duration of a generated unit.  Inside the
+// ~10,000-line single functions this corpus emits, that pushed MSVC's optimizer
+// past the point where it converges: affected units never finished compiling and
+// grew past 2 GB each, which exhausted system memory during a normal build.  The
+// last configuration observed booting on hardware (Stage 45.7) does not have it.
 struct RuntimeExecutionContextToken {
     std::int32_t thread_uid{-1};
     std::uint64_t switch_generation{};
@@ -99,9 +69,9 @@ class Runtime {
 public:
     using RecompiledFunction = void (*)(Runtime &, AllegrexContext &);
     using RecompiledEntryFunction = void (*)(Runtime &, AllegrexContext &, std::uint16_t,
-                                             GuestMemory::AotFastView &, AotHotRegisterCache &);
+                                             GuestMemory::AotFastView &);
     using HleFunction = std::function<void(Runtime &, AllegrexContext &)>;
-    using NativeFastPath = std::function<void(Runtime &, AllegrexContext &)>;
+    using NativeFastPath = void (*)(Runtime &, AllegrexContext &);
 
     explicit Runtime(std::uint32_t ram_size = 32u * 1024u * 1024u);
 
@@ -141,8 +111,7 @@ public:
     // Generated profile code can call this API without putting game-specific
     // addresses or implementations in the reusable runtime.
     void register_native_fast_path(std::uint32_t address, NativeFastPath function);
-    void invoke_native_fast_path(std::uint32_t address, AllegrexContext &ctx,
-                                 AotHotRegisterCache *shared_hot_regs = nullptr);
+    void invoke_native_fast_path(std::uint32_t address, AllegrexContext &ctx);
 
     // Bounded cross-unit call chaining.
     //
@@ -162,15 +131,13 @@ public:
     // at the same address.  Depth is bounded so guest recursion cannot exhaust
     // the native stack.  PSPRECOMP_NO_CHAIN=1 disables it for A/B checks.
     [[nodiscard]] bool invoke_chained_call(AllegrexContext &ctx,
-                                           GuestMemory::AotFastView *shared_aot_mem = nullptr,
-                                           AotHotRegisterCache *shared_hot_regs = nullptr);
+                                           GuestMemory::AotFastView *shared_aot_mem = nullptr);
     // Fast path for compile-time-known cross-unit targets.  Automatic AOT knows
     // the 16 KiB unit index and can avoid the large guest-PC dispatch table.
     // Units containing an import/HLE/host override fall back to the exact
     // per-PC chainability path at runtime.
     [[nodiscard]] bool invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index,
-                                           GuestMemory::AotFastView *shared_aot_mem = nullptr,
-                                           AotHotRegisterCache *shared_hot_regs = nullptr);
+                                           GuestMemory::AotFastView *shared_aot_mem = nullptr);
 
     // compile-time unit chain.  Automatic AOT knows both the target
     // function symbol and bucket, so the normal path becomes a direct native
@@ -184,8 +151,7 @@ public:
     template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId = 0u,
               std::uint32_t DirectTargetPc = 0u>
     [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_chained_direct(
-        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr,
-        AotHotRegisterCache *shared_hot_regs = nullptr) {
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
 #if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
         if (UnitIndex >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) {
 #else
@@ -194,7 +160,7 @@ public:
             !generated_unit_layout_valid_) {
 #endif
             if constexpr (DirectTargetPc != 0u) ctx.pc = DirectTargetPc;
-            return invoke_chained_unit(ctx, UnitIndex, shared_aot_mem, shared_hot_regs);
+            return invoke_chained_unit(ctx, UnitIndex, shared_aot_mem);
         }
         if (generated_unit_disabled_[UnitIndex] != 0u) {
             // A unit can be poisoned because it contains PSP import stubs while
@@ -205,7 +171,7 @@ public:
             // the mixed bucket. Host/HLE overrides are still non-chainable there.
             if constexpr (DirectTargetPc != 0u) {
                 ctx.pc = DirectTargetPc;
-                return invoke_chained_call(ctx, shared_aot_mem, shared_hot_regs);
+                return invoke_chained_call(ctx, shared_aot_mem);
             } else {
                 return false;
             }
@@ -237,14 +203,12 @@ public:
         } guard(chain_depth_);
         if constexpr (DirectEntryId != 0u &&
                       std::is_invocable_v<decltype(Function), Runtime &, AllegrexContext &, std::uint16_t,
-                                          GuestMemory::AotFastView &, AotHotRegisterCache &>) {
-            if (shared_aot_mem != nullptr && shared_hot_regs != nullptr) {
-                Function(*this, ctx, DirectEntryId, *shared_aot_mem, *shared_hot_regs);
+                                          GuestMemory::AotFastView &>) {
+            if (shared_aot_mem != nullptr) {
+                Function(*this, ctx, DirectEntryId, *shared_aot_mem);
             } else {
-                auto local_aot_mem = shared_aot_mem != nullptr ? *shared_aot_mem : memory_.aot_fast_view();
-                AotHotRegisterCache local_hot_regs(ctx);
-                Function(*this, ctx, DirectEntryId, local_aot_mem, local_hot_regs);
-                local_hot_regs.flush_to(ctx);
+                auto local_aot_mem = memory_.aot_fast_view();
+                Function(*this, ctx, DirectEntryId, local_aot_mem);
             }
         } else if constexpr (DirectEntryId != 0u &&
                              std::is_invocable_v<decltype(Function), Runtime &, AllegrexContext &, std::uint16_t>) {
@@ -271,10 +235,7 @@ public:
         const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
         if (starvation_interval == 0u) return true;
         if (++dispatches_since_import_ < starvation_interval) return true;
-        if (shared_hot_regs != nullptr) shared_hot_regs->flush_to(ctx);
-        const bool same_context = run_starvation_boundary(ctx);
-        if (shared_hot_regs != nullptr) shared_hot_regs->reload_from(ctx);
-        return same_context;
+        return run_starvation_boundary(ctx);
     }
 
     void register_generated_unit(std::uint32_t unit_index, std::uint32_t unit_address,
@@ -315,8 +276,7 @@ private:
     [[nodiscard]] const FunctionEntry *lookup_entry(std::uint32_t address) const noexcept;
     // Returns false only when the starvation/preemption hook changed the PSP
     // execution context at this safe boundary.
-    [[nodiscard]] bool account_dispatch_work(AllegrexContext &ctx, bool allow_preemption,
-                                             AotHotRegisterCache *shared_hot_regs = nullptr);
+    [[nodiscard]] bool account_dispatch_work(AllegrexContext &ctx, bool allow_preemption);
     // Called only once per configured scheduler interval by the header-inline
     // direct-chain fast path. Keeping hook/context-token work here leaves the
     // other ~4095 boundaries as a counter increment + predictable compare.

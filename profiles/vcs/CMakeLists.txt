@@ -9,12 +9,28 @@ option(PSPRECOMP_VCS_AOT_LTO
     "Include generated VCS AOT units in MSVC whole-program optimization" OFF)
 
 option(PSPRECOMP_PROFILE_GUIDED_AOT
-    "Optimize the measured VCS hot AOT units above the base generated level" OFF)
+    "Optimize the measured VCS hot AOT units above the base generated level" ON)
 set(PSPRECOMP_HOT_GENERATED_OPT_LEVEL "2" CACHE STRING
     "Optimization level for profile-guided VCS AOT units (0, 1, 2 or 3)")
 set_property(CACHE PSPRECOMP_HOT_GENERATED_OPT_LEVEL PROPERTY STRINGS 0 1 2 3)
 if(NOT PSPRECOMP_HOT_GENERATED_OPT_LEVEL MATCHES "^[0-3]$")
     message(FATAL_ERROR "PSPRECOMP_HOT_GENERATED_OPT_LEVEL must be 0, 1, 2 or 3")
+endif()
+
+# Full /Ob3 is valuable at runtime but several large, cold units still make
+# MSVC spend minutes and close to a gigabyte per compiler process. Keep those
+# units buildable, then override this level only for the measured hot corpus.
+set(PSPRECOMP_GENERATED_INLINE_LEVEL "0" CACHE STRING
+    "MSVC /Ob level for generated VCS AOT units (0, 1, 2 or 3)")
+set_property(CACHE PSPRECOMP_GENERATED_INLINE_LEVEL PROPERTY STRINGS 0 1 2 3)
+if(NOT PSPRECOMP_GENERATED_INLINE_LEVEL MATCHES "^[0-3]$")
+    message(FATAL_ERROR "PSPRECOMP_GENERATED_INLINE_LEVEL must be 0, 1, 2 or 3")
+endif()
+set(PSPRECOMP_HOT_GENERATED_INLINE_LEVEL "3" CACHE STRING
+    "MSVC /Ob level for measured hot VCS AOT units (0, 1, 2 or 3)")
+set_property(CACHE PSPRECOMP_HOT_GENERATED_INLINE_LEVEL PROPERTY STRINGS 0 1 2 3)
+if(NOT PSPRECOMP_HOT_GENERATED_INLINE_LEVEL MATCHES "^[0-3]$")
+    message(FATAL_ERROR "PSPRECOMP_HOT_GENERATED_INLINE_LEVEL must be 0, 1, 2 or 3")
 endif()
 
 file(GLOB VCS_GENERATED CONFIGURE_DEPENDS "${VCS_PROFILE_DIR}/generated/*.cpp")
@@ -27,7 +43,7 @@ if(MSVC)
         set(VCS_GENERATED_MSVC_OPT "/O${PSPRECOMP_GENERATED_OPT_LEVEL}")
     endif()
     set(VCS_GENERATED_MSVC_OPTIONS
-        "${VCS_GENERATED_MSVC_OPT};/Ob3;/bigobj;/MP")
+        "${VCS_GENERATED_MSVC_OPT};/Ob${PSPRECOMP_GENERATED_INLINE_LEVEL};/bigobj;${PSPRECOMP_MSVC_MP_FLAG}")
     if(PSPRECOMP_LTO AND NOT PSPRECOMP_VCS_AOT_LTO)
         # CMAKE_INTERPROCEDURAL_OPTIMIZATION adds /GL at target scope.  /GL- on
         # these sources overrides it so the linker receives native .obj code
@@ -42,10 +58,13 @@ else()
 endif()
 
 if(PSPRECOMP_PROFILE_GUIDED_AOT)
+    # This unit is hot in the current capture and finishes /Ob3 without
+    # triggering MSVC's pathological optimizer growth. It also contains the
+    # validated native collision leaf at guest PC 0x088B1554. Other measured
+    # units remain /Ob0 until their oversized helpers are split/noinline.
     set(VCS_HOT_UNIT_IDS
-        0018 0023 0024 0043 0044 0066 0067 0077 0080 0084 0087
-        0152 0154 0155 0169 0170 0173 0197 0200 0205 0216 0219)
-    set(VCS_HOT_SOURCES "${VCS_PROFILE_DIR}/generated/generated_registry.cpp")
+        0043)
+    set(VCS_HOT_SOURCES)
     foreach(VCS_UNIT_ID IN LISTS VCS_HOT_UNIT_IDS)
         set(VCS_UNIT_SOURCE "${VCS_PROFILE_DIR}/generated/generated_unit_${VCS_UNIT_ID}.cpp")
         if(NOT EXISTS "${VCS_UNIT_SOURCE}")
@@ -61,7 +80,8 @@ if(PSPRECOMP_PROFILE_GUIDED_AOT)
         else()
             set(VCS_HOT_MSVC_OPT "/O${PSPRECOMP_HOT_GENERATED_OPT_LEVEL}")
         endif()
-        set(VCS_HOT_MSVC_OPTIONS "${VCS_HOT_MSVC_OPT};/Ob3;/bigobj;/MP")
+        set(VCS_HOT_MSVC_OPTIONS
+            "${VCS_HOT_MSVC_OPT};/Ob${PSPRECOMP_HOT_GENERATED_INLINE_LEVEL};/bigobj;${PSPRECOMP_MSVC_MP_FLAG}")
         if(PSPRECOMP_LTO AND NOT PSPRECOMP_VCS_AOT_LTO)
             string(APPEND VCS_HOT_MSVC_OPTIONS ";/GL-")
         endif()
@@ -71,6 +91,25 @@ if(PSPRECOMP_PROFILE_GUIDED_AOT)
         set_source_files_properties(${VCS_HOT_SOURCES} PROPERTIES COMPILE_OPTIONS
             "-O${PSPRECOMP_HOT_GENERATED_OPT_LEVEL};-g0")
     endif()
+endif()
+
+if(MSVC AND PSPRECOMP_NATIVE_AVX2)
+    # MSVC 19.44's AVX2 optimizer crashes (C1001/c2.dll) on this translation
+    # unit, while the identical /Ox /Ob0 compile completes in ~3 s with AVX.
+    # Keep AVX2 for the host and the other AOT units; append the weaker ISA only
+    # to the known compiler-bug trigger (the last /arch switch wins in cl.exe).
+    set(PSPRECOMP_VCS_MSVC_AVX_FALLBACK_UNITS "0018;0022;0035;0089;0091;0117;0164" CACHE STRING
+        "Generated VCS units forced to AVX because MSVC 19.44 crashes with AVX2")
+    set(VCS_MSVC_AVX_FALLBACK_SOURCES)
+    foreach(VCS_UNIT_ID IN LISTS PSPRECOMP_VCS_MSVC_AVX_FALLBACK_UNITS)
+        set(VCS_UNIT_SOURCE "${VCS_PROFILE_DIR}/generated/generated_unit_${VCS_UNIT_ID}.cpp")
+        if(NOT EXISTS "${VCS_UNIT_SOURCE}")
+            message(FATAL_ERROR "VCS AVX fallback unit is missing: ${VCS_UNIT_SOURCE}")
+        endif()
+        list(APPEND VCS_MSVC_AVX_FALLBACK_SOURCES "${VCS_UNIT_SOURCE}")
+    endforeach()
+    set_property(SOURCE ${VCS_MSVC_AVX_FALLBACK_SOURCES} APPEND PROPERTY
+        COMPILE_OPTIONS "/arch:AVX")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -152,8 +191,16 @@ add_executable(VCSNative
 vcs_target_common(VCSNative)
 vcs_set_runtime_output(VCSNative)
 if(MSVC)
-    target_compile_options(VCSNative PRIVATE /MP
-        $<$<CONFIG:Release>:/Ob3> $<$<CONFIG:RelWithDebInfo>:/Ob3>)
+    # /Ob3 must stay off the target: target_compile_options lands in the vcxproj
+    # AdditionalOptions, which cl.exe sees *after* the per-source
+    # InlineFunctionExpansion, so a target-wide /Ob3 silently overrides the
+    # /Ob${PSPRECOMP_GENERATED_INLINE_LEVEL} set on the generated corpus above
+    # (MSVC reports this as "D9025: overriding '/Ob0' with '/Ob3'").  Apply it to
+    # the host sources only.
+    target_compile_options(VCSNative PRIVATE ${PSPRECOMP_MSVC_MP_FLAG})
+    set_source_files_properties(host/main.cpp ${VCS_HOST_SOURCES}
+        DIRECTORY "${VCS_PROFILE_DIR}" PROPERTIES COMPILE_OPTIONS
+        "$<$<CONFIG:Release>:/Ob3>;$<$<CONFIG:RelWithDebInfo>:/Ob3>")
     target_link_options(VCSNative PRIVATE /STACK:67108864)
     if(PSPRECOMP_LTO)
         # Make the otherwise silent LTCG phase visible in the console.
@@ -176,6 +223,8 @@ add_custom_command(TARGET VCSNative POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/config/VCSNative.ini" "$<TARGET_FILE_DIR:VCSNative>/VCSNative.ini"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${VCS_PROFILE_DIR}/config/ProperShaders.ini" "$<TARGET_FILE_DIR:VCSNative>/ProperShaders.ini"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/data/VCSProject2DFX_Lights.bin"
         "$<TARGET_FILE_DIR:VCSNative>/VCSProject2DFX_Lights.bin"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -183,7 +232,10 @@ add_custom_command(TARGET VCSNative POST_BUILD
         "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_ATTRIBUTION.md"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${VCS_PROFILE_DIR}/third_party/project2dfx/LICENSE.txt"
-        "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_LICENSE.txt")
+        "$<TARGET_FILE_DIR:VCSNative>/PROJECT2DFX_LICENSE.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${VCS_PROFILE_DIR}/third_party/cloudworks/ATTRIBUTION.md"
+        "$<TARGET_FILE_DIR:VCSNative>/CLOUDWORKS_ATTRIBUTION.md")
 
 # Profile-specific generator. The root psp_recomp target stays game-neutral.
 add_executable(vcs_recomp tools/vcs_codegen_main.cpp)
@@ -196,6 +248,7 @@ if(PSPRECOMP_BUILD_PROFILE_TESTS)
     endif()
     add_executable(vcs_profile_tests tests/vcs_profile_tests.cpp ${VCS_HOST_SOURCES})
     vcs_target_common(vcs_profile_tests)
+    vcs_set_runtime_output(vcs_profile_tests)
     add_test(NAME vcs_profile_tests COMMAND vcs_profile_tests)
 
     add_executable(vcs_config_tests

@@ -120,7 +120,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0226[3582] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 126,
 };
-void recomp_unit_0226_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem, AotHotRegisterCache & PSPRECOMP_RESTRICT hot_regs) {
+void recomp_unit_0226_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -3313,44 +3313,44 @@ L_08B8ECB4:
     (void)(0u << 16u);
     ctx.gpr[16] = (0u << 2u);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    ctx.gpr[24] = (hot_regs.g7 + ctx.gpr[23]);
+    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = hot_regs.g4; const std::uint32_t divisor = hot_regs.g2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
     rt.unsupported(0x08B8ED4Cu, 0x0018C295u, "special? not lowered yet"); return;
 L_08B8EE30:
     rt.unsupported(0x08B8EE34u, 0x00000005u, "special? not lowered yet"); return;
-    ctx.pc = 0x02EB0FE0u; (void)rt.invoke_chained_call(ctx, &aot_mem, &hot_regs); return;
+    ctx.pc = 0x02EB0FE0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
 L_08B8EE70:
     // nop
     // nop
@@ -4491,9 +4491,7 @@ L_08B8F7F4:
 
 void recomp_unit_0226(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();
-    AotHotRegisterCache hot_regs(ctx);
-    recomp_unit_0226_entry(rt, ctx, 0u, aot_mem, hot_regs);
-    hot_regs.flush_to(ctx);
+    recomp_unit_0226_entry(rt, ctx, 0u, aot_mem);
 }
 
 void register_generated_unit_226(Runtime &runtime) {

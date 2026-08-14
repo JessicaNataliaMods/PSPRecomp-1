@@ -30,6 +30,26 @@ if(NOT PSPRECOMP_MSVC_CGTHREADS MATCHES "^[0-9]+$")
     message(FATAL_ERROR "PSPRECOMP_MSVC_CGTHREADS must be a non-negative integer")
 endif()
 
+# Bare /MP lets cl.exe spawn one front-end per logical core, and MSBuild /m
+# multiplies that by the number of projects it builds in parallel.  On the VCS
+# profile each generated AOT unit costs well over a gigabyte at /Ox /Ob3, so the
+# unbounded product exhausts physical memory.  Cap the per-cl.exe degree here and
+# let the build scripts pick a memory-aware value.
+set(PSPRECOMP_MSVC_MP_JOBS "0" CACHE STRING
+    "Max cl.exe front-ends (0 = logical-core default, 1 = disable /MP)")
+if(NOT PSPRECOMP_MSVC_MP_JOBS MATCHES "^[0-9]+$")
+    message(FATAL_ERROR "PSPRECOMP_MSVC_MP_JOBS must be a non-negative integer")
+endif()
+if(PSPRECOMP_MSVC_MP_JOBS STREQUAL "0")
+    set(PSPRECOMP_MSVC_MP_FLAG "/MP")
+elseif(PSPRECOMP_MSVC_MP_JOBS STREQUAL "1")
+    # Omitting /MP is materially different from /MP1: the latter still creates
+    # and communicates with a child compiler process and can fail with D8040.
+    set(PSPRECOMP_MSVC_MP_FLAG "")
+else()
+    set(PSPRECOMP_MSVC_MP_FLAG "/MP${PSPRECOMP_MSVC_MP_JOBS}")
+endif()
+
 if(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
     add_compile_definitions(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH=1)
 endif()
@@ -67,7 +87,7 @@ target_include_directories(psprecomp_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 target_compile_definitions(psprecomp_core PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 if(MSVC)
-    target_compile_options(psprecomp_core PRIVATE /W4 /permissive- /EHsc /MP
+    target_compile_options(psprecomp_core PRIVATE /W4 /permissive- /EHsc ${PSPRECOMP_MSVC_MP_FLAG}
         $<$<CONFIG:Release>:/Ob3> $<$<CONFIG:RelWithDebInfo>:/Ob3>)
 else()
     target_compile_options(psprecomp_core PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
@@ -83,7 +103,11 @@ add_executable(dump_function tools/dump_function.cpp)
 target_link_libraries(dump_function PRIVATE psprecomp_core)
 
 function(psprecomp_enable_host_avx target)
-    if(PSPRECOMP_HOST_AVX AND MSVC)
+    # /arch:AVX appears after the directory-wide /arch:AVX2 option in MSVC's
+    # command line and therefore silently downgrades the whole target. AVX2
+    # already includes the AVX scalar instructions this compatibility switch
+    # was introduced for, so do not emit the weaker override in an AVX2 build.
+    if(PSPRECOMP_HOST_AVX AND MSVC AND NOT PSPRECOMP_NATIVE_AVX2)
         target_compile_options(${target} PRIVATE /arch:AVX)
     endif()
 endfunction()
