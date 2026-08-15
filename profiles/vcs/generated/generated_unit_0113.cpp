@@ -8791,6 +8791,21 @@ L_089CB33C:
       goto L_089CB38C;
     }
 L_089CB38C:
+    if (vcs::g_draw_distance_runtime_scales.npcs > 1.0f) {
+        const float dd_scale = vcs::g_draw_distance_runtime_scales.npcs;
+        ctx.gpr[19] = ctx.gpr[29] + static_cast<std::uint32_t>(64);
+        ctx.gpr[30] = ctx.gpr[29] + static_cast<std::uint32_t>(16);
+        ctx.gpr[23] = ctx.gpr[29] + static_cast<std::uint32_t>(32);
+        ctx.fpr[22] = 120.0f;
+        ctx.fpr[28] = 51.0f * dd_scale;
+        ctx.fpr[26] = 25.0f * dd_scale;
+        ctx.fpr[24] = 80.0f * dd_scale;
+        ctx.gpr[4] = ctx.gpr[18] << 5u;
+        ctx.gpr[20] = ctx.gpr[4];
+        ctx.gpr[4] <<= 4u;
+        ctx.gpr[20] += ctx.gpr[4];
+        goto L_089CB3C8;
+    }
     ctx.gpr[19] = (ctx.gpr[29] + static_cast<std::uint32_t>(64));
     ctx.gpr[30] = (ctx.gpr[29] + static_cast<std::uint32_t>(16));
     ctx.gpr[23] = (ctx.gpr[29] + static_cast<std::uint32_t>(32));

@@ -124,6 +124,7 @@ set(VCS_HOST_SOURCES
     host/vcs_native_fast_paths.cpp
     host/framebuffer_capture.cpp
     host/display_window.cpp
+    host/savedata_dialog.cpp
     host/audio_output.cpp
     host/vcs_config.cpp
     host/vcs_camera_input.cpp

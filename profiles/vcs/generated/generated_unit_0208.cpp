@@ -4568,6 +4568,10 @@ L_08B45AA4:
       goto L_08B45AC0;
     }
 L_08B45AC0:
+    if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {
+        ctx.fpr[12] = 60.0f * vcs::g_draw_distance_runtime_scales.vehicles;
+        goto L_08B45AC8;
+    }
     ctx.gpr[4] = (17008u << 16u);
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[4]);
     goto L_08B45AC8;

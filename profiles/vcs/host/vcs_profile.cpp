@@ -10,6 +10,8 @@
 #include "ge_renderer.hpp"
 #include "ge_gpu_backend.hpp"
 #include "vcs_project2dfx.hpp"
+#include "vcs_draw_distance_patch.hpp"
+#include "savedata_dialog.hpp"
 
 #include "psprecomp/common.hpp"
 #include "psprecomp/deflate.hpp"
@@ -1747,7 +1749,16 @@ std::uint32_t sas_step_envelope(SasVoiceState &voice) noexcept {
         }
         break;
     case SasEnvelopePhase::Release:
-        height = sas_walk_envelope_curve(height, voice.adsr_modes[3], voice.adsr_rates[3]);
+        // A zero release rate is legal in the compact PSP ADSR encoding, but
+        // treating it as an actual delta of zero makes a KeyOff voice immortal.
+        // That is catastrophic for looped vehicle/horn VAGs: the source keeps
+        // wrapping forever after the game has explicitly keyed it off. Hardware
+        // still reaches the off state; use the same short de-click ramp we use
+        // for an unconfigured envelope when the decoded release cannot advance.
+        if (voice.adsr_rates[3] <= 0)
+            height -= kSasFallbackReleaseStep;
+        else
+            height = sas_walk_envelope_curve(height, voice.adsr_modes[3], voice.adsr_rates[3]);
         if (height <= 0) {
             height = 0;
             voice.envelope_phase = SasEnvelopePhase::Off;
@@ -2161,6 +2172,7 @@ struct SavedataUtilityState {
     UtilityStatus status{UtilityStatus::None};
     std::uint32_t parameter_address{};
     bool operation_complete{};
+    bool slot_selection_complete{};
 };
 
 SavedataUtilityState savedata_utility{};
@@ -2169,6 +2181,7 @@ constexpr std::uint32_t kUtilityCommonResultOffset = 0x1Cu;
 constexpr std::uint32_t kSavedataModeOffset = 0x30u;
 constexpr std::uint32_t kSavedataGameNameOffset = 0x3Cu;
 constexpr std::uint32_t kSavedataSaveNameOffset = 0x4Cu;
+constexpr std::uint32_t kSavedataSaveNameListOffset = 0x60u;
 constexpr std::uint32_t kSavedataFileNameOffset = 0x64u;
 constexpr std::uint32_t kSavedataDataBufferOffset = 0x74u;
 constexpr std::uint32_t kSavedataDataBufferSizeOffset = 0x78u;
@@ -2177,6 +2190,7 @@ constexpr std::uint32_t kSavedataIcon0Offset = 0x584u;
 constexpr std::uint32_t kSavedataIcon1Offset = 0x594u;
 constexpr std::uint32_t kSavedataPic1Offset = 0x5A4u;
 constexpr std::uint32_t kSavedataSnd0Offset = 0x5B4u;
+constexpr std::uint32_t kSavedataAbortStatusOffset = 0x5CCu;
 constexpr std::uint32_t kSavedataIdListOffset = 0x5F4u;
 constexpr std::uint32_t kSavedataFileListOffset = 0x5F8u;
 constexpr std::uint32_t kSavedataSizeInfoOffset = 0x5FCu;
@@ -2218,6 +2232,95 @@ std::filesystem::path savedata_directory(const psprecomp::Runtime &runtime, std:
     const std::string save = safe_savedata_component(read_fixed_string(
         runtime.memory(), parameter_address + kSavedataSaveNameOffset, 20u));
     return savedata_root(runtime) / (game + save);
+}
+
+void write_fixed_string(psprecomp::GuestMemory &memory, std::uint32_t address,
+                        std::size_t capacity, std::string_view value) {
+    if (capacity == 0u) return;
+    memory.zero(address, capacity);
+    const std::size_t count = std::min<std::size_t>(capacity - 1u, value.size());
+    for (std::size_t i = 0; i < count; ++i)
+        memory.store8(address + static_cast<std::uint32_t>(i),
+                      static_cast<std::uint8_t>(value[i]));
+}
+
+std::vector<SavedataSlotEntry> savedata_slot_entries(psprecomp::Runtime &runtime,
+                                                      std::uint32_t parameter_address,
+                                                      bool saving) {
+    std::vector<SavedataSlotEntry> slots;
+    const std::string game = safe_savedata_component(read_fixed_string(
+        runtime.memory(), parameter_address + kSavedataGameNameOffset, 13u));
+    const auto root = savedata_root(runtime);
+
+    const std::uint32_t list = runtime.memory().load32(parameter_address + kSavedataSaveNameListOffset);
+    if (list != 0u) {
+        // SceUtilitySavedataParam::saveNameList is char (*)[20]. The list is
+        // terminated by an empty entry. Keep a hard cap so malformed guest data
+        // cannot turn a host system dialog into an unbounded memory walk.
+        for (std::uint32_t i = 0u; i < 128u; ++i) {
+            const std::uint32_t entry = list + i * 20u;
+            if (!runtime.memory().contains(entry, 20u)) break;
+            std::string name = safe_savedata_component(read_fixed_string(runtime.memory(), entry, 20u));
+            if (name.empty()) break;
+            const bool exists = std::filesystem::is_directory(root / (game + name));
+            if (saving || exists) slots.push_back({std::move(name), exists});
+        }
+    }
+
+    // Some titles leave saveNameList null and rely on the utility to discover
+    // matching directories. Reconstruct that list from our host SAVEDATA root.
+    if (slots.empty()) {
+        std::error_code error;
+        if (std::filesystem::is_directory(root, error)) {
+            for (std::filesystem::directory_iterator it(root, error), end;
+                 it != end && !error; it.increment(error)) {
+                if (!it->is_directory(error)) continue;
+                const std::string full = it->path().filename().string();
+                if (full.size() < game.size() || full.compare(0u, game.size(), game) != 0) continue;
+                std::string suffix = full.substr(game.size());
+                if (suffix.empty() || suffix.size() >= 20u) continue;
+                slots.push_back({std::move(suffix), true});
+            }
+            std::sort(slots.begin(), slots.end(), [](const auto &a, const auto &b) {
+                return a.save_name < b.save_name;
+            });
+        }
+    }
+
+    const std::string current = safe_savedata_component(read_fixed_string(
+        runtime.memory(), parameter_address + kSavedataSaveNameOffset, 20u));
+    if (!current.empty() && std::none_of(slots.begin(), slots.end(), [&](const auto &slot) {
+            return slot.save_name == current;
+        })) {
+        const bool exists = std::filesystem::is_directory(root / (game + current));
+        if (saving || exists) slots.push_back({current, exists});
+    }
+    return slots;
+}
+
+enum class SavedataSlotPreparation { Ready, Cancelled, NoSlots };
+
+SavedataSlotPreparation prepare_savedata_list_selection(psprecomp::Runtime &runtime,
+                                                         std::uint32_t parameter_address,
+                                                         std::uint32_t mode) {
+    if (mode != 4u && mode != 5u && mode != 6u) return SavedataSlotPreparation::Ready;
+    const bool saving = mode == 5u;
+    auto slots = savedata_slot_entries(runtime, parameter_address, saving);
+    if (slots.empty()) return SavedataSlotPreparation::NoSlots;
+    const std::string current = safe_savedata_component(read_fixed_string(
+        runtime.memory(), parameter_address + kSavedataSaveNameOffset, 20u));
+    const SavedataDialogChoice choice = choose_savedata_slot(slots, saving, current);
+    if (!choice.confirmed) {
+        // PSP exposes cancellation separately from base.result for the savedata
+        // list utility. Leave base.result successful and flag abortStatus so the
+        // guest can return from its fade/system-dialog state normally.
+        runtime.memory().store32(parameter_address + kSavedataAbortStatusOffset, 1u);
+        return SavedataSlotPreparation::Cancelled;
+    }
+    runtime.memory().store32(parameter_address + kSavedataAbortStatusOffset, 0u);
+    write_fixed_string(runtime.memory(), parameter_address + kSavedataSaveNameOffset,
+                       20u, choice.save_name);
+    return SavedataSlotPreparation::Ready;
 }
 
 bool write_guest_file(psprecomp::Runtime &runtime, const std::filesystem::path &path,
@@ -2411,6 +2514,7 @@ std::uint32_t execute_savedata_operation(psprecomp::Runtime &runtime, std::uint3
     case 3u: // SAVE
     case 5u: // LISTSAVE
         return save_savedata_file(runtime, parameter_address, data_path, false);
+    case 6u: // LISTDELETE (slot was selected by the utility UI)
     case 9u: // AUTODELETE
     case 10u: // DELETE
         if (!std::filesystem::exists(directory)) return 0x80110347u;
@@ -2447,7 +2551,8 @@ std::uint64_t system_time_microseconds() {
 std::uint32_t audio_remaining_samples(const AudioChannelState &channel) {
     if (!channel.reserved || channel.busy_until_us <= virtual_time_us) return 0u;
     const std::uint64_t remaining_us = channel.busy_until_us - virtual_time_us;
-    const std::uint64_t samples = (remaining_us * 44100u + 999999u) / 1000000u;
+    const std::uint64_t rate = channel.frequency == 0u ? 44100u : channel.frequency;
+    const std::uint64_t samples = (remaining_us * rate + 999999u) / 1000000u;
     return static_cast<std::uint32_t>(std::min<std::uint64_t>(samples, channel.sample_count));
 }
 
@@ -7046,6 +7151,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         ge_gpu_backend_set_display_framebuffer(display_state.frame_buffer);
         project2dfx_render_frame(
             rt.memory(), ctx.gpr[28], display_vblank_index, display_state.frame_buffer);
+        // Draw-distance world/far-clip maintenance is tied to a real vblank
+        // rather than fragile AOT entry hooks, which local generated gotos can bypass.
+        draw_distance_vblank_tick(rt, ctx.gpr[28], display_vblank_index);
         // A movie frame is a finished 480x272 picture with no more image at the
         // sides, so widening it can only stretch it. Present it black-barred at
         // its own shape instead; gameplay keeps the widescreen treatment.
@@ -7105,6 +7213,10 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         if (frame_time_diag_enabled())
             frame_time_stats.present_time += std::chrono::steady_clock::now() - present_entry;
         limit_frame_rate();
+        // limit_frame_rate() may advance virtual_time_us when the host misses the
+        // target. Seal the audio timeline immediately at that corrected guest
+        // time instead of leaving waveOut one vblank behind during heavy frames.
+        vcs::audio_output_advance(virtual_time_us);
         if (display_window_close_requested()) {
             ctx.set_gpr(2, 0u);
             rt.stop("Display window closed by the user");
@@ -7176,7 +7288,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x80110004u);
                 return;
             }
-            savedata_utility = SavedataUtilityState{UtilityStatus::Init, parameter, false};
+            savedata_utility = SavedataUtilityState{UtilityStatus::Init, parameter, false, false};
             rt.memory().store32(parameter + kUtilityCommonResultOffset, 0u);
             if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
                 std::cerr << "[hle] savedata init mode=" << rt.memory().load32(parameter + kSavedataModeOffset)
@@ -7196,6 +7308,21 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             if (savedata_utility.status == UtilityStatus::Init) {
                 savedata_utility.status = UtilityStatus::Visible;
             } else if (savedata_utility.status == UtilityStatus::Visible && !savedata_utility.operation_complete) {
+                const std::uint32_t mode = rt.memory().load32(
+                    savedata_utility.parameter_address + kSavedataModeOffset);
+                if (!savedata_utility.slot_selection_complete) {
+                    const SavedataSlotPreparation selection = prepare_savedata_list_selection(
+                        rt, savedata_utility.parameter_address, mode);
+                    savedata_utility.slot_selection_complete = true;
+                    if (selection == SavedataSlotPreparation::Cancelled) {
+                        rt.memory().store32(savedata_utility.parameter_address +
+                                            kUtilityCommonResultOffset, 0u);
+                        savedata_utility.operation_complete = true;
+                        savedata_utility.status = UtilityStatus::Quit;
+                        set_success(ctx);
+                        return;
+                    }
+                }
                 const std::uint32_t result = execute_savedata_operation(rt, savedata_utility.parameter_address);
                 rt.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, result);
                 savedata_utility.operation_complete = true;
@@ -9638,6 +9765,26 @@ bool run_profile_self_tests(std::string &error) {
             virtual_time_us = previous_time;
         }
 
+        // sceAudioGetChannelRestLength reports samples in the channel's source
+        // rate. Returning a 44.1-kHz count for a 22.05/24/32-kHz SRC channel
+        // makes the guest believe much more audio remains than the DAC will
+        // actually consume, which eventually stretches low-rate radio/news.
+        {
+            const std::uint64_t previous_time = virtual_time_us;
+            virtual_time_us = 2'000'000u;
+            AudioChannelState channel{};
+            channel.reserved = true;
+            channel.sample_count = 4096u;
+            channel.frequency = 22050u;
+            channel.busy_until_us = virtual_time_us + 10'000u;
+            require(audio_remaining_samples(channel) == 221u,
+                    "audio remaining length ignored the SRC channel frequency");
+            channel.frequency = 24000u;
+            require(audio_remaining_samples(channel) == 240u,
+                    "audio remaining length drifted for a 24-kHz channel");
+            virtual_time_us = previous_time;
+        }
+
         // A voice configured through __sceSasSetADSR alone -- rates only, no
         // call to __sceSasSetADSRmode -- must still retire when the game keys
         // it off.  VCS does exactly this for the vehicle engine, and the old
@@ -9666,6 +9813,26 @@ bool run_profile_self_tests(std::string &error) {
             require(!voice.playing, "a keyed-off voice never released its envelope");
             require(voice.envelope_height == 0u,
                     "a released voice was retired with a non-zero envelope");
+        }
+
+        // A zero decoded release rate is not allowed to make a looped VAG
+        // immortal after KeyOff. Vehicle engine and horn voices are exactly the
+        // kind of long/looping effects where this turns into an obvious stuck
+        // sound, so use the short de-click fallback release in that case.
+        {
+            SasVoiceState voice{};
+            voice.type = SasVoiceType::Vag;
+            voice.adsr_configured = true;
+            voice.loop = true;
+            voice.playing = true;
+            voice.on = false;
+            voice.envelope_height = kSasEnvelopeMaximum;
+            voice.envelope_phase = SasEnvelopePhase::Release;
+            voice.adsr_rates[3] = 0;
+            for (std::uint32_t step = 0u; step < 64u && voice.playing; ++step)
+                sas_step_envelope(voice);
+            require(!voice.playing && voice.envelope_height == 0u,
+                    "zero-rate KeyOff left a looping SAS voice alive forever");
         }
 
         // A GE context supplied to sceGeListEnQueue is a real serialized PSP

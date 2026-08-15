@@ -1,5 +1,6 @@
 #include "vcs_project2dfx.hpp"
 #include "vcs_project2dfx_lights.hpp"
+#include "vcs_draw_distance_patch.hpp"
 #include "ge_gpu_backend.hpp"
 #include "psprecomp/runtime.hpp"
 
@@ -25,7 +26,6 @@
 #include <vector>
 
 namespace vcs {
-void install_draw_distance_patch(psprecomp::Runtime &, const std::filesystem::path &);
 namespace {
 
 constexpr float kPi = 3.14159265358979323846f;

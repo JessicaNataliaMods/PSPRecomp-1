@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "psprecomp/guest_memory.hpp"
+#include "vcs_draw_distance_patch.hpp"
 
 namespace psprecomp {
 class Runtime;

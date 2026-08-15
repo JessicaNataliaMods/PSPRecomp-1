@@ -1,0 +1,35 @@
+--- /mnt/data/savedata_windows_compile_fix_work/savedata_dialog.orig.cpp	2026-08-15 02:10:03.548449495 +0000
++++ /mnt/data/savedata_windows_compile_fix_work/savedata_dialog.cpp	2026-08-15 02:10:03.548765745 +0000
+@@ -81,7 +81,7 @@
+             WS_CHILD | WS_VISIBLE, 16, 14, 470, 22, window, nullptr, nullptr, nullptr);
+         state->list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"",
+             WS_CHILD | WS_VISIBLE | WS_TABSTOP | LBS_NOTIFY | WS_VSCROLL,
+-            16, 42, 470, 224, window, reinterpret_cast<HMENU>(kListId), nullptr, nullptr);
++            16, 42, 470, 224, window, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kListId)), nullptr, nullptr);
+         for (std::size_t i = 0; i < state->slots->size(); ++i) {
+             const auto &slot = (*state->slots)[i];
+             std::wstring line = L"Slot " + std::to_wstring(i + 1u) + L"  -  " + utf8_to_wide(slot.save_name);
+@@ -90,10 +90,10 @@
+         }
+         CreateWindowExW(0, L"BUTTON", state->saving ? L"Save" : L"Load",
+             WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
+-            310, 280, 82, 30, window, reinterpret_cast<HMENU>(kAcceptId), nullptr, nullptr);
++            310, 280, 82, 30, window, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kAcceptId)), nullptr, nullptr);
+         CreateWindowExW(0, L"BUTTON", L"Cancel",
+             WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+-            404, 280, 82, 30, window, reinterpret_cast<HMENU>(kCancelId), nullptr, nullptr);
++            404, 280, 82, 30, window, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kCancelId)), nullptr, nullptr);
+         return 0;
+     }
+     case WM_COMMAND:
+@@ -134,8 +134,8 @@
+         WNDCLASSW cls{};
+         cls.lpfnWndProc = savedata_window_proc;
+         cls.hInstance = instance;
+-        cls.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+-        cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
++        cls.hCursor = LoadCursorW(nullptr, MAKEINTRESOURCEW(32512));
++        cls.hbrBackground = reinterpret_cast<HBRUSH>(static_cast<INT_PTR>(COLOR_WINDOW + 1));
+         cls.lpszClassName = kClassName;
+         registered = RegisterClassW(&cls) != 0 || GetLastError() == ERROR_CLASS_ALREADY_EXISTS;
+     }

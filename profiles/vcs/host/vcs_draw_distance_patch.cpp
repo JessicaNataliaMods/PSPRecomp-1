@@ -25,6 +25,7 @@
 // The install call MUST be after register_generated_functions(runtime), because this
 // file intentionally replaces a few AOT entry labels in Runtime's function table.
 
+#include "vcs_draw_distance_patch.hpp"
 #include "psprecomp/runtime.hpp"
 #include "psprecomp/common.hpp"   // hex32, para o relatorio de hooks vivos/mortos
 
@@ -43,6 +44,9 @@
 #include <unordered_map>
 
 namespace vcs {
+
+DrawDistanceRuntimeScales g_draw_distance_runtime_scales{};
+
 namespace {
 
 struct DrawDistanceConfig {
@@ -55,23 +59,11 @@ struct DrawDistanceConfig {
 DrawDistanceConfig g_config{};
 
 // ULUS-10160 / VCSNative AOT guest addresses.
-constexpr std::uint32_t kFarClipSetter          = 0x08A1AD6Cu;
-constexpr std::uint32_t kEntityLodSetup         = 0x08A24128u;
-constexpr std::uint32_t kEntityLodSetupContinue = 0x08A24138u;
-constexpr std::uint32_t kNpcRangeSetup          = 0x089CB38Cu;
-constexpr std::uint32_t kNpcRangeContinue       = 0x089CB3C8u;
-constexpr std::uint32_t kVehicleRangeSetup      = 0x08B45AC0u;
-constexpr std::uint32_t kVehicleRangeContinue   = 0x08B45AC8u;
-constexpr std::uint32_t kIdeInitEpilogue        = 0x08AEC918u;
 
 // VCS globals, addressed from $gp (r28).
 constexpr std::uint32_t kGpFarClipOffset  = 7796u; // CDraw::ms_fFarClipZ
 constexpr std::uint32_t kGpIdeCountOffset = 7656u; // IDE/model-info slot count
 constexpr std::uint32_t kGpIdeTableOffset = 24u;   // IDE/model-info pointer table
-
-// Runtime entity fields used by the original VCS WidescreenFix LOD patch.
-constexpr std::uint32_t kEntityLodDistance      = 0x7A0u;
-constexpr std::uint32_t kEntityBaseLodDistance  = 0x7A8u;
 
 // VCS CBaseModelInfo-like layout exposed by the IDE table.
 constexpr std::uint32_t kModelHashOffset  = 0x08u;
@@ -91,6 +83,9 @@ struct OriginalWorldModel {
 };
 
 std::unordered_map<std::uint32_t, OriginalWorldModel> g_original_world_models;
+bool g_far_clip_seen{};
+float g_far_clip_last_raw{};
+float g_far_clip_last_scaled{};
 
 std::string trim_copy(std::string value) {
     auto is_space = [](unsigned char c) { return std::isspace(c) != 0; };
@@ -215,10 +210,9 @@ float scaled_or_original(float original, float multiplier) {
 
 // Returns true once it has actually written entries, so the caller can stop
 // retrying. Called every frame from SetFarClipZ until it succeeds.
-bool patch_world_model_table(psprecomp::Runtime &runtime, const psprecomp::AllegrexContext &ctx) {
-    if (g_config.world <= 1.0f) return false;
+bool patch_world_model_table(psprecomp::Runtime &runtime, std::uint32_t gp) {
+    if (g_config.world <= 1.0f || gp == 0u) return false;
 
-    const std::uint32_t gp = ctx.gpr[28];
     const std::uint32_t count = runtime.memory().load32(gp + kGpIdeCountOffset);
     const std::uint32_t table = runtime.memory().load32(gp + kGpIdeTableOffset);
 
@@ -318,153 +312,92 @@ bool patch_world_model_table(psprecomp::Runtime &runtime, const psprecomp::Alleg
     return patched != 0u;
 }
 
-// CDraw::SetFarClipZ(float): keep the game's dynamic far-clip selection, but scale
-// every value written through the real setter. This avoids a static far-clip hack.
-void far_clip_setter_patch(psprecomp::Runtime &runtime, psprecomp::AllegrexContext &ctx) {
-    const float far_clip = ctx.fpr[12] * g_config.world;
-    store_float(runtime, ctx.gpr[28] + kGpFarClipOffset, far_clip);
-
-    // The model-info table is patched from here, not from the IDE epilogue.
-    //
-    // 0x08AEC918 IS a registered AOT entry point -- has_function() confirms it --
-    // but it is never dispatched: control reaches it as a local label inside its
-    // own generated unit, and a `goto L_xxxx` does not consult the runtime's
-    // function table, so the replacement is bypassed. Same mechanism the fast
-    // path at 0x088B1554 documents. Measured: the hook installs, reports OK, and
-    // its body never runs.
-    //
-    // SetFarClipZ runs every frame and already carries gp in $28, which is all
-    // patch_world_model_table needs. Retry until the table is populated -- at the
-    // first calls the globals are still zero -- then stop, and refresh
-    // periodically so a streamed-in reload does not stay unpatched.
-    static std::uint64_t calls = 0u;
-    static bool table_done = false;
-    ++calls;
-    if (!table_done || (calls % 600u) == 0u) {
-        if (patch_world_model_table(runtime, ctx)) table_done = true;
-    }
-
-    ctx.pc = ctx.gpr[31];
-}
-
-// Equivalent to ThirteenAG's VCS WidescreenFix entity LOD hook, adapted to the
-// static AOT recomp. The original PSP patch uses one LOD multiplier for cars+peds;
-// use max(Vehicles,NPCs) here, while their actual despawn/culling ranges remain
-// independently controlled below.
-void entity_lod_setup_patch(psprecomp::Runtime &runtime, psprecomp::AllegrexContext &ctx) {
-    const float multiplier = std::max(g_config.vehicles, g_config.npcs);
-    const std::uint32_t entity = ctx.gpr[16]; // s0 in this VCS call site
-    if (entity != 0u && runtime.memory().contains(entity + kEntityLodDistance, 12u)) {
-        const float base = load_float(runtime, entity + kEntityBaseLodDistance);
-        store_float(runtime, entity + kEntityLodDistance, base * multiplier);
-    }
-
-    ctx.fpr[0] = multiplier;              // helper's return value; next block scales +0x7A8
-    ctx.set_gpr(31, kEntityLodSetupContinue); // preserve JAL-visible RA semantics
-    ctx.pc = kEntityLodSetupContinue;
-}
-
-// VCS vehicle off-screen despawn/culling constant: original 60.0f.
-void vehicle_range_patch(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
-    ctx.fpr[12] = 60.0f * g_config.vehicles;
-    ctx.pc = kVehicleRangeContinue;
-}
-
-// VCS population/ped range block. Re-emulates the whole original AOT label,
-// changing only 51/25/80; the original 120 constant and integer setup are preserved.
-void npc_range_patch(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
-    ctx.set_gpr(19, ctx.gpr[29] + 64u);
-    ctx.set_gpr(30, ctx.gpr[29] + 16u);
-    ctx.set_gpr(23, ctx.gpr[29] + 32u);
-
-    ctx.fpr[22] = 120.0f;
-    ctx.fpr[28] = 51.0f * g_config.npcs;
-    ctx.fpr[26] = 25.0f * g_config.npcs;
-    ctx.fpr[24] = 80.0f * g_config.npcs;
-
-    ctx.set_gpr(4, ctx.gpr[18] << 5u);
-    ctx.set_gpr(20, ctx.gpr[4]);
-    ctx.set_gpr(4, ctx.gpr[4] << 4u);
-    ctx.set_gpr(20, ctx.gpr[20] + ctx.gpr[4]);
-    ctx.pc = kNpcRangeContinue;
-}
-
-// Runs at the real IDE initialization epilogue, once the game's pointer table has
-// been installed. Patch only map objects (OBJ=1, TOBJ=3), not vehicle/ped model-info.
-void ide_init_epilogue_patch(psprecomp::Runtime &runtime, psprecomp::AllegrexContext &ctx) {
-    patch_world_model_table(runtime, ctx);
-
-    // Exact original epilogue for 0x08AEC918.
-    ctx.set_gpr(16, runtime.memory().load32(ctx.gpr[29] + 0u));
-    ctx.set_gpr(17, runtime.memory().load32(ctx.gpr[29] + 4u));
-    ctx.set_gpr(18, runtime.memory().load32(ctx.gpr[29] + 8u));
-    ctx.set_gpr(31, runtime.memory().load32(ctx.gpr[29] + 12u));
-    const std::uint32_t return_pc = ctx.gpr[31];
-    ctx.set_gpr(29, ctx.gpr[29] + 16u);
-    ctx.pc = return_pc;
-}
-
 } // namespace
 
 void install_draw_distance_patch(psprecomp::Runtime &runtime,
                                  const std::filesystem::path &ini_path) {
     g_config = load_config(ini_path);
     g_original_world_models.clear();
+    g_far_clip_seen = false;
+    g_far_clip_last_raw = 0.0f;
+    g_far_clip_last_scaled = 0.0f;
+    g_draw_distance_runtime_scales = {};
+    if (g_config.enabled) {
+        g_draw_distance_runtime_scales.entity = std::max(g_config.vehicles, g_config.npcs);
+        g_draw_distance_runtime_scales.vehicles = g_config.vehicles;
+        g_draw_distance_runtime_scales.npcs = g_config.npcs;
+    }
 
     if (!g_config.enabled) {
         std::cerr << "[draw-distance] disabled\n";
         return;
     }
 
-    // These replacements are intentionally registered AFTER generated functions.
-    // Runtime::register_function overwrites the existing address in both the hash
-    // registry and direct dispatch table.
-    //
-    // But it only has any effect when the address already IS an AOT entry point.
-    // Registering an address that lands mid-block succeeds silently and is never
-    // dispatched -- vcs_project2dfx.cpp hit exactly this with the heli-height
-    // kit's continuation address. The header of this file says it targets
-    // "Stage 40 / load base 0x08804000", i.e. a different recompilation, so every
-    // address here is a candidate. Report which ones are live instead of leaving
-    // a dead hook looking installed.
-    std::uint32_t live = 0u;
-    std::uint32_t dead = 0u;
-    const auto hook = [&](std::uint32_t address, psprecomp::Runtime::RecompiledFunction function,
-                          std::string name, const char *what) {
-        const bool exists = runtime.has_function(address);
-        if (exists) {
-            runtime.register_function(address, function, std::move(name));
-            ++live;
-        } else {
-            ++dead;
-        }
-        std::cerr << "[draw-distance] hook " << what << " em " << psprecomp::hex32(address)
-                  << (exists ? " OK" : " MORTO (nao e ponto de entrada AOT nesta recompilacao)")
-                  << "\n";
-    };
+    // World is maintained at vblank. Entity/vehicle/NPC constants are
+    // patched directly at their generated local labels, because gameplay reaches
+    // those labels with intra-unit gotos that cannot be intercepted by the runtime
+    // function registry.
 
     if (g_config.world > 1.0f) {
-        hook(kFarClipSetter, &far_clip_setter_patch, "vcs_draw_distance_far_clip", "far_clip");
-        hook(kIdeInitEpilogue, &ide_init_epilogue_patch, "vcs_draw_distance_world_ide", "ide_init");
+        // World distance is maintained from the display-vblank boundary. Both
+        // historical entry hooks can be reached as local labels inside an AOT
+        // unit and therefore bypass Runtime::register_function entirely. Keeping
+        // them registered also poisons direct chaining for no reliable benefit.
+        std::cerr << "[draw-distance] world path=vblank (no fragile far_clip/IDE AOT hooks)\n";
     }
 
     if (g_config.vehicles > 1.0f || g_config.npcs > 1.0f) {
-        hook(kEntityLodSetup, &entity_lod_setup_patch, "vcs_draw_distance_entity_lod", "entity_lod");
+        // Entity/vehicle/NPC labels are also reached by local gotos inside their
+        // generated units. Runtime::register_function cannot intercept those
+        // paths. The generated corpus now reads g_draw_distance_runtime_scales
+        // at the exact labels instead, so do not install misleading dead hooks.
+        std::cerr << "[draw-distance] entity/vehicle/NPC path=generated-local-label" << "\n";
     }
-    if (g_config.vehicles > 1.0f) {
-        hook(kVehicleRangeSetup, &vehicle_range_patch, "vcs_draw_distance_vehicle_range", "vehicle_range");
-    }
-    if (g_config.npcs > 1.0f) {
-        hook(kNpcRangeSetup, &npc_range_patch, "vcs_draw_distance_npc_range", "npc_range");
-    }
-    std::cerr << "[draw-distance] hooks vivos=" << live << " mortos=" << dead << "\n";
-
     std::cerr << "[draw-distance] enabled"
               << " world=" << g_config.world
               << " vehicles=" << g_config.vehicles
               << " npcs=" << g_config.npcs
               << " entity_lod=" << std::max(g_config.vehicles, g_config.npcs)
               << "\n";
+}
+
+void draw_distance_vblank_tick(psprecomp::Runtime &runtime,
+                               std::uint32_t guest_gp,
+                               std::uint64_t vblank_index) noexcept {
+    if (!g_config.enabled || g_config.world <= 1.0f || guest_gp == 0u) return;
+    try {
+        const std::uint32_t far_address = guest_gp + kGpFarClipOffset;
+        if (runtime.memory().contains(far_address, sizeof(std::uint32_t))) {
+            const float current = load_float(runtime, far_address);
+            if (std::isfinite(current) && current > 0.0f) {
+                // Never multiply our own value again. If the game writes a new
+                // dynamic far clip (weather/interior/etc.), treat that new value
+                // as the next raw baseline and scale it exactly once.
+                if (!g_far_clip_seen ||
+                    (!nearly_equal(current, g_far_clip_last_scaled) &&
+                     !nearly_equal(current, g_far_clip_last_raw))) {
+                    g_far_clip_seen = true;
+                    g_far_clip_last_raw = current;
+                    g_far_clip_last_scaled = current * g_config.world;
+                }
+                if (g_far_clip_seen && !nearly_equal(current, g_far_clip_last_scaled))
+                    store_float(runtime, far_address, g_far_clip_last_scaled);
+            }
+        }
+
+        // The model-info table can appear after the first gameplay vblanks and
+        // can be repopulated by streaming. Retry aggressively at startup, then
+        // refresh twice a second-ish without touching generated guest code.
+        if (vblank_index < 240u || (vblank_index % 120u) == 0u)
+            (void)patch_world_model_table(runtime, guest_gp);
+    } catch (const std::exception &error) {
+        static bool logged = false;
+        if (!logged) {
+            logged = true;
+            std::cerr << "[draw-distance] vblank maintenance disabled after error: "
+                      << error.what() << "\n";
+        }
+    }
 }
 
 } // namespace vcs

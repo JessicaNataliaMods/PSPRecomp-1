@@ -1092,6 +1092,14 @@ L_08A24120:
     if (rt.invoke_chained_direct<&recomp_unit_0133_entry, 133u, 449u, 0x08A1AD6Cu>(ctx, &aot_mem) && ctx.pc == 0x08A24128u) goto L_08A24128;
     return;
 L_08A24128:
+    if (vcs::g_draw_distance_runtime_scales.entity > 1.0f) {
+        const float dd_base = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[16] + static_cast<std::uint32_t>(1960)));
+        const float dd_scale = vcs::g_draw_distance_runtime_scales.entity;
+        aot_mem.aot_store32(ctx.gpr[16] + static_cast<std::uint32_t>(1952),
+                            std::bit_cast<std::uint32_t>(dd_base * dd_scale));
+        ctx.fpr[0] = dd_scale;
+        goto L_08A24138;
+    }
     ctx.fpr[12] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[16] + static_cast<std::uint32_t>(1960)));
     aot_mem.aot_store32(ctx.gpr[16] + static_cast<std::uint32_t>(1952), std::bit_cast<std::uint32_t>(ctx.fpr[12]));
     ctx.gpr[31] = (0x08A24138u);

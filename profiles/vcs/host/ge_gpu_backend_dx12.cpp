@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <limits>
 #include <iterator>
+#include <iostream>
 #include <span>
 #include <sstream>
 #include <unordered_map>
@@ -715,7 +716,23 @@ D3D12_COMPARISON_FUNC depth_compare(std::uint32_t function) noexcept {
     return D3D12_COMPARISON_FUNC_ALWAYS;
 }
 
+struct Dx12BlendPlan {
+    bool enabled{};
+    bool exact{true};
+    bool uses_constant{};
+    std::uint32_t constant_rgb{};
+    D3D12_BLEND src{D3D12_BLEND_ONE};
+    D3D12_BLEND dst{D3D12_BLEND_ZERO};
+    D3D12_BLEND src_alpha{D3D12_BLEND_ONE};
+    D3D12_BLEND dst_alpha{D3D12_BLEND_ZERO};
+    D3D12_BLEND_OP op{D3D12_BLEND_OP_ADD};
+    D3D12_BLEND_OP op_alpha{D3D12_BLEND_OP_ADD};
+};
+
 std::size_t blend_variant(const GeGpuDrawDescriptor &draw) noexcept {
+    // Retained only for the legacy per-mode counters in GeGpuBackendReport.
+    // Pipeline selection itself uses dx12_blend_plan(), because VCS uses more
+    // PSP GE blend states than the old five hard-coded variants.
     if (!draw.blend_enabled || draw.clear_mode) return 0u;
     const std::uint32_t eq = draw.blend_equation & 7u;
     const std::uint32_t src = draw.blend_source_factor & 0xFu;
@@ -736,6 +753,206 @@ std::size_t blend_variant(const GeGpuDrawDescriptor &draw) noexcept {
     return 0u;
 }
 
+bool fixed_rgb_is_complement(std::uint32_t left, std::uint32_t right) noexcept {
+    left &= 0x00FFFFFFu;
+    right &= 0x00FFFFFFu;
+    for (std::uint32_t shift = 0u; shift < 24u; shift += 8u) {
+        if ((((left >> shift) & 0xFFu) + ((right >> shift) & 0xFFu)) != 0xFFu)
+            return false;
+    }
+    return true;
+}
+
+bool blend_source_factor(Dx12BlendPlan &plan, std::uint32_t factor,
+                         std::uint32_t fixed_rgb) noexcept {
+    switch (factor & 0xFu) {
+    case 0u:
+        plan.src = D3D12_BLEND_DEST_COLOR;
+        plan.src_alpha = D3D12_BLEND_DEST_ALPHA;
+        return true;
+    case 1u:
+        plan.src = D3D12_BLEND_INV_DEST_COLOR;
+        plan.src_alpha = D3D12_BLEND_INV_DEST_ALPHA;
+        return true;
+    case 2u:
+        plan.src = D3D12_BLEND_SRC_ALPHA;
+        plan.src_alpha = D3D12_BLEND_SRC_ALPHA;
+        return true;
+    case 3u:
+        plan.src = D3D12_BLEND_INV_SRC_ALPHA;
+        plan.src_alpha = D3D12_BLEND_INV_SRC_ALPHA;
+        return true;
+    case 4u:
+        plan.src = D3D12_BLEND_DEST_ALPHA;
+        plan.src_alpha = D3D12_BLEND_DEST_ALPHA;
+        return true;
+    case 5u:
+        plan.src = D3D12_BLEND_INV_DEST_ALPHA;
+        plan.src_alpha = D3D12_BLEND_INV_DEST_ALPHA;
+        return true;
+    case 10u: {
+        const std::uint32_t fixed = fixed_rgb & 0x00FFFFFFu;
+        if (fixed == 0u) {
+            plan.src = D3D12_BLEND_ZERO;
+            plan.src_alpha = D3D12_BLEND_ZERO;
+        } else if (fixed == 0x00FFFFFFu) {
+            plan.src = D3D12_BLEND_ONE;
+            plan.src_alpha = D3D12_BLEND_ONE;
+        } else {
+            plan.src = D3D12_BLEND_BLEND_FACTOR;
+            // PSP FIX alpha is effectively 1.0: the GE register contains RGB.
+            plan.src_alpha = D3D12_BLEND_ONE;
+            plan.uses_constant = true;
+            plan.constant_rgb = fixed;
+        }
+        return true;
+    }
+    default:
+        // PSP factors 6..9 are 2x-alpha forms. D3D12 fixed-function blending
+        // has no bit-exact equivalent, so those states take the safe fallback.
+        return false;
+    }
+}
+
+bool blend_dest_factor(Dx12BlendPlan &plan, std::uint32_t factor,
+                       std::uint32_t fixed_rgb) noexcept {
+    switch (factor & 0xFu) {
+    case 0u:
+        plan.dst = D3D12_BLEND_SRC_COLOR;
+        plan.dst_alpha = D3D12_BLEND_SRC_ALPHA;
+        return true;
+    case 1u:
+        plan.dst = D3D12_BLEND_INV_SRC_COLOR;
+        plan.dst_alpha = D3D12_BLEND_INV_SRC_ALPHA;
+        return true;
+    case 2u:
+        plan.dst = D3D12_BLEND_SRC_ALPHA;
+        plan.dst_alpha = D3D12_BLEND_SRC_ALPHA;
+        return true;
+    case 3u:
+        plan.dst = D3D12_BLEND_INV_SRC_ALPHA;
+        plan.dst_alpha = D3D12_BLEND_INV_SRC_ALPHA;
+        return true;
+    case 4u:
+        plan.dst = D3D12_BLEND_DEST_ALPHA;
+        plan.dst_alpha = D3D12_BLEND_DEST_ALPHA;
+        return true;
+    case 5u:
+        plan.dst = D3D12_BLEND_INV_DEST_ALPHA;
+        plan.dst_alpha = D3D12_BLEND_INV_DEST_ALPHA;
+        return true;
+    case 10u: {
+        const std::uint32_t fixed = fixed_rgb & 0x00FFFFFFu;
+        if (fixed == 0u) {
+            plan.dst = D3D12_BLEND_ZERO;
+            plan.dst_alpha = D3D12_BLEND_ZERO;
+        } else if (fixed == 0x00FFFFFFu) {
+            plan.dst = D3D12_BLEND_ONE;
+            plan.dst_alpha = D3D12_BLEND_ONE;
+        } else {
+            plan.dst = D3D12_BLEND_BLEND_FACTOR;
+            plan.dst_alpha = D3D12_BLEND_ONE;
+            plan.uses_constant = true;
+            plan.constant_rgb = fixed;
+        }
+        return true;
+    }
+    default:
+        return false;
+    }
+}
+
+Dx12BlendPlan dx12_blend_plan(const GeGpuDrawDescriptor &draw) noexcept {
+    Dx12BlendPlan plan{};
+    if (!draw.blend_enabled || draw.clear_mode) return plan;
+    plan.enabled = true;
+
+    const std::uint32_t equation = draw.blend_equation & 7u;
+    const std::uint32_t src_factor = draw.blend_source_factor & 0xFu;
+    const std::uint32_t dst_factor = draw.blend_dest_factor & 0xFu;
+    const std::uint32_t src_fix = draw.blend_fix_source & 0x00FFFFFFu;
+    const std::uint32_t dst_fix = draw.blend_fix_dest & 0x00FFFFFFu;
+
+    // MIN/MAX in the PSP software reference operate on the unweighted source
+    // and destination colors. D3D12 MIN/MAX do exactly that with ONE/ONE.
+    if (equation == 3u || equation == 4u) {
+        plan.src = plan.dst = D3D12_BLEND_ONE;
+        plan.src_alpha = plan.dst_alpha = D3D12_BLEND_ONE;
+        plan.op = plan.op_alpha = equation == 3u ? D3D12_BLEND_OP_MIN : D3D12_BLEND_OP_MAX;
+        return plan;
+    }
+
+    switch (equation) {
+    case 0u: plan.op = plan.op_alpha = D3D12_BLEND_OP_ADD; break;
+    case 1u: plan.op = plan.op_alpha = D3D12_BLEND_OP_SUBTRACT; break;
+    case 2u: plan.op = plan.op_alpha = D3D12_BLEND_OP_REV_SUBTRACT; break;
+    default:
+        // ABS_DIFF and unknown equations cannot be expressed by the D3D12
+        // fixed-function blend unit.
+        plan.exact = false;
+        break;
+    }
+
+    if (plan.exact && src_factor == 10u && dst_factor == 10u &&
+        src_fix != 0u && src_fix != 0x00FFFFFFu &&
+        dst_fix != 0u && dst_fix != 0x00FFFFFFu) {
+        // D3D12 exposes one dynamic blend constant. Two arbitrary PSP FIX/FIX
+        // colors are representable only when they are identical or complementary.
+        if (src_fix == dst_fix) {
+            plan.uses_constant = true;
+            plan.constant_rgb = src_fix;
+            plan.src = plan.dst = D3D12_BLEND_BLEND_FACTOR;
+            plan.src_alpha = plan.dst_alpha = D3D12_BLEND_ONE;
+        } else if (fixed_rgb_is_complement(src_fix, dst_fix)) {
+            plan.uses_constant = true;
+            plan.constant_rgb = src_fix;
+            plan.src = D3D12_BLEND_BLEND_FACTOR;
+            plan.dst = D3D12_BLEND_INV_BLEND_FACTOR;
+            plan.src_alpha = D3D12_BLEND_ONE;
+            plan.dst_alpha = D3D12_BLEND_ZERO;
+        } else {
+            plan.exact = false;
+        }
+    } else if (plan.exact) {
+        const bool src_ok = blend_source_factor(plan, src_factor, src_fix);
+        const bool src_uses_constant = plan.uses_constant;
+        const std::uint32_t src_constant = plan.constant_rgb;
+
+        // Evaluate the destination independently so an arbitrary FIX on each
+        // side cannot silently overwrite the one D3D12 blend constant.
+        Dx12BlendPlan dst_plan{};
+        const bool dst_ok = blend_dest_factor(dst_plan, dst_factor, dst_fix);
+        if (!src_ok || !dst_ok ||
+            (src_uses_constant && dst_plan.uses_constant && src_constant != dst_plan.constant_rgb)) {
+            plan.exact = false;
+        } else {
+            plan.dst = dst_plan.dst;
+            plan.dst_alpha = dst_plan.dst_alpha;
+            if (dst_plan.uses_constant) {
+                plan.uses_constant = true;
+                plan.constant_rgb = dst_plan.constant_rgb;
+            }
+        }
+    }
+
+    if (!plan.exact) {
+        // Safety fallback. The old DX12 path returned blend variant 0 here,
+        // disabling blending and turning translucent sun/lighting overlays into
+        // opaque full-screen washes. Keep the draw translucent instead. Exact
+        // parity for 2x-alpha/ABS_DIFF/non-complementary FIX/FIX still requires
+        // a shader/RMW path, and is reported as unsupported below.
+        plan.enabled = true;
+        plan.uses_constant = false;
+        plan.constant_rgb = 0u;
+        plan.src = D3D12_BLEND_SRC_ALPHA;
+        plan.dst = D3D12_BLEND_INV_SRC_ALPHA;
+        plan.src_alpha = D3D12_BLEND_ONE;
+        plan.dst_alpha = D3D12_BLEND_INV_SRC_ALPHA;
+        plan.op = plan.op_alpha = D3D12_BLEND_OP_ADD;
+    }
+    return plan;
+}
+
 std::uint8_t color_write_mask(const GeGpuDrawDescriptor &draw) noexcept {
     std::uint8_t mask = 0u;
     for (std::uint32_t channel = 0u; channel < 4u; ++channel) {
@@ -746,11 +963,20 @@ std::uint8_t color_write_mask(const GeGpuDrawDescriptor &draw) noexcept {
 }
 
 std::uint64_t pipeline_key(const GeGpuDrawDescriptor &draw) noexcept {
+    const Dx12BlendPlan blend = dx12_blend_plan(draw);
     std::uint64_t key = static_cast<std::uint64_t>(draw.depth_test_enabled ? 1u : 0u);
     key |= static_cast<std::uint64_t>(draw.depth_write_enabled ? 1u : 0u) << 1u;
     key |= static_cast<std::uint64_t>(draw.depth_function & 7u) << 2u;
-    key |= static_cast<std::uint64_t>(blend_variant(draw) & 7u) << 5u;
-    key |= static_cast<std::uint64_t>(color_write_mask(draw) & 0xFu) << 8u;
+    key |= static_cast<std::uint64_t>(blend.enabled ? 1u : 0u) << 5u;
+    key |= static_cast<std::uint64_t>(blend.exact ? 0u : 1u) << 6u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.src) & 0x1Fu) << 7u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.dst) & 0x1Fu) << 12u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.src_alpha) & 0x1Fu) << 17u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.dst_alpha) & 0x1Fu) << 22u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.op) & 0x7u) << 27u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.op_alpha) & 0x7u) << 30u;
+    key |= static_cast<std::uint64_t>(color_write_mask(draw) & 0xFu) << 33u;
+    key |= static_cast<std::uint64_t>(blend.uses_constant ? 1u : 0u) << 37u;
     return key;
 }
 
@@ -805,9 +1031,9 @@ bool adjacent_batch_merge_compatible(const Dx12Batch &a, const Dx12Batch &b) noe
     if (a.draw.scissor_x0 != b.draw.scissor_x0 || a.draw.scissor_y0 != b.draw.scissor_y0 ||
         a.draw.scissor_x1 != b.draw.scissor_x1 || a.draw.scissor_y1 != b.draw.scissor_y1)
         return false;
-    if (blend_variant(a.draw) == 4u &&
-        (a.draw.blend_fix_source & 0x00FFFFFFu) !=
-        (b.draw.blend_fix_source & 0x00FFFFFFu)) return false;
+    const Dx12BlendPlan blend_a = dx12_blend_plan(a.draw);
+    const Dx12BlendPlan blend_b = dx12_blend_plan(b.draw);
+    if (blend_a.uses_constant && blend_a.constant_rgb != blend_b.constant_rgb) return false;
     // Pixel state moved out of the vertex stream in 45.4, so merged draws must
     // share the exact root-constant state rather than merely a compatible PSO.
     const Dx12PixelConstants pa = make_pixel_constants(a.draw, a.draw.texture_enabled);
@@ -1598,42 +1824,14 @@ ComPtr<ID3D12PipelineState> create_pipeline(Dx12GeState &s,
     pso.BlendState.IndependentBlendEnable = FALSE;
     D3D12_RENDER_TARGET_BLEND_DESC blend{};
     blend.RenderTargetWriteMask = color_write_mask(draw);
-    const std::size_t variant = blend_variant(draw);
-    if (variant != 0u && variant != 2u) blend.BlendEnable = TRUE;
-    blend.SrcBlend = D3D12_BLEND_ONE;
-    blend.DestBlend = D3D12_BLEND_ZERO;
-    blend.BlendOp = D3D12_BLEND_OP_ADD;
-    blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-    blend.DestBlendAlpha = D3D12_BLEND_ZERO;
-    blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-    switch (variant) {
-    case 1u:
-        blend.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        blend.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-        blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
-        break;
-    case 3u:
-        blend.SrcBlend = D3D12_BLEND_ONE;
-        blend.DestBlend = D3D12_BLEND_ONE;
-        blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-        blend.DestBlendAlpha = D3D12_BLEND_ONE;
-        break;
-    case 4u:
-        blend.SrcBlend = D3D12_BLEND_BLEND_FACTOR;
-        blend.DestBlend = D3D12_BLEND_INV_BLEND_FACTOR;
-        blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-        blend.DestBlendAlpha = D3D12_BLEND_ZERO;
-        break;
-    case 5u:
-        blend.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        blend.DestBlend = D3D12_BLEND_ONE;
-        blend.SrcBlendAlpha = D3D12_BLEND_ONE;
-        blend.DestBlendAlpha = D3D12_BLEND_ONE;
-        break;
-    default:
-        break;
-    }
+    const Dx12BlendPlan blend_plan = dx12_blend_plan(draw);
+    blend.BlendEnable = blend_plan.enabled ? TRUE : FALSE;
+    blend.SrcBlend = blend_plan.src;
+    blend.DestBlend = blend_plan.dst;
+    blend.BlendOp = blend_plan.op;
+    blend.SrcBlendAlpha = blend_plan.src_alpha;
+    blend.DestBlendAlpha = blend_plan.dst_alpha;
+    blend.BlendOpAlpha = blend_plan.op_alpha;
     pso.BlendState.RenderTarget[0] = blend;
     pso.DepthStencilState.DepthEnable = draw.depth_test_enabled ? TRUE : FALSE;
     pso.DepthStencilState.DepthWriteMask = draw.depth_write_enabled
@@ -3986,8 +4184,9 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
             active_scissor = scissor;
             active_scissor_valid = true;
         }
-        if (blend_variant(batch.draw) == 4u) {
-            const std::uint32_t fix = batch.draw.blend_fix_source & 0x00FFFFFFu;
+        const Dx12BlendPlan blend_plan = dx12_blend_plan(batch.draw);
+        if (blend_plan.uses_constant) {
+            const std::uint32_t fix = blend_plan.constant_rgb;
             if (fix != active_blend_fix) {
                 const float factors[4]{
                     static_cast<float>(fix & 0xFFu) / 255.0f,
@@ -4013,6 +4212,23 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
         case 2u: s.report.fixed_replace_blended_game_draw_calls += batch.logical_draw_count; break;
         case 3u: s.report.additive_blended_game_draw_calls += batch.logical_draw_count; break;
         default: break;
+        }
+        if (batch.draw.blend_enabled && !batch.draw.clear_mode && !blend_plan.exact) {
+            s.report.unsupported_blend_game_draw_calls += batch.logical_draw_count;
+            static std::uint32_t diagnostic_count = 0u;
+            if (std::getenv("PSPRECOMP_DX12_BLEND_DIAG") != nullptr && diagnostic_count < 32u) {
+                std::ostringstream line;
+                line << "DX12 unsupported PSP blend fallback #" << (diagnostic_count + 1u)
+                     << ": eq=" << (batch.draw.blend_equation & 7u)
+                     << " src=" << (batch.draw.blend_source_factor & 0xFu)
+                     << " dst=" << (batch.draw.blend_dest_factor & 0xFu)
+                     << " fixS=0x" << std::hex << (batch.draw.blend_fix_source & 0x00FFFFFFu)
+                     << " fixD=0x" << (batch.draw.blend_fix_dest & 0x00FFFFFFu) << std::dec;
+                const std::string message = line.str();
+                std::cerr << "[blend] " << message << "\n";
+                runtime_log_error("blend", message);
+                ++diagnostic_count;
+            }
         }
         if (batch.draw.fog_enabled) s.report.fogged_game_draw_calls += batch.logical_draw_count;
         if (srv_index != 0u) {

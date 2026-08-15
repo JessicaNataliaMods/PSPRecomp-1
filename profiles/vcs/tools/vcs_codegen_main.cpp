@@ -990,6 +990,44 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                 break;
             }
 
+            // VCS draw-distance local-label patches. These addresses are valid
+            // AOT entries, but normal gameplay reaches them through local gotos,
+            // which bypasses Runtime::register_function replacements. Keep the
+            // exact original path at scale 1.0 and only short-circuit when the
+            // user explicitly enables extended draw distance.
+            if (pc == 0x08A24128u) {
+                body << "    if (vcs::g_draw_distance_runtime_scales.entity > 1.0f) {\n"
+                     << "        const float dd_base = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[16] + static_cast<std::uint32_t>(1960)));\n"
+                     << "        const float dd_scale = vcs::g_draw_distance_runtime_scales.entity;\n"
+                     << "        aot_mem.aot_store32(ctx.gpr[16] + static_cast<std::uint32_t>(1952), std::bit_cast<std::uint32_t>(dd_base * dd_scale));\n"
+                     << "        ctx.fpr[0] = dd_scale;\n"
+                     << "        goto L_08A24138;\n"
+                     << "    }\n";
+            }
+            if (pc == 0x089CB38Cu) {
+                body << "    if (vcs::g_draw_distance_runtime_scales.npcs > 1.0f) {\n"
+                     << "        const float dd_scale = vcs::g_draw_distance_runtime_scales.npcs;\n"
+                     << "        ctx.gpr[19] = ctx.gpr[29] + static_cast<std::uint32_t>(64);\n"
+                     << "        ctx.gpr[30] = ctx.gpr[29] + static_cast<std::uint32_t>(16);\n"
+                     << "        ctx.gpr[23] = ctx.gpr[29] + static_cast<std::uint32_t>(32);\n"
+                     << "        ctx.fpr[22] = 120.0f;\n"
+                     << "        ctx.fpr[28] = 51.0f * dd_scale;\n"
+                     << "        ctx.fpr[26] = 25.0f * dd_scale;\n"
+                     << "        ctx.fpr[24] = 80.0f * dd_scale;\n"
+                     << "        ctx.gpr[4] = ctx.gpr[18] << 5u;\n"
+                     << "        ctx.gpr[20] = ctx.gpr[4];\n"
+                     << "        ctx.gpr[4] <<= 4u;\n"
+                     << "        ctx.gpr[20] += ctx.gpr[4];\n"
+                     << "        goto L_089CB3C8;\n"
+                     << "    }\n";
+            }
+            if (pc == 0x08B45AC0u) {
+                body << "    if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {\n"
+                     << "        ctx.fpr[12] = 60.0f * vcs::g_draw_distance_runtime_scales.vehicles;\n"
+                     << "        goto L_08B45AC8;\n"
+                     << "    }\n";
+            }
+
             // Verified VCS raw-DEFLATE hot loop. The original Allegrex code at
             // 0x08B64AD8 performs a forward LZ back-reference copy one byte at
             // a time. Preserve its register/error semantics while lowering the
@@ -1588,7 +1626,7 @@ int generate_auto(const std::filesystem::path &elf_path,
     // instead of forcing every known edge through a function-pointer branch.
     const auto units_header_path = output_dir / "generated_units.hpp";
     std::ostringstream units_header;
-    units_header << "#pragma once\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\n";
+    units_header << "#pragma once\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n#include \"vcs_draw_distance_patch.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\n";
     for (const auto &unit : units) {
         units_header << "void " << generated_unit_cpp_name(unit.bucket)
                      << "(Runtime &, AllegrexContext &);\n";
