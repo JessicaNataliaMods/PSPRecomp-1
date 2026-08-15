@@ -4,6 +4,7 @@
 #include "vcs_project2dfx.hpp"
 #include "vcs_fps_overlay.hpp"
 #include "savedata_utility_ui.hpp"
+#include "vcs_texture_replacement.hpp"
 
 #include "psprecomp/common.hpp"
 
@@ -2055,8 +2056,10 @@ TextureSetup make_texture_setup_for_level(const psprecomp::GuestMemory &memory, 
 
 TextureSetup make_texture_setup(const psprecomp::GuestMemory &memory, const std::array<std::uint32_t, 256> &commands) noexcept { return make_texture_setup_for_level(memory,commands,selected_texture_level(commands)); }
 
-std::uint64_t texture_source_signature(const psprecomp::GuestMemory &memory,
-                                       const TextureSetup &texture) noexcept {
+// Size in bytes of a texture's stored image, padding included. Shared by the
+// content signature and by the DDS replacement index, which has to hash exactly
+// the same span the GE samples for its match to mean anything.
+std::uint64_t texture_source_byte_size(const TextureSetup &texture) noexcept {
     if (texture.base == 0u || texture.width == 0u || texture.height == 0u) return 0u;
     std::uint64_t bytes = 0u;
     switch (texture.format) {
@@ -2083,7 +2086,14 @@ std::uint64_t texture_source_signature(const psprecomp::GuestMemory &memory,
         row = (row + 15u) & ~15ull;
         bytes = row * ((static_cast<std::uint64_t>(texture.height) + 7u) & ~7ull);
     }
-    if (bytes == 0u || bytes > std::numeric_limits<std::size_t>::max()) return 0u;
+    if (bytes > std::numeric_limits<std::size_t>::max()) return 0u;
+    return bytes;
+}
+
+std::uint64_t texture_source_signature(const psprecomp::GuestMemory &memory,
+                                       const TextureSetup &texture) noexcept {
+    const std::uint64_t bytes = texture_source_byte_size(texture);
+    if (bytes == 0u) return 0u;
     const auto size = static_cast<std::size_t>(bytes);
     const std::uint8_t *pixels = memory.raw_pointer(texture.base, size);
     if (pixels == nullptr) return 0u;
@@ -4185,6 +4195,25 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
                 if (part == 0u) continue;
                 any_signature = true;
                 signature ^= part + 0x9E3779B97F4A7C15ull + (signature << 6u) + (signature >> 2u);
+                // Offer level 0 to the DDS replacement index. This site fires
+                // once per texture that is not already resident for the frame,
+                // so it identifies rather than running per draw.
+                if (level == 0u) {
+                    const std::uint64_t source_bytes = texture_source_byte_size(source);
+                    if (source_bytes != 0u &&
+                        source_bytes <= std::numeric_limits<std::size_t>::max()) {
+                        const auto span = static_cast<std::size_t>(source_bytes);
+                        // The archives store palettized art only, so formats 4
+                        // and 5 are the only ones that can ever match an index
+                        // entry. Anything else reports depth 0 and simply misses.
+                        const std::uint32_t depth = source.format == 4u   ? 4u
+                                                    : source.format == 5u ? 8u
+                                                                          : 0u;
+                        texture_replacement_observe_texture(
+                            memory.raw_pointer(source.base, span), span,
+                            source.width, source.height, depth);
+                    }
+                }
             }
             gpu_draw.texture_content_signature = any_signature ? signature : 0u;
         }
@@ -4283,7 +4312,37 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
         std::array<TextureSetup, 8> mip_setups{};
         std::size_t total_bytes = 0u;
         bool all = true;
-        for (std::uint32_t level = 0u; level < level_count; ++level) {
+
+        // DDS replacement. The renderer already hands the backend plain RGBA8
+        // for every texture, so a replacement is simply a different buffer on
+        // the same upload path -- no separate sampling route exists to go wrong.
+        //
+        // texture_width/height stay at the guest's values on purpose. The shader
+        // samples with normalized coordinates whose scale comes from the guest's
+        // texture matrix, not from the resident image, so leaving them alone lets
+        // a 512x512 replacement stand in for a 64x64 original with the UVs still
+        // landing where the game intends.
+        bool replaced = false;
+        if (!framebuffer_feedback) {
+            const TextureSetup base = make_texture_setup_for_level(memory, commands, 0u);
+            const std::uint64_t base_bytes = texture_source_byte_size(base);
+            if (base_bytes != 0u && base_bytes <= std::numeric_limits<std::size_t>::max()) {
+                const auto span = static_cast<std::size_t>(base_bytes);
+                const std::uint32_t depth = base.format == 4u   ? 4u
+                                            : base.format == 5u ? 8u
+                                                                : 0u;
+                TextureReplacement replacement{};
+                if (texture_replacement_lookup(memory.raw_pointer(base.base, span), span,
+                                               base.width, base.height, depth, replacement)) {
+                    std::vector<std::byte> pixels(
+                        replacement.rgba, replacement.rgba + replacement.size);
+                    replaced = ge_gpu_backend_upload_decoded_texture(
+                        gpu_draw, replacement.width, replacement.height, pixels);
+                }
+            }
+        }
+
+        for (std::uint32_t level = 0u; !replaced && level < level_count; ++level) {
             mip_setups[level] = make_texture_setup_for_level(memory, commands, level);
             const std::uint64_t bytes = static_cast<std::uint64_t>(mip_setups[level].width) *
                                         mip_setups[level].height * 4ull;
@@ -4294,11 +4353,11 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
             total_bytes += static_cast<std::size_t>(bytes);
         }
         std::vector<std::byte> decoded;
-        if (all) {
+        if (all && !replaced) {
             try { decoded.resize(total_bytes); } catch (...) { all = false; }
         }
         std::size_t offset = 0u;
-        for (std::uint32_t level = 0u; all && level < level_count; ++level) {
+        for (std::uint32_t level = 0u; all && !replaced && level < level_count; ++level) {
             const std::size_t bytes = static_cast<std::size_t>(mip_setups[level].width) *
                                       mip_setups[level].height * 4u;
             if (!decode_texture_rgba_into(memory, mip_setups[level],
@@ -4308,7 +4367,9 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
             }
             offset += bytes;
         }
-        if (all) {
+        if (replaced) {
+            // Already uploaded above.
+        } else if (all) {
             (void)ge_gpu_backend_upload_decoded_texture_chain_packed(
                 gpu_draw, mip_setups[0].width, mip_setups[0].height,
                 level_count, std::move(decoded));

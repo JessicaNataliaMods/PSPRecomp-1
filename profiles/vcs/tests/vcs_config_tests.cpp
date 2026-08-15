@@ -53,6 +53,9 @@ int main() {
                    << "FlushEveryLine=false\n"
                    << "[Frontend]\n"
                    << "MouseMenu=false\n"
+                   << "[Textures]\n"
+                   << "Enabled=true\n"
+                   << "Directory=MyTextures\n"
                    << "[Controls]\n"
                    << "CameraStick=true\n"
                    << "MouseSensitivity=17\n"
@@ -135,6 +138,9 @@ int main() {
                 "Diagnostics.FlushEveryLine was not parsed");
         require(!config.frontend.mouse_menu,
                 "Frontend.MouseMenu was not parsed");
+        require(config.textures.enabled, "Textures.Enabled was not parsed");
+        require(config.textures.directory == "MyTextures",
+                "Textures.Directory was not parsed");
         require(config.controls.camera_stick, "camera stick was not parsed");
         require(config.controls.mouse_sensitivity == 17u,
                 "mouse sensitivity was not parsed");
@@ -250,6 +256,8 @@ int main() {
                 "missing INI did not preserve the stock on-foot camera upper limit");
         require(!missing.frontend.mouse_menu,
                 "missing INI did not preserve disabled pause-menu mouse default");
+        require(!missing.textures.enabled && missing.textures.directory == "TexturesDDS",
+                "missing INI did not preserve the texture replacement defaults");
         const vcs::InternalResolutionDimensions native =
             vcs::resolve_internal_resolution(missing.rendering);
         require(native.width == 480u && native.height == 272u,

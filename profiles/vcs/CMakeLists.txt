@@ -125,6 +125,7 @@ set(VCS_HOST_SOURCES
     host/framebuffer_capture.cpp
     host/display_window.cpp
     host/savedata_utility_ui.cpp
+    host/vcs_texture_replacement.cpp
     host/audio_output.cpp
     host/vcs_config.cpp
     host/vcs_camera_input.cpp

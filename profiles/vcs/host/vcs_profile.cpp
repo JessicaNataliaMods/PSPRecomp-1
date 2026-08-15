@@ -12,6 +12,7 @@
 #include "vcs_project2dfx.hpp"
 #include "vcs_draw_distance_patch.hpp"
 #include "savedata_utility_ui.hpp"
+#include "vcs_texture_replacement.hpp"
 
 #include "psprecomp/common.hpp"
 #include "psprecomp/deflate.hpp"
@@ -549,6 +550,12 @@ const VirtualDiscFile *register_virtual_disc_file(const std::filesystem::path &p
         static_cast<std::uint64_t>(file_table.next_virtual_sector) + sector_count > 0x100000000ull) {
         return nullptr;
     }
+
+    // Indexing here, rather than by walking the asset directory, means only the
+    // archives the guest actually opens are indexed. Backup copies the user left
+    // sitting next to the real files are never picked up, and an asset mod that
+    // replaces an archive is indexed as it is opened.
+    texture_replacement_index_archive(path);
 
     VirtualDiscFile item{};
     item.native_path = path;

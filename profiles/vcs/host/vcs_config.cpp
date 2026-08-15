@@ -471,6 +471,24 @@ void apply_frontend_key(VcsConfiguration &config, const std::string &key,
     warning(config, line, "unknown [Frontend] key '" + key + "'");
 }
 
+void apply_textures_key(VcsConfiguration &config, const std::string &key,
+                        const std::string &value, std::size_t line) {
+    if (key == "enabled" || key == "ddsreplacement") {
+        if (!parse_bool(value, config.textures.enabled))
+            warning(config, line, "Textures.Enabled expects true/false");
+        return;
+    }
+    if (key == "directory" || key == "folder") {
+        const std::string trimmed = trim_copy(value);
+        if (trimmed.empty())
+            warning(config, line, "Textures.Directory expects a path");
+        else
+            config.textures.directory = trimmed;
+        return;
+    }
+    warning(config, line, "unknown [Textures] key '" + key + "'");
+}
+
 void apply_controls_key(VcsConfiguration &config, const std::string &key,
                         const std::string &value, std::size_t line) {
     if (key == "camerastick" || key == "mousecamera") {
@@ -733,6 +751,8 @@ VcsConfiguration load_vcs_configuration(const std::filesystem::path &path) {
             apply_controls_key(config, key, value, line_number);
         else if (section == "frontend")
             apply_frontend_key(config, key, value, line_number);
+        else if (section == "textures" || section == "texturereplacement")
+            apply_textures_key(config, key, value, line_number);
         // These sections belong to the optional Project2DFX module, which
         // deliberately owns its parser so it can be compiled independently of
         // the core display/input configuration. They are nevertheless valid

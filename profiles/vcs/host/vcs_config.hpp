@@ -221,6 +221,15 @@ struct FrontendConfiguration {
     bool mouse_menu{false};
 };
 
+struct TexturesConfiguration {
+    // DDS texture replacement matched by the internal TEX name. Opt-in: with it
+    // off the host never opens the game's archives for indexing.
+    bool enabled{false};
+    // Relative paths resolve against the executable directory. Subdirectories
+    // below it are scanned too and carry no meaning beyond organisation.
+    std::string directory{"TexturesDDS"};
+};
+
 struct ControlsConfiguration {
     // Mouse and right-stick camera. Needs the guest-side hook, which bypasses
     // the game's own camera conditions, so it is opt-in.
@@ -249,6 +258,7 @@ struct ControlsConfiguration {
 
 struct VcsConfiguration {
     FrontendConfiguration frontend{};
+    TexturesConfiguration textures{};
     ControlsConfiguration controls{};
     DisplayConfiguration display{};
     RenderingConfiguration rendering{};

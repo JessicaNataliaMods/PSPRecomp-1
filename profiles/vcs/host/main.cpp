@@ -7,6 +7,7 @@
 #include "ge_gpu_backend.hpp"
 #include "vcs_profile.hpp"
 #include "vcs_config.hpp"
+#include "vcs_texture_replacement.hpp"
 #include "vcs_bootstrap_paths.hpp"
 #include "vcs_project2dfx.hpp"
 #include "vcs_hdr_post.hpp"
@@ -444,6 +445,7 @@ int main(int argc, char **argv) {
                       << gpu_final.last_texture_format
                       << " texture_checksum=" << gpu_final.last_texture_checksum << "\n";
         }
+        vcs::texture_replacement_log_summary();
         if (shutdown_diag) std::cerr << "[shutdown] before-display-shutdown\n";
         vcs::audio_output_shutdown();
         vcs::display_window_shutdown();
