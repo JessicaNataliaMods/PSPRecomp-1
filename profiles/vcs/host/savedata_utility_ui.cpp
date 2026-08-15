@@ -44,6 +44,7 @@ struct UiState {
 UiState g_ui{};
 bool g_logged_missing_target = false;
 bool g_logged_first_frame = false;
+bool g_logged_host_texture_upload = false;
 
 struct TrackedTarget {
     std::uint32_t address{};
@@ -53,6 +54,19 @@ struct TrackedTarget {
 constexpr std::size_t kTrackedTargets = 8u;
 std::array<TrackedTarget, kTrackedTargets> g_targets{};
 std::uint32_t g_last_observed_target{};
+
+#include "savedata_font_atlas.inc"
+
+struct TextGlyphCommand {
+    char ch{};
+    float x{};
+    float y{};
+    float scale{1.0f};
+    std::uint32_t color{0xFFFFFFFFu};
+};
+
+thread_local std::vector<TextGlyphCommand> *g_text_commands = nullptr;
+constexpr std::uint64_t kSavedataFontCacheKey = 0x564353464F4E5431ull; // "VCSFONT1"
 
 std::uint64_t icon_cache_key(std::string_view path, std::span<const std::byte> rgba) noexcept {
     std::uint64_t hash = 1469598103934665603ull;
@@ -198,22 +212,31 @@ void gradient_quad(std::vector<GeGpuVertex> &v, float x0, float y0, float x1, fl
     v.push_back(a); v.push_back(c); v.push_back(d);
 }
 
+void legacy_text_glyph(std::vector<GeGpuVertex> &v, char ch, float x, float y,
+                       float scale, std::uint32_t color) {
+    const Glyph *g = glyph_for(ch);
+    if (g == nullptr) return;
+    for (std::size_t row=0; row<7; ++row) {
+        for (std::size_t col=0; col<5; ++col) {
+            if ((g->r[row] & (1u << (4u-col))) == 0u) continue;
+            const float px=x+static_cast<float>(col)*scale;
+            const float py=y+static_cast<float>(row)*scale;
+            quad(v,px,py,px+scale,py+scale,color);
+        }
+    }
+}
+
 void text(std::vector<GeGpuVertex> &v, std::string_view value, float x, float y,
           float scale, std::uint32_t color, std::size_t max_chars = 64u) {
     float pen = x;
     std::size_t emitted = 0u;
     for (char ch : value) {
         if (emitted++ >= max_chars || ch == '\n' || ch == '\r') break;
-        const Glyph *g = glyph_for(ch);
-        if (g != nullptr) {
-            for (std::size_t row=0; row<7; ++row) {
-                for (std::size_t col=0; col<5; ++col) {
-                    if ((g->r[row] & (1u << (4u-col))) == 0u) continue;
-                    const float px=pen+static_cast<float>(col)*scale;
-                    const float py=y+static_cast<float>(row)*scale;
-                    quad(v,px,py,px+scale,py+scale,color);
-                }
-            }
+        if (g_text_commands != nullptr && static_cast<unsigned char>(ch) >= 32u &&
+            static_cast<unsigned char>(ch) <= 126u) {
+            g_text_commands->push_back(TextGlyphCommand{ch, pen, y, scale, color});
+        } else {
+            legacy_text_glyph(v, ch, pen, y, scale, color);
         }
         pen += 6.0f * scale;
     }
@@ -364,7 +387,7 @@ void render_list(std::vector<GeGpuVertex> &v, std::vector<IconQuad> &icons) {
     constexpr std::uint32_t white = 0xFFF4F4F4u;
     constexpr std::uint32_t dim = 0xFFD0CCD4u;
 
-    // V9.3 clean-rebase visual change only: reproduce the user-supplied
+    // V9.4 keeps the V9.3 clean-rebase gradient: reproduce the user-supplied
     // purple/pink background with native vertex interpolation. This keeps the
     // exact proven V9 framebuffer/render path: no extra texture, target, or
     // high-resolution overlay is introduced. Colors are sampled from the four
@@ -385,21 +408,28 @@ void render_list(std::vector<GeGpuVertex> &v, std::vector<IconQuad> &icons) {
     const SavedataSlotEntry &slot = g_ui.slots[selected];
 
     if (g_ui.prompt == SavedataUtilityUiPrompt::List) {
-        // Match the PSP utility's save-list composition: selected ICON0 is
-        // 144x80 at (27,97); neighboring saves are 81x45 above/below it.
-        for (std::size_t i = 0; i < g_ui.slots.size(); ++i) {
-            float x, y, w, h;
-            if (i == selected) {
-                x = 27.0f; y = 97.0f; w = 144.0f; h = 80.0f;
-            } else {
-                x = 58.5f; w = 81.0f; h = 45.0f;
-                if (i < selected)
-                    y = 97.0f - 13.0f - 45.0f * static_cast<float>(selected - i);
-                else
-                    y = 97.0f + 48.0f + 45.0f * static_cast<float>(i - selected);
-            }
-            if (y < -60.0f || y > 271.0f) continue;
-            draw_save_thumbnail(v, icons, x, y, w, h, i == selected, g_ui.slots[i].exists, i);
+        // Keep the scrolled slot strip inside the content area.  The old
+        // firmware-inspired arithmetic let slot N-2 climb through y=0 and draw
+        // over the SAVE/LOAD banner once the third slot was selected.  Only the
+        // immediate neighbours are useful context, so pin them to safe rows.
+        if (selected > 0u) {
+            const std::size_t previous = selected - 1u;
+            draw_save_thumbnail(v, icons, 58.0f, 37.0f, 82.0f, 46.0f, false,
+                                g_ui.slots[previous].exists, previous);
+        }
+        draw_save_thumbnail(v, icons, 27.0f, 94.0f, 144.0f, 80.0f, true,
+                            slot.exists, selected);
+        if (selected + 1u < g_ui.slots.size()) {
+            const std::size_t next = selected + 1u;
+            draw_save_thumbnail(v, icons, 58.0f, 183.0f, 82.0f, 46.0f, false,
+                                g_ui.slots[next].exists, next);
+        }
+        if (g_ui.slots.size() > 1u) {
+            char position[24]{};
+            std::snprintf(position, sizeof(position), "%u / %u",
+                          static_cast<unsigned>(selected + 1u),
+                          static_cast<unsigned>(g_ui.slots.size()));
+            text(v, position, 92.0f, 235.0f, 0.72f, dim, 20);
         }
         draw_selected_info(v, slot, white, dim);
         draw_bottom_buttons(v, "X ENTER   O BACK", dim);
@@ -429,6 +459,142 @@ void render_list(std::vector<GeGpuVertex> &v, std::vector<IconQuad> &icons) {
     }
 }
 
+
+const std::vector<std::byte> &savedata_font_rgba() {
+    static const std::vector<std::byte> rgba = [] {
+        std::vector<std::byte> out(
+            static_cast<std::size_t>(kSavedataFontAtlasWidth) *
+            static_cast<std::size_t>(kSavedataFontAtlasHeight) * 4u,
+            std::byte{0});
+        std::size_t pixel = 0u;
+        for (std::size_t i = 0u; i + 1u < kSavedataFontAtlasRle.size(); i += 2u) {
+            const std::uint32_t count = kSavedataFontAtlasRle[i];
+            const std::uint8_t alpha = kSavedataFontAtlasRle[i + 1u];
+            for (std::uint32_t n = 0u; n < count && pixel <
+                 static_cast<std::size_t>(kSavedataFontAtlasWidth) *
+                 static_cast<std::size_t>(kSavedataFontAtlasHeight); ++n, ++pixel) {
+                const std::size_t base = pixel * 4u;
+                out[base + 0u] = std::byte{0xFF};
+                out[base + 1u] = std::byte{0xFF};
+                out[base + 2u] = std::byte{0xFF};
+                out[base + 3u] = static_cast<std::byte>(alpha);
+            }
+        }
+        return out;
+    }();
+    return rgba;
+}
+
+bool submit_smooth_text(const GeGpuDrawDescriptor &target,
+                        std::span<const TextGlyphCommand> commands) noexcept {
+    if (commands.empty()) return true;
+
+    GeGpuDrawDescriptor text_draw = target;
+    configure_overlay_draw(text_draw, commands.size() * 6u);
+    text_draw.texture_enabled = true;
+    text_draw.texture_address = 0u;
+    text_draw.texture_buffer_width = kSavedataFontAtlasWidth;
+    text_draw.texture_width = kSavedataFontAtlasWidth;
+    text_draw.texture_height = kSavedataFontAtlasHeight;
+    text_draw.texture_format = 3u; // host RGBA8
+    text_draw.texture_function = 0u; // MODULATE atlas coverage by vertex colour
+    text_draw.texture_use_alpha = true;
+    text_draw.texture_linear = true;
+    text_draw.texture_min_linear = true;
+    text_draw.texture_mag_linear = true;
+    text_draw.texture_clamp_u = true;
+    text_draw.texture_clamp_v = true;
+    text_draw.texture_cache_key_hint = kSavedataFontCacheKey;
+    text_draw.texture_image_key_hint = kSavedataFontCacheKey;
+    text_draw.texture_content_signature = kSavedataFontCacheKey;
+    text_draw.blend_enabled = true;
+    text_draw.blend_equation = 0u;
+    text_draw.blend_source_factor = 2u; // source alpha
+    text_draw.blend_dest_factor = 3u;   // one minus source alpha
+
+    if (!ge_gpu_backend_texture_available(text_draw)) {
+        const std::vector<std::byte> &rgba = savedata_font_rgba();
+        if (!ge_gpu_backend_upload_decoded_texture(
+                text_draw, kSavedataFontAtlasWidth, kSavedataFontAtlasHeight, rgba))
+            return false;
+        if (!g_logged_host_texture_upload) {
+            std::fprintf(stderr,
+                "[savedata-ui] V9.5 host font atlas uploaded as cache texture (not framebuffer feedback) key=0x%016llX\n",
+                static_cast<unsigned long long>(kSavedataFontCacheKey));
+            g_logged_host_texture_upload = true;
+        }
+    }
+
+    static thread_local std::vector<GeGpuVertex> textured;
+    textured.clear();
+    textured.reserve(commands.size() * 6u);
+    constexpr float cell_w = 32.0f;
+    constexpr float cell_h = 40.0f;
+    constexpr std::uint32_t columns = 16u;
+
+    auto emit = [&](GeGpuVertex &vert, float x, float y, float u, float vv,
+                    std::uint32_t color) {
+        vert.x = x;
+        vert.y = y;
+        vert.rgba = color;
+        vert.u = u;
+        vert.v = vv;
+    };
+
+    for (const TextGlyphCommand &cmd : commands) {
+        unsigned char code = static_cast<unsigned char>(cmd.ch);
+        if (code < 32u || code > 126u) code = static_cast<unsigned char>('?');
+        const std::uint32_t glyph = static_cast<std::uint32_t>(code - 32u);
+        const std::uint32_t column = glyph % columns;
+        const std::uint32_t row = glyph / columns;
+
+        const float u0 = static_cast<float>(column) * cell_w;
+        const float v0 = static_cast<float>(row) * cell_h;
+        const float u1 = u0 + cell_w;
+        const float v1 = v0 + cell_h;
+
+        // The raster atlas uses a 32x40 cell with the actual glyph centred in
+        // it. Mapping the whole cell to ~8x10 PSP pixels keeps the legacy 6px
+        // advance while preserving antialiased coverage at the edges.
+        const float x0 = cmd.x - 1.0f * cmd.scale;
+        const float y0 = cmd.y - 1.5f * cmd.scale;
+        const float x1 = x0 + 8.0f * cmd.scale;
+        const float y1 = y0 + 10.0f * cmd.scale;
+
+        GeGpuVertex a{}, b{}, c{}, d{}, e{}, f{};
+        emit(a, x0, y0, u0, v0, cmd.color);
+        emit(b, x1, y0, u1, v0, cmd.color);
+        emit(c, x1, y1, u1, v1, cmd.color);
+        emit(d, x0, y0, u0, v0, cmd.color);
+        emit(e, x1, y1, u1, v1, cmd.color);
+        emit(f, x0, y1, u0, v1, cmd.color);
+        textured.push_back(a);
+        textured.push_back(b);
+        textured.push_back(c);
+        textured.push_back(d);
+        textured.push_back(e);
+        textured.push_back(f);
+    }
+
+    text_draw.vertex_count = static_cast<std::uint32_t>(textured.size());
+    ge_gpu_backend_accumulate_color_triangles(text_draw, textured);
+    return true;
+}
+
+void submit_legacy_text_fallback(const GeGpuDrawDescriptor &target,
+                                 std::span<const TextGlyphCommand> commands) noexcept {
+    if (commands.empty()) return;
+    static thread_local std::vector<GeGpuVertex> fallback;
+    fallback.clear();
+    fallback.reserve(commands.size() * 48u);
+    for (const TextGlyphCommand &cmd : commands)
+        legacy_text_glyph(fallback, cmd.ch, cmd.x, cmd.y, cmd.scale, cmd.color);
+    if (fallback.empty()) return;
+    GeGpuDrawDescriptor draw = target;
+    configure_overlay_draw(draw, fallback.size());
+    ge_gpu_backend_accumulate_color_triangles(draw, fallback);
+}
+
 } // namespace
 
 void savedata_utility_ui_begin(std::uint32_t mode,
@@ -443,6 +609,7 @@ void savedata_utility_ui_begin(std::uint32_t mode,
         g_ui.icons.push_back(decode_png_icon(slot));
     g_logged_missing_target = false;
     g_logged_first_frame = false;
+    g_logged_host_texture_upload = false;
     g_ui.selected = slots.empty() ? 0u : std::min(selected, slots.size()-1u);
     g_ui.prompt = slots.empty() ? SavedataUtilityUiPrompt::NoData
                                 : SavedataUtilityUiPrompt::List;
@@ -503,7 +670,7 @@ void savedata_utility_ui_render_frame(std::uint32_t selected_framebuffer) noexce
     if (target == nullptr) {
         if (!g_logged_missing_target) {
             std::fprintf(stderr,
-                "[savedata-ui] V9.3 active but framebuffer target 0x%08X was never observed; no UI frame can be submitted\n",
+                "[savedata-ui] V9.4 active but framebuffer target 0x%08X was never observed; no UI frame can be submitted\n",
                 address);
             g_logged_missing_target = true;
         }
@@ -512,20 +679,27 @@ void savedata_utility_ui_render_frame(std::uint32_t selected_framebuffer) noexce
 
     static thread_local std::vector<GeGpuVertex> vertices;
     static thread_local std::vector<IconQuad> icon_quads;
+    static thread_local std::vector<TextGlyphCommand> text_commands;
     vertices.clear();
     icon_quads.clear();
+    text_commands.clear();
     vertices.reserve(12000u);
     icon_quads.reserve(8u);
+    text_commands.reserve(512u);
+    g_text_commands = &text_commands;
     render_list(vertices, icon_quads);
-    if (vertices.empty()) return;
+    g_text_commands = nullptr;
+    if (vertices.empty() && text_commands.empty()) return;
 
     GeGpuDrawDescriptor draw = target->draw;
-    configure_overlay_draw(draw, vertices.size());
-    ge_gpu_backend_accumulate_color_triangles(draw, vertices);
+    if (!vertices.empty()) {
+        configure_overlay_draw(draw, vertices.size());
+        ge_gpu_backend_accumulate_color_triangles(draw, vertices);
+    }
     if (!g_logged_first_frame) {
         std::fprintf(stderr,
-            "[savedata-ui] V9.3 first UI frame submitted target=0x%08X vertices=%zu\n",
-            address, vertices.size());
+            "[savedata-ui] V9.4 first UI frame submitted target=0x%08X base_vertices=%zu text_glyphs=%zu\n",
+            address, vertices.size(), text_commands.size());
         g_logged_first_frame = true;
     }
 
@@ -577,6 +751,12 @@ void savedata_utility_ui_render_frame(std::uint32_t selected_framebuffer) noexce
         set(textured[5], x0, y1, 0.0f, v1);
         ge_gpu_backend_accumulate_color_triangles(icon_draw, textured);
     }
+
+    // Draw text last so slot thumbnails can never cover labels or metadata.
+    // The atlas has antialiased coverage and is linearly filtered; if a backend
+    // cannot upload host RGBA textures, retain the old 5x7 path as a fallback.
+    if (!submit_smooth_text(target->draw, text_commands))
+        submit_legacy_text_fallback(target->draw, text_commands);
 }
 
 } // namespace vcs

@@ -2549,7 +2549,7 @@ void initialize_savedata_list_ui(psprecomp::Runtime &runtime) {
     savedata_utility.ui_initialized = true;
     savedata_utility_ui_begin(savedata_utility.mode, savedata_utility.slots,
                               savedata_utility.selected);
-    std::cout << "[savedata] V9.3 list UI initialized mode=" << savedata_utility.mode
+    std::cout << "[savedata] V9.4 list UI initialized mode=" << savedata_utility.mode
               << " slots=" << savedata_utility.slots.size()
               << " selected=" << savedata_utility.selected << "\n";
 }
@@ -2802,12 +2802,19 @@ const char *savedata_failure_message(std::uint32_t mode) noexcept {
 }
 
 void cancel_savedata_list_utility(psprecomp::Runtime &runtime) {
+    // PSP utility cancellation is not success.  The retail VCS completion
+    // handler treats common.result == 0 as a successful load even when
+    // abortStatus is non-zero, which is why backing out of our promoted
+    // LOAD->LISTLOAD picker dropped into New Game.  VCS' own AOT path has an
+    // explicit cancel branch for result==2 + abortStatus!=0.
     runtime.memory().store32(savedata_utility.parameter_address + kSavedataAbortStatusOffset, 1u);
-    runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, 0u);
+    runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, 2u);
     savedata_utility.operation_complete = true;
     savedata_utility.status = UtilityStatus::Quit;
     savedata_utility_ui_end();
     display_window_set_system_utility_mode(false);
+    std::cout << "[savedata] V9.4 picker cancelled mode=" << savedata_utility.mode
+              << " commonResult=2 abortStatus=1\n";
 }
 
 void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
@@ -2830,7 +2837,7 @@ void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
         savedata_utility.status = UtilityStatus::Quit;
         savedata_utility_ui_end();
         display_window_set_system_utility_mode(false);
-        std::cout << "[savedata] V9.3 LOAD selected slot=" << slot.save_name
+        std::cout << "[savedata] V9.4 LOAD selected slot=" << slot.save_name
                   << " result=0\n";
     } else {
         savedata_utility.prompt = SavedataUtilityUiPrompt::Result;
@@ -7715,7 +7722,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 initialize_savedata_list_ui(rt);
                 display_window_set_system_utility_mode(true);
                 savedata_utility.previous_buttons = effective_controller_buttons();
-                std::cout << "[savedata] V9.3 LOAD picker active; guest mode="
+                std::cout << "[savedata] V9.4 LOAD picker active; guest mode="
                           << guest_mode << " slots=" << savedata_utility.slots.size() << "\n";
             } else if (savedata_mode_has_list_ui(savedata_utility.mode)) {
                 initialize_savedata_list_ui(rt);

@@ -36,8 +36,15 @@ require(ge, 'savedata_utility_ui_observe_draw(gpu_draw, count);',
         'displayed GE target observed')
 require(ui_cpp, 'ge_gpu_backend_accumulate_color_triangles',
         'utility geometry enters GPU framebuffer')
-require(ui_cpp, 'x = 27.0f; y = 97.0f; w = 144.0f; h = 80.0f;',
-        'PSP savedata selected-icon geometry')
+require(ui_cpp, 'draw_save_thumbnail(v, icons, 27.0f, 94.0f, 144.0f, 80.0f, true,',
+        'selected save thumbnail geometry')
+require(ui_cpp, '58.0f, 37.0f, 82.0f, 46.0f', 'previous slot stays below banner')
+require(ui_cpp, '58.0f, 183.0f, 82.0f, 46.0f', 'next slot stays above footer')
+require(ui_cpp, 'submit_smooth_text', 'antialiased text atlas path')
+require(ui_cpp, 'blend_source_factor = 2u', 'text source-alpha blending')
+require(ui_cpp, 'blend_dest_factor = 3u', 'text inverse-alpha blending')
+require(profile_cpp, 'kUtilityCommonResultOffset, 2u', 'cancel result is not reported as success')
+require(profile_cpp, 'kSavedataAbortStatusOffset, 1u', 'cancel abortStatus is asserted')
 require(ui_cpp, 'quad(v, 0, 0, 480, 23', 'PSP utility banner geometry')
 require(ui_cpp, 'quad(v, 180, 136, 480, 137', 'PSP save-info separator geometry')
 require(profile_cpp, 'slot.icon0_path = icon0.string();', 'savedata ICON0 path preserved')

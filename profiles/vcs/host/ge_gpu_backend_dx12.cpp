@@ -337,6 +337,20 @@ std::uint64_t hash_mix(std::uint64_t hash, std::uint64_t value) noexcept {
     return hash;
 }
 
+bool explicit_host_decoded_texture(const GeGpuDrawDescriptor &draw) noexcept {
+    // Savedata UI host-decoded RGBA textures (font atlas + ICON0.PNG) use
+    // texture_address=0 because they do not live in PSP VRAM. DX12 also keeps
+    // framebuffer target 0 alive for the display, so treating every address-0
+    // texture as framebuffer feedback aliases these host textures to the last
+    // gameplay frame. The savedata uploader deliberately stamps the same
+    // nonzero host identity into all three host-only key/signature fields;
+    // normal PSP textures never use that triple-equality contract.
+    return draw.texture_enabled && draw.texture_address == 0u &&
+           draw.texture_cache_key_hint != 0u &&
+           draw.texture_cache_key_hint == draw.texture_image_key_hint &&
+           draw.texture_cache_key_hint == draw.texture_content_signature;
+}
+
 std::uint64_t texture_key(const GeGpuDrawDescriptor &draw) noexcept {
     if (draw.texture_cache_key_hint != 0u) return draw.texture_cache_key_hint;
     std::uint64_t key = 0xCBF29CE484222325ull;
@@ -3390,7 +3404,8 @@ bool ge_gpu_backend_texture_needed(const GeGpuDrawDescriptor &draw) noexcept {
     if (!s.enabled || !draw.texture_enabled || draw.texture_format > 10u ||
         draw.texture_width == 0u || draw.texture_height == 0u) return false;
     const std::uint32_t feedback_address = draw.texture_address & 0x001FFFF0u;
-    if (find_framebuffer_target(s, feedback_address) != nullptr) {
+    if (!explicit_host_decoded_texture(draw) &&
+        find_framebuffer_target(s, feedback_address) != nullptr) {
         ++s.report.texture_cache_hits;
         return false; // native GPU->GPU framebuffer feedback: no CPU decode
     }
@@ -3424,7 +3439,8 @@ bool ge_gpu_backend_texture_signature_needed(const GeGpuDrawDescriptor &draw) no
     Dx12GeState &s = state();
     if (!s.enabled || !draw.texture_enabled || draw.texture_width == 0u || draw.texture_height == 0u)
         return false;
-    if (find_framebuffer_target(s, draw.texture_address) != nullptr)
+    if (!explicit_host_decoded_texture(draw) &&
+        find_framebuffer_target(s, draw.texture_address) != nullptr)
         return false; // framebuffer target already has authoritative content on the GPU
     Dx12Texture *found = find_cached_texture(s, texture_key(draw));
     return found == nullptr || found->signature_epoch != s.frame_epoch;
@@ -3433,6 +3449,7 @@ bool ge_gpu_backend_texture_signature_needed(const GeGpuDrawDescriptor &draw) no
 bool ge_gpu_backend_is_framebuffer_feedback_texture(const GeGpuDrawDescriptor &draw) noexcept {
     const Dx12GeState &s = state();
     return s.enabled && draw.texture_enabled &&
+           !explicit_host_decoded_texture(draw) &&
            find_framebuffer_target(s, draw.texture_address) != nullptr;
 }
 GeGpuWidescreenHud ge_gpu_backend_widescreen_hud(
@@ -3475,8 +3492,10 @@ bool ge_gpu_backend_adopt_shared_texture(const GeGpuDrawDescriptor &) noexcept {
 bool ge_gpu_backend_texture_available(const GeGpuDrawDescriptor &draw) noexcept {
     Dx12GeState &s = state();
     if (!s.enabled || !draw.texture_enabled) return false;
-    if (const auto *target = find_framebuffer_target(s, draw.texture_address))
-        return target->color != nullptr;
+    if (!explicit_host_decoded_texture(draw)) {
+        if (const auto *target = find_framebuffer_target(s, draw.texture_address))
+            return target->color != nullptr;
+    }
     Dx12Texture *found = find_cached_texture(s, texture_key(draw));
     if (found == nullptr || !found->image) return false;
     found->last_used_epoch = s.frame_epoch;
@@ -3554,6 +3573,7 @@ void ge_gpu_backend_accumulate_color_triangles(
         }
         const std::uint32_t feedback_address = draw.texture_address & 0x001FFFF0u;
         const bool framebuffer_feedback = draw.texture_enabled &&
+            !explicit_host_decoded_texture(draw) &&
             find_framebuffer_target(s, feedback_address) != nullptr;
         Dx12Batch batch{};
         batch.draw = draw;
@@ -3643,6 +3663,7 @@ void ge_gpu_backend_accumulate_hardware_triangles(
         const std::uint32_t logical = std::max<std::uint32_t>(1u, transform.logical_prim_batches);
         const std::uint32_t feedback_address = draw.texture_address & 0x001FFFF0u;
         const bool framebuffer_feedback = draw.texture_enabled &&
+            !explicit_host_decoded_texture(draw) &&
             find_framebuffer_target(s, feedback_address) != nullptr;
         Dx12Batch batch{};
         batch.draw = draw;
@@ -3747,6 +3768,7 @@ bool ge_gpu_backend_accumulate_hardware_packed_0115(
         const std::uint32_t logical = std::max<std::uint32_t>(1u, transform.logical_prim_batches);
         const std::uint32_t feedback_address = draw.texture_address & 0x001FFFF0u;
         const bool framebuffer_feedback = draw.texture_enabled &&
+            !explicit_host_decoded_texture(draw) &&
             find_framebuffer_target(s, feedback_address) != nullptr;
         Dx12Batch batch{};
         batch.draw = draw;
