@@ -20,8 +20,10 @@ if 'startup_load_picker_consumed' not in profile or 'savedata_utility.startup_pi
 if 'savedata_utility.mode = 4u' not in profile: fail('startup picker is not host-side LISTLOAD')
 if 'guest_mode == 0u' not in profile or 'guest_mode == 2u' not in profile: fail('AUTOLOAD/LOAD modes not covered')
 if 'if (!savedata_utility.startup_picker)' not in profile: fail('startup picker cancellation guard missing')
-if 'kUtilityCommonResultOffset, 2u' not in profile or 'kSavedataAbortStatusOffset, 1u' not in profile:
-    fail('picker cancel is still reported as successful LOAD')
+if 'load_cancel_workaround' not in profile or 'kPspUtilityDialogResultAbort' not in profile:
+    fail('promoted LOAD picker cancel compatibility path missing')
+if 'kPspUtilityDialogResultCancel = 1u' not in profile:
+    fail('PSP user-cancel result is not defined for non-load dialogs')
 if 'MouseMenu=false' not in ini: fail('mouse menu is not disabled by default')
 if 'if (mouse_menu_enabled()) enqueue_synthetic_pulse(state, kPspCross, 2);' not in display:
     fail('savedata mouse click is not gated by MouseMenu')
@@ -29,5 +31,5 @@ print('LOAD-ONLY STARTUP AUDIT: PASS')
 print(' - native GAME frontend boot hook is unlinked')
 print(' - V8 generated autoload interception is removed')
 print(' - first AUTOLOAD and every explicit LOAD become the in-frame Load Game picker')
-print(' - cancel returns result=2 + abortStatus=1 instead of successful LOAD')
+print(' - LOAD cancel keeps the proven abort compatibility path; SAVE uses PSP CANCEL')
 print(' - menu mouse remains disabled by default and gates savedata clicks')

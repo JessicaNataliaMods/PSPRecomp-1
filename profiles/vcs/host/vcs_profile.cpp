@@ -2207,6 +2207,14 @@ constexpr std::uint32_t kPspUtilityCircle = 0x002000u;
 constexpr std::uint32_t kPspUtilityCross = 0x004000u;
 
 constexpr std::uint32_t kUtilityCommonResultOffset = 0x1Cu;
+// PSP utility dialog common.result values.  Keep these separate from savedata
+// I/O error codes: user cancellation is CANCEL (1), while ABORT (2) is a
+// different firmware result.  VCS needs a legacy ABORT workaround only for
+// the promoted LISTLOAD path; normal LISTSAVE/LISTDELETE cancellation must use
+// the real PSP CANCEL result or the retail frontend enters its loading path.
+constexpr std::uint32_t kPspUtilityDialogResultSuccess = 0u;
+constexpr std::uint32_t kPspUtilityDialogResultCancel = 1u;
+constexpr std::uint32_t kPspUtilityDialogResultAbort = 2u;
 constexpr std::uint32_t kSavedataModeOffset = 0x30u;
 constexpr std::uint32_t kSavedataGameNameOffset = 0x3Cu;
 constexpr std::uint32_t kSavedataSaveNameOffset = 0x4Cu;
@@ -2549,7 +2557,7 @@ void initialize_savedata_list_ui(psprecomp::Runtime &runtime) {
     savedata_utility.ui_initialized = true;
     savedata_utility_ui_begin(savedata_utility.mode, savedata_utility.slots,
                               savedata_utility.selected);
-    std::cout << "[savedata] V9.4 list UI initialized mode=" << savedata_utility.mode
+    std::cout << "[savedata] V9.6 list UI initialized mode=" << savedata_utility.mode
               << " slots=" << savedata_utility.slots.size()
               << " selected=" << savedata_utility.selected << "\n";
 }
@@ -2802,19 +2810,34 @@ const char *savedata_failure_message(std::uint32_t mode) noexcept {
 }
 
 void cancel_savedata_list_utility(psprecomp::Runtime &runtime) {
-    // PSP utility cancellation is not success.  The retail VCS completion
-    // handler treats common.result == 0 as a successful load even when
-    // abortStatus is non-zero, which is why backing out of our promoted
-    // LOAD->LISTLOAD picker dropped into New Game.  VCS' own AOT path has an
-    // explicit cancel branch for result==2 + abortStatus!=0.
-    runtime.memory().store32(savedata_utility.parameter_address + kSavedataAbortStatusOffset, 1u);
-    runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, 2u);
+    // Real PSP savedata list dialogs report a user Back/Cancel as
+    // common.result = CANCEL (1) and do not set abortStatus.  V9.4 deliberately
+    // used ABORT (2) + abortStatus=1 to get VCS' promoted LOAD->LISTLOAD path
+    // back into gameplay; applying that same workaround to LISTSAVE was wrong:
+    // VCS interprets it as a load/restore transition and shows a black LOADING
+    // screen.  Keep the proven LOAD compatibility workaround, but use exact PSP
+    // cancellation semantics for SAVE/DELETE.
+    const bool load_cancel_workaround = savedata_utility.mode == 4u ||
+        savedata_utility.startup_picker || savedata_utility.direct_load_picker;
+    const std::uint32_t common_result = load_cancel_workaround
+        ? kPspUtilityDialogResultAbort
+        : kPspUtilityDialogResultCancel;
+    const std::uint32_t abort_status = load_cancel_workaround ? 1u : 0u;
+
+    runtime.memory().store32(savedata_utility.parameter_address +
+                             kSavedataAbortStatusOffset, abort_status);
+    runtime.memory().store32(savedata_utility.parameter_address +
+                             kUtilityCommonResultOffset, common_result);
     savedata_utility.operation_complete = true;
     savedata_utility.status = UtilityStatus::Quit;
     savedata_utility_ui_end();
     display_window_set_system_utility_mode(false);
-    std::cout << "[savedata] V9.4 picker cancelled mode=" << savedata_utility.mode
-              << " commonResult=2 abortStatus=1\n";
+    std::cout << "[savedata] V9.6 picker cancelled mode=" << savedata_utility.mode
+              << " commonResult=" << common_result
+              << " abortStatus=" << abort_status
+              << (load_cancel_workaround ? " policy=load-compat-abort"
+                                         : " policy=psp-user-cancel")
+              << "\n";
 }
 
 void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
@@ -2837,7 +2860,7 @@ void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
         savedata_utility.status = UtilityStatus::Quit;
         savedata_utility_ui_end();
         display_window_set_system_utility_mode(false);
-        std::cout << "[savedata] V9.4 LOAD selected slot=" << slot.save_name
+        std::cout << "[savedata] V9.6 LOAD selected slot=" << slot.save_name
                   << " result=0\n";
     } else {
         savedata_utility.prompt = SavedataUtilityUiPrompt::Result;
@@ -7722,7 +7745,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 initialize_savedata_list_ui(rt);
                 display_window_set_system_utility_mode(true);
                 savedata_utility.previous_buttons = effective_controller_buttons();
-                std::cout << "[savedata] V9.4 LOAD picker active; guest mode="
+                std::cout << "[savedata] V9.6 LOAD picker active; guest mode="
                           << guest_mode << " slots=" << savedata_utility.slots.size() << "\n";
             } else if (savedata_mode_has_list_ui(savedata_utility.mode)) {
                 initialize_savedata_list_ui(rt);
