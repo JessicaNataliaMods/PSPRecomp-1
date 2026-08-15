@@ -4184,21 +4184,38 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
             active_pixel_valid = true;
         }
 
-        const auto scale_x = [&](std::int32_t value) {
+        // The PSP scissor is expressed in 480x272 logical pixels and has to be
+        // remapped onto a render target that is normally several times larger.
+        // Both edges must round *inwards*: truncating a leading edge starts the
+        // rectangle up to (scale - 1) device pixels early, which admits a sliver
+        // of the neighbouring logical pixel that the guest scissored away. VCS
+        // draws the radar map tiles clipped to the radar's bounding box and then
+        // covers them with a circular mask, so that sliver escaped above the
+        // mask as a thin horizontal line over the minimap. Trailing edges were
+        // already truncated, which is the inward direction for them; only the
+        // leading edges were wrong. At native 480x272 the scale is 1 and both
+        // roundings are exact, which is why this only ever showed at upscaled
+        // internal resolutions.
+        const auto scale_leading = [](std::int32_t value, std::uint32_t target,
+                                      std::uint32_t logical) {
+            const std::int64_t denominator = std::max<std::uint32_t>(1u, logical);
+            const std::int64_t numerator =
+                static_cast<std::int64_t>(value) * target + denominator - 1;
             return static_cast<LONG>(std::clamp<std::int64_t>(
-                static_cast<std::int64_t>(value) * s.target_width /
-                    std::max<std::uint32_t>(1u, logical_width),
-                0, static_cast<std::int64_t>(s.target_width)));
+                numerator / denominator, 0, static_cast<std::int64_t>(target)));
         };
-        const auto scale_y = [&](std::int32_t value) {
+        const auto scale_trailing = [](std::int32_t value, std::uint32_t target,
+                                       std::uint32_t logical) {
             return static_cast<LONG>(std::clamp<std::int64_t>(
-                static_cast<std::int64_t>(value) * s.target_height /
-                    std::max<std::uint32_t>(1u, logical_height),
-                0, static_cast<std::int64_t>(s.target_height)));
+                static_cast<std::int64_t>(value) * target /
+                    std::max<std::uint32_t>(1u, logical),
+                0, static_cast<std::int64_t>(target)));
         };
         D3D12_RECT scissor{
-            scale_x(batch.draw.scissor_x0), scale_y(batch.draw.scissor_y0),
-            scale_x(batch.draw.scissor_x1 + 1), scale_y(batch.draw.scissor_y1 + 1)};
+            scale_leading(batch.draw.scissor_x0, s.target_width, logical_width),
+            scale_leading(batch.draw.scissor_y0, s.target_height, logical_height),
+            scale_trailing(batch.draw.scissor_x1 + 1, s.target_width, logical_width),
+            scale_trailing(batch.draw.scissor_y1 + 1, s.target_height, logical_height)};
         if (scissor.right <= scissor.left || scissor.bottom <= scissor.top) continue;
         if (!active_scissor_valid ||
             std::memcmp(&scissor, &active_scissor, sizeof(scissor)) != 0) {
