@@ -22,11 +22,16 @@ require(host / "vcs_profile.cpp",
         "// limit_frame_rate() may advance virtual_time_us when the host misses the",
         "post-frame-limit audio timeline seal")
 
-require(profile / "CMakeLists.txt", "host/savedata_dialog.cpp", "savedata dialog linked")
+require(profile / "CMakeLists.txt", "host/savedata_utility_ui.cpp", "PSP savedata utility renderer linked")
 require(host / "vcs_profile.cpp", "kSavedataSaveNameListOffset = 0x60u", "savedata saveNameList")
-require(host / "vcs_profile.cpp", "mode != 4u && mode != 5u && mode != 6u", "savedata LIST modes")
-require(host / "vcs_profile.cpp", "choose_savedata_slot", "savedata chooser invoked")
-require(host / "savedata_dialog.cpp", "VCSNativeSavedataSlotDialog", "Win32 savedata chooser")
+require(host / "vcs_profile.cpp", "savedata_mode_has_list_ui", "savedata LIST modes")
+require(host / "vcs_profile.cpp", "update_savedata_list_utility", "interactive savedata HLE state machine")
+require(host / "vcs_profile.cpp", "savedata_utility_ui_render_frame(display_state.frame_buffer);",
+        "savedata utility rendered into GE framebuffer")
+require(host / "savedata_utility_ui.cpp", "ge_gpu_backend_accumulate_color_triangles",
+        "in-frame savedata utility draw")
+if "host/savedata_dialog.cpp" in (profile / "CMakeLists.txt").read_text(encoding="utf-8", errors="replace"):
+    errors.append("rejected Win32 savedata dialog must not be linked")
 
 require(generated / "generated_units.hpp", '#include "vcs_draw_distance_patch.hpp"',
         "generated draw-distance state header")
@@ -63,7 +68,7 @@ if errors:
 
 print("CORRECTNESS 0.1 SOURCE AUDIT: PASS")
 print(" - audio release/timing guards present")
-print(" - savedata list selector linked")
+print(" - savedata LIST UI is firmware-style HLE rendered in the PSP framebuffer")
 print(" - draw-distance local AOT labels + regeneration hooks present")
 print(" - DX12 unsafe opaque blend fallback removed")
 print(" - draw distance remains opt-in for baseline FPS comparison")

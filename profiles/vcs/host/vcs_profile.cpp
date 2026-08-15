@@ -11,7 +11,7 @@
 #include "ge_gpu_backend.hpp"
 #include "vcs_project2dfx.hpp"
 #include "vcs_draw_distance_patch.hpp"
-#include "savedata_dialog.hpp"
+#include "savedata_utility_ui.hpp"
 
 #include "psprecomp/common.hpp"
 #include "psprecomp/deflate.hpp"
@@ -796,6 +796,13 @@ std::filesystem::path identify_pmf_source(std::span<const std::uint8_t> header, 
     return {};
 }
 
+[[nodiscard]] bool is_boot_titles_movie(const std::filesystem::path &path) {
+    if (path.empty()) return false;
+    std::string name = path.filename().string();
+    std::transform(name.begin(), name.end(), name.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
+    return name == "TITLES.PMF";
+}
 
 std::uint16_t read_le16(std::span<const std::uint8_t> bytes, std::size_t offset) {
     return static_cast<std::uint16_t>(bytes[offset]) |
@@ -2171,11 +2178,33 @@ enum class UtilityStatus : std::uint32_t {
 struct SavedataUtilityState {
     UtilityStatus status{UtilityStatus::None};
     std::uint32_t parameter_address{};
+    std::uint32_t mode{};
     bool operation_complete{};
-    bool slot_selection_complete{};
+    bool ui_initialized{};
+    std::vector<SavedataSlotEntry> slots;
+    std::size_t selected{};
+    std::uint32_t previous_buttons{};
+    SavedataUtilityUiPrompt prompt{SavedataUtilityUiPrompt::List};
+    bool confirm_yes{};
+    std::uint32_t last_result{};
+    // V9 load-only startup: the first retail AUTOLOAD/LOAD is presented through
+    // the in-frame LISTLOAD picker instead of being allowed to auto-select a
+    // save or fall into New Game. The guest parameter keeps its original mode;
+    // only this host-side UI state is promoted to LISTLOAD.
+    bool startup_picker{};
+    bool direct_load_picker{};
 };
 
 SavedataUtilityState savedata_utility{};
+bool startup_load_picker_consumed = false;
+
+constexpr std::uint32_t kPspUtilityStart = 0x000008u;
+constexpr std::uint32_t kPspUtilityUp = 0x000010u;
+constexpr std::uint32_t kPspUtilityRight = 0x000020u;
+constexpr std::uint32_t kPspUtilityDown = 0x000040u;
+constexpr std::uint32_t kPspUtilityLeft = 0x000080u;
+constexpr std::uint32_t kPspUtilityCircle = 0x002000u;
+constexpr std::uint32_t kPspUtilityCross = 0x004000u;
 
 constexpr std::uint32_t kUtilityCommonResultOffset = 0x1Cu;
 constexpr std::uint32_t kSavedataModeOffset = 0x30u;
@@ -2186,6 +2215,13 @@ constexpr std::uint32_t kSavedataFileNameOffset = 0x64u;
 constexpr std::uint32_t kSavedataDataBufferOffset = 0x74u;
 constexpr std::uint32_t kSavedataDataBufferSizeOffset = 0x78u;
 constexpr std::uint32_t kSavedataDataSizeOffset = 0x7Cu;
+constexpr std::uint32_t kSavedataSfoOffset = 0x80u;
+constexpr std::uint32_t kSavedataSfoTitleOffset = kSavedataSfoOffset + 0x000u;
+constexpr std::uint32_t kSavedataSfoSavedataTitleOffset = kSavedataSfoOffset + 0x080u;
+constexpr std::uint32_t kSavedataSfoDetailOffset = kSavedataSfoOffset + 0x100u;
+constexpr std::uint32_t kSavedataSfoTitleSize = 0x80u;
+constexpr std::uint32_t kSavedataSfoSavedataTitleSize = 0x80u;
+constexpr std::uint32_t kSavedataSfoDetailSize = 0x400u;
 constexpr std::uint32_t kSavedataIcon0Offset = 0x584u;
 constexpr std::uint32_t kSavedataIcon1Offset = 0x594u;
 constexpr std::uint32_t kSavedataPic1Offset = 0x5A4u;
@@ -2234,6 +2270,193 @@ std::filesystem::path savedata_directory(const psprecomp::Runtime &runtime, std:
     return savedata_root(runtime) / (game + save);
 }
 
+
+struct SavedataDisplayMetadata {
+    std::string title;
+    std::string savedata_title;
+    std::string detail;
+};
+
+SavedataDisplayMetadata savedata_metadata_from_guest(psprecomp::Runtime &runtime,
+                                                      std::uint32_t parameter_address) {
+    SavedataDisplayMetadata metadata;
+    if (!runtime.memory().contains(parameter_address + kSavedataSfoOffset,
+                                   kSavedataSfoDetailOffset + kSavedataSfoDetailSize - kSavedataSfoOffset))
+        return metadata;
+    metadata.title = read_fixed_string(runtime.memory(),
+                                       parameter_address + kSavedataSfoTitleOffset,
+                                       kSavedataSfoTitleSize);
+    metadata.savedata_title = read_fixed_string(runtime.memory(),
+                                                parameter_address + kSavedataSfoSavedataTitleOffset,
+                                                kSavedataSfoSavedataTitleSize);
+    metadata.detail = read_fixed_string(runtime.memory(),
+                                        parameter_address + kSavedataSfoDetailOffset,
+                                        kSavedataSfoDetailSize);
+    return metadata;
+}
+
+constexpr std::string_view kSavedataMetadataMagic = "VCSMETA1";
+
+void write_u32_le(std::ofstream &out, std::uint32_t value) {
+    const char bytes[4] = {
+        static_cast<char>(value & 0xFFu),
+        static_cast<char>((value >> 8u) & 0xFFu),
+        static_cast<char>((value >> 16u) & 0xFFu),
+        static_cast<char>((value >> 24u) & 0xFFu),
+    };
+    out.write(bytes, 4);
+}
+
+bool read_u32_le(std::ifstream &in, std::uint32_t &value) {
+    unsigned char bytes[4]{};
+    if (!in.read(reinterpret_cast<char *>(bytes), 4)) return false;
+    value = static_cast<std::uint32_t>(bytes[0]) |
+        (static_cast<std::uint32_t>(bytes[1]) << 8u) |
+        (static_cast<std::uint32_t>(bytes[2]) << 16u) |
+        (static_cast<std::uint32_t>(bytes[3]) << 24u);
+    return true;
+}
+
+bool write_savedata_metadata_file(const std::filesystem::path &directory,
+                                  const SavedataDisplayMetadata &metadata) {
+    std::error_code error;
+    std::filesystem::create_directories(directory, error);
+    if (error) return false;
+    std::ofstream out(directory / "VCSNative.meta", std::ios::binary | std::ios::trunc);
+    if (!out) return false;
+    out.write(kSavedataMetadataMagic.data(), static_cast<std::streamsize>(kSavedataMetadataMagic.size()));
+    const auto write_string = [&](const std::string &value) {
+        const std::uint32_t length = static_cast<std::uint32_t>(
+            std::min<std::size_t>(value.size(), 64u * 1024u));
+        write_u32_le(out, length);
+        if (length != 0u) out.write(value.data(), static_cast<std::streamsize>(length));
+    };
+    write_string(metadata.title);
+    write_string(metadata.savedata_title);
+    write_string(metadata.detail);
+    return out.good();
+}
+
+SavedataDisplayMetadata read_savedata_metadata_file(const std::filesystem::path &directory) {
+    SavedataDisplayMetadata metadata;
+    std::ifstream in(directory / "VCSNative.meta", std::ios::binary);
+    if (!in) return metadata;
+    std::string magic(kSavedataMetadataMagic.size(), '\0');
+    if (!in.read(magic.data(), static_cast<std::streamsize>(magic.size())) ||
+        magic != kSavedataMetadataMagic)
+        return {};
+    const auto read_string = [&](std::string &value) -> bool {
+        std::uint32_t length = 0u;
+        if (!read_u32_le(in, length) || length > 64u * 1024u) return false;
+        value.assign(length, '\0');
+        return length == 0u || static_cast<bool>(in.read(value.data(), static_cast<std::streamsize>(length)));
+    };
+    if (!read_string(metadata.title) ||
+        !read_string(metadata.savedata_title) ||
+        !read_string(metadata.detail))
+        return {};
+    return metadata;
+}
+
+// Imported PSP/PPSSPP savedata directories may already contain a standard
+// PARAM.SFO. Read the three user-facing strings directly so pre-existing saves
+// can show their title/mission metadata without first being re-saved by
+// VCSNative. This is deliberately a tiny bounded PSF reader, not a general SFO
+// implementation.
+SavedataDisplayMetadata read_savedata_param_sfo(const std::filesystem::path &directory) {
+    SavedataDisplayMetadata metadata;
+    std::ifstream in(directory / "PARAM.SFO", std::ios::binary | std::ios::ate);
+    if (!in) return metadata;
+    const std::streamoff end = in.tellg();
+    if (end < 20 || end > static_cast<std::streamoff>(1024 * 1024)) return metadata;
+    std::vector<std::uint8_t> bytes(static_cast<std::size_t>(end));
+    in.seekg(0, std::ios::beg);
+    if (!in.read(reinterpret_cast<char *>(bytes.data()), static_cast<std::streamsize>(bytes.size())))
+        return metadata;
+
+    const auto u16 = [&](std::size_t offset, std::uint16_t &value) -> bool {
+        if (offset + 2u > bytes.size()) return false;
+        value = static_cast<std::uint16_t>(bytes[offset]) |
+                static_cast<std::uint16_t>(bytes[offset + 1u] << 8u);
+        return true;
+    };
+    const auto u32 = [&](std::size_t offset, std::uint32_t &value) -> bool {
+        if (offset + 4u > bytes.size()) return false;
+        value = static_cast<std::uint32_t>(bytes[offset]) |
+                (static_cast<std::uint32_t>(bytes[offset + 1u]) << 8u) |
+                (static_cast<std::uint32_t>(bytes[offset + 2u]) << 16u) |
+                (static_cast<std::uint32_t>(bytes[offset + 3u]) << 24u);
+        return true;
+    };
+    std::uint32_t magic = 0u, key_table = 0u, data_table = 0u, count = 0u;
+    if (!u32(0u, magic) || magic != 0x46535000u ||
+        !u32(8u, key_table) || !u32(12u, data_table) || !u32(16u, count) ||
+        count > 256u || key_table >= bytes.size() || data_table >= bytes.size())
+        return metadata;
+
+    for (std::uint32_t i = 0u; i < count; ++i) {
+        const std::size_t entry = 20u + static_cast<std::size_t>(i) * 16u;
+        std::uint16_t key_offset = 0u, format = 0u;
+        std::uint32_t data_len = 0u, data_offset = 0u;
+        if (!u16(entry, key_offset) || !u16(entry + 2u, format) ||
+            !u32(entry + 4u, data_len) || !u32(entry + 12u, data_offset))
+            break;
+        const std::size_t key_pos = static_cast<std::size_t>(key_table) + key_offset;
+        const std::size_t data_pos = static_cast<std::size_t>(data_table) + data_offset;
+        if (key_pos >= bytes.size() || data_pos >= bytes.size()) continue;
+
+        std::size_t key_end = key_pos;
+        while (key_end < bytes.size() && bytes[key_end] != 0u && key_end - key_pos < 96u) ++key_end;
+        if (key_end == bytes.size() || key_end - key_pos >= 96u) continue;
+        const std::string key(reinterpret_cast<const char *>(bytes.data() + key_pos), key_end - key_pos);
+
+        // UTF-8/string PSF entries use a string-ish format; accepting any
+        // non-empty data here is harmless because only known string keys below
+        // are consumed and the first NUL terminates the visible text.
+        (void)format;
+        const std::size_t available = bytes.size() - data_pos;
+        const std::size_t length = std::min<std::size_t>(data_len, available);
+        std::size_t visible = 0u;
+        while (visible < length && bytes[data_pos + visible] != 0u) ++visible;
+        const std::string value(reinterpret_cast<const char *>(bytes.data() + data_pos), visible);
+        if (key == "TITLE") metadata.title = value;
+        else if (key == "SAVEDATA_TITLE") metadata.savedata_title = value;
+        else if (key == "SAVEDATA_DETAIL") metadata.detail = value;
+    }
+    return metadata;
+}
+
+SavedataSlotEntry make_savedata_slot_entry(psprecomp::Runtime &runtime,
+                                           std::uint32_t parameter_address,
+                                           std::string name,
+                                           bool exists,
+                                           bool saving) {
+    SavedataSlotEntry slot;
+    slot.save_name = std::move(name);
+    slot.exists = exists;
+    if (exists) {
+        const std::string game = safe_savedata_component(read_fixed_string(
+            runtime.memory(), parameter_address + kSavedataGameNameOffset, 13u));
+        const std::filesystem::path directory = savedata_root(runtime) / (game + slot.save_name);
+        auto metadata = read_savedata_metadata_file(directory);
+        if (metadata.title.empty() && metadata.savedata_title.empty() && metadata.detail.empty())
+            metadata = read_savedata_param_sfo(directory);
+        slot.title = metadata.title;
+        slot.savedata_title = metadata.savedata_title;
+        slot.detail = metadata.detail;
+        const std::filesystem::path icon0 = directory / "ICON0.PNG";
+        std::error_code icon_error;
+        if (std::filesystem::is_regular_file(icon0, icon_error) && !icon_error)
+            slot.icon0_path = icon0.string();
+    } else if (saving) {
+        const auto metadata = savedata_metadata_from_guest(runtime, parameter_address);
+        slot.title = metadata.title;
+        slot.savedata_title = metadata.savedata_title;
+        slot.detail = metadata.detail;
+    }
+    return slot;
+}
+
 void write_fixed_string(psprecomp::GuestMemory &memory, std::uint32_t address,
                         std::size_t capacity, std::string_view value) {
     if (capacity == 0u) return;
@@ -2263,7 +2486,7 @@ std::vector<SavedataSlotEntry> savedata_slot_entries(psprecomp::Runtime &runtime
             std::string name = safe_savedata_component(read_fixed_string(runtime.memory(), entry, 20u));
             if (name.empty()) break;
             const bool exists = std::filesystem::is_directory(root / (game + name));
-            if (saving || exists) slots.push_back({std::move(name), exists});
+            if (saving || exists) slots.push_back(make_savedata_slot_entry(runtime, parameter_address, std::move(name), exists, saving));
         }
     }
 
@@ -2279,7 +2502,7 @@ std::vector<SavedataSlotEntry> savedata_slot_entries(psprecomp::Runtime &runtime
                 if (full.size() < game.size() || full.compare(0u, game.size(), game) != 0) continue;
                 std::string suffix = full.substr(game.size());
                 if (suffix.empty() || suffix.size() >= 20u) continue;
-                slots.push_back({std::move(suffix), true});
+                slots.push_back(make_savedata_slot_entry(runtime, parameter_address, std::move(suffix), true, saving));
             }
             std::sort(slots.begin(), slots.end(), [](const auto &a, const auto &b) {
                 return a.save_name < b.save_name;
@@ -2293,34 +2516,42 @@ std::vector<SavedataSlotEntry> savedata_slot_entries(psprecomp::Runtime &runtime
             return slot.save_name == current;
         })) {
         const bool exists = std::filesystem::is_directory(root / (game + current));
-        if (saving || exists) slots.push_back({current, exists});
+        if (saving || exists) slots.push_back(make_savedata_slot_entry(runtime, parameter_address, current, exists, saving));
     }
     return slots;
 }
 
-enum class SavedataSlotPreparation { Ready, Cancelled, NoSlots };
+bool savedata_mode_has_list_ui(std::uint32_t mode) noexcept {
+    return mode == 4u || mode == 5u || mode == 6u;
+}
 
-SavedataSlotPreparation prepare_savedata_list_selection(psprecomp::Runtime &runtime,
-                                                         std::uint32_t parameter_address,
-                                                         std::uint32_t mode) {
-    if (mode != 4u && mode != 5u && mode != 6u) return SavedataSlotPreparation::Ready;
-    const bool saving = mode == 5u;
-    auto slots = savedata_slot_entries(runtime, parameter_address, saving);
-    if (slots.empty()) return SavedataSlotPreparation::NoSlots;
+void initialize_savedata_list_ui(psprecomp::Runtime &runtime) {
+    if (!savedata_mode_has_list_ui(savedata_utility.mode) || savedata_utility.ui_initialized)
+        return;
+
+    savedata_utility.slots = savedata_slot_entries(
+        runtime, savedata_utility.parameter_address, savedata_utility.mode == 5u);
+    savedata_utility.selected = 0u;
     const std::string current = safe_savedata_component(read_fixed_string(
-        runtime.memory(), parameter_address + kSavedataSaveNameOffset, 20u));
-    const SavedataDialogChoice choice = choose_savedata_slot(slots, saving, current);
-    if (!choice.confirmed) {
-        // PSP exposes cancellation separately from base.result for the savedata
-        // list utility. Leave base.result successful and flag abortStatus so the
-        // guest can return from its fade/system-dialog state normally.
-        runtime.memory().store32(parameter_address + kSavedataAbortStatusOffset, 1u);
-        return SavedataSlotPreparation::Cancelled;
+        runtime.memory(), savedata_utility.parameter_address + kSavedataSaveNameOffset, 20u));
+    if (!current.empty()) {
+        const auto found = std::find_if(savedata_utility.slots.begin(), savedata_utility.slots.end(),
+            [&](const SavedataSlotEntry &slot) { return slot.save_name == current; });
+        if (found != savedata_utility.slots.end())
+            savedata_utility.selected = static_cast<std::size_t>(
+                std::distance(savedata_utility.slots.begin(), found));
     }
-    runtime.memory().store32(parameter_address + kSavedataAbortStatusOffset, 0u);
-    write_fixed_string(runtime.memory(), parameter_address + kSavedataSaveNameOffset,
-                       20u, choice.save_name);
-    return SavedataSlotPreparation::Ready;
+
+    runtime.memory().store32(savedata_utility.parameter_address + kSavedataAbortStatusOffset, 0u);
+    savedata_utility.prompt = savedata_utility.slots.empty()
+        ? SavedataUtilityUiPrompt::NoData : SavedataUtilityUiPrompt::List;
+    savedata_utility.previous_buttons = 0u;
+    savedata_utility.ui_initialized = true;
+    savedata_utility_ui_begin(savedata_utility.mode, savedata_utility.slots,
+                              savedata_utility.selected);
+    std::cout << "[savedata] V9.3 list UI initialized mode=" << savedata_utility.mode
+              << " slots=" << savedata_utility.slots.size()
+              << " selected=" << savedata_utility.selected << "\n";
 }
 
 bool write_guest_file(psprecomp::Runtime &runtime, const std::filesystem::path &path,
@@ -2389,6 +2620,14 @@ std::uint32_t save_savedata_file(psprecomp::Runtime &runtime, std::uint32_t para
             !write_savedata_auxiliary(runtime, parameter_address, kSavedataSnd0Offset, "SND0.AT3")) {
             return 0x80110385u;
         }
+        // The PSP firmware normally persists sfoParam to PARAM.SFO and uses
+        // savedataTitle/detail on its load screen. VCSNative's host savedata
+        // path previously dropped that metadata entirely, leaving the slot UI
+        // with only opaque names like S92F0. Preserve the exact guest-provided
+        // display strings in a tiny host sidecar so the in-game overlay can show
+        // the mission/save title on later loads.
+        (void)write_savedata_metadata_file(path.parent_path(),
+                                           savedata_metadata_from_guest(runtime, parameter_address));
     }
     return 0u;
 }
@@ -2541,6 +2780,161 @@ std::uint32_t execute_savedata_operation(psprecomp::Runtime &runtime, std::uint3
         return 0u;
     default:
         return 0x80110300u;
+    }
+}
+
+const char *savedata_success_message(std::uint32_t mode) noexcept {
+    switch (mode) {
+    case 4u: return "LOAD COMPLETED.";
+    case 5u: return "SAVE COMPLETED.";
+    case 6u: return "DELETE COMPLETED.";
+    default: return "OPERATION COMPLETED.";
+    }
+}
+
+const char *savedata_failure_message(std::uint32_t mode) noexcept {
+    switch (mode) {
+    case 4u: return "LOAD FAILED.";
+    case 5u: return "SAVE FAILED.";
+    case 6u: return "DELETE FAILED.";
+    default: return "OPERATION FAILED.";
+    }
+}
+
+void cancel_savedata_list_utility(psprecomp::Runtime &runtime) {
+    runtime.memory().store32(savedata_utility.parameter_address + kSavedataAbortStatusOffset, 1u);
+    runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, 0u);
+    savedata_utility.operation_complete = true;
+    savedata_utility.status = UtilityStatus::Quit;
+    savedata_utility_ui_end();
+    display_window_set_system_utility_mode(false);
+}
+
+void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
+    if (savedata_utility.slots.empty() ||
+        savedata_utility.selected >= savedata_utility.slots.size()) {
+        cancel_savedata_list_utility(runtime);
+        return;
+    }
+    const SavedataSlotEntry &slot = savedata_utility.slots[savedata_utility.selected];
+    runtime.memory().store32(savedata_utility.parameter_address + kSavedataAbortStatusOffset, 0u);
+    write_fixed_string(runtime.memory(), savedata_utility.parameter_address + kSavedataSaveNameOffset,
+                       20u, slot.save_name);
+    const std::uint32_t result = execute_savedata_operation(runtime, savedata_utility.parameter_address);
+    runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, result);
+    savedata_utility.operation_complete = true;
+    savedata_utility.last_result = result;
+    if ((savedata_utility.startup_picker || savedata_utility.direct_load_picker) && result == 0u) {
+        // A successful first-boot choice should hand control back to the retail
+        // LOAD completion path immediately. There is no GAME frontend in V9.
+        savedata_utility.status = UtilityStatus::Quit;
+        savedata_utility_ui_end();
+        display_window_set_system_utility_mode(false);
+        std::cout << "[savedata] V9.3 LOAD selected slot=" << slot.save_name
+                  << " result=0\n";
+    } else {
+        savedata_utility.prompt = SavedataUtilityUiPrompt::Result;
+        savedata_utility_ui_set_prompt(SavedataUtilityUiPrompt::Result,
+            result == 0u ? savedata_success_message(savedata_utility.mode)
+                         : savedata_failure_message(savedata_utility.mode),
+            result == 0u);
+    }
+    if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
+        std::cerr << "[hle] savedata list operation result=0x" << std::hex << std::uppercase << result
+                  << std::nouppercase << std::dec << "\n";
+    }
+}
+
+void update_savedata_list_utility(psprecomp::Runtime &runtime) {
+    initialize_savedata_list_ui(runtime);
+
+    const std::uint32_t buttons = effective_controller_buttons();
+    const std::uint32_t pressed = buttons & ~savedata_utility.previous_buttons;
+    savedata_utility.previous_buttons = buttons;
+
+    if (savedata_utility.prompt == SavedataUtilityUiPrompt::NoData) {
+        if (savedata_utility.startup_picker) return;
+        if ((pressed & (kPspUtilityCircle | kPspUtilityStart)) != 0u) {
+            const std::uint32_t result = savedata_utility.mode == 4u ? 0x80110307u
+                : (savedata_utility.mode == 6u ? 0x80110347u : 0u);
+            runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, result);
+            savedata_utility.operation_complete = true;
+            savedata_utility.last_result = result;
+            savedata_utility.status = UtilityStatus::Quit;
+            savedata_utility_ui_end();
+            display_window_set_system_utility_mode(false);
+        }
+        return;
+    }
+
+    if (savedata_utility.prompt == SavedataUtilityUiPrompt::Result) {
+        if ((pressed & (kPspUtilityCircle | kPspUtilityStart)) != 0u) {
+            if (savedata_utility.last_result != 0u) {
+                // PSP LIST operations return to the list after an I/O failure
+                // so another slot can be tried instead of tearing down utility.
+                savedata_utility.operation_complete = false;
+                savedata_utility.prompt = SavedataUtilityUiPrompt::List;
+                savedata_utility_ui_set_prompt(SavedataUtilityUiPrompt::List);
+            } else {
+                savedata_utility.status = UtilityStatus::Quit;
+                savedata_utility_ui_end();
+                display_window_set_system_utility_mode(false);
+            }
+        }
+        return;
+    }
+
+    if (savedata_utility.prompt == SavedataUtilityUiPrompt::Confirm) {
+        if ((pressed & (kPspUtilityCircle | kPspUtilityStart)) != 0u) {
+            savedata_utility.prompt = SavedataUtilityUiPrompt::List;
+            savedata_utility.confirm_yes = false;
+            savedata_utility_ui_set_prompt(SavedataUtilityUiPrompt::List);
+        } else {
+            if ((pressed & kPspUtilityLeft) != 0u) savedata_utility.confirm_yes = true;
+            if ((pressed & kPspUtilityRight) != 0u) savedata_utility.confirm_yes = false;
+            savedata_utility_ui_set_confirm_choice(savedata_utility.confirm_yes);
+            if ((pressed & kPspUtilityCross) != 0u) {
+                if (savedata_utility.confirm_yes)
+                    execute_selected_savedata_slot(runtime);
+                else {
+                    savedata_utility.prompt = SavedataUtilityUiPrompt::List;
+                    savedata_utility_ui_set_prompt(SavedataUtilityUiPrompt::List);
+                }
+            }
+        }
+        return;
+    }
+
+    if ((pressed & (kPspUtilityCircle | kPspUtilityStart)) != 0u) {
+        if (!savedata_utility.startup_picker)
+            cancel_savedata_list_utility(runtime);
+        return;
+    }
+    if ((pressed & kPspUtilityUp) != 0u && savedata_utility.selected > 0u) {
+        --savedata_utility.selected;
+        savedata_utility_ui_set_selected(savedata_utility.selected);
+    }
+    if ((pressed & kPspUtilityDown) != 0u &&
+        savedata_utility.selected + 1u < savedata_utility.slots.size()) {
+        ++savedata_utility.selected;
+        savedata_utility_ui_set_selected(savedata_utility.selected);
+    }
+    if ((pressed & kPspUtilityCross) != 0u && !savedata_utility.slots.empty()) {
+        const SavedataSlotEntry &slot = savedata_utility.slots[savedata_utility.selected];
+        if (savedata_utility.mode == 4u ||
+            (savedata_utility.mode == 5u && !slot.exists)) {
+            // LISTLOAD immediately starts loading; LISTSAVE only asks before
+            // overwriting an existing slot. This matches the PSP utility flow.
+            execute_selected_savedata_slot(runtime);
+        } else {
+            savedata_utility.prompt = SavedataUtilityUiPrompt::Confirm;
+            savedata_utility.confirm_yes = false; // PSP confirm dialogs default to No.
+            const char *message = savedata_utility.mode == 6u
+                ? "THIS SAVE DATA WILL BE DELETED. CONTINUE?"
+                : "DO YOU WANT TO OVERWRITE THE DATA?";
+            savedata_utility_ui_set_prompt(SavedataUtilityUiPrompt::Confirm, message, true);
+            savedata_utility_ui_set_confirm_choice(false);
+        }
     }
 }
 
@@ -5437,6 +5831,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     sub_interrupts.clear();
     memory_stick_fat_state = 1u;
     controller_state = ControllerState{};
+    savedata_utility_ui_end();
+    display_window_set_system_utility_mode(false);
     savedata_utility = SavedataUtilityState{};
     deflate_fast_pending.clear();
     collision_chain_trace_stack.clear();
@@ -7011,6 +7407,10 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         // wait only here before framebuffer presentation and vblank callbacks.
         if (!ge_async_wait_idle(rt)) return;
         ++display_vblank_index;
+        // First-boot frontend + native pause-menu mouse state.  TITLES.PMF
+        // completion is signalled directly by the MPEG HLE, so this vblank path
+        // never guesses intro completion from framebuffer timing and never
+        // injects Start during a movie.
         vcs::audio_output_advance(virtual_time_us);
         report_realtime_speed_if_requested();
         if (frame_time_diag_enabled()) {
@@ -7162,6 +7562,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             movie_output_buffers.count(normalize_ram_address(display_state.frame_buffer)) != 0u);
         const auto present_entry = frame_time_diag_enabled()
             ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
+        // PSP firmware-owned savedata utility: render its HLE surface into the
+        // same GE target before the frame is finalized. No desktop/Win32 chooser.
+        savedata_utility_ui_render_frame(display_state.frame_buffer);
         const bool gpu_frame_ready = ge_gpu_backend_finish_color_frame(display_vblank_index);
         // VCS only fills the displayed framebuffer on every other vblank, so the
         // GPU path produces a frame at half the vblank rate. Presenting the
@@ -7288,8 +7691,39 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x80110004u);
                 return;
             }
-            savedata_utility = SavedataUtilityState{UtilityStatus::Init, parameter, false, false};
+            savedata_utility = SavedataUtilityState{};
+            savedata_utility.status = UtilityStatus::Init;
+            savedata_utility.parameter_address = parameter;
+            savedata_utility.mode = rt.memory().load32(parameter + kSavedataModeOffset);
             rt.memory().store32(parameter + kUtilityCommonResultOffset, 0u);
+
+            const std::uint32_t guest_mode = savedata_utility.mode;
+            const bool first_boot_autoload = !startup_load_picker_consumed && guest_mode == 0u;
+            const bool direct_load = guest_mode == 2u;
+            if (first_boot_autoload || direct_load) {
+                // Clean V9 rebase: AUTOLOAD is promoted only on the first boot,
+                // while every explicit LOAD request gets a LISTLOAD presentation.
+                // The guest parameter block remains untouched, so after a slot is
+                // selected the original mode 0/2 operation still performs the load.
+                if (guest_mode == 0u) {
+                    startup_load_picker_consumed = true;
+                    savedata_utility.startup_picker = true;
+                } else {
+                    savedata_utility.direct_load_picker = true;
+                }
+                savedata_utility.mode = 4u;
+                initialize_savedata_list_ui(rt);
+                display_window_set_system_utility_mode(true);
+                savedata_utility.previous_buttons = effective_controller_buttons();
+                std::cout << "[savedata] V9.3 LOAD picker active; guest mode="
+                          << guest_mode << " slots=" << savedata_utility.slots.size() << "\n";
+            } else if (savedata_mode_has_list_ui(savedata_utility.mode)) {
+                initialize_savedata_list_ui(rt);
+                display_window_set_system_utility_mode(true);
+                // Latch the button that opened LOAD/SAVE so a held Cross/Enter
+                // cannot instantly confirm the first slot in the PSP utility.
+                savedata_utility.previous_buttons = effective_controller_buttons();
+            }
             if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
                 std::cerr << "[hle] savedata init mode=" << rt.memory().load32(parameter + kSavedataModeOffset)
                           << " game=" << read_fixed_string(rt.memory(), parameter + kSavedataGameNameOffset, 13u)
@@ -7307,29 +7741,20 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             }
             if (savedata_utility.status == UtilityStatus::Init) {
                 savedata_utility.status = UtilityStatus::Visible;
-            } else if (savedata_utility.status == UtilityStatus::Visible && !savedata_utility.operation_complete) {
-                const std::uint32_t mode = rt.memory().load32(
-                    savedata_utility.parameter_address + kSavedataModeOffset);
-                if (!savedata_utility.slot_selection_complete) {
-                    const SavedataSlotPreparation selection = prepare_savedata_list_selection(
-                        rt, savedata_utility.parameter_address, mode);
-                    savedata_utility.slot_selection_complete = true;
-                    if (selection == SavedataSlotPreparation::Cancelled) {
-                        rt.memory().store32(savedata_utility.parameter_address +
-                                            kUtilityCommonResultOffset, 0u);
-                        savedata_utility.operation_complete = true;
-                        savedata_utility.status = UtilityStatus::Quit;
-                        set_success(ctx);
-                        return;
+            } else if (savedata_utility.status == UtilityStatus::Visible) {
+                if (savedata_mode_has_list_ui(savedata_utility.mode)) {
+                    update_savedata_list_utility(rt);
+                } else if (!savedata_utility.operation_complete) {
+                    const std::uint32_t result = execute_savedata_operation(
+                        rt, savedata_utility.parameter_address);
+                    rt.memory().store32(savedata_utility.parameter_address +
+                                        kUtilityCommonResultOffset, result);
+                    savedata_utility.operation_complete = true;
+                    savedata_utility.status = UtilityStatus::Quit;
+                    if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
+                        std::cerr << "[hle] savedata operation result=0x" << std::hex << std::uppercase << result
+                                  << std::nouppercase << std::dec << "\n";
                     }
-                }
-                const std::uint32_t result = execute_savedata_operation(rt, savedata_utility.parameter_address);
-                rt.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, result);
-                savedata_utility.operation_complete = true;
-                savedata_utility.status = UtilityStatus::Quit;
-                if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
-                    std::cerr << "[hle] savedata operation result=0x" << std::hex << std::uppercase << result
-                              << std::nouppercase << std::dec << "\n";
                 }
             }
             set_success(ctx);
@@ -7340,9 +7765,11 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             ctx.set_gpr(2, static_cast<std::uint32_t>(reported));
             if (reported == UtilityStatus::Init) {
                 // PSP utility initialization completes on its own access thread.
-                // Expose INIT once, then make the dialog visible for Update().
+                // Expose INIT once, then make the firmware-owned utility visible.
                 savedata_utility.status = UtilityStatus::Visible;
             } else if (reported == UtilityStatus::Finished) {
+                savedata_utility_ui_end();
+                display_window_set_system_utility_mode(false);
                 savedata_utility = SavedataUtilityState{};
             }
         });
@@ -7353,6 +7780,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 return;
             }
             savedata_utility.status = UtilityStatus::Finished;
+            savedata_utility_ui_end();
+            display_window_set_system_utility_mode(false);
             set_success(ctx);
         });
 
@@ -8636,6 +9065,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             }
             std::vector<std::uint8_t> frame(frame_bytes);
             if (!read_video_frame(state->second, frame)) {
+                // Natural end of TITLES.PMF is the earliest exact hand-off to
+                // the retail startup flow.  Release the native-menu boot gate
+                // here; skipped movies are covered by Reset/Delete below.
                 rt.memory().store32(status_pointer, 0u);
                 ctx.set_gpr(2, 0x80628002u);
                 return;
@@ -8832,8 +9264,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                     rt.memory().store32(ring + 40u, 0u);
                 }
             }
-            if (auto state = mpeg_contexts.find(mpeg_out); state != mpeg_contexts.end())
+            if (auto state = mpeg_contexts.find(mpeg_out); state != mpeg_contexts.end()) {
                 close_video_decoder(state->second);
+            }
             mpeg_contexts.erase(mpeg_out);
             set_success(ctx);
         });

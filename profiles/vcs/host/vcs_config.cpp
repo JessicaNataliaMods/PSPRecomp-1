@@ -453,6 +453,24 @@ bool parse_aspect_ratio(const std::string &value, std::uint32_t &x, std::uint32_
     return true;
 }
 
+void apply_frontend_key(VcsConfiguration &config, const std::string &key,
+                        const std::string &value, std::size_t line) {
+    if (key == "boottogamemenu" || key == "bootmenu") {
+        bool ignored = false;
+        if (!parse_bool(value, ignored))
+            warning(config, line, "Frontend.BootToGameMenu expects true/false");
+        // Retired in the load-only startup path. Kept parse-compatible so an
+        // older INI cannot accidentally re-enable the removed boot frontend.
+        return;
+    }
+    if (key == "mousemenu" || key == "menumouse") {
+        if (!parse_bool(value, config.frontend.mouse_menu))
+            warning(config, line, "Frontend.MouseMenu expects true/false");
+        return;
+    }
+    warning(config, line, "unknown [Frontend] key '" + key + "'");
+}
+
 void apply_controls_key(VcsConfiguration &config, const std::string &key,
                         const std::string &value, std::size_t line) {
     if (key == "camerastick" || key == "mousecamera") {
@@ -713,6 +731,8 @@ VcsConfiguration load_vcs_configuration(const std::filesystem::path &path) {
             apply_widescreen_key(config, key, value, line_number);
         else if (section == "controls")
             apply_controls_key(config, key, value, line_number);
+        else if (section == "frontend")
+            apply_frontend_key(config, key, value, line_number);
         // These sections belong to the optional Project2DFX module, which
         // deliberately owns its parser so it can be compiled independently of
         // the core display/input configuration. They are nevertheless valid

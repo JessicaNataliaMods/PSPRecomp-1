@@ -215,6 +215,12 @@ struct VolumetricCloudsConfiguration {
 // constant 0x3FE38E39 -- exactly 16/9 -- and everything is relative to it.
 inline constexpr float kGameNativeAspectRatio = 16.0f / 9.0f;
 
+struct FrontendConfiguration {
+    // Mouse ownership for the in-frame PSP savedata utility. Disabled by
+    // default so the desktop pointer never interferes with gameplay.
+    bool mouse_menu{false};
+};
+
 struct ControlsConfiguration {
     // Mouse and right-stick camera. Needs the guest-side hook, which bypasses
     // the game's own camera conditions, so it is opt-in.
@@ -242,6 +248,7 @@ struct ControlsConfiguration {
 };
 
 struct VcsConfiguration {
+    FrontendConfiguration frontend{};
     ControlsConfiguration controls{};
     DisplayConfiguration display{};
     RenderingConfiguration rendering{};

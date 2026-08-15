@@ -296,6 +296,7 @@ int main(int argc, char **argv) {
         const std::uint64_t max_dispatches = configured_max_dispatches();
         std::cout << "Dispatch cap: " << max_dispatches << "\n";
         vcs::display_window_start();
+
         vcs::install_display_heartbeat();
         vcs::install_starvation_preemption();
         runtime.run(elf.runtime_entry(), max_dispatches);

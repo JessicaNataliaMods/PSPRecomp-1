@@ -51,6 +51,8 @@ int main() {
                    << "LogToFile=true\n"
                    << "LogFile=vcs-config-test.log\n"
                    << "FlushEveryLine=false\n"
+                   << "[Frontend]\n"
+                   << "MouseMenu=false\n"
                    << "[Controls]\n"
                    << "CameraStick=true\n"
                    << "MouseSensitivity=17\n"
@@ -131,6 +133,8 @@ int main() {
                 "Diagnostics.LogFile was not parsed");
         require(!config.diagnostics.flush_every_line,
                 "Diagnostics.FlushEveryLine was not parsed");
+        require(!config.frontend.mouse_menu,
+                "Frontend.MouseMenu was not parsed");
         require(config.controls.camera_stick, "camera stick was not parsed");
         require(config.controls.mouse_sensitivity == 17u,
                 "mouse sensitivity was not parsed");
@@ -244,6 +248,8 @@ int main() {
                 "missing INI did not preserve PSP internal-resolution default");
         require(missing.controls.ped_camera_up_limit_degrees == 45u,
                 "missing INI did not preserve the stock on-foot camera upper limit");
+        require(!missing.frontend.mouse_menu,
+                "missing INI did not preserve disabled pause-menu mouse default");
         const vcs::InternalResolutionDimensions native =
             vcs::resolve_internal_resolution(missing.rendering);
         require(native.width == 480u && native.height == 272u,

@@ -3,6 +3,7 @@
 #include "vcs_config.hpp"
 #include "vcs_project2dfx.hpp"
 #include "vcs_fps_overlay.hpp"
+#include "savedata_utility_ui.hpp"
 
 #include "psprecomp/common.hpp"
 
@@ -4213,8 +4214,10 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
                                           cloud_viewport, cloud_camera_position,
                                           gpu_draw, count);
         }
-        if (!gpu_draw.clear_mode && primitive >= 3u && primitive <= 6u)
+        if (!gpu_draw.clear_mode && primitive >= 3u && primitive <= 6u) {
             fps_overlay_observe_draw(gpu_draw, count);
+            savedata_utility_ui_observe_draw(gpu_draw, count);
+        }
         if (!gpu_draw.through && !gpu_draw.clear_mode &&
             primitive >= 3u && primitive <= 5u &&
             !project2dfx_observe_camera_hot(gpu_draw, count, camera_state_revision)) {

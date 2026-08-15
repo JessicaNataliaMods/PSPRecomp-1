@@ -7,8 +7,10 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <deque>
 #include <mutex>
 #include <stdexcept>
 #include <iostream>
@@ -138,6 +140,36 @@ struct WindowState {
     std::atomic<std::int32_t> mouse_dx{0};
     std::atomic<std::int32_t> mouse_dy{0};
     std::atomic<std::int32_t> wheel{0};
+    // Guest native pause/frontend state, observed from VCS itself every vblank.
+    // This is deliberately separate from menu_mouse_mode: with MouseMenu=false
+    // the game is still paused, but the OS cursor stays hidden and mouse clicks
+    // are ignored instead of being translated into menu input.
+    std::atomic<bool> guest_frontend_active{false};
+    // Pause/frontend mouse mode. True only while the guest frontend is actually
+    // active AND [Frontend] MouseMenu=true. Never toggled from Escape/Start.
+    std::atomic<bool> menu_mouse_mode{false};
+    // Firmware-owned PSP utility (savedata etc.) takes the pointer/buttons away
+    // from gameplay while its in-frame HLE surface is visible.
+    std::atomic<bool> system_utility_mode{false};
+    // First boot is the *native guest* VCS frontend. The host never draws a
+    // replacement menu; these flags only gate desktop input and queue the two
+    // native R-trigger presses that move the guest pause frontend from MAP to
+    // GAME after the guest itself reports the menu active.
+    std::atomic<bool> native_boot_armed{false};
+    std::atomic<bool> native_boot_active{false};
+    std::atomic<bool> native_boot_game_tab_queued{false};
+    std::atomic<bool> native_boot_game_tab_ready{false};
+    std::atomic<bool> native_boot_user_committed{false};
+    std::atomic<bool> native_boot_lock{false};
+    // After the automatic MAP->BRIEF->GAME navigation finishes, require the
+    // physical pad/keyboard to be fully released before any face/menu button
+    // is allowed through. This prevents the Cross/Space used to skip an intro
+    // from immediately activating GAME's first row (LOAD GAME).
+    std::atomic<bool> native_boot_release_ready{false};
+    std::atomic<std::uint32_t> native_boot_release_neutral_polls{0u};
+    std::mutex synthetic_mutex;
+    std::deque<std::uint32_t> synthetic_buttons;
+    std::atomic<int> last_hover_row{-1};
     // Set while a movie is on screen; see display_window_set_aspect_lock.
     // Atomic because the guest thread raises it and the window thread paints.
     std::atomic<bool> aspect_lock{false};
@@ -161,6 +193,148 @@ constexpr UINT_PTR kStatusTimer = 1u;
 WindowState &window_state() {
     static WindowState state;
     return state;
+}
+
+bool mouse_menu_enabled() noexcept {
+    const VcsConfiguration &config = vcs_configuration();
+    return config.initialized && config.frontend.mouse_menu;
+}
+
+bool native_boot_locked(const WindowState &state) noexcept {
+    return state.native_boot_lock.load(std::memory_order_relaxed);
+}
+
+bool native_boot_ready(const WindowState &state) noexcept {
+    return state.native_boot_game_tab_ready.load(std::memory_order_relaxed);
+}
+
+void refresh_menu_mouse_mode(WindowState &state) noexcept {
+    const bool desired = mouse_menu_enabled() &&
+        state.guest_frontend_active.load(std::memory_order_relaxed) &&
+        !state.system_utility_mode.load(std::memory_order_relaxed);
+    const bool previous = state.menu_mouse_mode.exchange(desired, std::memory_order_relaxed);
+    if (previous == desired) return;
+
+    // Never let raw deltas/wheel movement accumulated while a menu owned the
+    // mouse explode into the camera on the first gameplay frame after closing.
+    state.mouse_dx.store(0, std::memory_order_relaxed);
+    state.mouse_dy.store(0, std::memory_order_relaxed);
+    state.wheel.store(0, std::memory_order_relaxed);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    if (HWND hwnd = state.window.load(std::memory_order_relaxed)) {
+        SetCursor(desired ? LoadCursorW(nullptr, MAKEINTRESOURCEW(32512)) : nullptr);
+        InvalidateRect(hwnd, nullptr, FALSE);
+    }
+}
+
+void clear_synthetic_buttons(WindowState &state) {
+    std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+    state.synthetic_buttons.clear();
+}
+
+void commit_native_boot_action(WindowState &state) noexcept {
+    state.native_boot_user_committed.store(true, std::memory_order_relaxed);
+    state.native_boot_lock.store(false, std::memory_order_relaxed);
+}
+
+void enqueue_synthetic_pulse(WindowState &state, std::uint32_t button, int neutral_polls = 2) {
+    std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+    state.synthetic_buttons.push_back(button);
+    for (int i = 0; i < neutral_polls; ++i) state.synthetic_buttons.push_back(0u);
+}
+
+void enqueue_synthetic_delay(WindowState &state, int polls) {
+    std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+    for (int i = 0; i < polls; ++i) state.synthetic_buttons.push_back(0u);
+}
+
+void enqueue_menu_row_exact(WindowState &state, int row, bool activate) {
+    row = std::clamp(row, 0, 10);
+    // Mouse clicks must be deterministic even if keyboard/pad navigation moved
+    // the guest selection since the previous click. Clamp to the first row with
+    // repeated Up edges, then walk down to the requested row. This costs a few
+    // controller polls but cannot drift or accumulate the "random" movement the
+    // old hover-relative queue produced.
+    for (int i = 0; i < 10; ++i) enqueue_synthetic_pulse(state, kPspUp, 1);
+    for (int i = 0; i < row; ++i) enqueue_synthetic_pulse(state, kPspDown, 1);
+    state.last_hover_row.store(row, std::memory_order_relaxed);
+    if (activate) enqueue_synthetic_pulse(state, kPspCross, 2);
+}
+
+void enqueue_menu_tab(WindowState &state, int tab_index) {
+    tab_index = std::clamp(tab_index, 0, 7);
+    // L repeatedly clamps the pause frontend to MAP, then R reaches the exact
+    // requested tab. This avoids needing a guest-side selected-tab address.
+    for (int i = 0; i < 10; ++i) enqueue_synthetic_pulse(state, kPspLTrigger, 1);
+    for (int i = 0; i < tab_index; ++i) enqueue_synthetic_pulse(state, kPspRTrigger, 1);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+}
+
+int frontend_row_from_point(HWND window, int x, int y) {
+    RECT client{};
+    GetClientRect(window, &client);
+    const int w = client.right - client.left;
+    const int h = client.bottom - client.top;
+    if (w <= 0 || h <= 0) return -1;
+    const double nx = static_cast<double>(x) / static_cast<double>(w);
+    const double ny = static_cast<double>(y) / static_cast<double>(h);
+    if (nx < 0.20 || nx > 0.78 || ny < 0.20 || ny > 0.70) return -1;
+    const double row_position = (ny - 0.27) / 0.074;
+    const int row = static_cast<int>(std::lround(row_position));
+    return row >= 0 && row <= 8 ? row : -1;
+}
+
+int frontend_tab_from_point(HWND window, int x, int y) {
+    RECT client{};
+    GetClientRect(window, &client);
+    const int w = client.right - client.left;
+    const int h = client.bottom - client.top;
+    if (w <= 0 || h <= 0) return -1;
+    const double nx = static_cast<double>(x) / static_cast<double>(w);
+    const double ny = static_cast<double>(y) / static_cast<double>(h);
+    if (ny >= 0.79 && ny < 0.90) {
+        if (nx >= 0.13 && nx < 0.22) return 0; // Map
+        if (nx >= 0.22 && nx < 0.31) return 1; // Brief
+        if (nx >= 0.31 && nx < 0.41) return 2; // Game
+        if (nx >= 0.41 && nx < 0.51) return 3; // Stats
+        if (nx >= 0.51 && nx < 0.66) return 4; // Controls
+    }
+    if (ny >= 0.89 && ny <= 0.99) {
+        if (nx >= 0.13 && nx < 0.25) return 5; // Audio
+        if (nx >= 0.25 && nx < 0.39) return 6; // Display
+        if (nx >= 0.39 && nx < 0.58) return 7; // Multiplayer
+    }
+    return -1;
+}
+
+void enqueue_native_boot_game_tab(WindowState &state) {
+    // The native VCS pause frontend opens on MAP during gameplay. Two genuine
+    // R-trigger edges therefore select GAME (MAP -> BRIEF -> GAME). The menu is
+    // already active before this runs, so these are consumed by the game's own
+    // frontend controller path; no host menu is being navigated or drawn.
+    enqueue_synthetic_delay(state, 2);
+    enqueue_synthetic_pulse(state, kPspRTrigger, 2);
+    enqueue_synthetic_pulse(state, kPspRTrigger, 2);
+    enqueue_synthetic_delay(state, 2);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    state.native_boot_game_tab_queued.store(true, std::memory_order_relaxed);
+}
+
+std::uint32_t dequeue_synthetic_buttons(WindowState &state) {
+    std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+    if (state.synthetic_buttons.empty()) {
+        if (state.native_boot_game_tab_queued.load(std::memory_order_relaxed) &&
+            state.native_boot_active.load(std::memory_order_relaxed))
+            state.native_boot_game_tab_ready.store(true, std::memory_order_relaxed);
+        return 0u;
+    }
+    const std::uint32_t value = state.synthetic_buttons.front();
+    state.synthetic_buttons.pop_front();
+    if (state.synthetic_buttons.empty() &&
+        state.native_boot_game_tab_queued.load(std::memory_order_relaxed) &&
+        state.native_boot_active.load(std::memory_order_relaxed))
+        state.native_boot_game_tab_ready.store(true, std::memory_order_relaxed);
+    return value;
 }
 
 bool key_down(int virtual_key) noexcept {
@@ -274,8 +448,10 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wparam, LPAR
         state.focused.store(false, std::memory_order_relaxed);
         return 0;
     case WM_KEYDOWN:
-        // Escape is the pause button now that it is bound to Start, the way it
-        // is in San Andreas. Alt+F4 and the window's close box still close.
+        // Keyboard state is sampled with GetAsyncKeyState. Do not infer pause
+        // menu ownership from Escape here: the guest may consume the press for
+        // an intro/transition. Cursor mode is driven only by VCS' real native
+        // frontend-active byte through display_window_set_guest_frontend_active.
         return 0;
     case WM_INPUT: {
         // Raw mouse deltas. Sized from the message rather than assumed: the
@@ -297,18 +473,86 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wparam, LPAR
         }
         return 0;
     }
+    case WM_MOUSEMOVE:
+        // Do not synthesize D-pad edges on hover. The old hover-relative queue
+        // could still be draining while the pointer crossed another row, which
+        // made the highlight move seemingly at random. Mouse movement now only
+        // moves the OS cursor; a click performs one exact navigation transaction.
+        return 0;
+    case WM_LBUTTONDOWN:
+        if (state.system_utility_mode.load(std::memory_order_relaxed)) {
+            if (mouse_menu_enabled()) enqueue_synthetic_pulse(state, kPspCross, 2);
+            return 0;
+        }
+        if (mouse_menu_enabled() && state.menu_mouse_mode.load(std::memory_order_relaxed)) {
+            if (native_boot_locked(state) && !native_boot_ready(state)) return 0;
+            const int x = static_cast<int>(static_cast<short>(LOWORD(lparam)));
+            const int y = static_cast<int>(static_cast<short>(HIWORD(lparam)));
+            const int tab = frontend_tab_from_point(window, x, y);
+            if (tab >= 0) {
+                // One click replaces any older mouse-navigation transaction.
+                // The initial boot frontend remains pinned to GAME until an
+                // actual Game-page action is selected.
+                if (!native_boot_locked(state) || tab == 2) {
+                    clear_synthetic_buttons(state);
+                    enqueue_menu_tab(state, tab);
+                }
+            } else {
+                const int row = frontend_row_from_point(window, x, y);
+                // The native GAME page has exactly four actions. Reject lower
+                // hitbox rows while the first-boot lock owns that page.
+                if (row >= 0 && (!native_boot_locked(state) || row <= 3)) {
+                    clear_synthetic_buttons(state);
+                    enqueue_menu_row_exact(state, row, true);
+                    if (native_boot_locked(state)) commit_native_boot_action(state);
+                } else {
+                    // A click outside a recognized item does not punch/fire
+                    // through the menu into the paused world.
+                }
+            }
+            return 0;
+        }
+        break;
+    case WM_RBUTTONDOWN:
+        if (state.system_utility_mode.load(std::memory_order_relaxed)) {
+            if (mouse_menu_enabled()) enqueue_synthetic_pulse(state, kPspCircle, 2);
+            return 0;
+        }
+        if (mouse_menu_enabled() && state.menu_mouse_mode.load(std::memory_order_relaxed)) {
+            // On the initial native GAME screen Circle/Back is deliberately
+            // blocked. Once the user commits to New/Load/Delete/Reset the guest
+            // regains normal back behavior in its confirmation/submenus.
+            if (!native_boot_locked(state)) enqueue_synthetic_pulse(state, kPspCircle, 2);
+            return 0;
+        }
+        break;
     case WM_MOUSEWHEEL:
-        state.wheel.fetch_add(GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA,
-                              std::memory_order_relaxed);
+        if (state.system_utility_mode.load(std::memory_order_relaxed)) {
+            if (mouse_menu_enabled()) {
+                const int notches = GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA;
+                if (notches != 0)
+                    enqueue_synthetic_pulse(state, notches > 0 ? kPspUp : kPspDown, 2);
+            }
+        } else if (mouse_menu_enabled() && state.menu_mouse_mode.load(std::memory_order_relaxed)) {
+            if (native_boot_locked(state) && !native_boot_ready(state)) return 0;
+            const int notches = GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA;
+            if (notches != 0)
+                enqueue_synthetic_pulse(state, notches > 0 ? kPspUp : kPspDown, 2);
+        } else {
+            state.wheel.fetch_add(GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA,
+                                  std::memory_order_relaxed);
+        }
         return 0;
     case WM_SETCURSOR:
-        // Hide the pointer over the client area: the mouse is aiming the
-        // camera, not pointing at anything. Answering WM_SETCURSOR rather than
-        // calling ShowCursor avoids its counter, which has to be balanced
-        // exactly and leaves the cursor invisible everywhere if it is not.
-        // The non-client area keeps its arrow so the title bar stays usable.
+        // Gameplay uses raw mouse deltas and hides the OS pointer. Pause/menu
+        // mode does the opposite: show a normal arrow and turn mouse clicks
+        // into PSP front-end navigation.
         if (LOWORD(lparam) == HTCLIENT) {
-            SetCursor(nullptr);
+            if ((mouse_menu_enabled() && state.system_utility_mode.load(std::memory_order_relaxed)) ||
+                (mouse_menu_enabled() && state.menu_mouse_mode.load(std::memory_order_relaxed)))
+                SetCursor(LoadCursorW(nullptr, MAKEINTRESOURCEW(32512)));
+            else
+                SetCursor(nullptr);
             return TRUE;
         }
         break;
@@ -739,10 +983,17 @@ HostInputState display_window_input() {
     const std::int32_t wheel = state.wheel.exchange(0, std::memory_order_relaxed);
     if (!state.focused.load(std::memory_order_relaxed)) return publish();
 
+    const bool menu_mode = state.system_utility_mode.load(std::memory_order_relaxed) ||
+        state.guest_frontend_active.load(std::memory_order_relaxed);
+
     for (const KeyBinding &binding : kKeyBindings)
         if (key_down(binding.virtual_key)) input.buttons |= binding.psp_button;
-    for (const KeyBinding &binding : kMouseBindings)
-        if (key_down(binding.virtual_key)) input.buttons |= binding.psp_button;
+    // While the pause/frontend cursor is active, mouse clicks belong to the
+    // menu and must never leak through as punch/fire/aim/look-behind.
+    if (!menu_mode) {
+        for (const KeyBinding &binding : kMouseBindings)
+            if (key_down(binding.virtual_key)) input.buttons |= binding.psp_button;
+    }
 
     // Driving and walking want opposite things from the same keys, and the
     // guest tells us which one is happening: only vehicle code reads the
@@ -752,12 +1003,14 @@ HostInputState display_window_input() {
 
     int move_x = 0;
     int move_y = 0;
-    if (key_down(kMoveLeft)) move_x -= 1;
-    if (key_down(kMoveRight)) move_x += 1;
-    if (!driving) {
+    if (!menu_mode) {
+        if (key_down(kMoveLeft)) move_x -= 1;
+        if (key_down(kMoveRight)) move_x += 1;
+    }
+    if (!menu_mode && !driving) {
         if (key_down(kMoveForward)) move_y -= 1;
         if (key_down(kMoveBack)) move_y += 1;
-    } else {
+    } else if (!menu_mode) {
         // In a vehicle the stick's Y axis is lean, not throttle, so W and S
         // must keep out of it -- feeding it made the bike wheelie every time
         // the player accelerated. San Andreas leans with the arrow keys, and
@@ -767,8 +1020,8 @@ HostInputState display_window_input() {
     }
     // W and S drive whatever the context: the accessors they reach are the
     // vehicle's own, so on foot the guest never asks and nothing happens.
-    input.accelerate = key_down(kMoveForward);
-    input.brake = key_down(kMoveBack);
+    input.accelerate = !menu_mode && key_down(kMoveForward);
+    input.brake = !menu_mode && key_down(kMoveBack);
     // Left Alt is San Andreas' walk modifier: half deflection instead of full.
     const int reach = key_down(VK_LMENU) ? 60 : 127;
     input.analog_x = static_cast<std::uint8_t>(std::clamp(128 + move_x * reach, 0, 255));
@@ -826,11 +1079,13 @@ HostInputState display_window_input() {
         const double magnitude = 127.0 * scaled / (scaled + 12.0);
         return static_cast<int>(std::lround(delta < 0 ? -magnitude : magnitude));
     };
-    input.camera_x = camera_response(mouse_dx);
-    // Negated: raw mouse Y grows downwards, and the axis the game reads treats
-    // positive as looking up. Pushing the mouse forward has to raise the view.
-    input.camera_y = camera_response(-mouse_dy);
-    if (controls.invert_camera_y) input.camera_y = -input.camera_y;
+    if (!menu_mode) {
+        input.camera_x = camera_response(mouse_dx);
+        // Negated: raw mouse Y grows downwards, and the axis the game reads treats
+        // positive as looking up. Pushing the mouse forward has to raise the view.
+        input.camera_y = camera_response(-mouse_dy);
+        if (controls.invert_camera_y) input.camera_y = -input.camera_y;
+    }
 
     if (const PfnXInputGetState get_state = xinput_get_state()) {
         XInputStatePacket pad{};
@@ -847,6 +1102,8 @@ HostInputState display_window_input() {
             if (b & kPadRightShoulder) input.buttons |= kPspRTrigger;
             if (b & kPadStart) input.buttons |= kPspStart;
             if (b & kPadBack) input.buttons |= kPspSelect;
+            // Start is only PSP input. Do not use it to guess whether a pause
+            // menu opened; VCS' real frontend-active flag owns cursor state.
             if (b & kPadDpadUp) input.buttons |= kPspUp;
             if (b & kPadDpadDown) input.buttons |= kPspDown;
             if (b & kPadDpadLeft) input.buttons |= kPspLeft;
@@ -870,8 +1127,8 @@ HostInputState display_window_input() {
             // accelerates in a car and still aims out of one, and it needs no
             // help from ModernControlScheme -- that option is about which pad
             // button the game itself reads, which is a different question.
-            if (pad.gamepad.right_trigger > 64u) input.accelerate = true;
-            if (pad.gamepad.left_trigger > 64u) input.brake = true;
+            if (!menu_mode && pad.gamepad.right_trigger > 64u) input.accelerate = true;
+            if (!menu_mode && pad.gamepad.left_trigger > 64u) input.brake = true;
 
             const std::uint8_t pad_x = stick_to_psp(pad.gamepad.lx, false);
             // PSP Y grows downwards, the stick's grows upwards.
@@ -885,13 +1142,167 @@ HostInputState display_window_input() {
             const int camera_x = stick_to_psp(pad.gamepad.rx, false) - 128;
             int camera_y = stick_to_psp(pad.gamepad.ry, false) - 128;
             if (controls.invert_camera_y) camera_y = -camera_y;
-            if (camera_x != 0 || camera_y != 0) {
+            if (!menu_mode && (camera_x != 0 || camera_y != 0)) {
                 input.camera_x = std::clamp(camera_x, -127, 127);
                 input.camera_y = std::clamp(camera_y, -127, 127);
             }
         }
     }
+
+    // Initial native-frontend boot lock. This code is reached only AFTER the
+    // guest has opened its real pause frontend. Intro movies are never locked.
+    // While the two synthetic R edges select GAME, all physical input is
+    // neutral. Even after those edges finish, physical input remains neutral
+    // until every button has been released for two controller polls. This
+    // specifically prevents a held/repeated Space/Cross used to skip the last
+    // intro from becoming a fresh Cross edge on LOAD GAME.
+    static bool boot_cross_was_down = false;
+    const bool boot_locked = native_boot_locked(state);
+    const bool boot_ready = native_boot_ready(state);
+    const std::uint32_t physical_buttons = input.buttons;
+    const bool physical_cross_down = (physical_buttons & kPspCross) != 0u;
+    if (boot_locked) {
+        bool release_ready = state.native_boot_release_ready.load(std::memory_order_relaxed);
+        if (boot_ready && !release_ready) {
+            if (physical_buttons == 0u) {
+                const std::uint32_t neutral =
+                    state.native_boot_release_neutral_polls.fetch_add(1u, std::memory_order_relaxed) + 1u;
+                if (neutral >= 2u) {
+                    state.native_boot_release_ready.store(true, std::memory_order_relaxed);
+                    release_ready = true;
+                    boot_cross_was_down = false;
+                }
+            } else {
+                state.native_boot_release_neutral_polls.store(0u, std::memory_order_relaxed);
+            }
+        }
+
+        if (!boot_ready || !release_ready) {
+            input.buttons = 0u;
+            input.analog_x = 128u;
+            input.analog_y = 128u;
+            input.camera_x = 0;
+            input.camera_y = 0;
+            input.accelerate = false;
+            input.brake = false;
+        } else {
+            if (physical_cross_down && !boot_cross_was_down)
+                commit_native_boot_action(state);
+            input.buttons &= ~(kPspCircle | kPspStart | kPspSelect |
+                               kPspLTrigger | kPspRTrigger);
+            boot_cross_was_down = physical_cross_down;
+        }
+    } else {
+        boot_cross_was_down = physical_cross_down;
+    }
+
+    // One queued synthetic value is consumed per controller sample. The queue
+    // contains explicit neutral polls between presses so the guest sees proper
+    // PSP button edges. Synthetic front-end navigation is ORed last and cannot
+    // be lost to physical input mapping above.
+    input.buttons |= dequeue_synthetic_buttons(state);
     return publish();
+}
+
+void display_window_arm_native_boot_menu(bool armed) noexcept {
+    WindowState &state = window_state();
+    state.native_boot_armed.store(armed, std::memory_order_relaxed);
+    state.native_boot_active.store(false, std::memory_order_relaxed);
+    state.native_boot_game_tab_queued.store(false, std::memory_order_relaxed);
+    state.native_boot_game_tab_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_user_committed.store(false, std::memory_order_relaxed);
+    state.native_boot_release_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_release_neutral_polls.store(0u, std::memory_order_relaxed);
+    // Arming is passive. Do not lock any physical input during logos/FMVs or
+    // ordinary startup. The lock begins only after the guest's real
+    // menu-active flag is observed in display_window_notify_native_boot_menu_active().
+    state.native_boot_lock.store(false, std::memory_order_relaxed);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    state.guest_frontend_active.store(false, std::memory_order_relaxed);
+    state.menu_mouse_mode.store(false, std::memory_order_relaxed);
+    {
+        std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+        state.synthetic_buttons.clear();
+    }
+}
+
+void display_window_notify_native_boot_menu_active() noexcept {
+    WindowState &state = window_state();
+    if (!state.native_boot_armed.load(std::memory_order_relaxed)) return;
+    bool expected = false;
+    if (!state.native_boot_active.compare_exchange_strong(
+            expected, true, std::memory_order_relaxed))
+        return;
+
+    state.native_boot_game_tab_queued.store(false, std::memory_order_relaxed);
+    state.native_boot_game_tab_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_user_committed.store(false, std::memory_order_relaxed);
+    state.native_boot_release_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_release_neutral_polls.store(0u, std::memory_order_relaxed);
+    state.native_boot_lock.store(true, std::memory_order_relaxed);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    refresh_menu_mouse_mode(state);
+    {
+        std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+        state.synthetic_buttons.clear();
+    }
+    enqueue_native_boot_game_tab(state);
+    if (HWND hwnd = state.window.load(std::memory_order_relaxed))
+        InvalidateRect(hwnd, nullptr, FALSE);
+}
+
+void display_window_notify_native_boot_menu_closed() noexcept {
+    WindowState &state = window_state();
+    state.native_boot_active.store(false, std::memory_order_relaxed);
+    state.native_boot_armed.store(false, std::memory_order_relaxed);
+    state.native_boot_game_tab_queued.store(false, std::memory_order_relaxed);
+    state.native_boot_game_tab_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_release_ready.store(false, std::memory_order_relaxed);
+    state.native_boot_release_neutral_polls.store(0u, std::memory_order_relaxed);
+    state.native_boot_lock.store(false, std::memory_order_relaxed);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    refresh_menu_mouse_mode(state);
+    {
+        std::lock_guard<std::mutex> guard(state.synthetic_mutex);
+        state.synthetic_buttons.clear();
+    }
+}
+
+bool display_window_native_boot_user_committed() noexcept {
+    return window_state().native_boot_user_committed.load(std::memory_order_relaxed);
+}
+
+void display_window_set_guest_frontend_active(bool active) noexcept {
+    WindowState &state = window_state();
+    const bool previous = state.guest_frontend_active.exchange(active, std::memory_order_relaxed);
+    if (previous == active) return;
+
+    // Menu transitions are authoritative. Clear stale mouse-navigation pulses
+    // and stale raw deltas so neither can leak across the pause boundary.
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    state.mouse_dx.store(0, std::memory_order_relaxed);
+    state.mouse_dy.store(0, std::memory_order_relaxed);
+    state.wheel.store(0, std::memory_order_relaxed);
+    if (!active) clear_synthetic_buttons(state);
+    refresh_menu_mouse_mode(state);
+}
+
+void display_window_set_system_utility_mode(bool active) noexcept {
+    WindowState &state = window_state();
+    state.system_utility_mode.store(active, std::memory_order_relaxed);
+    state.mouse_dx.store(0, std::memory_order_relaxed);
+    state.mouse_dy.store(0, std::memory_order_relaxed);
+    state.wheel.store(0, std::memory_order_relaxed);
+    state.last_hover_row.store(-1, std::memory_order_relaxed);
+    if (active) {
+        // The click that opened Load/Save has already been consumed by the
+        // guest frontend. Do not let any remaining frontend navigation pulse
+        // leak into the firmware utility as an accidental confirmation.
+        clear_synthetic_buttons(state);
+    }
+    refresh_menu_mouse_mode(state);
+    if (HWND hwnd = state.window.load(std::memory_order_relaxed))
+        InvalidateRect(hwnd, nullptr, FALSE);
 }
 
 bool display_window_close_requested() {
@@ -939,6 +1350,12 @@ DisplayWindowSurface display_window_surface() { return {}; }
 std::uint32_t display_window_buttons() { return 0u; }
 void display_window_analog(std::uint8_t &x, std::uint8_t &y) { x = 128u; y = 128u; }
 HostInputState display_window_input() { return {}; }
+void display_window_arm_native_boot_menu(bool) noexcept {}
+void display_window_notify_native_boot_menu_active() noexcept {}
+void display_window_notify_native_boot_menu_closed() noexcept {}
+void display_window_set_guest_frontend_active(bool) noexcept {}
+bool display_window_native_boot_user_committed() noexcept { return false; }
+void display_window_set_system_utility_mode(bool) noexcept {}
 bool display_window_close_requested() { return false; }
 void display_window_shutdown() {}
 

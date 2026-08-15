@@ -78,6 +78,24 @@ struct HostInputState {
 };
 [[nodiscard]] HostInputState display_window_input();
 
+// Native VCS first-boot frontend integration. These functions do not draw a
+// replacement menu. The boot hook uses VCS' original guest pause-request path
+// only after TITLES.PMF has ended, then R edges select the real GAME tab.
+void display_window_arm_native_boot_menu(bool armed) noexcept;
+void display_window_notify_native_boot_menu_active() noexcept;
+void display_window_notify_native_boot_menu_closed() noexcept;
+[[nodiscard]] bool display_window_native_boot_user_committed() noexcept;
+
+// Mirrors the actual native VCS frontend-active state observed from guest RAM.
+// MouseMenu=true only affects cursor/click translation while this is true;
+// MouseMenu=false leaves the mouse completely out of the pause menu.
+void display_window_set_guest_frontend_active(bool active) noexcept;
+
+// PSP firmware utility ownership (savedata, message dialogs, etc.). This only
+// changes desktop input/cursor routing: the utility pixels are rendered into
+// the PSP framebuffer by the HLE renderer, never by a host window.
+void display_window_set_system_utility_mode(bool active) noexcept;
+
 // True once the user closed the window or pressed Escape.
 [[nodiscard]] bool display_window_close_requested();
 
