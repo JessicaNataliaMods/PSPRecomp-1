@@ -512,7 +512,9 @@ Dx12UploadVertex make_upload_vertex(const GeGpuVertex &source) noexcept {
 bool native_indexed_draw_enabled() noexcept {
     static const bool enabled = [] {
         const char *text = std::getenv("PSPRECOMP_DX12_NATIVE_INDEXED_DRAW");
-        if (text == nullptr || *text == '\0') return false;
+        // Default on: the production GE probe covers it on every build and the
+        // launcher scripts had been enabling it by hand. =0 restores the old path.
+        if (text == nullptr || *text == '\0') return true;
         return std::strcmp(text, "0") != 0 &&
                std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
                std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0;
@@ -2674,18 +2676,39 @@ bool prepare_texture_upload(Dx12GeState &s, const GeGpuDrawDescriptor &draw,
     }
     const std::uint32_t entry_limit = vcs_configuration().rendering.texture_cache_entries;
     const std::uint64_t byte_limit = static_cast<std::uint64_t>(vcs_configuration().rendering.texture_cache_mb) * 1024ull * 1024ull;
+    // Eviction used to rescan the whole cache for a single victim, so freeing k
+    // textures walked k*n unordered_map nodes. Once the cache is full -- which a
+    // streaming city reaches and then stays at -- every upload paid a scan of up
+    // to TextureCacheEntries nodes, with the pointer-chasing locality that implies.
+    //
+    // One pass now collects a batch of the coldest entries, and the loop spends
+    // that batch before scanning again. Same LRU victims, amortized over many
+    // evictions instead of repeated per eviction.
+    constexpr std::size_t kVictimBatch = 64u;
+    std::vector<std::pair<std::uint64_t, std::uint64_t>> victims; // epoch, key
     while (s.textures.size() >= entry_limit || s.texture_cache_bytes + packed.size() > byte_limit) {
-        auto victim = s.textures.end();
-        for (auto it = s.textures.begin(); it != s.textures.end(); ++it) {
-            if (it->second.last_used_epoch == s.frame_epoch) continue;
-            if (victim == s.textures.end() ||
-                it->second.last_used_epoch < victim->second.last_used_epoch)
-                victim = it;
+        if (victims.empty()) {
+            for (const auto &[key, texture] : s.textures) {
+                if (texture.last_used_epoch == s.frame_epoch) continue;
+                victims.emplace_back(texture.last_used_epoch, key);
+            }
+            if (victims.empty()) {
+                ++s.report.rejected_texture_decodes;
+                return false;
+            }
+            // Coldest first, and only the batch actually needed is ordered.
+            const std::size_t keep = std::min(kVictimBatch, victims.size());
+            std::partial_sort(victims.begin(), victims.begin() + keep, victims.end());
+            victims.resize(keep);
+            std::reverse(victims.begin(), victims.end()); // pop_back takes the coldest
         }
-        if (victim == s.textures.end()) {
-            ++s.report.rejected_texture_decodes;
-            return false;
-        }
+        const std::uint64_t key = victims.back().second;
+        victims.pop_back();
+        const auto victim = s.textures.find(key);
+        // A candidate can be touched or replaced between passes, so re-check
+        // rather than trusting the snapshot.
+        if (victim == s.textures.end() || victim->second.last_used_epoch == s.frame_epoch)
+            continue;
         for (Dx12FrameResources &retire : s.frames)
             retire.transient_resources.push_back(victim->second.image);
         retire_texture_srv(s, victim->second.srv_index);

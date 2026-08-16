@@ -150,6 +150,15 @@ Runtime::Runtime(std::uint32_t ram_size) : memory_(ram_size) {
 #endif
     // PSPRECOMP_NO_CHAIN disables cross-unit chaining outright;
     // PSPRECOMP_CHAIN_DEPTH tunes how deep it may nest without a rebuild.
+    //
+    // Do not raise this without measuring native stack use per chained frame.
+    // 1024 was tried on the theory that exceeding the limit is a cliff -- the
+    // chain refuses, the native stack unwinds to Runtime::run, and the target is
+    // re-entered through the guest-PC table -- and that bench.bat already passed
+    // 1024 by hand. It crashed the game during boot. A benchmark does not reach
+    // the call depths gameplay does, and generated frames are not small: each
+    // one carries the unit's locals, and inlining the memory fast path at every
+    // call site (/Ob1) made them larger still. 48 is the value that runs.
     chain_depth_limit_ = 48u;
     if (const char *depth = std::getenv("PSPRECOMP_CHAIN_DEPTH")) {
         char *end = nullptr;

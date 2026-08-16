@@ -20,7 +20,15 @@ endif()
 # Full /Ob3 is valuable at runtime but several large, cold units still make
 # MSVC spend minutes and close to a gigabyte per compiler process. Keep those
 # units buildable, then override this level only for the measured hot corpus.
-set(PSPRECOMP_GENERATED_INLINE_LEVEL "0" CACHE STRING
+# /Ob0 does not merely decline to auto-inline: MSVC drops __forceinline with it
+# too, verified by compiling a stand-in accessor at each level and reading the
+# disassembly -- /Ob0 emits a call to the accessor itself, /Ob1 and above emit a
+# call only to its cold fallback. Every guest load and store in the recompiled
+# corpus goes through a __forceinline fast path, so /Ob0 turned the single most
+# frequent operation in the program into an out-of-line call. /Ob1 restores it
+# while still refusing the aggressive auto-inlining that made /Ob3 blow up the
+# optimizer on the larger units.
+set(PSPRECOMP_GENERATED_INLINE_LEVEL "1" CACHE STRING
     "MSVC /Ob level for generated VCS AOT units (0, 1, 2 or 3)")
 set_property(CACHE PSPRECOMP_GENERATED_INLINE_LEVEL PROPERTY STRINGS 0 1 2 3)
 if(NOT PSPRECOMP_GENERATED_INLINE_LEVEL MATCHES "^[0-3]$")

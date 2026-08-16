@@ -225,11 +225,17 @@ bool gpu_hardware_transform_enabled() noexcept {
 // GPU simply rasterizes the back faces it is given -- a fill-rate cost on a
 // discrete GPU that measured well below the win from the hybrid transform.
 //
-// PSPRECOMP_GE_GPU_HW_CULL=1 re-enables it for whoever debugs it next.
+// Now on by default: measured on real gameplay it is part of the configuration
+// that runs fastest on this profile, and the launcher scripts had been setting
+// it by hand ever since. PSPRECOMP_GE_GPU_HW_CULL=0 turns it back off for a
+// compatibility bisect.
 bool gpu_hardware_cull_enabled() noexcept {
     static const bool enabled = [] {
         const char *text = std::getenv("PSPRECOMP_GE_GPU_HW_CULL");
-        return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0;
+        if (text == nullptr || *text == '\0') return true;
+        return std::strcmp(text, "0") != 0 &&
+               std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
+               std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0;
     }();
     return enabled;
 }
@@ -283,11 +289,13 @@ bool packed_0115_gpu_decode_enabled() noexcept {
 }
 
 bool direct_nonindexed_gpu_draw_enabled() noexcept {
-    // Stage 43 vkCmdDraw fast path is also isolated behind an explicit switch
-    // while the crash fix is validated on the user's physical driver.
+    // The crash fix this was gated behind has since been validated on the
+    // user's physical driver, and the production GE probe in the build script
+    // exercises it on every build. Default on; =0 restores the old path.
     static const bool enabled = [] {
         const char *text = std::getenv("PSPRECOMP_GE_DIRECT_NONINDEXED_DRAW");
-        return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0 &&
+        if (text == nullptr || *text == '\0') return true;
+        return std::strcmp(text, "0") != 0 &&
                std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
                std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0;
     }();
@@ -438,13 +446,15 @@ private:
             }
         }
         if (!explicitly_configured) {
-            // The guest Allegrex stream is intentionally serial, but host-side
-            // decode/raster work is not.  Stage 39 capped this pool at eight
-            // participants, leaving a large part of 12/16/20/24-thread desktop CPUs
-            // idle exactly during texture-streaming spikes.  Use every logical
-            // CPU up to the pool's conservative hard limit; the caller is one of
-            // the participants, so this creates at most kMaxThreads-1 workers.
-            requested = std::min(requested, kMaxThreads);
+            // "One worker per logical CPU" is the wrong default on a hybrid
+            // desktop part. hardware_concurrency() counts E-cores and SMT
+            // siblings, so on a 14600K it asks for 20 participants for work
+            // that is latency-sensitive and shares cache with the serial
+            // Allegrex stream -- the launcher scripts had been overriding it
+            // to 4 by hand, measured faster. Four is now the default; the
+            // env var still takes anything from 1 to kMaxThreads.
+            constexpr unsigned kDefaultWorkers = 4u;
+            requested = std::min(std::min(requested, kDefaultWorkers), kMaxThreads);
         }
         worker_count_ = std::max(1u, std::min(requested, kMaxThreads));
         if (worker_count_ <= 1u) return;
