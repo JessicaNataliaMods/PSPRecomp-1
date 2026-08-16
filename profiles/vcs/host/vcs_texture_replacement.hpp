@@ -29,14 +29,12 @@ struct TextureIndexEntry {
     std::uint32_t mipmaps{};
     std::uint64_t archive_offset{};
     std::uint64_t raster_size{};
-    // Two keys on purpose. The leading-bytes key tolerates the guest padding a
-    // texture's pitch on upload; the whole-raster key cannot, but discriminates
-    // far better. Measured on this game's main archive, the leading-bytes key
-    // puts three genuinely different textures into shared buckets -- all of them
-    // radar tiles, which share a uniform first kilobyte. Stage 1 carries both and
-    // reports which one the GE actually matches, so stage 2 can commit to the
-    // strongest key the guest's upload behaviour allows.
-    std::uint64_t content_key{};
+    // Hash of the whole raster. A leading-bytes variant was carried during
+    // bring-up to find out whether the guest pads a texture's pitch on upload;
+    // it does not -- every texture in this game reaches VRAM byte-identical to
+    // its archive copy -- so the strong key is the one that survived. It has to
+    // be: hashing only the first kilobyte puts several radar tiles in shared
+    // buckets and would swap the wrong one.
     std::uint64_t full_key{};
 };
 
@@ -44,15 +42,6 @@ struct TextureIndexEntry {
 // as the host registers archives the guest actually opens, which keeps user
 // backup copies sitting next to the real files out of the index.
 void texture_replacement_index_archive(const std::filesystem::path &path) noexcept;
-
-// Offers the raster bytes the GE is about to sample. Stage 1 only identifies and
-// records; no substitution happens yet. Dimensions and bit depth participate in
-// the key, so two textures now have to agree on shape *and* content to collide.
-void texture_replacement_observe_texture(const std::uint8_t *pixels,
-                                         std::size_t size,
-                                         std::uint32_t width,
-                                         std::uint32_t height,
-                                         std::uint32_t depth) noexcept;
 
 // A decoded replacement, owned by the module and stable for the process's life.
 struct TextureReplacement {

@@ -22,10 +22,6 @@ constexpr std::uint32_t kTexIdent = 0x00746578u;
 // only ever begin at one. Scanning by sector rather than byte keeps a false
 // positive from a random run of bytes inside model or collision data.
 constexpr std::uint64_t kSectorSize = 0x800u;
-// Enough leading raster to identify a texture without hashing megabytes. The
-// data is swizzled 4/8bpp indices, so the first block rows already differ
-// between any two distinct textures in practice.
-constexpr std::size_t kKeyBytes = 1024u;
 
 struct DecodedImage {
     std::uint32_t width{};
@@ -38,10 +34,8 @@ struct State {
     bool initialized{};
     bool enabled{};
     std::filesystem::path directory;
-    // content key -> index entry, one map per key strength
-    std::unordered_map<std::uint64_t, TextureIndexEntry> by_content;
+    // whole-raster content key -> index entry
     std::unordered_map<std::uint64_t, TextureIndexEntry> by_full_content;
-    std::uint64_t matched_full{};
     // upper-cased internal name -> .dds path supplied by the user
     std::unordered_map<std::string, std::filesystem::path> overrides;
     // Decoded .dds keyed by upper-cased name. unordered_map keeps element
@@ -50,11 +44,8 @@ struct State {
     std::unordered_map<std::string, DecodedImage> decoded;
     std::unordered_set<std::string> failed_decodes;
     std::unordered_set<std::string> indexed_archives;
-    std::unordered_set<std::uint64_t> reported_hits;
     std::uint64_t textures_indexed{};
     std::uint64_t containers_indexed{};
-    std::uint64_t observed_textures{};
-    std::uint64_t matched_textures{};
     std::uint64_t substituted_textures{};
 };
 
@@ -361,7 +352,21 @@ std::uint64_t texture_replacement_content_key(const std::uint8_t *bytes,
         hash ^= value;
         hash *= 0x100000001B3ull;
     };
-    for (std::size_t index = 0; index < length; ++index) mix(bytes[index]);
+    // Eight bytes per iteration. A byte at a time makes the loop a chain of
+    // dependent multiplies -- the same trap ge_renderer's own signature hash
+    // documents avoiding, and hashing a whole raster that way is thousands of
+    // them per texture.
+    std::size_t index = 0u;
+    for (; index + 8u <= length; index += 8u) {
+        std::uint64_t word{};
+        std::memcpy(&word, bytes + index, sizeof(word));
+        mix(word);
+    }
+    if (index < length) {
+        std::uint64_t tail = 0u;
+        std::memcpy(&tail, bytes + index, length - index);
+        mix(tail ^ (static_cast<std::uint64_t>(length - index) << 56u));
+    }
     mix(width);
     mix(height);
     mix(depth);
@@ -440,11 +445,9 @@ std::vector<TextureIndexEntry> texture_replacement_parse_tex_chunk(
 
         entry.archive_offset = record.data;
         entry.raster_size = base_bytes;
-        const auto raster = static_cast<std::size_t>(base_bytes);
-        entry.content_key = texture_replacement_content_key(
-            chunk + record.data, raster, entry.width, entry.height, entry.depth, kKeyBytes);
         entry.full_key = texture_replacement_content_key(
-            chunk + record.data, raster, entry.width, entry.height, entry.depth, 0u);
+            chunk + record.data, static_cast<std::size_t>(base_bytes),
+            entry.width, entry.height, entry.depth, 0u);
         out.push_back(std::move(entry));
     }
     return out;
@@ -483,8 +486,7 @@ void texture_replacement_index_archive(const std::filesystem::path &path) noexce
                 // A duplicate key usually means two textures are byte-identical
                 // -- the game ships the same art under several names. Keep the
                 // first; they cannot be told apart by content anyway.
-                s.by_full_content.emplace(entry.full_key, entry);
-                s.by_content.emplace(entry.content_key, std::move(entry));
+                s.by_full_content.emplace(entry.full_key, std::move(entry));
             }
         }
         s.containers_indexed += containers;
@@ -497,42 +499,6 @@ void texture_replacement_index_archive(const std::filesystem::path &path) noexce
     } catch (...) {
         // Indexing is an optional convenience; a malformed archive must never
         // take the game down with it.
-    }
-}
-
-void texture_replacement_observe_texture(const std::uint8_t *pixels,
-                                         std::size_t size,
-                                         std::uint32_t width,
-                                         std::uint32_t height,
-                                         std::uint32_t depth) noexcept {
-    State &s = state();
-    try {
-        std::lock_guard<std::mutex> guard(s.mutex);
-        if (!s.initialized || !s.enabled || pixels == nullptr || size == 0u) return;
-        ++s.observed_textures;
-        const std::uint64_t key = texture_replacement_content_key(
-            pixels, size, width, height, depth, kKeyBytes);
-        const std::uint64_t full = texture_replacement_content_key(
-            pixels, size, width, height, depth, 0u);
-        const bool full_matched = s.by_full_content.count(full) != 0u;
-        if (full_matched) ++s.matched_full;
-        const auto found = s.by_content.find(key);
-        if (found == s.by_content.end()) return;
-        ++s.matched_textures;
-        // One line per distinct texture, not per draw.
-        if (!s.reported_hits.insert(key).second) return;
-        std::ostringstream message;
-        message << "texture match name=\"" << found->second.name << "\" "
-                << found->second.width << 'x' << found->second.height
-                << " depth=" << found->second.depth
-                << " archive_bytes=" << found->second.raster_size
-                << " vram_bytes=" << size
-                << (found->second.raster_size == size ? " size=exact" : " size=differs")
-                << (full_matched ? " key=full" : " key=leading_only")
-                << (s.overrides.count(found->second.name) != 0u ? " override=yes"
-                                                                : " override=no");
-        runtime_log_line(message.str());
-    } catch (...) {
     }
 }
 
@@ -600,7 +566,7 @@ void texture_replacement_log_summary() noexcept {
         std::size_t matched_overrides = 0u;
         for (const auto &[name, path] : s.overrides) {
             (void)path;
-            for (const auto &[key, entry] : s.by_content) {
+            for (const auto &[key, entry] : s.by_full_content) {
                 (void)key;
                 if (entry.name == name) {
                     ++matched_overrides;
@@ -611,10 +577,6 @@ void texture_replacement_log_summary() noexcept {
         std::ostringstream message;
         message << "texture replacement summary containers=" << s.containers_indexed
                 << " indexed=" << s.textures_indexed
-                << " distinct_seen=" << s.reported_hits.size()
-                << " observed=" << s.observed_textures
-                << " matched=" << s.matched_textures
-                << " matched_full_key=" << s.matched_full
                 << " substituted=" << s.substituted_textures
                 << " decoded_dds=" << s.decoded.size()
                 << " failed_dds=" << s.failed_decodes.size()

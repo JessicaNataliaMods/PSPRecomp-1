@@ -4195,25 +4195,6 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
                 if (part == 0u) continue;
                 any_signature = true;
                 signature ^= part + 0x9E3779B97F4A7C15ull + (signature << 6u) + (signature >> 2u);
-                // Offer level 0 to the DDS replacement index. This site fires
-                // once per texture that is not already resident for the frame,
-                // so it identifies rather than running per draw.
-                if (level == 0u) {
-                    const std::uint64_t source_bytes = texture_source_byte_size(source);
-                    if (source_bytes != 0u &&
-                        source_bytes <= std::numeric_limits<std::size_t>::max()) {
-                        const auto span = static_cast<std::size_t>(source_bytes);
-                        // The archives store palettized art only, so formats 4
-                        // and 5 are the only ones that can ever match an index
-                        // entry. Anything else reports depth 0 and simply misses.
-                        const std::uint32_t depth = source.format == 4u   ? 4u
-                                                    : source.format == 5u ? 8u
-                                                                          : 0u;
-                        texture_replacement_observe_texture(
-                            memory.raw_pointer(source.base, span), span,
-                            source.width, source.height, depth);
-                    }
-                }
             }
             gpu_draw.texture_content_signature = any_signature ? signature : 0u;
         }
