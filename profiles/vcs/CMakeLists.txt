@@ -20,15 +20,23 @@ endif()
 # Full /Ob3 is valuable at runtime but several large, cold units still make
 # MSVC spend minutes and close to a gigabyte per compiler process. Keep those
 # units buildable, then override this level only for the measured hot corpus.
-# /Ob0 does not merely decline to auto-inline: MSVC drops __forceinline with it
-# too, verified by compiling a stand-in accessor at each level and reading the
-# disassembly -- /Ob0 emits a call to the accessor itself, /Ob1 and above emit a
-# call only to its cold fallback. Every guest load and store in the recompiled
-# corpus goes through a __forceinline fast path, so /Ob0 turned the single most
-# frequent operation in the program into an out-of-line call. /Ob1 restores it
-# while still refusing the aggressive auto-inlining that made /Ob3 blow up the
-# optimizer on the larger units.
-set(PSPRECOMP_GENERATED_INLINE_LEVEL "1" CACHE STRING
+# Keep this at 0, and do not "fix" it without measuring.
+#
+# /Ob0 does drop __forceinline, not merely auto-inlining: compiling a stand-in
+# accessor at each level and reading the disassembly shows /Ob0 emitting a call
+# to the accessor itself while /Ob1+ emit a call only to its cold fallback. Since
+# every guest load and store goes through a __forceinline fast path, /Ob0 looks
+# like it must be turning the most frequent operation in the program into an
+# out-of-line call, and /Ob1 looks like a free win.
+#
+# It measures 13.6% slower. On a 3800-frame route, median frame 11.84 ms at /Ob0
+# against 13.69 ms at /Ob1 (median FPS 84.5 against 73.0), guest cpu_us 9.66 ms
+# against 11.54 ms. Inlining the fast path at every call site grows the binary
+# from 103 MB to 232 MB, and this corpus is already hostile to the instruction
+# cache: 234 units, ~50k cross-unit chains, over a million architectural register
+# references. The call overhead removed is smaller than the I-cache and BTB
+# pressure added.
+set(PSPRECOMP_GENERATED_INLINE_LEVEL "0" CACHE STRING
     "MSVC /Ob level for generated VCS AOT units (0, 1, 2 or 3)")
 set_property(CACHE PSPRECOMP_GENERATED_INLINE_LEVEL PROPERTY STRINGS 0 1 2 3)
 if(NOT PSPRECOMP_GENERATED_INLINE_LEVEL MATCHES "^[0-3]$")
@@ -66,12 +74,24 @@ else()
 endif()
 
 if(PSPRECOMP_PROFILE_GUIDED_AOT)
-    # This unit is hot in the current capture and finishes /Ob3 without
-    # triggering MSVC's pathological optimizer growth. It also contains the
-    # validated native collision leaf at guest PC 0x088B1554. Other measured
-    # units remain /Ob0 until their oversized helpers are split/noinline.
+    # The units that carry 80% of the guest's cross-unit calls, measured with
+    # PSPRECOMP_UNIT_PROFILE=1 over a 7900-frame route: 141 million calls across
+    # 201 live units, roughly 17,900 unit transitions per frame.
+    #
+    # Only 0043 used to be here, and the census puts it eighth at 3.3% -- the
+    # aggressive settings were reaching 3% of the work. 0023 and 0024 alone are
+    # 16.6%.
+    #
+    # Why a list and not the whole corpus: /Ob1 applied to all 234 units measured
+    # 13.6% *slower* (median frame 13.69 ms against 11.84 ms) because the binary
+    # grew from 103 MB to 232 MB and this corpus is already hostile to the
+    # instruction cache. Confining the aggressive settings to the hot 16% keeps
+    # the code growth bounded where it cannot pay for itself.
     set(VCS_HOT_UNIT_IDS
-        0043)
+        0023 0024 0097 0030 0011 0091 0084 0043 0067 0163
+        0087 0142 0066 0152 0109 0179 0085 0215 0064 0149
+        0095 0199 0092 0206 0022 0190 0200 0080 0164 0198
+        0088 0155 0213 0154 0169 0035 0089)
     set(VCS_HOT_SOURCES)
     foreach(VCS_UNIT_ID IN LISTS VCS_HOT_UNIT_IDS)
         set(VCS_UNIT_SOURCE "${VCS_PROFILE_DIR}/generated/generated_unit_${VCS_UNIT_ID}.cpp")

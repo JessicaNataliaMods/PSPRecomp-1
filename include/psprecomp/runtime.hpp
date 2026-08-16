@@ -65,6 +65,18 @@ void set_runtime_thread_identity(std::int32_t uid, const std::string &name) noex
 [[nodiscard]] std::uint64_t runtime_thread_switch_generation() noexcept;
 [[nodiscard]] bool runtime_thread_switch_generation_matches(std::uint64_t generation) noexcept;
 
+// Per-generated-unit call census, armed with PSPRECOMP_UNIT_PROFILE=1.
+//
+// Exists to answer one question the build cannot answer on its own: which of the
+// 234 generated units are actually hot, so VCS_HOT_UNIT_IDS can name them
+// instead of carrying a single hand-picked entry. Counting is a load of one
+// global bool and a predictable branch on the chained-call path, so leaving it
+// compiled in costs nothing measurable when it is off.
+inline constexpr std::size_t kUnitProfileCapacity = 512u;
+extern bool g_unit_profile_enabled;
+extern std::uint64_t g_unit_profile_counts[kUnitProfileCapacity];
+void report_unit_profile(std::size_t limit = 40u);
+
 class Runtime {
 public:
     using RecompiledFunction = void (*)(Runtime &, AllegrexContext &);
@@ -216,6 +228,7 @@ public:
         } else {
             Function(*this, ctx);
         }
+        if (g_unit_profile_enabled) ++g_unit_profile_counts[UnitIndex];
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
         if (track_dispatch_counters_) {
             ++chained_dispatches_;

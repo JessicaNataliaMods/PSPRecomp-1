@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -140,6 +141,7 @@ Runtime::Runtime(std::uint32_t ram_size) : memory_(ram_size) {
     // in the middle of guest execution; larger profiles can still grow it.
     import_bindings_.resize(256u, nullptr);
     hle_histogram_enabled_ = std::getenv("PSPRECOMP_HLE_HISTOGRAM") != nullptr;
+    g_unit_profile_enabled = std::getenv("PSPRECOMP_UNIT_PROFILE") != nullptr;
 #if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     track_dispatch_counters_ = false;
 #else
@@ -304,6 +306,7 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
     if (unit_index >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) return false;
     RecompiledFunction function = generated_units_[unit_index];
     if (function == nullptr) return false;
+    if (g_unit_profile_enabled) ++g_unit_profile_counts[unit_index];
 
     const std::uint32_t target_pc = ctx.pc;
     const std::uint32_t native_depth = chain_depth_;
@@ -382,6 +385,33 @@ std::vector<std::pair<std::string, std::uint64_t>> Runtime::hle_histogram() cons
         return left.first < right.first;
     });
     return entries;
+}
+
+bool g_unit_profile_enabled = false;
+std::uint64_t g_unit_profile_counts[kUnitProfileCapacity]{};
+
+void report_unit_profile(std::size_t limit) {
+    if (!g_unit_profile_enabled) return;
+    std::vector<std::pair<std::uint64_t, std::size_t>> entries;
+    std::uint64_t total = 0u;
+    for (std::size_t index = 0; index < kUnitProfileCapacity; ++index) {
+        if (g_unit_profile_counts[index] == 0u) continue;
+        entries.emplace_back(g_unit_profile_counts[index], index);
+        total += g_unit_profile_counts[index];
+    }
+    std::sort(entries.begin(), entries.end(), std::greater<>());
+    std::cerr << "[unit-profile] units=" << entries.size() << " calls=" << total << "\n";
+    std::uint64_t running = 0u;
+    for (std::size_t i = 0; i < std::min(limit, entries.size()); ++i) {
+        running += entries[i].first;
+        std::cerr << "[unit-profile] unit=" << std::setw(4) << std::setfill('0')
+                  << entries[i].second << std::setfill(' ')
+                  << " calls=" << entries[i].first
+                  << " share=" << (100.0 * static_cast<double>(entries[i].first) /
+                                   static_cast<double>(total ? total : 1u))
+                  << "% cumulative=" << (100.0 * static_cast<double>(running) /
+                                         static_cast<double>(total ? total : 1u)) << "%\n";
+    }
 }
 
 void Runtime::report_hle_histogram(std::size_t limit) const {

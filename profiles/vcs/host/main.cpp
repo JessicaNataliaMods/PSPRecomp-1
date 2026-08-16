@@ -307,6 +307,7 @@ int main(int argc, char **argv) {
         psprecomp::report_counted_pcs();
         if (shutdown_diag) std::cerr << "[shutdown] counted-pcs-reported\n";
         runtime.report_hle_histogram();
+        psprecomp::report_unit_profile();
         if (shutdown_diag) std::cerr << "[shutdown] hle-histogram-reported\n";
         vcs::report_disc_read_stats();
         vcs::report_present_stats();
