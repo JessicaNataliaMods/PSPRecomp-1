@@ -151,6 +151,18 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties("${VCS_PROFILE_DIR}/host/vcs_profile.cpp" PROPERTIES COMPILE_OPTIONS "-O2")
 endif()
 
+# Tier-2 V1 is deliberately a compact hot-region superblock (~1.1k lines),
+# not a full-unit mega-TU. Give this host-side trace normal aggressive host
+# optimization while keeping the 234 generated AOT units on their measured
+# per-source policy above.
+if(MSVC)
+    set_source_files_properties("${VCS_PROFILE_DIR}/host/vcs_tier2_superblocks.cpp" PROPERTIES
+        COMPILE_OPTIONS "/O2;/Ob3;/bigobj")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set_source_files_properties("${VCS_PROFILE_DIR}/host/vcs_tier2_superblocks.cpp" PROPERTIES
+        COMPILE_OPTIONS "-O3;-g0")
+endif()
+
 set(VCS_GPU_BACKEND_SOURCE host/ge_gpu_backend_dx12.cpp)
 set(VCS_HDR_POST_SOURCE host/vcs_hdr_post_dx12_stub.cpp)
 set(VCS_HOST_SOURCES
@@ -222,6 +234,7 @@ endif()
 add_executable(VCSNative
     ${VCS_APP_RESOURCES}
     host/main.cpp
+    host/vcs_tier2_superblocks.cpp
     ${VCS_HOST_SOURCES}
     ${VCS_GENERATED}
 )
@@ -235,7 +248,7 @@ if(MSVC)
     # (MSVC reports this as "D9025: overriding '/Ob0' with '/Ob3'").  Apply it to
     # the host sources only.
     target_compile_options(VCSNative PRIVATE ${PSPRECOMP_MSVC_MP_FLAG})
-    set_source_files_properties(host/main.cpp ${VCS_HOST_SOURCES}
+    set_source_files_properties(host/main.cpp host/vcs_tier2_superblocks.cpp ${VCS_HOST_SOURCES}
         DIRECTORY "${VCS_PROFILE_DIR}" PROPERTIES COMPILE_OPTIONS
         "$<$<CONFIG:Release>:/Ob3>;$<$<CONFIG:RelWithDebInfo>:/Ob3>")
     target_link_options(VCSNative PRIVATE /STACK:67108864)
@@ -311,7 +324,7 @@ if(PSPRECOMP_BUILD_PROFILE_TESTS)
     set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO FALSE)
     set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL FALSE)
     if(MSVC)
-        target_compile_options(vfpu_tier2_tests PRIVATE /GL-)
+        target_compile_options(vfpu_tier2_tests PRIVATE /Od /Ob0 /GL-)
     endif()
     add_test(NAME vfpu_tier2_tests COMMAND vfpu_tier2_tests)
 

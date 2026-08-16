@@ -177,6 +177,9 @@ int main(int argc, char **argv) {
 
         psprecomp::Elf32Image elf = psprecomp::Elf32Image::from_file(executable);
         psprecomp::Runtime runtime(32u * 1024u * 1024u);
+        // The heavy GUESTHOT sampler is opt-in. The rolling PERF telemetry stays on,
+        // but normal gameplay does not pay a census/timestamp branch per cross-unit edge.
+        psprecomp::set_guest_hotspot_profile(configuration.diagnostics.guest_hotspot_profile, 8u);
         runtime.set_game_root(root);
         const auto relocations = elf.load_and_relocate(runtime.memory(), psprecomp::kDefaultPspUserLoadBase);
         std::uint64_t image_end = 0u;

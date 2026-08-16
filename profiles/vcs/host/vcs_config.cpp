@@ -581,6 +581,21 @@ void apply_diagnostics_key(VcsConfiguration &config, const std::string &key,
             warning(config, line, "Diagnostics.FlushEveryLine expects true/false");
         return;
     }
+    if (key == "perftelemetry" || key == "performancetelemetry") {
+        if (!parse_bool(value, config.diagnostics.perf_telemetry))
+            warning(config, line, "Diagnostics.PerfTelemetry expects true/false");
+        return;
+    }
+    if (key == "perftelemetryintervalvblanks" || key == "telemetryintervalvblanks") {
+        if (!parse_u64(value, 10u, 36000u, config.diagnostics.perf_telemetry_interval_vblanks))
+            warning(config, line, "Diagnostics.PerfTelemetryIntervalVblanks must be between 10 and 36000");
+        return;
+    }
+    if (key == "guesthotspotprofile" || key == "guesthotspot") {
+        if (!parse_bool(value, config.diagnostics.guest_hotspot_profile))
+            warning(config, line, "Diagnostics.GuestHotspotProfile expects true/false");
+        return;
+    }
     warning(config, line, "unknown [Diagnostics] key '" + key + "'");
 }
 
@@ -800,6 +815,21 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
     if (config.timing.realtime_speed_diagnostics &&
         std::getenv("PSPRECOMP_REALTIME_SPEED_DIAG") == nullptr) {
         set_environment_value("PSPRECOMP_REALTIME_SPEED_DIAG", "1");
+    }
+    if (config.diagnostics.perf_telemetry &&
+        std::getenv("PSPRECOMP_PERF_TELEMETRY") == nullptr) {
+        set_environment_value("PSPRECOMP_PERF_TELEMETRY", "1");
+    }
+    if (std::getenv("PSPRECOMP_PERF_TELEMETRY_INTERVAL") == nullptr) {
+        set_environment_value("PSPRECOMP_PERF_TELEMETRY_INTERVAL",
+                              std::to_string(config.diagnostics.perf_telemetry_interval_vblanks));
+    }
+    // GPU timing counters are sampled only when requested. PERF TELEMETRY uses
+    // them for queue/fence/present attribution, but still logs only once per
+    // aggregation window.
+    if (config.diagnostics.perf_telemetry &&
+        std::getenv("PSPRECOMP_GPU_TIMING_DIAG") == nullptr) {
+        set_environment_value("PSPRECOMP_GPU_TIMING_DIAG", "1");
     }
     if (std::getenv("PSPRECOMP_REALTIME_SPEED_INTERVAL") == nullptr) {
         set_environment_value("PSPRECOMP_REALTIME_SPEED_INTERVAL",

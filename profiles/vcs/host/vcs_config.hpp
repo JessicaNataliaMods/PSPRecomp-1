@@ -158,6 +158,13 @@ struct DiagnosticsConfiguration {
     bool log_to_file{false};
     std::string log_file{"VCSNative.log"};
     bool flush_every_line{true};
+    // Low-overhead rolling performance census. Unlike the legacy per-frame
+    // stderr diagnostics this aggregates many vblanks and emits one log line,
+    // so the profiler does not become the bottleneck it is trying to measure.
+    bool perf_telemetry{true};
+    std::uint64_t perf_telemetry_interval_vblanks{60u};
+    // Heavy cross-unit hotspot sampler is opt-in. Keep disabled in the safe benchmark build.
+    bool guest_hotspot_profile{false};
 };
 
 // Widescreen / ultrawide frustum, after ThirteenAG's WidescreenFixesPack

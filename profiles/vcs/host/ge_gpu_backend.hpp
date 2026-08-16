@@ -369,6 +369,12 @@ struct GeGpuBackendReport {
     // same-target feedback snapshots the pre-draw image on the GPU to avoid
     // the D3D12 RTV+SRV hazard without a CPU readback.
     std::uint64_t dx12_native_framebuffer_targets{};
+    std::uint64_t dx12_framebuffer_target_hits{};
+    std::uint64_t dx12_framebuffer_target_creates{};
+    std::uint64_t dx12_batch_appends{};
+    std::uint64_t dx12_batch_merges{};
+    std::uint64_t dx12_gpu_draw_calls{};
+    std::uint64_t dx12_srv_high_water{};
     std::uint64_t dx12_gpu_feedback_draws{};
     std::uint64_t dx12_self_feedback_snapshots{};
     // Stage 44.6 Direct3D 12 release-candidate diagnostics.

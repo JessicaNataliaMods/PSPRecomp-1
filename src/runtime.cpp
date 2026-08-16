@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
@@ -135,6 +136,108 @@ bool runtime_thread_switch_generation_matches(std::uint64_t generation) noexcept
     return generation == g_runtime_thread_switch_generation_fast;
 }
 
+bool g_guest_hotspot_profile_enabled = false;
+std::uint32_t g_guest_hotspot_sample_mask = 0xFFu;
+std::uint64_t g_guest_hotspot_unit_calls[kUnitProfileCapacity]{};
+namespace {
+struct GuestHotspotPcSlot {
+    std::uint32_t pc{};
+    std::uint16_t unit{};
+    std::uint16_t occupied{};
+    std::uint64_t samples{};
+    std::uint64_t inclusive_sample_ns{};
+};
+std::uint64_t g_guest_hotspot_unit_samples[kUnitProfileCapacity]{};
+std::uint64_t g_guest_hotspot_unit_ns[kUnitProfileCapacity]{};
+std::array<GuestHotspotPcSlot, kGuestHotspotPcCapacity> g_guest_hotspot_pc_slots{};
+std::uint64_t g_guest_hotspot_total_samples = 0u;
+
+std::size_t guest_hotspot_hash(std::uint32_t pc) noexcept {
+    std::uint32_t x = pc >> 2u;
+    x ^= x >> 16u;
+    x *= 0x7FEB352Du;
+    x ^= x >> 15u;
+    return static_cast<std::size_t>(x) & (kGuestHotspotPcCapacity - 1u);
+}
+}
+
+void set_guest_hotspot_profile(bool enabled, std::uint32_t sample_shift) noexcept {
+    if (sample_shift > 16u) sample_shift = 16u;
+    g_guest_hotspot_sample_mask = sample_shift == 0u ? 0u : ((1u << sample_shift) - 1u);
+    g_guest_hotspot_profile_enabled = enabled;
+}
+
+std::uint64_t guest_hotspot_clock_ns() noexcept {
+    return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count());
+}
+
+void guest_hotspot_record_sample(std::uint32_t unit, std::uint32_t pc,
+                                 std::uint64_t elapsed_ns) noexcept {
+    if (!g_guest_hotspot_profile_enabled || unit >= kUnitProfileCapacity) return;
+    ++g_guest_hotspot_unit_samples[unit];
+    g_guest_hotspot_unit_ns[unit] += elapsed_ns;
+    ++g_guest_hotspot_total_samples;
+    if (pc == 0u) return;
+
+    std::size_t slot = guest_hotspot_hash(pc);
+    for (std::size_t probe = 0u; probe < 12u; ++probe) {
+        GuestHotspotPcSlot &entry = g_guest_hotspot_pc_slots[(slot + probe) & (kGuestHotspotPcCapacity - 1u)];
+        if (entry.occupied == 0u) {
+            entry.pc = pc;
+            entry.unit = static_cast<std::uint16_t>(unit);
+            entry.occupied = 1u;
+        }
+        if (entry.pc == pc && entry.unit == unit) {
+            ++entry.samples;
+            entry.inclusive_sample_ns += elapsed_ns;
+            return;
+        }
+    }
+    // The table is intentionally fixed and allocation-free. Extremely unlikely
+    // collision overflow drops only this sampled PC; unit totals remain exact.
+}
+
+GuestHotspotSnapshot consume_guest_hotspot_profile(std::size_t unit_limit, std::size_t pc_limit) {
+    GuestHotspotSnapshot out;
+    out.sample_stride = g_guest_hotspot_sample_mask + 1u;
+    out.total_samples = g_guest_hotspot_total_samples;
+    for (std::size_t unit = 0u; unit < kUnitProfileCapacity; ++unit) {
+        const std::uint64_t calls = g_guest_hotspot_unit_calls[unit];
+        const std::uint64_t samples = g_guest_hotspot_unit_samples[unit];
+        const std::uint64_t ns = g_guest_hotspot_unit_ns[unit];
+        out.total_unit_calls += calls;
+        if (calls != 0u || samples != 0u)
+            out.units.push_back(GuestHotspotUnitEntry{static_cast<std::uint32_t>(unit), calls, samples, ns});
+        g_guest_hotspot_unit_calls[unit] = 0u;
+        g_guest_hotspot_unit_samples[unit] = 0u;
+        g_guest_hotspot_unit_ns[unit] = 0u;
+    }
+    for (GuestHotspotPcSlot &slot : g_guest_hotspot_pc_slots) {
+        if (slot.occupied != 0u && slot.samples != 0u)
+            out.pcs.push_back(GuestHotspotPcEntry{slot.unit, slot.pc, slot.samples, slot.inclusive_sample_ns});
+        slot = {};
+    }
+    g_guest_hotspot_total_samples = 0u;
+
+    const auto estimated_cost = [stride = static_cast<std::uint64_t>(out.sample_stride)](const auto &e) {
+        return e.samples == 0u ? 0u : e.inclusive_sample_ns * stride;
+    };
+    std::sort(out.units.begin(), out.units.end(), [&](const auto &a, const auto &b) {
+        const auto ac = estimated_cost(a), bc = estimated_cost(b);
+        if (ac != bc) return ac > bc;
+        return a.calls > b.calls;
+    });
+    std::sort(out.pcs.begin(), out.pcs.end(), [&](const auto &a, const auto &b) {
+        const auto ac = estimated_cost(a), bc = estimated_cost(b);
+        if (ac != bc) return ac > bc;
+        return a.samples > b.samples;
+    });
+    if (out.units.size() > unit_limit) out.units.resize(unit_limit);
+    if (out.pcs.size() > pc_limit) out.pcs.resize(pc_limit);
+    return out;
+}
+
 Runtime::Runtime(std::uint32_t ram_size) : memory_(ram_size) {
     // Most commercial PSP titles use a few hundred import stubs. Seed a small
     // binding table so first use of a late-numbered import does not reallocate
@@ -257,6 +360,25 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
     }
 
     const std::uint32_t target_pc = ctx.pc;
+    std::uint32_t guest_hotspot_unit = static_cast<std::uint32_t>(kUnitProfileCapacity);
+    bool guest_hotspot_sample = false;
+    std::uint64_t guest_hotspot_start_ns = 0u;
+    if (g_guest_hotspot_profile_enabled && generated_unit_layout_valid_ && generated_unit_span_ != 0u) {
+        const std::uint32_t canonical_pc = memory_.canonical(target_pc);
+        if (canonical_pc >= generated_unit_base_) {
+            const std::uint32_t delta = canonical_pc - generated_unit_base_;
+            const std::uint32_t unit_index = generated_unit_span_ == 16384u
+                ? (delta >> 14u) : (delta / generated_unit_span_);
+            if (unit_index < kUnitProfileCapacity) {
+                guest_hotspot_unit = unit_index;
+                ++g_guest_hotspot_unit_calls[unit_index];
+                const std::uint64_t ticket = ++guest_hotspot_ticket_;
+                guest_hotspot_sample =
+                    (ticket & static_cast<std::uint64_t>(g_guest_hotspot_sample_mask)) == 0u;
+                if (guest_hotspot_sample) guest_hotspot_start_ns = guest_hotspot_clock_ns();
+            }
+        }
+    }
     const std::uint32_t native_depth = chain_depth_;
     // Always guard execution-context ownership. Even a clean generated unit can
     // reach a nested direct chain whose scheduler boundary switches PSP thread.
@@ -279,6 +401,12 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
         entry_function(*this, ctx, 0u, *shared_aot_mem);
     } else {
         function(*this, ctx);
+    }
+    if (guest_hotspot_sample) {
+        const std::uint64_t end_ns = guest_hotspot_clock_ns();
+        guest_hotspot_record_sample(guest_hotspot_unit, target_pc,
+                                    end_ns >= guest_hotspot_start_ns
+                                        ? end_ns - guest_hotspot_start_ns : 0u);
     }
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_post_chained_call_hook != nullptr)
@@ -309,6 +437,15 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
     if (g_unit_profile_enabled) ++g_unit_profile_counts[unit_index];
 
     const std::uint32_t target_pc = ctx.pc;
+    bool guest_hotspot_sample = false;
+    std::uint64_t guest_hotspot_start_ns = 0u;
+    if (g_guest_hotspot_profile_enabled) {
+        ++g_guest_hotspot_unit_calls[unit_index];
+        const std::uint64_t ticket = ++guest_hotspot_ticket_;
+        guest_hotspot_sample =
+            (ticket & static_cast<std::uint64_t>(g_guest_hotspot_sample_mask)) == 0u;
+        if (guest_hotspot_sample) guest_hotspot_start_ns = guest_hotspot_clock_ns();
+    }
     const std::uint32_t native_depth = chain_depth_;
     const std::uint64_t caller_generation = g_runtime_thread_switch_generation_fast;
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
@@ -324,6 +461,12 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
         generated_unit_entries_[unit_index](*this, ctx, 0u, *shared_aot_mem);
     } else {
         function(*this, ctx);
+    }
+    if (guest_hotspot_sample) {
+        const std::uint64_t end_ns = guest_hotspot_clock_ns();
+        guest_hotspot_record_sample(unit_index, target_pc,
+                                    end_ns >= guest_hotspot_start_ns
+                                        ? end_ns - guest_hotspot_start_ns : 0u);
     }
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_post_chained_call_hook != nullptr)

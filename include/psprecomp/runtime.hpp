@@ -77,6 +77,45 @@ extern bool g_unit_profile_enabled;
 extern std::uint64_t g_unit_profile_counts[kUnitProfileCapacity];
 void report_unit_profile(std::size_t limit = 40u);
 
+// Low-overhead guest/AOT hotspot sampler used by the VCS performance build.
+// Unit entry counts are exact while wall-clock timing is sampled sparsely.
+// Sampled durations are inclusive of nested native AOT calls; this is
+// deliberate, because the next Tier-2 pass needs to identify expensive trace
+// roots before instrumenting individual basic blocks in only those units.
+inline constexpr std::size_t kGuestHotspotPcCapacity = 4096u;
+extern bool g_guest_hotspot_profile_enabled;
+extern std::uint32_t g_guest_hotspot_sample_mask;
+extern std::uint64_t g_guest_hotspot_unit_calls[kUnitProfileCapacity];
+
+struct GuestHotspotUnitEntry {
+    std::uint32_t unit{};
+    std::uint64_t calls{};
+    std::uint64_t samples{};
+    std::uint64_t inclusive_sample_ns{};
+};
+
+struct GuestHotspotPcEntry {
+    std::uint32_t unit{};
+    std::uint32_t pc{};
+    std::uint64_t samples{};
+    std::uint64_t inclusive_sample_ns{};
+};
+
+struct GuestHotspotSnapshot {
+    std::uint32_t sample_stride{1u};
+    std::uint64_t total_unit_calls{};
+    std::uint64_t total_samples{};
+    std::vector<GuestHotspotUnitEntry> units;
+    std::vector<GuestHotspotPcEntry> pcs;
+};
+
+void set_guest_hotspot_profile(bool enabled, std::uint32_t sample_shift = 8u) noexcept;
+[[nodiscard]] std::uint64_t guest_hotspot_clock_ns() noexcept;
+void guest_hotspot_record_sample(std::uint32_t unit, std::uint32_t pc,
+                                 std::uint64_t elapsed_ns) noexcept;
+[[nodiscard]] GuestHotspotSnapshot consume_guest_hotspot_profile(
+    std::size_t unit_limit = 16u, std::size_t pc_limit = 24u);
+
 class Runtime {
 public:
     using RecompiledFunction = void (*)(Runtime &, AllegrexContext &);
@@ -208,6 +247,17 @@ public:
         // invalidation flag.  All active direct ancestors see that same hot
         // byte and unwind. This replaces two process-global 64-bit loads on
         // every fixed cross-unit transfer with one normally-false local load.
+        bool guest_hotspot_sample = false;
+        std::uint64_t guest_hotspot_start_ns = 0u;
+        if (g_guest_hotspot_profile_enabled) {
+            if constexpr (UnitIndex < kUnitProfileCapacity)
+                ++g_guest_hotspot_unit_calls[UnitIndex];
+            const std::uint64_t ticket = ++guest_hotspot_ticket_;
+            guest_hotspot_sample =
+                (ticket & static_cast<std::uint64_t>(g_guest_hotspot_sample_mask)) == 0u;
+            if (guest_hotspot_sample) guest_hotspot_start_ns = guest_hotspot_clock_ns();
+        }
+
         struct DepthGuard {
             std::uint32_t &depth;
             explicit DepthGuard(std::uint32_t &value) : depth(value) { ++depth; }
@@ -227,6 +277,12 @@ public:
             Function(*this, ctx, DirectEntryId);
         } else {
             Function(*this, ctx);
+        }
+        if (guest_hotspot_sample) {
+            const std::uint64_t end_ns = guest_hotspot_clock_ns();
+            guest_hotspot_record_sample(UnitIndex, DirectTargetPc,
+                                        end_ns >= guest_hotspot_start_ns
+                                            ? end_ns - guest_hotspot_start_ns : 0u);
         }
         if (g_unit_profile_enabled) ++g_unit_profile_counts[UnitIndex];
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
@@ -249,6 +305,72 @@ public:
         if (starvation_interval == 0u) return true;
         if (++dispatches_since_import_ < starvation_interval) return true;
         return run_starvation_boundary(ctx);
+    }
+
+    // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
+    // cross-unit generated call would have performed, while allowing trivial
+    // leaf accessors to be emitted directly in their measured caller.  No HLE
+    // or PSP ownership switch can occur inside those leaf bodies, so only the
+    // starvation safe-point cadence needs to be preserved here.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_generated_leaf(
+        AllegrexContext &ctx) {
+        const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
+        if (starvation_interval == 0u) return true;
+        if (++dispatches_since_import_ < starvation_interval) return true;
+        return run_starvation_boundary(ctx);
+    }
+
+    // Tier-2 profile-guided superblocks can fuse a cross-unit edge into a local
+    // C++ goto.  The guest-visible control flow is unchanged, but the ordinary
+    // invoke_chained_direct() native frame no longer exists.  These helpers keep
+    // the two pieces of runtime state owned by that removed frame exact:
+    // chain-depth limiting and execution-driven scheduler accounting.
+    //
+    // Enter is intentionally separate from completion.  A fused J/JAL may run
+    // through many local blocks before the logical chain frame unwinds, matching
+    // the old nested native-call behavior rather than moving starvation safe
+    // points into the middle of the guest trace.
+    template <std::uint32_t UnitIndex, std::uint32_t TargetPc>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool tier2_enter_fused_transfer(
+        AllegrexContext &ctx) {
+        if (chain_depth_ >= chain_depth_limit_) {
+            ctx.pc = TargetPc;
+            return false;
+        }
+        ++chain_depth_;
+        if (g_unit_profile_enabled && UnitIndex < kUnitProfileCapacity)
+            ++g_unit_profile_counts[UnitIndex];
+        if (g_guest_hotspot_profile_enabled && UnitIndex < kUnitProfileCapacity)
+            ++g_guest_hotspot_unit_calls[UnitIndex];
+        return true;
+    }
+
+    // Complete N logical invoke_chained_direct() frames in unwind order.  This
+    // deliberately performs scheduler accounting once per removed frame.  After
+    // the first PSP context switch, remaining ancestors mirror the normal direct
+    // chain path: they advance dispatch work without running another scheduler
+    // boundary and unwind immediately.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool tier2_complete_fused_transfers(
+        AllegrexContext &ctx, std::uint32_t count) {
+        bool same_context = true;
+        while (count-- != 0u) {
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+            if (track_dispatch_counters_) {
+                ++chained_dispatches_;
+                ++dispatch_work_count_;
+            }
+#endif
+            const std::uint64_t interval = g_runtime_starvation_interval_fast;
+            if (chain_context_invalidated_) {
+                if (interval != 0u) ++dispatches_since_import_;
+                same_context = false;
+            } else if (interval != 0u) {
+                if (++dispatches_since_import_ >= interval && !run_starvation_boundary(ctx))
+                    same_context = false;
+            }
+            if (chain_depth_ != 0u) --chain_depth_;
+        }
+        return same_context;
     }
 
     void register_generated_unit(std::uint32_t unit_index, std::uint32_t unit_address,
@@ -327,6 +449,9 @@ private:
     // ownership while native AOT frames may still be nested. Cleared at the
     // beginning of each outer Runtime dispatch.
     bool chain_context_invalidated_{};
+    // Per-runtime sampler ticket. Only touched when hotspot profiling is on;
+    // keeping it local avoids contending on a process-global counter.
+    std::uint64_t guest_hotspot_ticket_{};
     std::uint64_t dispatches_since_import_{};
     std::uint64_t chained_dispatches_{};
     std::uint64_t dispatch_work_count_{};

@@ -1091,10 +1091,12 @@ bool append_or_merge_batch(Dx12GeState &s, Dx12Batch batch) {
             }
             previous.vertex_count += batch.vertex_count;
             previous.logical_draw_count += batch.logical_draw_count;
+            ++s.report.dx12_batch_merges;
             return true;
         }
     }
     s.batches.push_back(std::move(batch));
+    ++s.report.dx12_batch_appends;
     return false;
 }
 
@@ -1649,7 +1651,10 @@ void note_framebuffer_logical_extent(Dx12GeState &s, std::uint32_t address,
 bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
                                std::string &error) noexcept {
     address &= 0x001FFFF0u;
-    if (auto *existing = find_framebuffer_target(s, address)) return existing->color != nullptr;
+    if (auto *existing = find_framebuffer_target(s, address)) {
+        ++s.report.dx12_framebuffer_target_hits;
+        return existing->color != nullptr;
+    }
     if (!s.device || !s.rtv_heap || !s.dsv_heap || !s.srv_heap ||
         s.next_rtv >= kFramebufferTargetCapacity || s.next_dsv >= kFramebufferTargetCapacity ||
         s.next_srv >= kSrvCapacity) {
@@ -1740,8 +1745,10 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
     target.color_state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     s.frame_targets.emplace(address, std::move(target));
     s.known_frame_targets.insert(address);
+    ++s.report.dx12_framebuffer_target_creates;
     s.report.framebuffer_targets_observed = s.known_frame_targets.size();
     s.report.dx12_native_framebuffer_targets = s.frame_targets.size();
+    s.report.dx12_srv_high_water = std::max<std::uint64_t>(s.report.dx12_srv_high_water, s.next_srv);
     {
         std::ostringstream log;
         const auto created = s.frame_targets.find(address);
@@ -4326,6 +4333,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     if (current_target != nullptr)
         resolve_target_for_sampling(s, *current_target, false);
 
+    s.report.dx12_gpu_draw_calls += executed_batches;
     if (executed_batches == 0u) {
         hr = s.list->Close();
         if (SUCCEEDED(hr)) {
@@ -4476,7 +4484,11 @@ bool ge_gpu_backend_copy_offscreen_rgba(std::span<std::byte> destination) noexce
     return ge_gpu_backend_copy_game_frame_rgba(destination);
 }
 void ge_gpu_backend_mark_window_presented() noexcept { state().report.gpu_frame_presented_to_window = true; }
-GeGpuBackendReport ge_gpu_backend_report() { return state().report; }
+GeGpuBackendReport ge_gpu_backend_report() {
+    auto &s = state();
+    s.report.dx12_srv_high_water = std::max<std::uint64_t>(s.report.dx12_srv_high_water, s.next_srv);
+    return s.report;
+}
 
 #else
 

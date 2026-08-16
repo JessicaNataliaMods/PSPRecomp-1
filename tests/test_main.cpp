@@ -154,6 +154,62 @@ static void nested_direct_middle(psprecomp::Runtime &runtime, psprecomp::Allegre
     if (!runtime.invoke_chained_direct<&nested_direct_leaf, 1u>(ctx)) return;
     nested_direct_middle_resumed = true;
 }
+
+static void test_tier2_fused_transfer_accounting() {
+    // A Tier-2 fused edge removes an invoke_chained_direct native frame but must
+    // preserve both chain depth and the exact scheduler-work count when that
+    // logical frame unwinds.
+    {
+        psprecomp::Runtime runtime;
+        psprecomp::AllegrexContext ctx{};
+        chained_tick_count = 0u;
+        chained_tick_switch_context = false;
+        psprecomp::set_runtime_starvation_hook(&chained_tick, 2u);
+        psprecomp::set_runtime_thread_identity(3, "tier2-superblock");
+
+        require(runtime.tier2_enter_fused_transfer<154u, 0x08A6E8A4u>(ctx),
+                "Tier2 fused transfer rejected first logical chain frame");
+        require(runtime.tier2_enter_fused_transfer<155u, 0x08A71100u>(ctx),
+                "Tier2 fused transfer rejected second logical chain frame");
+        require(runtime.tier2_complete_fused_transfers(ctx, 2u),
+                "Tier2 fused unwind rejected same PSP execution context");
+        require(chained_tick_count == 1u,
+                "Tier2 fused unwind did not preserve scheduler dispatch cadence");
+    }
+
+    {
+        psprecomp::Runtime runtime;
+        psprecomp::AllegrexContext ctx{};
+        chained_tick_count = 0u;
+        chained_tick_switch_context = true;
+        psprecomp::set_runtime_starvation_hook(&chained_tick, 1u);
+        psprecomp::set_runtime_thread_identity(3, "tier2-superblock");
+
+        require(runtime.tier2_enter_fused_transfer<154u, 0x08A6E8A4u>(ctx),
+                "Tier2 fused switch test rejected frame 1");
+        require(runtime.tier2_enter_fused_transfer<155u, 0x08A71100u>(ctx),
+                "Tier2 fused switch test rejected frame 2");
+        require(runtime.tier2_enter_fused_transfer<154u, 0x08A6E8A4u>(ctx),
+                "Tier2 fused switch test rejected frame 3");
+        require(!runtime.tier2_complete_fused_transfers(ctx, 3u),
+                "Tier2 fused unwind retained a stale native superblock after PSP context switch");
+        require(chained_tick_count == 1u && psprecomp::runtime_thread_uid() == 7,
+                "Tier2 fused unwind ran another scheduler boundary after losing PSP ownership");
+
+        // All three logical DepthGuards must have unwound even on the switched
+        // path; otherwise future generated chains would eventually hit a false
+        // depth limit.
+        ctx.pc = 0u;
+        require(runtime.tier2_enter_fused_transfer<154u, 0x08A6E8A4u>(ctx),
+                "Tier2 fused unwind leaked logical chain depth after context switch");
+        (void)runtime.tier2_complete_fused_transfers(ctx, 1u);
+    }
+
+    psprecomp::set_runtime_starvation_hook(nullptr, 0u);
+    chained_tick_switch_context = false;
+    psprecomp::set_runtime_thread_identity(-1, "none");
+}
+
 static void test_nested_direct_chain_context_guard() {
     psprecomp::Runtime runtime;
     constexpr std::uint32_t base = 0x08800000u;
@@ -804,6 +860,7 @@ int main() {
     try {
         test_import_return_context_guard();
         test_chained_call_context_guard();
+        test_tier2_fused_transfer_accounting();
         test_nested_direct_chain_context_guard();
 
         psprecomp::GuestMemory mem;
@@ -1779,6 +1836,25 @@ int main() {
         require(nids.resolve("IoFileMgrForUser", 0x109F50BCu) == "sceIoOpen", "NID registry failed");
         require(nids.resolve("SysMemUserForUser", 0x7591C7DBu) == "sceKernelSetCompiledSdkVersion",
                 "PSP boot NID registry failed");
+
+        // Guest hotspot sampler: exact unit census + sparse PC timing snapshot.
+        psprecomp::set_guest_hotspot_profile(true, 2u); // stride 4 for deterministic fixture
+        psprecomp::g_guest_hotspot_unit_calls[23u] = 8u;
+        psprecomp::g_guest_hotspot_unit_calls[24u] = 4u;
+        psprecomp::guest_hotspot_record_sample(23u, 0x0890C000u, 100u);
+        psprecomp::guest_hotspot_record_sample(23u, 0x0890C000u, 300u);
+        psprecomp::guest_hotspot_record_sample(24u, 0x08910000u, 50u);
+        const auto hotspot = psprecomp::consume_guest_hotspot_profile(8u, 8u);
+        require(hotspot.sample_stride == 4u && hotspot.total_unit_calls == 12u && hotspot.total_samples == 3u,
+                "guest hotspot summary failed");
+        require(!hotspot.units.empty() && hotspot.units.front().unit == 23u && hotspot.units.front().calls == 8u,
+                "guest hotspot unit ranking failed");
+        require(!hotspot.pcs.empty() && hotspot.pcs.front().pc == 0x0890C000u && hotspot.pcs.front().samples == 2u,
+                "guest hotspot PC ranking failed");
+        const auto hotspot_reset = psprecomp::consume_guest_hotspot_profile(8u, 8u);
+        require(hotspot_reset.total_unit_calls == 0u && hotspot_reset.total_samples == 0u,
+                "guest hotspot reset failed");
+        psprecomp::set_guest_hotspot_profile(false);
 
         psprecomp::Runtime runtime;
         runtime.set_game_root(std::filesystem::current_path());

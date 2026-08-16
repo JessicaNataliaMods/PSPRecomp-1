@@ -13,6 +13,7 @@
 #include "vcs_draw_distance_patch.hpp"
 #include "savedata_utility_ui.hpp"
 #include "vcs_texture_replacement.hpp"
+#include "vcs_runtime_log.hpp"
 
 #include "psprecomp/common.hpp"
 #include "psprecomp/deflate.hpp"
@@ -4679,6 +4680,74 @@ bool frame_time_diag_enabled() {
     return enabled;
 }
 
+bool perf_telemetry_enabled() {
+    static const bool enabled = [] {
+        const char *text = std::getenv("PSPRECOMP_PERF_TELEMETRY");
+        return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0 &&
+               std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0;
+    }();
+    return enabled;
+}
+
+std::uint64_t perf_telemetry_interval() {
+    static const std::uint64_t value = std::max<std::uint64_t>(10u,
+        parse_environment_u64("PSPRECOMP_PERF_TELEMETRY_INTERVAL", 60u));
+    return value;
+}
+
+bool perf_timing_enabled() { return frame_time_diag_enabled() || perf_telemetry_enabled(); }
+
+struct PerfTelemetryAccumulator {
+    std::uint64_t frames{};
+    std::uint64_t frame_us_sum{}, frame_us_min{UINT64_MAX}, frame_us_max{};
+    std::uint64_t guest_cpu_us_sum{}, ge_us_sum{}, ge_wait_us_sum{}, present_us_sum{}, io_us_sum{};
+    std::uint64_t ge_calls_sum{};
+    GeGpuBackendReport previous_report{};
+    bool report_started{};
+};
+PerfTelemetryAccumulator perf_telemetry;
+std::uint32_t guest_hotspot_perf_windows{};
+
+void report_guest_hotspot_window(std::uint64_t vblank) {
+    const psprecomp::GuestHotspotSnapshot snap = psprecomp::consume_guest_hotspot_profile(16u, 24u);
+    std::ostringstream summary;
+    summary << "GUESTHOT summary vblank=" << vblank
+            << " stride=" << snap.sample_stride
+            << " unit_calls=" << snap.total_unit_calls
+            << " samples=" << snap.total_samples
+            << " units=" << snap.units.size()
+            << " pcs=" << snap.pcs.size();
+    runtime_log_line(summary.str());
+
+    std::size_t rank = 0u;
+    for (const auto &e : snap.units) {
+        const std::uint64_t avg_ns = e.samples ? e.inclusive_sample_ns / e.samples : 0u;
+        const std::uint64_t est_us = (e.inclusive_sample_ns * snap.sample_stride) / 1000u;
+        std::ostringstream line;
+        line << "GUESTHOT_UNIT rank=" << (++rank)
+             << " unit=" << std::setw(4) << std::setfill('0') << e.unit << std::setfill(' ')
+             << " calls=" << e.calls
+             << " samples=" << e.samples
+             << " avg_inclusive_ns=" << avg_ns
+             << " est_inclusive_us=" << est_us;
+        runtime_log_line(line.str());
+    }
+
+    rank = 0u;
+    for (const auto &e : snap.pcs) {
+        const std::uint64_t avg_ns = e.samples ? e.inclusive_sample_ns / e.samples : 0u;
+        const std::uint64_t est_us = (e.inclusive_sample_ns * snap.sample_stride) / 1000u;
+        std::ostringstream line;
+        line << "GUESTHOT_PC rank=" << (++rank)
+             << " unit=" << std::setw(4) << std::setfill('0') << e.unit << std::setfill(' ')
+             << " pc=" << psprecomp::hex32(e.pc)
+             << " samples=" << e.samples
+             << " avg_inclusive_ns=" << avg_ns
+             << " est_inclusive_us=" << est_us;
+        runtime_log_line(line.str());
+    }
+}
+
 bool ge_phase_diag_line_enabled() {
     static const bool enabled = std::getenv("PSPRECOMP_GE_PHASE_DIAG") != nullptr;
     return enabled;
@@ -4689,7 +4758,10 @@ bool gpu_timing_diag_line_enabled() {
         const char *text = std::getenv("PSPRECOMP_GPU_TIMING_DIAG");
         return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0;
     }();
-    return enabled;
+    // PERF TELEMETRY uses the same backend timing counters, but intentionally
+    // suppresses the legacy per-vblank stderr line: logging the profiler every
+    // frame was itself measured at >1 ms/frame on Windows.
+    return enabled && !perf_telemetry_enabled();
 }
 
 struct GpuTimingCensus {
@@ -4783,7 +4855,7 @@ bool execute_ge_list(psprecomp::Runtime &runtime, GeListRecord &list,
                      std::vector<GuestCallbackInvocation> &callbacks,
                      const std::atomic<std::uint32_t> *async_stall = nullptr) {
     constexpr std::uint64_t kMaximumCommandsPerRun = 4'000'000u;
-    const bool time_ge = frame_time_diag_enabled();
+    const bool time_ge = perf_timing_enabled();
     const bool ge_histogram = ge_histogram_diag_enabled();
     const bool count_ge_commands = ge_phase_diag_line_enabled();
     const auto ge_entry_time = time_ge
@@ -7450,7 +7522,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         // injects Start during a movie.
         vcs::audio_output_advance(virtual_time_us);
         report_realtime_speed_if_requested();
-        if (frame_time_diag_enabled()) {
+        if (perf_timing_enabled()) {
             const auto now = std::chrono::steady_clock::now();
             if (frame_time_stats.started) {
                 const auto frame = now - frame_time_stats.last_vblank;
@@ -7489,7 +7561,73 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                            << " guest_us=" << (virtual_time_us - frame_time_stats.last_guest_time)
                            << " ge_calls=" << frame_time_stats.ge_calls
                            << " fps=" << (frame_us > 0 ? 1000000 / frame_us : 0) << "\n";
-                write_diag_line(frame_line);
+                if (frame_time_diag_enabled()) write_diag_line(frame_line);
+
+                const auto guest_cpu_us = static_cast<std::uint64_t>(
+                    frame_us > accounted_non_guest ? frame_us - accounted_non_guest : 0);
+                if (perf_telemetry_enabled()) {
+                    auto &a = perf_telemetry;
+                    ++a.frames;
+                    a.frame_us_sum += static_cast<std::uint64_t>(std::max<std::int64_t>(0, frame_us));
+                    a.frame_us_min = std::min(a.frame_us_min, static_cast<std::uint64_t>(std::max<std::int64_t>(0, frame_us)));
+                    a.frame_us_max = std::max(a.frame_us_max, static_cast<std::uint64_t>(std::max<std::int64_t>(0, frame_us)));
+                    a.guest_cpu_us_sum += guest_cpu_us;
+                    a.ge_us_sum += static_cast<std::uint64_t>(std::max<std::int64_t>(0, ge_us));
+                    a.ge_wait_us_sum += static_cast<std::uint64_t>(std::max<std::int64_t>(0, ge_async_wait_us));
+                    a.present_us_sum += static_cast<std::uint64_t>(std::max<std::int64_t>(0, present_us));
+                    a.io_us_sum += static_cast<std::uint64_t>(std::max<std::int64_t>(0, io_us));
+                    a.ge_calls_sum += frame_time_stats.ge_calls;
+                    if (a.frames >= perf_telemetry_interval()) {
+                        const GeGpuBackendReport r = ge_gpu_backend_report();
+                        const GeGpuBackendReport &o = a.previous_report;
+                        const auto d = [](std::uint64_t n, std::uint64_t p) { return n >= p ? n - p : 0u; };
+                        const std::uint64_t n = a.frames;
+                        std::ostringstream t;
+                        t << "PERF window=" << n
+                          << " vblank=" << display_vblank_index
+                          << " fps_avg=" << (a.frame_us_sum ? (1000000.0 * n / a.frame_us_sum) : 0.0)
+                          << " fps_min=" << (a.frame_us_max ? (1000000.0 / a.frame_us_max) : 0.0)
+                          << " fps_max=" << (a.frame_us_min && a.frame_us_min != UINT64_MAX ? (1000000.0 / a.frame_us_min) : 0.0)
+                          << " frame_us_avg=" << (a.frame_us_sum / n)
+                          << " guest_cpu_us_avg=" << (a.guest_cpu_us_sum / n)
+                          << " ge_us_avg=" << (a.ge_us_sum / n)
+                          << " ge_wait_us_avg=" << (a.ge_wait_us_sum / n)
+                          << " present_us_avg=" << (a.present_us_sum / n)
+                          << " io_us_avg=" << (a.io_us_sum / n)
+                          << " ge_calls_avg=" << (a.ge_calls_sum / n)
+                          << " game_draws=" << d(r.game_draw_calls, o.game_draw_calls)
+                          << " gpu_draws=" << d(r.dx12_gpu_draw_calls, o.dx12_gpu_draw_calls)
+                          << " batch_appends=" << d(r.dx12_batch_appends, o.dx12_batch_appends)
+                          << " batch_merges=" << d(r.dx12_batch_merges, o.dx12_batch_merges)
+                          << " tex_req=" << d(r.texture_decode_requests, o.texture_decode_requests)
+                          << " tex_hits=" << d(r.texture_cache_hits, o.texture_cache_hits)
+                          << " tex_uploads=" << d(r.decoded_texture_uploads, o.decoded_texture_uploads)
+                          << " tex_upload_bytes=" << d(r.decoded_texture_bytes, o.decoded_texture_bytes)
+                          << " tex_evict=" << d(r.evicted_textures, o.evicted_textures)
+                          << " srv_recycled=" << d(r.recycled_texture_descriptor_sets, o.recycled_texture_descriptor_sets)
+                          << " transfer_submits=" << d(r.transfer_submissions, o.transfer_submissions)
+                          << " transfer_bytes=" << d(r.transfer_bytes, o.transfer_bytes)
+                          << " fb_hits=" << d(r.dx12_framebuffer_target_hits, o.dx12_framebuffer_target_hits)
+                          << " fb_creates=" << d(r.dx12_framebuffer_target_creates, o.dx12_framebuffer_target_creates)
+                          << " fb_live=" << r.dx12_native_framebuffer_targets
+                          << " fb_feedback=" << d(r.dx12_gpu_feedback_draws, o.dx12_gpu_feedback_draws)
+                          << " fb_selfsnap=" << d(r.dx12_self_feedback_snapshots, o.dx12_self_feedback_snapshots)
+                          << " srv_high=" << r.dx12_srv_high_water
+                          << " submit_us=" << (d(r.perf_queue_submit_ns, o.perf_queue_submit_ns) / 1000u)
+                          << " presentq_us=" << (d(r.perf_queue_present_ns, o.perf_queue_present_ns) / 1000u)
+                          << " fence_us=" << (d(r.perf_wait_for_frame_ns, o.perf_wait_for_frame_ns) / 1000u)
+                          << " finish_us=" << (d(r.perf_finish_frame_ns, o.perf_finish_frame_ns) / 1000u);
+                        runtime_log_line(t.str());
+                        if (vcs_configuration().diagnostics.guest_hotspot_profile &&
+                            ++guest_hotspot_perf_windows >= 5u) {
+                            report_guest_hotspot_window(display_vblank_index);
+                            guest_hotspot_perf_windows = 0u;
+                        }
+                        a = {};
+                        a.previous_report = r;
+                        a.report_started = true;
+                    }
+                }
                 // Splits ge_us into the per-fragment pixel loop and everything
                 // else, which is per-triangle geometry.  Says directly which of
                 // the two a heavy frame is actually spent on.
@@ -7597,7 +7735,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         display_window_set_aspect_lock(
             !movie_output_buffers.empty() &&
             movie_output_buffers.count(normalize_ram_address(display_state.frame_buffer)) != 0u);
-        const auto present_entry = frame_time_diag_enabled()
+        const auto present_entry = perf_timing_enabled()
             ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
         // PSP firmware-owned savedata utility: render its HLE surface into the
         // same GE target before the frame is finalized. No desktop/Win32 chooser.
@@ -7650,7 +7788,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             ++swapchain_presents;
         }
         if (gpu_frame_ready) dump_gpu_internal_frame_if_requested(display_vblank_index);
-        if (frame_time_diag_enabled())
+        if (perf_timing_enabled())
             frame_time_stats.present_time += std::chrono::steady_clock::now() - present_entry;
         limit_frame_rate();
         // limit_frame_rate() may advance virtual_time_us when the host misses the
@@ -9918,7 +10056,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                     ctx.set_gpr(2, 0x80010009u);
                     return;
                 }
-                const bool time_io = frame_time_diag_enabled();
+                const bool time_io = perf_timing_enabled();
                 const auto io_entry = time_io ? std::chrono::steady_clock::now()
                                               : std::chrono::steady_clock::time_point{};
                 const std::size_t read = read_virtual_disc(
@@ -9982,7 +10120,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x80010009u);
                 return;
             }
-            const bool time_io = frame_time_diag_enabled();
+            const bool time_io = perf_timing_enabled();
             const auto io_entry = time_io ? std::chrono::steady_clock::now()
                                           : std::chrono::steady_clock::time_point{};
             it->second.read(reinterpret_cast<char *>(guest_destination),

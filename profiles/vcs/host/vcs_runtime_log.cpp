@@ -62,9 +62,15 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=tier2-extreme-2026-08-16\n";
+    s.file << "stage=tier2-superblock-v1-2026-08-16\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
-    s.file << "started=" << timestamp_now() << "\n\n";
+    s.file << "started=" << timestamp_now() << '\n';
+    s.file << "perf_telemetry=" << (configuration.diagnostics.perf_telemetry ? 1 : 0)
+           << " interval_vblanks=" << configuration.diagnostics.perf_telemetry_interval_vblanks
+           << "\n";
+    s.file << "guest_hotspot=" << (configuration.diagnostics.guest_hotspot_profile ? 1 : 0)
+           << " sample_stride=256 interval_vblanks=300\n";
+    s.file << "tier2_superblocks=1 cluster=0154+0155 hot_region_edges=8 cold_exits=3\n\n";
     if (s.flush_every_line) s.file.flush();
 }
 
