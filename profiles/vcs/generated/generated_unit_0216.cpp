@@ -1933,10 +1933,10 @@ L_08B647AC:
     }
 L_08B647B4:
     ctx.gpr[10] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(8)));
-    ctx.gpr[3] = (rt.memory().aot_load_word_left(ctx.gpr[10] + static_cast<std::uint32_t>(3), ctx.gpr[3]));
-    ctx.gpr[3] = (rt.memory().aot_load_word_right(ctx.gpr[10] + static_cast<std::uint32_t>(0), ctx.gpr[3]));
-    rt.memory().aot_store_word_left(ctx.gpr[29] + static_cast<std::uint32_t>(15), ctx.gpr[3]);
-    rt.memory().aot_store_word_right(ctx.gpr[29] + static_cast<std::uint32_t>(12), ctx.gpr[3]);
+    ctx.gpr[3] = (aot_mem.aot_load_word_left(ctx.gpr[10] + static_cast<std::uint32_t>(3), ctx.gpr[3]));
+    ctx.gpr[3] = (aot_mem.aot_load_word_right(ctx.gpr[10] + static_cast<std::uint32_t>(0), ctx.gpr[3]));
+    aot_mem.aot_store_word_left(ctx.gpr[29] + static_cast<std::uint32_t>(15), ctx.gpr[3]);
+    aot_mem.aot_store_word_right(ctx.gpr[29] + static_cast<std::uint32_t>(12), ctx.gpr[3]);
     { const bool branch_taken = ctx.gpr[18] == 0u;
     ctx.gpr[7] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(12)));
       if (branch_taken) {
@@ -2809,8 +2809,8 @@ L_08B64E00:
     ctx.gpr[8] = (0u - ctx.gpr[25]);
     ctx.gpr[8] = (ctx.gpr[8] >> 3u);
     ctx.gpr[6] = (ctx.gpr[6] - ctx.gpr[8]);
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[6] + static_cast<std::uint32_t>(7), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[6] + static_cast<std::uint32_t>(4), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[6] + static_cast<std::uint32_t>(7), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[6] + static_cast<std::uint32_t>(4), ctx.gpr[8]));
     ctx.gpr[3] = (ctx.gpr[8] & 65535u);
     ctx.gpr[3] = (ctx.gpr[3] + ctx.gpr[4]);
     ctx.gpr[9] = (ctx.gpr[5] < ctx.gpr[3] ? 1u : 0u);
@@ -5109,9 +5109,9 @@ L_08B65F8C:
 L_08B65F90:
     ctx.fpr[14] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[8] + static_cast<std::uint32_t>(4)));
     ctx.fpr[13] = ctx.fpr[13] + ctx.fpr[14];
-    ctx.set_fpu_condition((ctx.fpr[13] < ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[13] < ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    if (!ctx.fpu_condition()) {
+    if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     ctx.gpr[9] = (ctx.gpr[8] | 0u);
         goto L_08B65FBC;
     }

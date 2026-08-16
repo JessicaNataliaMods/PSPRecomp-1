@@ -8415,9 +8415,9 @@ L_08AA37D8:
     ctx.fpr[13] = std::bit_cast<float>(ctx.gpr[7]);
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[9]);
     { const float fs = ctx.fpr[16]; const float ft = ctx.fpr[13]; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) ctx.fpr[16] = std::bit_cast<float>(0x7FC00000u); else ctx.fpr[16] = fs * ft; }
-    ctx.set_fpu_condition((ctx.fpr[16] < ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[16] < ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[5] = (0u | 1000u);
       if (branch_taken) {
           goto L_08AA3828;

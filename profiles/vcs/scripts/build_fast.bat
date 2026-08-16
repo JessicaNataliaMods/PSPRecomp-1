@@ -30,6 +30,9 @@ echo VCS - FAST INCREMENTAL BUILD
 echo Build pipeline restored to the last known-good pre-reorganization behavior.
 echo CMake: !CMAKE_EXE! ^| Workers: %JOBS% (/MP%JOBS%, MSBuild /m:1) ^| LTCG: OFF
 echo ================================================================
+echo Reapplying profile-guided Tier-2 source transforms...
+call "%REPO%\profiles\vcs\APPLY_TIER2_EXTREME.bat"
+if errorlevel 1 goto :FAIL
 "%CMAKE_EXE%" -S "%REPO%" -B "%BUILD%" -G "Visual Studio 17 2022" -A x64 ^
   -DPSPRECOMP_PROFILE=vcs ^
   -DPSPRECOMP_GENERATED_OPT_LEVEL=2 ^
@@ -40,7 +43,7 @@ echo ================================================================
   -DPSPRECOMP_BUILD_PROFILE_TESTS=ON
 if errorlevel 1 goto :FAIL
 "%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel 1 --target ^
-  VCSNative psprecomp_tests vcs_config_tests audio_resampler_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
+  VCSNative psprecomp_tests vcs_config_tests audio_resampler_tests vfpu_tier2_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
   -- /m:1
 if errorlevel 1 goto :FAIL
 copy /Y "%REPO%\profiles\vcs\config\VCSNative.ini" "%BUILD%\bin\Release\VCSNative.ini" >nul

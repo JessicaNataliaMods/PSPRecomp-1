@@ -4378,7 +4378,7 @@ void vcs_post_dispatch_hook(psprecomp::Runtime &rt, psprecomp::AllegrexContext &
             std::cerr << " virtual_time_us=" << virtual_time_us << "\n";
             rt.stop(
                 "Execution-driven PSP clock is disabled while delayed threads are pending. "
-                "Remove PSPRECOMP_TIME_TICK_DISPATCHES=0 (default is 256), or set "
+                "Remove PSPRECOMP_TIME_TICK_DISPATCHES=0 (VCSNative default is 4096), or set "
                 "PSPRECOMP_FROZEN_CLOCK_GUARD_DISPATCHES=0 only for an isolated ordering test.");
             return;
         }

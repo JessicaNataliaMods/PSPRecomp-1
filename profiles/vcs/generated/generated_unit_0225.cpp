@@ -828,7 +828,7 @@ L_08B88BF8:
 L_08B88C04:
     rt.unsupported(0x08B88C04u, 0x4F4C5F32u, "unknown not lowered yet"); return;
 L_08B88C1C:
-    ctx.gpr[4] = (rt.memory().aot_load_word_left(ctx.gpr[20] + static_cast<std::uint32_t>(-32143), ctx.gpr[4]));
+    ctx.gpr[4] = (aot_mem.aot_load_word_left(ctx.gpr[20] + static_cast<std::uint32_t>(-32143), ctx.gpr[4]));
     ctx.gpr[18] = (ctx.gpr[17] & 12850u);
     rt.unsupported(0x08B88C24u, 0x44454B46u, "unsupported CFC1 control register"); return;
     goto L_08B88C28;
@@ -1158,7 +1158,7 @@ L_08B89ED8:
 L_08B89FA0:
     ctx.gpr[18] = (31068u << 16u);
     (void)(ctx.gpr[3] & 25440u);
-    ctx.gpr[20] = (rt.memory().aot_load_word_left(ctx.gpr[11] + static_cast<std::uint32_t>(31614), ctx.gpr[20]));
+    ctx.gpr[20] = (aot_mem.aot_load_word_left(ctx.gpr[11] + static_cast<std::uint32_t>(31614), ctx.gpr[20]));
     ctx.gpr[23] = (ctx.gpr[19] & 34931u);
     ctx.gpr[18] = (ctx.gpr[17] & 12850u);
     rt.unsupported(0x08B89FB4u, 0x44454B46u, "unsupported CFC1 control register"); return;

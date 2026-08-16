@@ -3,7 +3,8 @@ setlocal EnableExtensions
 for %%I in ("%~dp0..\..\..") do set "REPO=%%~fI"
 for %%I in ("%~dp0..") do set "PROFILE=%%~fI"
 
-set "BIN=%REPO%\out\vcs-ninja\bin\Release\VCSNative.exe"
+set "BIN=%REPO%\out\vcs-release-ninja\bin\Release\VCSNative.exe"
+if not exist "%BIN%" set "BIN=%REPO%\out\vcs-ninja\bin\Release\VCSNative.exe"
 if not exist "%BIN%" set "BIN=%REPO%\out\vcs-release\bin\Release\VCSNative.exe"
 if not exist "%BIN%" set "BIN=%REPO%\out\vcs-fast\bin\Release\VCSNative.exe"
 if not exist "%BIN%" (

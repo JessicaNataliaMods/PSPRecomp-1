@@ -1345,9 +1345,9 @@ L_08B60330:
     ctx.pc = jump_target;
     return;
 L_08B6033C:
-    ctx.set_fpu_condition((!(std::isnan(ctx.fpr[12]) || std::isnan(ctx.fpr[12])) && ctx.fpr[12] == ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(ctx.fpr[12]) || std::isnan(ctx.fpr[12])) && ctx.fpr[12] == ctx.fpr[12])) ? 0x00800000u : 0u);
     ctx.gpr[3] = (0u + static_cast<std::uint32_t>(1));
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.fpr[0] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[12]));
       if (branch_taken) {
           goto L_08B603E8;
@@ -1356,9 +1356,9 @@ L_08B6033C:
     }
 L_08B6034C:
     ctx.fpr[1] = std::bit_cast<float>(0u);
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[1]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[1])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[4] = (2233u << 16u);
       if (branch_taken) {
           goto L_08B60368;
@@ -1371,9 +1371,9 @@ L_08B60360:
     goto L_08B60368;
 L_08B60368:
     ctx.fpr[4] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(-24280)));
-    ctx.set_fpu_condition((ctx.fpr[4] <= ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[4] <= ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[6] = (2233u << 16u);
       if (branch_taken) {
           goto L_08B604B0;
@@ -1384,9 +1384,9 @@ L_08B6037C:
     ctx.fpr[12] = ctx.fpr[4] / ctx.fpr[12];
     ctx.gpr[5] = (2233u << 16u);
     ctx.fpr[1] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[5] + static_cast<std::uint32_t>(-24276)));
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[1]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[1])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[9] = (2233u << 16u);
       if (branch_taken) {
           goto L_08B603F0;
@@ -1428,9 +1428,9 @@ L_08B603E8:
     return;
 L_08B603F0:
     ctx.fpr[14] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[9] + static_cast<std::uint32_t>(-24260)));
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[14]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[14])) ? 0x00800000u : 0u);
     // nop
-    if (!ctx.fpu_condition()) {
+    if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     ctx.fpr[2] = ctx.fpr[12] + ctx.fpr[4];
         goto L_08B60464;
     }
@@ -1484,9 +1484,9 @@ L_08B60464:
     goto L_08B6045C;
 L_08B604B0:
     ctx.fpr[7] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[6] + static_cast<std::uint32_t>(-24276)));
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[7]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[7])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[10] = (2233u << 16u);
       if (branch_taken) {
           goto L_08B60500;
@@ -1511,9 +1511,9 @@ L_08B604C4:
     goto L_08B603DC;
 L_08B60500:
     ctx.fpr[18] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[10] + static_cast<std::uint32_t>(-24260)));
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[18]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[18])) ? 0x00800000u : 0u);
     // nop
-    if (!ctx.fpu_condition()) {
+    if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     ctx.fpr[2] = ctx.fpr[12] + ctx.fpr[4];
         goto L_08B60574;
     }

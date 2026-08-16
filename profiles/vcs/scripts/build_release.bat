@@ -37,6 +37,10 @@ echo Link: host/core LTCG only ^| generated AOT /GL- ^| LTCG status visible
 echo Build dir preserved: %BUILD%
 echo ================================================================
 
+echo [0b/7] Reapplying profile-guided Tier-2 source transforms...
+call "%REPO%\profiles\vcs\APPLY_TIER2_EXTREME.bat"
+if errorlevel 1 goto :FAIL
+
 echo [1/7] Configuring without deleting existing objects...
 "%CMAKE_EXE%" -S "%REPO%" -B "%BUILD%" -G "Visual Studio 17 2022" -A x64 ^
   -DPSPRECOMP_PROFILE=vcs ^
@@ -63,7 +67,7 @@ if errorlevel 1 goto :FAIL
 
 echo [2b/7] Building tests and probes...
 "%CMAKE_EXE%" --build "%BUILD%" --config Release --parallel 1 --target ^
-  psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
+  psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests vfpu_tier2_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe ^
   -- /m:1
 if errorlevel 1 goto :FAIL
 

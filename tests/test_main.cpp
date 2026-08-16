@@ -729,9 +729,10 @@ static void test_automatic_cross_unit_tail_chaining() {
     require(text.find("GuestMemory::AotFastView &aot_mem)") != std::string::npos &&
             text.find("_entry(rt, ctx, 0u, aot_mem)") != std::string::npos,
             "Shared AOT memory was not threaded across generated-unit direct chains");
-    // The register-cache lowering passes were removed: generated units must
-    // address AllegrexContext directly rather than a second long-lived cache
-    // object, which is what made MSVC's optimizer non-convergent on this corpus.
+    // The old long-lived cross-unit register cache remains removed.  The VCS
+    // profile may later apply short-lived basic-block locals only to measured
+    // hot units, but automatic framework codegen must not carry a second
+    // architectural state object across Runtime boundaries.
     require(text.find("AotHotRegisterCache") == std::string::npos &&
             text.find("hot_regs") == std::string::npos,
             "Generated unit still carries the removed hot-register cache");
@@ -1753,6 +1754,26 @@ int main() {
         unaligned_memory.store32(unaligned_base, 0x44332211u);
         unaligned_memory.store_word_right(unaligned_base + 3u, 0xAABBCCDDu);
         require(unaligned_memory.load32(unaligned_base) == 0xDD332211u, "SWR lane 3 failed");
+
+        // The generated AOT Tier-2 path uses the shared AotFastView for the
+        // four unaligned MIPS word operations as well.  Keep it bit-identical
+        // to GuestMemory's reference merge semantics.
+        auto unaligned_aot = unaligned_memory.aot_fast_view();
+        unaligned_memory.store32(unaligned_base, 0x44332211u);
+        require(unaligned_aot.aot_load_word_left(unaligned_base + 0u, 0xAABBCCDDu) == 0x11BBCCDDu,
+                "AOT LWL lane 0 failed");
+        require(unaligned_aot.aot_load_word_left(unaligned_base + 3u, 0xAABBCCDDu) == 0x44332211u,
+                "AOT LWL lane 3 failed");
+        require(unaligned_aot.aot_load_word_right(unaligned_base + 0u, 0xAABBCCDDu) == 0x44332211u,
+                "AOT LWR lane 0 failed");
+        require(unaligned_aot.aot_load_word_right(unaligned_base + 3u, 0xAABBCCDDu) == 0xAABBCC44u,
+                "AOT LWR lane 3 failed");
+        unaligned_memory.store32(unaligned_base, 0x44332211u);
+        unaligned_aot.aot_store_word_left(unaligned_base + 0u, 0xAABBCCDDu);
+        require(unaligned_memory.load32(unaligned_base) == 0x443322AAu, "AOT SWL lane 0 failed");
+        unaligned_memory.store32(unaligned_base, 0x44332211u);
+        unaligned_aot.aot_store_word_right(unaligned_base + 3u, 0xAABBCCDDu);
+        require(unaligned_memory.load32(unaligned_base) == 0xDD332211u, "AOT SWR lane 3 failed");
 
         psprecomp::NidRegistry nids;
         require(nids.resolve("IoFileMgrForUser", 0x109F50BCu) == "sceIoOpen", "NID registry failed");

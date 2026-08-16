@@ -91,6 +91,7 @@ for %%I in ("%CMAKE_EXE%") do set "CTEST_EXE=%%~dpIctest.exe"
 if not exist "%CTEST_EXE%" set "CTEST_EXE=ctest.exe"
 
 set "NINJA_STATUS=[%%f/%%t %%p ^| %%e elapsed ^| %%r running] "
+set "BOOTFIX_STAMP=%BUILD%\.vcs_tier2_bootfix_20260816_v1"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -107,7 +108,18 @@ echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo ================================================================
 echo.
+echo [0b/7] Reapplying BOOTFIX-safe Tier-2 source transforms...
+call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
+if errorlevel 1 goto :FAIL
 
+if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
+  echo.
+  echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
+  del /s /q "%BUILD%\*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*.pch" >nul 2>&1
+)
+
+echo.
 echo [1/7] Configuring persistent Ninja Release tree...
 "%CMAKE_EXE%" -S "%REPO%" -B "%BUILD%" -G Ninja ^
   "-DCMAKE_MAKE_PROGRAM=%NINJA_EXE%" ^
@@ -133,11 +145,12 @@ echo.
 echo [2/7] Building VCSNative with Ninja...
 "%CMAKE_EXE%" --build "%BUILD%" --parallel %JOBS% --target VCSNative
 if errorlevel 1 goto :FAIL
+>"%BOOTFIX_STAMP%" echo VCS Tier2 BOOTFIX 2026-08-16 v1
 
 echo.
 echo [2b/7] Building tests and DX12 probes...
 "%CMAKE_EXE%" --build "%BUILD%" --parallel %JOBS% --target ^
-  psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests ^
+  psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests vfpu_tier2_tests ^
   vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe
 if errorlevel 1 goto :FAIL
 

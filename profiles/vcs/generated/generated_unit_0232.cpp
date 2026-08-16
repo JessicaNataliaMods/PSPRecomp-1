@@ -480,7 +480,7 @@ L_08BA41B8:
     // nop
     rt.unsupported(0x08BA41DCu, 0x43500000u, "unknown not lowered yet"); return;
 L_08BA41E8:
-    ctx.gpr[23] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
+    ctx.gpr[23] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
     ctx.gpr[25] = (39321u << 16u);
     ctx.gpr[2] = (aot_mem.aot_load16(ctx.gpr[1] + static_cast<std::uint32_t>(-27815)));
     ctx.gpr[18] = (18724u << 16u);

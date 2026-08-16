@@ -6262,9 +6262,9 @@ L_08B72BC4:
     ctx.fpr[12] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[9] + static_cast<std::uint32_t>(16)));
     ctx.fpr[13] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[10] + static_cast<std::uint32_t>(16)));
     ctx.gpr[9] = (0u | 0u);
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[13]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[13])) ? 0x00800000u : 0u);
     // nop
-    if (ctx.fpu_condition()) {
+    if (((ctx.fcr31 & 0x00800000u) != 0u)) {
     ctx.gpr[9] = (0u | 1u);
         goto L_08B72BE8;
     }
@@ -8500,7 +8500,7 @@ L_08B73CA0:
 L_08B73CA4:
     rt.unsupported(0x08B73CA4u, 0x05DB22CEu, "regimm? not lowered yet"); return;
 L_08B73CB0:
-    rt.memory().aot_store_word_left(ctx.gpr[26] + static_cast<std::uint32_t>(-6294), ctx.gpr[9]);
+    aot_mem.aot_store_word_left(ctx.gpr[26] + static_cast<std::uint32_t>(-6294), ctx.gpr[9]);
     rt.unsupported(0x08B73CB4u, 0xB287BD61u, "unknown not lowered yet"); return;
 L_08B73CBC:
     ctx.gpr[31] = (0x08B73CC4u);

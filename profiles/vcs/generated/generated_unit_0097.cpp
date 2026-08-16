@@ -1424,12 +1424,12 @@ L_08988194:
 L_0898819C:
     ctx.gpr[3] = (ctx.gpr[2] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[3]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[3] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[3]);
-    ctx.set_fpu_condition((ctx.fpr[20] <= ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[20] <= ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = ctx.fpu_condition();
+    { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_08988240;
@@ -1439,7 +1439,7 @@ L_0898819C:
 L_089881C0:
     ctx.gpr[8] = (ctx.gpr[2] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[8]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[8] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[8]);
     ctx.fpr[20] = ctx.fpr[20] - ctx.fpr[12];
@@ -1516,7 +1516,7 @@ L_08988240:
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[11] + static_cast<std::uint32_t>(8)));
     ctx.gpr[4] = (ctx.gpr[4] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[4] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[4]);
     ctx.fpr[12] = ctx.fpr[12] - ctx.fpr[20];
@@ -1586,9 +1586,9 @@ L_08988300:
     { const float fs = ctx.fpr[22]; const float ft = ctx.fpr[20]; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) ctx.fpr[22] = std::bit_cast<float>(0x7FC00000u); else ctx.fpr[22] = fs * ft; }
     goto L_08988304;
 L_08988304:
-    ctx.set_fpu_condition((ctx.fpr[22] <= ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[22] <= ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = ctx.fpu_condition();
+    { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_089883C0;
@@ -1744,9 +1744,9 @@ L_08988450:
     { const float fs = ctx.fpr[20]; const float ft = ctx.fpr[22]; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) ctx.fpr[20] = std::bit_cast<float>(0x7FC00000u); else ctx.fpr[20] = fs * ft; }
     goto L_08988454;
 L_08988454:
-    ctx.set_fpu_condition((ctx.fpr[20] <= ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[20] <= ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = ctx.fpu_condition();
+    { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_089885C4;
@@ -1762,12 +1762,12 @@ L_08988464:
     ctx.gpr[5] = (aot_mem.aot_load16(ctx.gpr[18] + static_cast<std::uint32_t>(8)));
     ctx.gpr[5] = (ctx.gpr[5] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[5]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[5] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[22] = std::bit_cast<float>(ctx.gpr[5]);
-    ctx.set_fpu_condition((!(std::isnan(ctx.fpr[22]) || std::isnan(ctx.fpr[12])) && ctx.fpr[22] == ctx.fpr[12]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(ctx.fpr[22]) || std::isnan(ctx.fpr[12])) && ctx.fpr[22] == ctx.fpr[12])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = ctx.fpu_condition();
+    { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_089884B4;
@@ -1832,12 +1832,12 @@ L_08988510:
     aot_mem.aot_store16(ctx.gpr[29] + static_cast<std::uint32_t>(2), static_cast<std::uint16_t>(ctx.gpr[4]));
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[30] + static_cast<std::uint32_t>(0)));
     aot_mem.aot_store16(ctx.gpr[29] + static_cast<std::uint32_t>(4), static_cast<std::uint16_t>(ctx.gpr[4]));
-    ctx.gpr[20] = (rt.memory().aot_load_word_right(ctx.gpr[29] + static_cast<std::uint32_t>(0), ctx.gpr[20]));
-    ctx.gpr[20] = (rt.memory().aot_load_word_left(ctx.gpr[29] + static_cast<std::uint32_t>(3), ctx.gpr[20]));
+    ctx.gpr[20] = (aot_mem.aot_load_word_right(ctx.gpr[29] + static_cast<std::uint32_t>(0), ctx.gpr[20]));
+    ctx.gpr[20] = (aot_mem.aot_load_word_left(ctx.gpr[29] + static_cast<std::uint32_t>(3), ctx.gpr[20]));
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[29] + static_cast<std::uint32_t>(4)));
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[20]);
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(1u, 0u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 0u, 2u>();
     ctx.gpr[18] = (ctx.gpr[29] + static_cast<std::uint32_t>(64));
     { float vfpu_value[4]{}; ctx.read_vfpu_vector_ct<1u, 4u>(vfpu_value);
       const std::uint32_t vfpu_address = ctx.gpr[18] + static_cast<std::uint32_t>(0);
@@ -2103,25 +2103,25 @@ L_08988728:
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[5] + static_cast<std::uint32_t>(0)));
     ctx.gpr[4] = (ctx.gpr[4] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[4] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[4]);
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[5] + static_cast<std::uint32_t>(2)));
     ctx.gpr[4] = (ctx.gpr[4] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[4] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[13] = std::bit_cast<float>(ctx.gpr[4]);
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[5] + static_cast<std::uint32_t>(4)));
     ctx.gpr[4] = (ctx.gpr[4] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[4] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[14] = std::bit_cast<float>(ctx.gpr[4]);
     ctx.gpr[4] = (aot_mem.aot_load16(ctx.gpr[5] + static_cast<std::uint32_t>(6)));
     ctx.gpr[4] = (ctx.gpr[4] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[4]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[4] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[15] = std::bit_cast<float>(ctx.gpr[4]);
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(32), std::bit_cast<std::uint32_t>(ctx.fpr[12]));
@@ -2132,25 +2132,25 @@ L_08988728:
     ctx.gpr[5] = (aot_mem.aot_load16(ctx.gpr[6] + static_cast<std::uint32_t>(0)));
     ctx.gpr[5] = (ctx.gpr[5] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[5]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[5] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[12] = std::bit_cast<float>(ctx.gpr[5]);
     ctx.gpr[5] = (aot_mem.aot_load16(ctx.gpr[6] + static_cast<std::uint32_t>(2)));
     ctx.gpr[5] = (ctx.gpr[5] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[5]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[5] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[13] = std::bit_cast<float>(ctx.gpr[5]);
     ctx.gpr[5] = (aot_mem.aot_load16(ctx.gpr[6] + static_cast<std::uint32_t>(4)));
     ctx.gpr[5] = (ctx.gpr[5] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[5]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[5] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[14] = std::bit_cast<float>(ctx.gpr[5]);
     ctx.gpr[5] = (aot_mem.aot_load16(ctx.gpr[6] + static_cast<std::uint32_t>(6)));
     ctx.gpr[5] = (ctx.gpr[5] & 65535u);
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[5]);
-    ctx.execute_vfpu_vh2f(0u, 0u, 1u);
+    ctx.execute_vfpu_vh2f_ct<0u, 0u, 1u>();
     ctx.gpr[5] = (ctx.vfpu_scalar_bits_ct<0u>());
     ctx.fpr[15] = std::bit_cast<float>(ctx.gpr[5]);
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(48), std::bit_cast<std::uint32_t>(ctx.fpr[12]));
@@ -2250,14 +2250,14 @@ L_089888C0:
 L_089888D0:
     ctx.gpr[12] = (ctx.gpr[12] + ctx.gpr[16]);
     if (ctx.gpr[12] != ctx.gpr[14]) {
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
         goto L_08988900;
     }
     goto L_089888DC;
 L_089888DC:
     ctx.gpr[9] = (ctx.gpr[3] & 2u);
     if (ctx.gpr[9] != 0u) {
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[13] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[13] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
         goto L_089888F8;
     }
     goto L_089888E8;
@@ -2279,9 +2279,9 @@ L_089888F8:
     ctx.gpr[2] = (0u + static_cast<std::uint32_t>(1));
     goto L_08988900;
 L_08988900:
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[8]);
-    ctx.execute_vfpu_vh2f(1u, 32u, 1u);
+    ctx.execute_vfpu_vh2f_ct<1u, 32u, 1u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<0u, 1u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<1u, 1u, 1u>(vfpu_t);
@@ -2297,26 +2297,26 @@ L_0898891C:
     aot_mem.aot_store32(ctx.gpr[4] + static_cast<std::uint32_t>(16), ctx.vfpu_scalar_bits_ct<0u>());
     ctx.gpr[8] = (ctx.gpr[25] & 1u);
     { const bool branch_taken = ctx.gpr[8] == 0u;
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
       if (branch_taken) {
           goto L_08988988;
       }
       goto L_0898892C;
     }
 L_0898892C:
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<16u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<48u>(ctx.gpr[9]);
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<80u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<112u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(1u, 16u, 2u);
-    ctx.execute_vfpu_vh2f(2u, 80u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 16u, 2u>();
+    ctx.execute_vfpu_vh2f_ct<2u, 80u, 2u>();
     ctx.execute_vfpu_vdot_ct<16u, 1u, 2u, 4u>();
     { float vfpu_s[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
@@ -2326,7 +2326,7 @@ L_0898892C:
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
       for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = std::asin(vfpu_s[i]) * 0.63661977236758134308f;
       ctx.write_vfpu_vector_with_destination_prefix_ct<16u, 1u>(vfpu_d); }
-    ctx.execute_vfpu_vocp(16u, 16u, 1u);
+    ctx.execute_vfpu_vocp_ct<16u, 16u, 1u>();
     ctx.execute_vfpu_vcmp_ct<16u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
     { float vfpu_s[4]{}, vfpu_d[4]{};
@@ -2382,10 +2382,10 @@ L_089889B0:
       goto L_089889BC;
     }
 L_089889BC:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[8]);
-    ctx.execute_vfpu_vh2f(20u, 32u, 1u);
+    ctx.execute_vfpu_vh2f_ct<20u, 32u, 1u>();
     ctx.execute_vfpu_vcmp_ct<20u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
@@ -2415,18 +2415,18 @@ L_089889DC:
       goto L_089889E8;
     }
 L_089889E8:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
     ctx.gpr[9] = (aot_mem.aot_load16(ctx.gpr[15] + static_cast<std::uint32_t>(14)));
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[9]);
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
     ctx.gpr[9] = (aot_mem.aot_load16(ctx.gpr[12] + static_cast<std::uint32_t>(14)));
     ctx.set_vfpu_scalar_bits_ct<64u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<96u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(1u, 0u, 2u);
-    ctx.execute_vfpu_vh2f(2u, 64u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 0u, 2u>();
+    ctx.execute_vfpu_vh2f_ct<2u, 64u, 2u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<2u, 3u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<1u, 3u, 1u>(vfpu_t);
@@ -2458,29 +2458,29 @@ L_08988A2C:
 L_08988A38:
     ctx.set_vfpu_scalar_bits_ct<16u>(aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(0)));
     ctx.set_vfpu_scalar_bits_ct<48u>(aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(4)));
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[9]);
     ctx.execute_vfpu_vcmp_ct<16u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
-    ctx.execute_vfpu_vh2f(1u, 0u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 0u, 2u>();
       if (branch_taken) {
           goto L_08988AA0;
       }
       goto L_08988A64;
     }
 L_08988A64:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<64u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<96u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(2u, 64u, 2u);
-    ctx.execute_vfpu_vocp(52u, 20u, 1u);
+    ctx.execute_vfpu_vh2f_ct<2u, 64u, 2u>();
+    ctx.execute_vfpu_vocp_ct<52u, 20u, 1u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<20u, 1u, 1u>(vfpu_t);
@@ -2600,14 +2600,14 @@ L_08988B38:
 L_08988B48:
     ctx.gpr[12] = (ctx.gpr[12] + ctx.gpr[16]);
     if (ctx.gpr[12] != ctx.gpr[14]) {
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
         goto L_08988B78;
     }
     goto L_08988B54;
 L_08988B54:
     ctx.gpr[9] = (ctx.gpr[3] & 2u);
     if (ctx.gpr[9] != 0u) {
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[13] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[13] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
         goto L_08988B70;
     }
     goto L_08988B60;
@@ -2629,9 +2629,9 @@ L_08988B70:
     ctx.gpr[2] = (0u + static_cast<std::uint32_t>(1));
     goto L_08988B78;
 L_08988B78:
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[8]);
-    ctx.execute_vfpu_vh2f(1u, 32u, 1u);
+    ctx.execute_vfpu_vh2f_ct<1u, 32u, 1u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<0u, 1u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<1u, 1u, 1u>(vfpu_t);
@@ -2647,26 +2647,26 @@ L_08988B94:
     aot_mem.aot_store32(ctx.gpr[4] + static_cast<std::uint32_t>(16), ctx.vfpu_scalar_bits_ct<0u>());
     ctx.gpr[8] = (ctx.gpr[25] & 1u);
     { const bool branch_taken = ctx.gpr[8] == 0u;
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
       if (branch_taken) {
           goto L_08988C00;
       }
       goto L_08988BA4;
     }
 L_08988BA4:
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<16u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<48u>(ctx.gpr[9]);
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<80u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<112u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(1u, 16u, 2u);
-    ctx.execute_vfpu_vh2f(2u, 80u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 16u, 2u>();
+    ctx.execute_vfpu_vh2f_ct<2u, 80u, 2u>();
     ctx.execute_vfpu_vdot_ct<16u, 1u, 2u, 4u>();
     { float vfpu_s[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
@@ -2676,7 +2676,7 @@ L_08988BA4:
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
       for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = std::asin(vfpu_s[i]) * 0.63661977236758134308f;
       ctx.write_vfpu_vector_with_destination_prefix_ct<16u, 1u>(vfpu_d); }
-    ctx.execute_vfpu_vocp(16u, 16u, 1u);
+    ctx.execute_vfpu_vocp_ct<16u, 16u, 1u>();
     ctx.execute_vfpu_vcmp_ct<16u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
     { float vfpu_s[4]{}, vfpu_d[4]{};
@@ -2732,10 +2732,10 @@ L_08988C28:
       goto L_08988C34;
     }
 L_08988C34:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(8), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(11), ctx.gpr[8]));
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[8]);
-    ctx.execute_vfpu_vh2f(20u, 32u, 1u);
+    ctx.execute_vfpu_vh2f_ct<20u, 32u, 1u>();
     ctx.execute_vfpu_vcmp_ct<20u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
@@ -2765,18 +2765,18 @@ L_08988C54:
       goto L_08988C60;
     }
 L_08988C60:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
     ctx.gpr[9] = (aot_mem.aot_load16(ctx.gpr[15] + static_cast<std::uint32_t>(14)));
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[9]);
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(10), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(13), ctx.gpr[8]));
     ctx.gpr[9] = (aot_mem.aot_load16(ctx.gpr[12] + static_cast<std::uint32_t>(14)));
     ctx.set_vfpu_scalar_bits_ct<64u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<96u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(1u, 0u, 2u);
-    ctx.execute_vfpu_vh2f(2u, 64u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 0u, 2u>();
+    ctx.execute_vfpu_vh2f_ct<2u, 64u, 2u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<2u, 3u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<1u, 3u, 1u>(vfpu_t);
@@ -2812,15 +2812,15 @@ L_08988CA8:
 L_08988CB4:
     ctx.set_vfpu_scalar_bits_ct<16u>(aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(0)));
     ctx.set_vfpu_scalar_bits_ct<48u>(aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(4)));
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[15] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[15] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<0u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<32u>(ctx.gpr[9]);
     ctx.execute_vfpu_vcmp_ct<16u, 28u, 1u, 1u>();
     { const bool branch_taken = ((ctx.vfpu_ctrl[3] >> 0u) & 1u) != 0u;
-    ctx.execute_vfpu_vh2f(1u, 0u, 2u);
+    ctx.execute_vfpu_vh2f_ct<1u, 0u, 2u>();
       if (branch_taken) {
           goto L_08988CF8;
       }
@@ -2844,13 +2844,13 @@ L_08988CF0:
       ctx.write_vfpu_vector_with_destination_prefix_ct<1u, 4u>(vfpu_d); }
     goto L_08988CF8;
 L_08988CF8:
-    ctx.gpr[8] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
-    ctx.gpr[8] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
-    ctx.gpr[9] = (rt.memory().aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(0), ctx.gpr[8]));
+    ctx.gpr[8] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(3), ctx.gpr[8]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(4), ctx.gpr[9]));
+    ctx.gpr[9] = (aot_mem.aot_load_word_left(ctx.gpr[12] + static_cast<std::uint32_t>(7), ctx.gpr[9]));
     ctx.set_vfpu_scalar_bits_ct<64u>(ctx.gpr[8]);
     ctx.set_vfpu_scalar_bits_ct<96u>(ctx.gpr[9]);
-    ctx.execute_vfpu_vh2f(2u, 64u, 2u);
+    ctx.execute_vfpu_vh2f_ct<2u, 64u, 2u>();
     { float vfpu_s[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<2u, 4u, 0u>(vfpu_s);
       for (std::uint32_t i = 0; i < 4u; ++i) vfpu_d[i] = vfpu_s[i];
@@ -2866,7 +2866,7 @@ L_08988D24:
       ctx.read_vfpu_vector_with_source_prefix_ct<3u, 4u, 0u>(vfpu_s);
       for (std::uint32_t i = 0; i < 4u; ++i) vfpu_d[i] = vfpu_s[i];
       ctx.write_vfpu_vector_with_destination_prefix_ct<2u, 4u>(vfpu_d); }
-    ctx.execute_vfpu_vocp(52u, 20u, 1u);
+    ctx.execute_vfpu_vocp_ct<52u, 20u, 1u>();
     { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
       ctx.read_vfpu_vector_with_source_prefix_ct<16u, 1u, 0u>(vfpu_s);
       ctx.read_vfpu_vector_with_source_prefix_ct<20u, 1u, 1u>(vfpu_t);
@@ -5304,9 +5304,9 @@ L_08989F70:
     ctx.fpr[12] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[28] + static_cast<std::uint32_t>(7672)));
     ctx.gpr[4] = (16512u << 16u);
     ctx.fpr[13] = std::bit_cast<float>(ctx.gpr[4]);
-    ctx.set_fpu_condition((ctx.fpr[12] < ctx.fpr[13]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] < ctx.fpr[13])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = !ctx.fpu_condition();
+    { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_08989F9C;
@@ -5408,9 +5408,9 @@ L_0898A048:
     ctx.fpr[12] = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[28] + static_cast<std::uint32_t>(7672)));
     ctx.gpr[4] = (16000u << 16u);
     ctx.fpr[13] = std::bit_cast<float>(ctx.gpr[4]);
-    ctx.set_fpu_condition((ctx.fpr[12] <= ctx.fpr[13]));
+    ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[12] <= ctx.fpr[13])) ? 0x00800000u : 0u);
     // nop
-    { const bool branch_taken = ctx.fpu_condition();
+    { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     // nop
       if (branch_taken) {
           goto L_0898A074;

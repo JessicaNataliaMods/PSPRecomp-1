@@ -1232,7 +1232,7 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                         // this unit continues locally; otherwise the chained
                         // caller one frame up recognizes its return address.
                         body << "    local_pc = jump_target;\n"
-                             << "    if (++local_transfers < 2048u) { entry_id = 0u; goto LOCAL_DISPATCH; }\n"
+                             << "    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }\n"
                              << "    ctx.pc = jump_target;\n"
                              << "    return;\n";
                     }

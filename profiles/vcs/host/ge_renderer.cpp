@@ -262,8 +262,9 @@ std::int64_t parallel_pixel_threshold() noexcept {
 // by raster/texture work.  Keep small draws serial because waking participants
 // costs more than decoding a few dozen simple vertices.
 bool parallel_vertex_decode_enabled() noexcept {
-    // Stage 41+ experiment: keep opt-in until physical Windows/Vulkan parity
-    // is established against the last known-good Stage 40 run.
+    // The VCS executable installs this as an enabled-by-default performance
+    // path; keeping the profile layer environment-gated preserves a clean
+    // PSPRECOMP_GE_PARALLEL_VERTEX_DECODE=0 A/B fallback and test isolation.
     static const bool enabled = [] {
         const char *text = std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE");
         return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0 &&

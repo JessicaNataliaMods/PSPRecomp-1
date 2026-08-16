@@ -119,6 +119,13 @@ if(PSPRECOMP_PROFILE_GUIDED_AOT)
         set_source_files_properties(${VCS_HOT_SOURCES} PROPERTIES COMPILE_OPTIONS
             "-O${PSPRECOMP_HOT_GENERATED_OPT_LEVEL};-g0")
     endif()
+
+    # Feed the measured hot units to the linker contiguously and in profile rank
+    # order. This is deliberately limited to the same 37-unit hot set: globally
+    # inflating/reordering the 234-unit corpus previously hurt I-cache/BTB behavior.
+    # Linker PGO can refine this further after a physical gameplay training run.
+    list(REMOVE_ITEM VCS_GENERATED ${VCS_HOT_SOURCES})
+    list(PREPEND VCS_GENERATED ${VCS_HOT_SOURCES})
 endif()
 
 if(MSVC AND PSPRECOMP_NATIVE_AVX2)
@@ -292,6 +299,21 @@ if(PSPRECOMP_BUILD_PROFILE_TESTS)
     add_executable(audio_resampler_tests tests/audio_resampler_tests.cpp)
     target_include_directories(audio_resampler_tests PRIVATE host)
     add_test(NAME audio_resampler_tests COMMAND audio_resampler_tests)
+
+    add_executable(vfpu_tier2_tests tests/vfpu_tier2_tests.cpp)
+    target_include_directories(vfpu_tier2_tests PRIVATE "${PROJECT_SOURCE_DIR}/include")
+    # This differential test instantiates a dense set of header-only VFPU Tier-2
+    # templates.  MSVC 19.44 can ICE in the LTCG back-end while linking this
+    # otherwise-valid test (C1001 in allegrex_context.hpp).  Keep host/game LTCG
+    # enabled, but compile this diagnostic target as a normal translation unit.
+    set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
+    set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
+    set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO FALSE)
+    set_property(TARGET vfpu_tier2_tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL FALSE)
+    if(MSVC)
+        target_compile_options(vfpu_tier2_tests PRIVATE /GL-)
+    endif()
+    add_test(NAME vfpu_tier2_tests COMMAND vfpu_tier2_tests)
 
     add_executable(vcs_bootstrap_paths_tests
         tests/vcs_bootstrap_paths_tests.cpp host/vcs_bootstrap_paths.cpp)

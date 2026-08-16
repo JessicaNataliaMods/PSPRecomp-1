@@ -117,6 +117,34 @@ public:
             }
             owner_->aot_store32_slow(address, value);
         }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_load_word_left(
+            std::uint32_t address, std::uint32_t existing) const {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t memory_word = aot_load32(address & ~3u);
+            return (existing & (0x00FFFFFFu >> shift)) | (memory_word << (24u - shift));
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_load_word_right(
+            std::uint32_t address, std::uint32_t existing) const {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t memory_word = aot_load32(address & ~3u);
+            return (existing & (0xFFFFFF00u << (24u - shift))) | (memory_word >> shift);
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_store_word_left(
+            std::uint32_t address, std::uint32_t value) const {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t aligned = address & ~3u;
+            const std::uint32_t memory_word = aot_load32(aligned);
+            aot_store32(aligned,
+                (value >> (24u - shift)) | (memory_word & (0xFFFFFF00u << shift)));
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_store_word_right(
+            std::uint32_t address, std::uint32_t value) const {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t aligned = address & ~3u;
+            const std::uint32_t memory_word = aot_load32(aligned);
+            aot_store32(aligned,
+                (value << shift) | (memory_word & (0x00FFFFFFu >> (24u - shift))));
+        }
 
     private:
         friend class GuestMemory;

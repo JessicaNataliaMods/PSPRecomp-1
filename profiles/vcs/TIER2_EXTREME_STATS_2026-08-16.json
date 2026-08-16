@@ -1,0 +1,161 @@
+{
+  "date": "2026-08-16",
+  "baseline": "PSPRecomp-temp-edits-1.zip",
+  "generated": {
+    "before": {
+      "files": 234,
+      "bytes": 108732904,
+      "lines": 2249696,
+      "ctx_gpr": 1230757,
+      "ctx_fpr": 196805,
+      "fpu_get": 8321,
+      "fpu_set": 8321,
+      "cap256": 11299,
+      "cap2048": 0,
+      "tail_direct": 0,
+      "call_direct": 50932,
+      "tier2_marker": 0,
+      "generic_dest": 337,
+      "ct_dest": 5211,
+      "unaligned_fastview": 0,
+      "unaligned_memory": 2051
+    },
+    "after": {
+      "files": 234,
+      "bytes": 109407605,
+      "lines": 2301256,
+      "ctx_gpr": 1182033,
+      "ctx_fpr": 186925,
+      "fpu_get": 0,
+      "fpu_set": 0,
+      "cap256": 0,
+      "cap2048": 11299,
+      "tail_direct": 1331,
+      "call_direct": 49601,
+      "tier2_marker": 37,
+      "generic_dest": 266,
+      "ct_dest": 5282,
+      "unaligned_fastview": 2051,
+      "unaligned_memory": 0
+    },
+    "hot_after": {
+      "generic_vfpu_calls_total": 15,
+      "generic_vfpu_calls": {
+        "eat_vfpu_prefixes": 15
+      },
+      "ct_vfpu_calls_total": 9177,
+      "ct_vfpu_calls": {
+        "read_vfpu_vector_ct": 1580,
+        "set_vfpu_scalar_bits_ct": 563,
+        "write_vfpu_vector_ct": 2310,
+        "execute_vfpu_vmscl_ct": 1,
+        "execute_vfpu_vscl_ct": 266,
+        "read_vfpu_vector_with_source_prefix_ct": 1533,
+        "write_vfpu_vector_with_destination_prefix_ct": 1314,
+        "vfpu_scalar_bits_ct": 418,
+        "execute_vfpu_cross_quat_ct": 74,
+        "execute_vfpu_vdot_ct": 362,
+        "read_vfpu_matrix_ct": 101,
+        "write_vfpu_matrix_ct": 15,
+        "execute_vfpu_vh2f_ct": 41,
+        "execute_vfpu_vcmp_ct": 159,
+        "execute_vfpu_vocp_ct": 10,
+        "apply_vfpu_source_prefix_ct": 206,
+        "execute_vfpu_vcmov_ct": 154,
+        "execute_vfpu_vrot_ct": 5,
+        "execute_vfpu_matrix_init_ct": 9,
+        "execute_vfpu_vmmov_ct": 2,
+        "execute_vfpu_vhdp_ct": 16,
+        "execute_vfpu_vx2i_ct": 20,
+        "execute_vfpu_horizontal_ct": 3,
+        "execute_vfpu_vminmax_ct": 8,
+        "execute_vfpu_compare3_ct": 4,
+        "execute_vfpu_vf2h_ct": 3
+      }
+    },
+    "repo_diff": {
+      "changed_existing": 243,
+      "added": 4,
+      "removed": 0,
+      "total": 247,
+      "added_files": [
+        "profiles/vcs/APPLY_TIER2_EXTREME.bat",
+        "profiles/vcs/tests/vfpu_tier2_tests.cpp",
+        "profiles/vcs/tools/apply_tier2_extreme.py",
+        "profiles/vcs/tools/optimize_generated_vfpu_hot.py"
+      ],
+      "non_generated_changed": [
+        "include/psprecomp/allegrex_context.hpp",
+        "include/psprecomp/guest_memory.hpp",
+        "include/psprecomp/runtime.hpp",
+        "profiles/vcs/CMakeLists.txt",
+        "profiles/vcs/host/ge_renderer.cpp",
+        "profiles/vcs/host/main.cpp",
+        "profiles/vcs/host/vcs_profile.cpp",
+        "profiles/vcs/host/vcs_runtime_log.cpp",
+        "profiles/vcs/scripts/build_release.bat",
+        "profiles/vcs/scripts/build_release_ninja.bat",
+        "profiles/vcs/scripts/play.bat",
+        "profiles/vcs/tools/vcs_codegen_main.cpp",
+        "src/runtime.cpp",
+        "tests/test_main.cpp",
+        "tools/codegen_main.cpp"
+      ]
+    },
+    "delta_generated_bytes": 674701,
+    "delta_generated_percent": 0.6205122600238866,
+    "delta_gpr_refs": -48724,
+    "delta_fpr_refs": -9880
+  },
+  "tier2_baseline_transform_opportunity": {
+    "structural_files": 228,
+    "local_caps_256_to_2048": 11299,
+    "tail_edges": 1331,
+    "unaligned_fastview": 2051,
+    "fpu_condition_set_inline": 8321,
+    "fpu_condition_get_inline": 8321,
+    "hot_units": 37,
+    "gpr": {
+      "blocks": 8733,
+      "locals": 13706,
+      "occurrences_replaced": 74603,
+      "dirty": 12173
+    },
+    "fpr": {
+      "blocks": 1460,
+      "locals": 2656,
+      "occurrences_replaced": 15138,
+      "dirty": 2602
+    },
+    "vfpu": {
+      "matrix_reads": 101,
+      "matrix_writes": 15,
+      "destination_prefix_side": 71,
+      "cross_quat": 74,
+      "vh2f": 41,
+      "vhdp": 16,
+      "vx2i": 20,
+      "vminmax": 8,
+      "compare3": 4,
+      "vrot": 5,
+      "vf2h": 3,
+      "horizontal": 3,
+      "vocp": 10,
+      "vmscl": 1,
+      "vmmov": 2,
+      "matrix_init": 9
+    }
+  },
+  "validation": {
+    "psprecomp_tests": "1/1 PASS",
+    "vcs_light_tests": "4/4 PASS",
+    "hot_generated_syntax": "37/37 PASS",
+    "vfpu_original_tier2_diff": "PASS (65 distinct hot combinations)",
+    "vfpu_destination_diff": "PASS (7 combinations x 512 trials)",
+    "vfpu_remaining_diff": "PASS (13 combinations x 256 trials)",
+    "generic_codegen": "built",
+    "vcs_codegen": "built",
+    "final_reapply_check": "0 pending transformations",
+    "windows_dx12_gameplay": "not executable in this Linux environment"
+  }
+}

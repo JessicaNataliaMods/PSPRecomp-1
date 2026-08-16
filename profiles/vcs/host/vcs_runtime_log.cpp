@@ -62,7 +62,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=45.9-async-ge-cross-unit-hot-register-cache\n";
+    s.file << "stage=tier2-extreme-2026-08-16\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
     s.file << "started=" << timestamp_now() << "\n\n";
     if (s.flush_every_line) s.file.flush();
