@@ -38,9 +38,10 @@ struct TextureIndexEntry {
     std::uint64_t full_key{};
 };
 
-// Indexes one of the game's .IMG archives, if it has not been seen yet. Called
-// as the host registers archives the guest actually opens, which keeps user
-// backup copies sitting next to the real files out of the index.
+// Indexes one of the game's texture archives (.IMG or .XTX), if it has not been
+// seen yet. Called as the host registers archives the guest actually opens,
+// which keeps user backup copies sitting next to the real files out of the
+// index.
 void texture_replacement_index_archive(const std::filesystem::path &path) noexcept;
 
 // A decoded replacement, owned by the module and stable for the process's life.
@@ -49,6 +50,15 @@ struct TextureReplacement {
     std::size_t size{};
     std::uint32_t width{};
     std::uint32_t height{};
+    // True when the decoded image actually contains non-opaque pixels.
+    //
+    // The shader honours a texture's alpha only when the guest's TEXFUNC says
+    // the texture has any (TCC=RGBA); otherwise it substitutes the vertex alpha
+    // and the image's own alpha is discarded. A replacement carrying real
+    // transparency therefore has to raise that bit, or it renders opaque. An
+    // image whose alpha is uniformly 255 leaves it alone, so nothing changes for
+    // opaque replacements.
+    bool has_transparency{};
 };
 
 // Looks up a replacement for the texture the GE is about to upload, decoding the

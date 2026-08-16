@@ -13,6 +13,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libswscale/swscale.h>
+}
+
 namespace vcs {
 namespace {
 
@@ -27,6 +32,7 @@ struct DecodedImage {
     std::uint32_t width{};
     std::uint32_t height{};
     std::vector<std::byte> rgba;
+    bool has_transparency{};
 };
 
 struct State {
@@ -290,6 +296,96 @@ bool decode_dds_file(const std::filesystem::path &path, DecodedImage &out) {
     return true;
 }
 
+// PNG is the better source for this pipeline and especially for interface art.
+// Everything is decoded to RGBA8 before upload anyway, so a block-compressed DDS
+// buys nothing here and only spends quality: DXT quantizes in 4x4 blocks, which
+// is exactly what ruins sharp edges and text, and DXT1 carries a single bit of
+// alpha. PNG is lossless and ffmpeg is already a dependency of this build.
+bool decode_png_file(const std::filesystem::path &path, DecodedImage &out) {
+    std::ifstream input(path, std::ios::binary | std::ios::ate);
+    if (!input) return false;
+    const std::streamoff length = input.tellg();
+    if (length <= 0 || length > 64 * 1024 * 1024 ||
+        length > static_cast<std::streamoff>(std::numeric_limits<int>::max()))
+        return false;
+    input.seekg(0, std::ios::beg);
+    std::vector<std::uint8_t> compressed(static_cast<std::size_t>(length));
+    input.read(reinterpret_cast<char *>(compressed.data()), length);
+    if (!input) return false;
+
+    // The ffmpeg shipped with this profile is a minimal build carrying only what
+    // the PMF movies need, and a PNG decoder is not part of it. Say so once and
+    // plainly: the alternative is a user staring at a folder of .png files that
+    // silently do nothing. Uncompressed A8R8G8B8 .dds is the lossless route that
+    // works with this build.
+    const AVCodec *decoder = avcodec_find_decoder(AV_CODEC_ID_PNG);
+    if (decoder == nullptr) {
+        static bool reported = false;
+        if (!reported) {
+            reported = true;
+            runtime_log_line(
+                "texture replacement: this build's ffmpeg has no PNG decoder, so every "
+                ".png override is ignored -- export as uncompressed A8R8G8B8 .dds "
+                "instead, which is equally lossless");
+        }
+        return false;
+    }
+    AVCodecContext *codec = avcodec_alloc_context3(decoder);
+    AVPacket *packet = av_packet_alloc();
+    AVFrame *frame = av_frame_alloc();
+    bool ok = false;
+    if (codec != nullptr && packet != nullptr && frame != nullptr &&
+        avcodec_open2(codec, decoder, nullptr) >= 0 &&
+        av_new_packet(packet, static_cast<int>(compressed.size())) >= 0) {
+        std::memcpy(packet->data, compressed.data(), compressed.size());
+        if (avcodec_send_packet(codec, packet) >= 0 &&
+            avcodec_receive_frame(codec, frame) >= 0 && frame->width > 0 &&
+            frame->height > 0 && frame->width <= 8192 && frame->height <= 8192) {
+            out.width = static_cast<std::uint32_t>(frame->width);
+            out.height = static_cast<std::uint32_t>(frame->height);
+            try {
+                out.rgba.assign(static_cast<std::size_t>(out.width) * out.height * 4u,
+                                std::byte{0});
+            } catch (...) {
+                out.rgba.clear();
+            }
+            if (!out.rgba.empty()) {
+                SwsContext *sws = sws_getContext(
+                    frame->width, frame->height, static_cast<AVPixelFormat>(frame->format),
+                    frame->width, frame->height, AV_PIX_FMT_RGBA, SWS_POINT, nullptr,
+                    nullptr, nullptr);
+                if (sws != nullptr) {
+                    std::uint8_t *dst[4]{reinterpret_cast<std::uint8_t *>(out.rgba.data()),
+                                         nullptr, nullptr, nullptr};
+                    int dst_stride[4]{frame->width * 4, 0, 0, 0};
+                    ok = sws_scale(sws, frame->data, frame->linesize, 0, frame->height, dst,
+                                   dst_stride) == frame->height;
+                    sws_freeContext(sws);
+                }
+            }
+        }
+    }
+    if (frame != nullptr) av_frame_free(&frame);
+    if (packet != nullptr) av_packet_free(&packet);
+    if (codec != nullptr) avcodec_free_context(&codec);
+    return ok;
+}
+
+// Whether this build can read PNG at all. Decides which file wins a name owned
+// by both a .png and a .dds: preferring the lossless format is only right while
+// it is actually readable, and preferring an unreadable one would hide a working
+// .dds sitting right next to it.
+bool png_decoder_available() {
+    static const bool available = avcodec_find_decoder(AV_CODEC_ID_PNG) != nullptr;
+    return available;
+}
+
+bool decode_replacement_file(const std::filesystem::path &path, DecodedImage &out) {
+    const std::string extension = upper_copy(path.extension().string());
+    if (extension == ".PNG") return decode_png_file(path, out);
+    return decode_dds_file(path, out);
+}
+
 void scan_override_directory(State &s) {
     std::error_code error;
     if (!std::filesystem::is_directory(s.directory, error) || error) return;
@@ -299,12 +395,20 @@ void scan_override_directory(State &s) {
     for (const auto &entry : walk) {
         std::error_code file_error;
         if (!entry.is_regular_file(file_error) || file_error) continue;
-        if (upper_copy(entry.path().extension().string()) != ".DDS") continue;
+        const std::string extension = upper_copy(entry.path().extension().string());
+        if (extension != ".PNG" && extension != ".DDS") continue;
         // Subdirectories exist purely so the user can organise; only the file
-        // stem takes part in matching, so TexturesDDS/UI/HUD/radar.dds and
-        // TexturesDDS/radar.dds mean the same texture.
+        // stem takes part in matching, so <dir>/UI/HUD/radar.png and
+        // <dir>/radar.png mean the same texture.
         const std::string key = upper_copy(entry.path().stem().string());
         if (key.empty()) continue;
+        const std::string preferred = png_decoder_available() ? ".PNG" : ".DDS";
+        const auto existing = s.overrides.find(key);
+        if (existing != s.overrides.end()) {
+            if (extension != preferred) continue;
+            existing->second = entry.path();
+            continue;
+        }
         s.overrides.emplace(key, entry.path());
     }
 }
@@ -459,7 +563,15 @@ void texture_replacement_index_archive(const std::filesystem::path &path) noexce
         std::lock_guard<std::mutex> guard(s.mutex);
         ensure_initialized(s);
         if (!s.enabled) return;
-        if (upper_copy(path.extension().string()) != ".IMG") return;
+        // .IMG is the streamed world/character archive. .XTX is a standalone
+        // container holding a single TEX chunk at offset zero, and it is where
+        // this game keeps most of its interface art: the empire HUD bars, the
+        // loading screens, the memory-card and splash screens, the per-language
+        // legal screens. None of that is reachable through the .IMG, so leaving
+        // .XTX out made interface replacement look broken for exactly the files
+        // a user is most likely to want to change.
+        const std::string extension = upper_copy(path.extension().string());
+        if (extension != ".IMG" && extension != ".XTX") return;
         if (!s.indexed_archives.insert(path.generic_string()).second) return;
 
         std::ifstream input(path, std::ios::binary | std::ios::ate);
@@ -529,20 +641,27 @@ bool texture_replacement_lookup(const std::uint8_t *pixels, std::size_t size,
         auto decoded = s.decoded.find(name);
         if (decoded == s.decoded.end()) {
             DecodedImage image;
-            if (!decode_dds_file(override_path->second, image)) {
+            if (!decode_replacement_file(override_path->second, image)) {
                 s.failed_decodes.insert(name);
                 std::ostringstream message;
                 message << "texture replacement FAILED to decode \""
                         << override_path->second.filename().string()
-                        << "\" -- supported: DXT1/DXT3/DXT5 and uncompressed 24/32-bit,"
-                           " no DX10 header";
+                        << "\" -- supported: .png, and .dds as DXT1/DXT3/DXT5 or"
+                           " uncompressed 24/32-bit with no DX10 header";
                 runtime_log_line(message.str());
                 return false;
+            }
+            for (std::size_t at = 3u; at < image.rgba.size(); at += 4u) {
+                if (image.rgba[at] != std::byte{255}) {
+                    image.has_transparency = true;
+                    break;
+                }
             }
             std::ostringstream message;
             message << "texture replacement active name=\"" << name << "\" original="
                     << found->second.width << 'x' << found->second.height
-                    << " replacement=" << image.width << 'x' << image.height;
+                    << " replacement=" << image.width << 'x' << image.height
+                    << (image.has_transparency ? " alpha=forced" : " alpha=opaque");
             runtime_log_line(message.str());
             decoded = s.decoded.emplace(name, std::move(image)).first;
         }
@@ -552,6 +671,7 @@ bool texture_replacement_lookup(const std::uint8_t *pixels, std::size_t size,
         out.size = decoded->second.rgba.size();
         out.width = decoded->second.width;
         out.height = decoded->second.height;
+        out.has_transparency = decoded->second.has_transparency;
         return true;
     } catch (...) {
         return false;

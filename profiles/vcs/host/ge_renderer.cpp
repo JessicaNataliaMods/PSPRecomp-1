@@ -4319,6 +4319,14 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
                         replacement.rgba, replacement.rgba + replacement.size);
                     replaced = ge_gpu_backend_upload_decoded_texture(
                         gpu_draw, replacement.width, replacement.height, pixels);
+                    // The guest's TEXFUNC decides whether the shader reads a
+                    // texture's alpha at all. A palettized original the game
+                    // declared opaque leaves that bit clear, and a replacement
+                    // carrying real transparency would be flattened by it. Raise
+                    // it only when the image actually has non-opaque pixels, so
+                    // an opaque replacement changes nothing.
+                    if (replaced && replacement.has_transparency)
+                        gpu_draw.texture_use_alpha = true;
                 }
             }
         }
