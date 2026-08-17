@@ -1142,8 +1142,12 @@ GeAsyncWorkerState ge_async{};
 thread_local bool ge_async_worker_thread = false;
 
 bool ge_async_enabled() noexcept {
+    // V5 SYNC RECOVERY: the experimental async scheduler is quarantined after
+    // repeated boot->gameplay deadlocks.  Ignore the legacy PSPRECOMP_GE_ASYNC
+    // variable so a stale shell/BAT cannot silently re-enable the broken path.
+    // Re-entry is development-only and requires an explicit new opt-in.
     static const bool enabled = [] {
-        const char *value = std::getenv("PSPRECOMP_GE_ASYNC");
+        const char *value = std::getenv("PSPRECOMP_GE_ASYNC_EXPERIMENTAL");
         return value != nullptr && *value != '\0' && std::strcmp(value, "0") != 0;
     }();
     return enabled;

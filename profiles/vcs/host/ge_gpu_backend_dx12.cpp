@@ -1168,10 +1168,14 @@ bool adjacent_batch_merge_compatible(const Dx12Batch &a, const Dx12Batch &b) noe
 
 bool dx12_execute_indirect_enabled() noexcept {
     static const bool enabled = [] {
+        // V4 telemetry showed thousands of saved Draw* calls with essentially
+        // unchanged GE time. Building/uploading indirect records is therefore
+        // not part of the production fast path until a workload proves a win.
+        // Keep it as an explicit A/B switch.
         const char *text = std::getenv("PSPRECOMP_DX12_EXECUTE_INDIRECT");
-        return text == nullptr || (*text != '\0' && std::strcmp(text, "0") != 0 &&
+        return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0 &&
                std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
-               std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0);
+               std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0;
     }();
     return enabled;
 }

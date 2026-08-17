@@ -1,0 +1,66 @@
+{
+  "name": "VCSNative PERF V5 ASYNC/VFPU",
+  "date": "2026-08-16",
+  "base": "PSPRecomp-VCS-TIER2-V4-AMD-UMA-COMPAT-2026-08-16",
+  "stage": "perf-v5-async-vfpu-2026-08-16",
+  "perf_layer": 5,
+  "tier2_version": 4,
+  "tier2": {
+    "clusters": 7,
+    "hot_blocks": 1060,
+    "generated_cluster_lines": 18027,
+    "fused_calls": 49,
+    "fused_tail": 13,
+    "cold_exits": 9,
+    "hooks": 25,
+    "gpr_shadow_clusters": 4,
+    "gpr_shadow_registers": 24,
+    "gpr_shadow_occurrences": 3428,
+    "simd_mat4": 4,
+    "simd_matvec": 19
+  },
+  "vfpu_default_prefix_fast": {
+    "total": 95,
+    "write_dest": 60,
+    "vscl": 2,
+    "vdot": 19,
+    "vcmp": 14,
+    "vcmov": 0,
+    "modified_clusters": [
+      "entity",
+      "matrix",
+      "physics",
+      "world",
+      "edge43"
+    ],
+    "geometry_unchanged_from_v4": true,
+    "boundary_unchanged_from_v4": true
+  },
+  "dx12_defaults": {
+    "ge_async": true,
+    "parallel_vertex_decode": true,
+    "execute_indirect": false
+  },
+  "compatibility_preserved": {
+    "amd_uma_safe_mode": true,
+    "uma_msaa_guard": true,
+    "packed0115_amd_stride": 12
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests_async_forced": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "modified_tier2_target_objects": "5/5 PASS",
+    "changed_host_target_objects_linux": "4/4 PASS",
+    "generator_idempotent": true,
+    "geometry_boundary_byte_identical_v4": true,
+    "full_windows_vcsnative_build": "requires user VS2022"
+  },
+  "native_fast_paths": {
+    "vfpu_088b1780_block_loads": true,
+    "scalar_loads_collapsed_from": 16,
+    "block_loads_to": 4,
+    "runtime_validation_switch": "PSPRECOMP_VALIDATE_FAST_088B1780"
+  }
+}

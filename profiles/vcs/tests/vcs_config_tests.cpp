@@ -1,6 +1,7 @@
 #include "vcs_config.hpp"
 
 #include <cmath>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -179,6 +180,12 @@ int main() {
                    << "DayProgression=-0.12\n";
         }
         vcs::initialize_vcs_configuration(root);
+        const char *async_default = std::getenv("PSPRECOMP_GE_ASYNC");
+        const char *parallel_decode_default = std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE");
+        require(async_default != nullptr && std::string(async_default) == "0",
+                "DirectX12 sync-recovery must force legacy GE async off");
+        require(parallel_decode_default != nullptr && std::string(parallel_decode_default) == "0",
+                "DirectX12 stable recovery must force parallel vertex decode off");
         const auto &clouds = vcs::vcs_configuration().volumetric_clouds;
         require(clouds.enabled, "ProperShaders.ini VolumetricClouds.Enabled was not parsed");
         require(clouds.downscale_div == 4u && clouds.layers == 3u &&

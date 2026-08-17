@@ -94,6 +94,11 @@ set "NINJA_STATUS=[%%f/%%t %%p ^| %%e elapsed ^| %%r running] "
 set "BOOTFIX_STAMP=%BUILD%\.vcs_tier2_bootfix_20260816_v1"
 set "SUPERBLOCK_STAMP=%BUILD%\.vcs_tier2_v4_150fps_buildfix3_20260816"
 set "AMD_COMPAT_STAMP=%BUILD%\.vcs_dx12_amd_uma_compat_20260816"
+set "PERF_V5_STAMP=%BUILD%\.vcs_perf_v5_async_vfpu_20260816"
+set "PERF_V5_STALLFIX_STAMP=%BUILD%\.vcs_perf_v5_async_stallfix_20260817"
+set "PERF_V5_PRESENTFIX_STAMP=%BUILD%\.vcs_perf_v5_async_presentfix_20260817"
+set "PERF_V5_SYNC_RECOVERY_STAMP=%BUILD%\.vcs_perf_v5_sync_recovery_20260817"
+set "PERF_V5_STABLE_RECOVERY2_STAMP=%BUILD%\.vcs_perf_v5_stable_recovery2_20260817"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -105,7 +110,7 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; Tier2 V4 + AMD/UMA DX12 compatibility; Geometry /Ob2 + shadow-off guard
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V4-stable Tier2 + sync GE; V5 risky paths quarantined; AMD/UMA safe
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo ================================================================
@@ -114,7 +119,7 @@ echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms 
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building profile-guided Tier-2 V4 150FPS second layer...
+echo [0b2/7] Building gameplay-stable V4 Tier2 layer with V5 recovery guards...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -141,6 +146,61 @@ if exist "%BUILD%" if not exist "%AMD_COMPAT_STAMP%" (
   echo [0c-amd/7] DX12 AMD/UMA compatibility - invalidating backend + runtime log once...
   rem Do not touch generated/Tier2 objects: this compatibility revision only changes host DX12 policy.
   del /s /q "%BUILD%\*ge_gpu_backend_dx12*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V5_STAMP%" (
+  echo.
+  echo [0c-v5/7] V5 ASYNC/VFPU - invalidating hot clusters + changed host objects once...
+  rem Hooks/generated units are unchanged. Rebuild only the five modified Tier2 cluster TUs and host policy/backend/log.
+  del /s /q "%BUILD%\*vcs_tier2_cluster_entity*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_matrix*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_physics*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_world*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_edge43*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_config*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_native_fast_paths*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*ge_gpu_backend_dx12*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V5_STALLFIX_STAMP%" (
+  echo.
+  echo [0c-v5fix/7] V5 GE ASYNC STALL-RACE FIX - invalidating profile + runtime log once...
+  rem Hotfix only changes the async GE scheduler/telemetry. Keep all Tier2 and DX12 objects.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V5_PRESENTFIX_STAMP%" (
+  echo.
+  echo [0c-v5present/7] V5 GE ASYNC PRESENTFIX - invalidating profile + runtime log once...
+  rem Presentation safe-point fix only changes async GE/display scheduling + metadata.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V5_SYNC_RECOVERY_STAMP%" (
+  echo.
+  echo [0c-v5sync/7] V5 SYNC RECOVERY - restoring proven GE scheduler + safe defaults once...
+  rem Only scheduler/config/log changed. Preserve expensive Tier2/DX12 objects.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_config*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V5_STABLE_RECOVERY2_STAMP%" (
+  echo.
+  echo [0c-v5stable2/7] V5 STABLE RECOVERY2 - quarantining parallel decode + V5 VFPU/native experiments once...
+  rem Restore only the five V5-modified Tier2 clusters and native/config/log objects.
+  rem Geometry and Boundary remain untouched to avoid the prior MSVC compile-time cliff.
+  del /s /q "%BUILD%\*vcs_tier2_cluster_entity*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_matrix*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_physics*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_world*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_edge43*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_config*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_native_fast_paths*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
@@ -180,6 +240,11 @@ if errorlevel 1 goto :FAIL
 >"%BOOTFIX_STAMP%" echo VCS Tier2 BOOTFIX 2026-08-16 v1
 >"%SUPERBLOCK_STAMP%" echo VCS Tier2 V4 BUILDFIX3 2026-08-16
 >"%AMD_COMPAT_STAMP%" echo VCS DX12 AMD UMA COMPAT 2026-08-16
+>"%PERF_V5_STAMP%" echo VCS PERF V5 ASYNC VFPU 2026-08-16
+>"%PERF_V5_STALLFIX_STAMP%" echo VCS PERF V5 GE ASYNC STALL-RACE FIX 2026-08-17
+>"%PERF_V5_PRESENTFIX_STAMP%" echo VCS PERF V5 GE ASYNC PRESENTFIX 2026-08-17
+>"%PERF_V5_SYNC_RECOVERY_STAMP%" echo VCS PERF V5 SYNC RECOVERY 2026-08-17
+>"%PERF_V5_STABLE_RECOVERY2_STAMP%" echo VCS PERF V5 STABLE RECOVERY2 2026-08-17
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

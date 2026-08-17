@@ -1,0 +1,33 @@
+{
+  "stage": "perf-v5-async-presentfix-2026-08-17",
+  "base": "perf-v5-async-vfpu-stallfix-2026-08-17",
+  "root_cause": "sceDisplayWaitVblank* incorrectly called ge_async_wait_idle(), creating a CPU<->GE deadlock when a display list required guest stall advancement across vblank",
+  "changes": {
+    "removed_global_ge_idle_barrier_from_vblank": true,
+    "presentation_safe_point_gate": true,
+    "worker_pauses_between_list_segments_for_present": true,
+    "stall_race_fix_preserved": true,
+    "ge_async_default": true,
+    "parallel_vertex_decode_default": true,
+    "vfpu_fast_paths_preserved": 95,
+    "tier2_hot_blocks_preserved": 1060,
+    "amd_uma_compat_preserved": true
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "vcs_profile_tests_ge_async_1": "PASS",
+    "vcsnative_vcs_profile_object": "PASS",
+    "vcsnative_vcs_runtime_log_object": "PASS"
+  },
+  "windows_incremental_rebuild_objects": [
+    "vcs_profile.cpp.obj",
+    "vcs_runtime_log.cpp.obj"
+  ],
+  "progress_estimate": {
+    "overall_percent": 91,
+    "tier2_percent": 95,
+    "performance_150fps_goal_percent": 62
+  }
+}

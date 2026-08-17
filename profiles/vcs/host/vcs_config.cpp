@@ -840,6 +840,14 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
                               config.rendering.backend == RenderingBackend::DirectX12
                                   ? "directx12" : "software");
     }
+    // V5 STABLE RECOVERY2: return every unproven scheduler/CPU-renderer
+    // experiment to the last gameplay-stable V4 AMD/UMA baseline.  Both GE
+    // async and parallel vertex decode are quarantined in production, and old
+    // inherited environment flags are deliberately ignored.
+    if (config.rendering.backend == RenderingBackend::DirectX12) {
+        set_environment_value("PSPRECOMP_GE_ASYNC", "0");
+        set_environment_value("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", "0");
+    }
     const InternalResolutionDimensions internal =
         resolve_internal_resolution(config.rendering);
     if (std::getenv("PSPRECOMP_INTERNAL_WIDTH") == nullptr)
