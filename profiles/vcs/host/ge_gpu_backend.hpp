@@ -374,6 +374,13 @@ struct GeGpuBackendReport {
     std::uint64_t dx12_batch_appends{};
     std::uint64_t dx12_batch_merges{};
     std::uint64_t dx12_gpu_draw_calls{};
+    // Tier-2 V4 DX12: adjacent state-compatible draws can be submitted through
+    // ExecuteIndirect.  The GPU still executes every PSP draw, but CPU command
+    // recording collapses transform/pixel constant updates + Draw* calls into
+    // one API command for the whole run.
+    std::uint64_t dx12_indirect_executes{};
+    std::uint64_t dx12_indirect_draws{};
+    std::uint64_t dx12_indirect_saved_api_draws{};
     std::uint64_t dx12_srv_high_water{};
     std::uint64_t dx12_gpu_feedback_draws{};
     std::uint64_t dx12_self_feedback_snapshots{};

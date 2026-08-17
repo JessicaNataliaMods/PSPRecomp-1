@@ -3,6 +3,8 @@
 #include "vcs_tier2_superblocks.hpp"
 
 #include <chrono>
+#include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -63,7 +65,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=tier2-superblock-v3-dataflow-2026-08-16\n";
+    s.file << "stage=tier2-v4-150fps-2026-08-16\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
     s.file << "started=" << timestamp_now() << '\n';
     s.file << "perf_telemetry=" << (configuration.diagnostics.perf_telemetry ? 1 : 0)
@@ -72,8 +74,12 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
     s.file << "guest_hotspot=" << (configuration.diagnostics.guest_hotspot_profile ? 1 : 0)
            << " sample_stride=256 interval_vblanks=300\n";
     s.file << "tier2_superblocks=" << (tier2_superblocks_enabled() ? 1 : 0)
-           << " version=3 clusters=7 mask=0x" << std::hex << tier2_cluster_mask() << std::dec
-           << " hot_blocks=1060 static_fused_calls=49 static_fused_tail=13 hooks=25 unwind_fix=1 reentry_guard=1 dataflow=1 vfpu_block32=133 mem_runs=35 mem_words=287 append32=51 advance32=89\n\n";
+           << " version=4 clusters=7 mask=0x" << std::hex << tier2_cluster_mask() << std::dec
+           << " hot_blocks=1060 static_fused_calls=49 static_fused_tail=13 hooks=25"
+           << " unwind_fix=1 reentry_guard=1 dataflow=1 vfpu_block32=133 mem_runs=35 mem_words=287"
+           << " append32=51 advance32=89 simd_mat4=4 simd_matvec=19"
+           << " gpr_shadow_clusters=4 gpr_shadow_regs=24 gpr_shadow_occurrences=3428 geometry_shadow=0"
+           << " dx12_execute_indirect_default=1 indirect_buffer_mb=4\n\n";
     if (s.flush_every_line) s.file.flush();
 }
 

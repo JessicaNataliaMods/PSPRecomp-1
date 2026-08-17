@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate VCS Tier-2 SUPERBLOCK V3 dataflow multi-cluster second-layer AOT.
+"""Generate VCS Tier-2 SUPERBLOCK V4 150FPS multi-cluster second-layer AOT.
 
-V3 is profile-guided and intentionally keeps the original generated corpus as
+V4 is profile-guided and intentionally keeps the original generated corpus as
 its semantic fallback.  It extracts only measured hot control-flow closures,
 fuses selected cross-unit direct calls/tails inside those closures, and leaves
 all cold/external paths in the original AOT units.
@@ -137,7 +137,7 @@ CLUSTERS: List[Cluster] = [
 
 
 
-# Tier-2 V3 dataflow/memory lowering.  V2 proved that eliminating dispatch
+# Tier-2 V4 dataflow/memory lowering inherited from V3.  V2 proved that eliminating dispatch
 # alone is not enough: the hot clusters still spend most of their time in the
 # translated body.  These transforms deliberately target memory-access runs
 # where semantics can be preserved without keeping guest registers dirty
@@ -281,6 +281,102 @@ def _batch_simple_store_runs(text: str) -> tuple[str, int, int]:
         runs += 1; words += n
         i = j
     return '\n'.join(out) + ('\n' if text.endswith('\n') else ''), runs, words
+
+
+
+MAT4_MUL_RE = re.compile(
+    r'for \(std::uint32_t a = 0; a < 4u; \+\+a\) \{\s*'
+    r'for \(std::uint32_t b = 0; b < 4u; \+\+b\) \{\s*'
+    r'float sum = 0\.0f;\s*'
+    r'for \(std::uint32_t c = 0; c < 4u; \+\+c\) sum \+= vfpu_s\[b \* 4u \+ c\] \* vfpu_t\[a \* 4u \+ c\];\s*'
+    r'vfpu_d\[a \* 4u \+ b\] = sum;\s*'
+    r'\}\s*\}')
+
+MAT4_VEC_FIRST3_RE = re.compile(
+    r'for \(std::uint32_t row = 0; row \+ 1u < vfpu_side; \+\+row\) \{\s*'
+    r'float sum = 0\.0f;\s*'
+    r'for \(std::uint32_t column = 0; column < vfpu_side; \+\+column\) sum \+= vfpu_matrix\[row \* 4u \+ column\] \* vfpu_target\[column\];\s*'
+    r'vfpu_result\[row\] = sum;\s*'
+    r'\}')
+
+
+def optimize_tier2_simd(text: str) -> tuple[str, Dict[str, int]]:
+    stats = {'mat4_mul': 0, 'mat4_vec_first3': 0}
+    def repl_mul(_: re.Match[str]) -> str:
+        stats['mat4_mul'] += 1
+        return 'psprecomp::vcs_tier2_mat4_mul_ordered(vfpu_s, vfpu_t, vfpu_d);'
+    text = MAT4_MUL_RE.sub(repl_mul, text)
+    def repl_vec(_: re.Match[str]) -> str:
+        stats['mat4_vec_first3'] += 1
+        return ('if constexpr (vfpu_side == 4u) {\n'
+                '        psprecomp::vcs_tier2_mat4_vec_first3_ordered(vfpu_matrix, vfpu_target, vfpu_result);\n'
+                '      } else {\n'
+                '        for (std::uint32_t row = 0; row + 1u < vfpu_side; ++row) {\n'
+                '          float sum = 0.0f;\n'
+                '          for (std::uint32_t column = 0; column < vfpu_side; ++column) sum += vfpu_matrix[row * 4u + column] * vfpu_target[column];\n'
+                '          vfpu_result[row] = sum;\n'
+                '        }\n'
+                '      }')
+    text = MAT4_VEC_FIRST3_RE.sub(repl_vec, text)
+    return text, stats
+
+_GPR_BODY_BEGIN = '// TIER2_GPR_BODY_BEGIN\n'
+_GPR_BODY_END = '// TIER2_GPR_BODY_END\n'
+_GPR_DECL_PLACEHOLDER = '    // TIER2_GPR_SHADOW_DECLS\n'
+_GPR_DIRECT_BOOL_RE = re.compile(r'rt\.invoke_chained_direct<[^;\n]+?>\(ctx, &aot_mem\)')
+_GPR_DYNAMIC_BOOL_RE = re.compile(r'rt\.invoke_chained_call\(ctx, &aot_mem\)')
+
+
+def optimize_tier2_gpr_shadow(text: str, cluster_key: str) -> tuple[str, Dict[str, object]]:
+    """Promote six hot GPRs with explicit synchronization at visibility boundaries."""
+    begin = text.find(_GPR_BODY_BEGIN)
+    end = text.find(_GPR_BODY_END)
+    if begin < 0 or end < 0 or end <= begin:
+        raise RuntimeError(f'{cluster_key}: GPR body markers missing')
+    body_start = begin + len(_GPR_BODY_BEGIN)
+    body = text[body_start:end]
+    eligible = cluster_key not in {'physics', 'matrix', 'geometry'}
+    counts = collections.Counter(int(x) for x in re.findall(r'ctx\.gpr\[(\d+)\]', body))
+    selected = [reg for reg, _ in counts.most_common() if reg != 0][:6] if eligible else []
+
+    if selected:
+        decls = ''.join(f'    std::uint32_t tier2_gpr_{r} = ctx.gpr[{r}];\n' for r in selected)
+        out_body = ' '.join(f'ctx.gpr[{r}] = tier2_gpr_{r};' for r in selected)
+        in_body = ' '.join(f'tier2_gpr_{r} = ctx.gpr[{r}];' for r in selected)
+        macros = (decls +
+            '    bool tier2_gpr_shadow_valid = true;\n' +
+            f'#define TIER2_GPR_SYNC_OUT() do {{ if (tier2_gpr_shadow_valid) {{ {out_body} }} }} while (false)\n' +
+            f'#define TIER2_GPR_SYNC_IN() do {{ if (tier2_gpr_shadow_valid) {{ {in_body} }} }} while (false)\n' +
+            '#define TIER2_GPR_BEFORE_COLD() do { TIER2_GPR_SYNC_OUT(); tier2_gpr_shadow_valid = false; } while (false)\n')
+    else:
+        macros = ('    bool tier2_gpr_shadow_valid = true;\n'
+            '#define TIER2_GPR_SYNC_OUT() do {} while (false)\n'
+            '#define TIER2_GPR_SYNC_IN() do {} while (false)\n'
+            '#define TIER2_GPR_BEFORE_COLD() do { tier2_gpr_shadow_valid = false; } while (false)\n')
+    if _GPR_DECL_PLACEHOLDER not in text:
+        raise RuntimeError(f'{cluster_key}: GPR declaration placeholder missing')
+
+    if selected:
+        def wrap_bool(m: re.Match[str]) -> str:
+            expr = m.group(0)
+            return ('([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (' + expr + '); '
+                    'if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; '
+                    'return tier2_same_; }())')
+        body = _GPR_DIRECT_BOOL_RE.sub(wrap_bool, body)
+        body = _GPR_DYNAMIC_BOOL_RE.sub(wrap_bool, body)
+        for r in selected:
+            body = body.replace(f'ctx.gpr[{r}]', f'tier2_gpr_{r}')
+        text = text[:body_start] + body + text[end:]
+
+    # Insert declarations only after body splicing; doing this earlier shifts
+    # the saved marker offsets and corrupts the generated CFG.
+    text = text.replace(_GPR_DECL_PLACEHOLDER, macros, 1)
+
+    return text, {
+        'enabled': int(bool(selected)),
+        'registers': selected,
+        'occurrences': sum(counts[r] for r in selected),
+    }
 
 
 def optimize_tier2_dataflow(text: str) -> tuple[str, Dict[str, int]]:
@@ -526,7 +622,7 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
         stats['cold_exits'] += 1
         if entry is not None:
             return (f'++tier2_stats.cold_exits; tier2_scope.finish(); '
-                    f'psprecomp::recomp_unit_{source_unit:04d}_entry(rt, ctx, {entry}u, aot_mem); '
+                    f'TIER2_GPR_BEFORE_COLD(); psprecomp::recomp_unit_{source_unit:04d}_entry(rt, ctx, {entry}u, aot_mem); '
                     f'TIER2_SB_RETURN();')
         return (f'++tier2_stats.cold_exits; ctx.pc = 0x{target:08X}u; TIER2_SB_RETURN();')
     text = GOTO_RE.sub(goto_repl, text)
@@ -589,11 +685,11 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
             tier2_pending_transfers - tier2_pending_base;
         if (tier2_nested_tail != 0u) {{
             tier2_pending_transfers = tier2_pending_base;
-            if (!rt.tier2_complete_fused_transfers(ctx, tier2_nested_tail))
+            if (!tier2_complete_shadow(tier2_nested_tail))
                 tier2_same_context = false;
         }}
         --tier2_return_depth;
-        if (!rt.tier2_complete_fused_transfers(ctx, 1u))
+        if (!tier2_complete_shadow(1u))
             tier2_same_context = false;
         if (!tier2_same_context) TIER2_SB_RETURN();
         goto TIER2_FUSED_RETURN_DISPATCH;
@@ -619,7 +715,7 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
     for unit, entries in sorted(cold_resume_by_unit.items()):
         cases = '\n'.join(
             f'        case 0x{pc:08X}u: ++tier2_stats.cold_exits; tier2_scope.finish(); '
-            f'psprecomp::recomp_unit_{unit:04d}_entry(rt, ctx, {entry}u, aot_mem); TIER2_SB_RETURN();'
+            f'TIER2_GPR_BEFORE_COLD(); psprecomp::recomp_unit_{unit:04d}_entry(rt, ctx, {entry}u, aot_mem); TIER2_SB_RETURN();'
             for pc, entry in entries)
         cold_resume_sections.append(f'''    case {unit}u:
         switch (tier2_resume_pc) {{
@@ -629,10 +725,11 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
         break;''')
 
     cpp = f'''// AUTO-GENERATED by profiles/vcs/tools/build_tier2_superblocks.py.
-// Tier-2 SUPERBLOCK V3 DATAFLOW cluster: {cluster.key}
+// Tier-2 SUPERBLOCK V4 150FPS cluster: {cluster.key}
 #include "vcs_tier2_superblocks.hpp"
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_fast_paths.hpp"
 
 #include <cstdint>
 
@@ -657,8 +754,17 @@ void {cluster.function}(psprecomp::Runtime &rt,
     std::uint32_t local_pc = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t entry_id = 0u;
+    // TIER2_GPR_SHADOW_DECLS
+
+    auto tier2_complete_shadow = [&](std::uint32_t count) -> bool {{
+        TIER2_GPR_SYNC_OUT();
+        const bool same = rt.tier2_complete_fused_transfers(ctx, count);
+        if (!same) tier2_gpr_shadow_valid = false;
+        return same;
+    }};
 
 #define TIER2_SB_RETURN() do {{ \
+        TIER2_GPR_SYNC_OUT(); \
         tier2_scope.finish(); \
         /* Unwind every logical invoke_chained_direct frame in true LIFO \
            order. Tail frames created inside a fused JAL unwind before that \
@@ -672,12 +778,12 @@ void {cluster.function}(psprecomp::Runtime &rt,
             const std::uint32_t tier2_tail_count_ = tier2_pending_transfers - tier2_base_; \
             tier2_pending_transfers = tier2_base_; \
             if (tier2_tail_count_ != 0u) \
-                (void)rt.tier2_complete_fused_transfers(ctx, tier2_tail_count_); \
+                (void)tier2_complete_shadow(tier2_tail_count_); \
             --tier2_return_depth; \
-            (void)rt.tier2_complete_fused_transfers(ctx, 1u); \
+            (void)tier2_complete_shadow(1u); \
         }} \
         if (tier2_pending_transfers != 0u) {{ \
-            (void)rt.tier2_complete_fused_transfers(ctx, tier2_pending_transfers); \
+            (void)tier2_complete_shadow(tier2_pending_transfers); \
             tier2_pending_transfers = 0u; \
         }} \
         return; \
@@ -708,15 +814,21 @@ TIER2_ENTRY_DISPATCH:
         TIER2_SB_RETURN();
     }}
 
-{chr(10).join(chunks)}
-
-#undef TIER2_SB_RETURN
+// TIER2_GPR_BODY_BEGIN\n{chr(10).join(chunks)}// TIER2_GPR_BODY_END\n\n#undef TIER2_SB_RETURN
+#undef TIER2_GPR_BEFORE_COLD
+#undef TIER2_GPR_SYNC_IN
+#undef TIER2_GPR_SYNC_OUT
 }}
 
 }} // namespace vcs
 '''
     cpp, dataflow_stats = optimize_tier2_dataflow(cpp)
     stats.update({f'dataflow_{k}': v for k, v in dataflow_stats.items()})
+    cpp, simd_stats = optimize_tier2_simd(cpp)
+    stats.update({f'simd_{k}': v for k, v in simd_stats.items()})
+    cpp, gpr_stats = optimize_tier2_gpr_shadow(cpp, cluster.key)
+    stats['gpr_shadow_occurrences'] = int(gpr_stats['occurrences'])
+    stats['gpr_shadow_registers'] = len(gpr_stats['registers'])
 
     path = host / f'vcs_tier2_cluster_{cluster.key}.cpp'
     old = path.read_text(encoding='utf-8') if path.exists() else None
@@ -779,7 +891,7 @@ def main() -> int:
         selected_by_cluster[cluster.key] = selected
         path, stats = emit_cluster(cluster, selected, sources, host)
         generated_paths.append(path)
-        print(f'Tier2 V3 cluster {cluster.key}: ' + ' '.join(f'{k}={v}' for k, v in sorted(stats.items())))
+        print(f'Tier2 V4 cluster {cluster.key}: ' + ' '.join(f'{k}={v}' for k, v in sorted(stats.items())))
         total.update(stats)
 
     hooks_by_unit: Dict[int, List[Tuple[Cluster, int]]] = collections.defaultdict(list)
@@ -802,7 +914,7 @@ def main() -> int:
     # common file is handwritten by V2 and must remain; generated cluster files
     # carry all hot code.
 
-    print('Tier2 SUPERBLOCK V3 DATAFLOW:',
+    print('Tier2 SUPERBLOCK V4 150FPS:',
           f'clusters={len(CLUSTERS)} hook_units_changed={hook_units_changed}',
           f'blocks={total["blocks"]} lines={total["lines"]}',
           f'fused_calls={total["fused_calls"]} fused_tail={total["fused_tail"]}',

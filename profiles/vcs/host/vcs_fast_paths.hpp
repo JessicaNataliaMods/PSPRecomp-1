@@ -109,3 +109,45 @@ finish:
 }
 
 } // namespace psprecomp
+
+#if defined(__SSE2__) || defined(_M_X64) || defined(_M_IX86_FP)
+#include <immintrin.h>
+#endif
+
+namespace psprecomp {
+
+// Tier-2 V4: ordered SIMD primitives.  Multiplication is vectorized while the
+// four products are reduced in the original left-to-right order.  This avoids
+// FMA/reassociation surprises while removing most scalar multiply issue cost in
+// VCS's matrix-heavy geometry hot path.
+inline float vcs_tier2_dot4_ordered(const float *a, const float *b) noexcept {
+#if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+    const __m128 va = _mm_loadu_ps(a);
+    const __m128 vb = _mm_loadu_ps(b);
+    const __m128 vm = _mm_mul_ps(va, vb);
+    alignas(16) float p[4];
+    _mm_store_ps(p, vm);
+    return ((p[0] + p[1]) + p[2]) + p[3];
+#else
+    return ((a[0] * b[0] + a[1] * b[1]) + a[2] * b[2]) + a[3] * b[3];
+#endif
+}
+
+inline void vcs_tier2_mat4_mul_ordered(const float *s, const float *t, float *d) noexcept {
+    for (std::uint32_t a = 0; a < 4u; ++a) {
+        const float *tr = t + a * 4u;
+        d[a * 4u + 0u] = vcs_tier2_dot4_ordered(s + 0u, tr);
+        d[a * 4u + 1u] = vcs_tier2_dot4_ordered(s + 4u, tr);
+        d[a * 4u + 2u] = vcs_tier2_dot4_ordered(s + 8u, tr);
+        d[a * 4u + 3u] = vcs_tier2_dot4_ordered(s + 12u, tr);
+    }
+}
+
+inline void vcs_tier2_mat4_vec_first3_ordered(const float *m, const float *v,
+                                               float *out) noexcept {
+    out[0] = vcs_tier2_dot4_ordered(m + 0u, v);
+    out[1] = vcs_tier2_dot4_ordered(m + 4u, v);
+    out[2] = vcs_tier2_dot4_ordered(m + 8u, v);
+}
+
+} // namespace psprecomp

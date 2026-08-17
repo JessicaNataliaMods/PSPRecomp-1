@@ -151,7 +151,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties("${VCS_PROFILE_DIR}/host/vcs_profile.cpp" PROPERTIES COMPILE_OPTIONS "-O2")
 endif()
 
-# Tier-2 V2 keeps each profile-guided cluster in its own translation unit.
+# Tier-2 V4 keeps each profile-guided cluster in its own translation unit.
 # This is the actual second AOT layer: hot functions/loops are cold-split from
 # the giant generated units and selected cross-unit edges are fused locally.
 # /GL- on these sources avoids re-inflating them into a giant LTCG partition;
@@ -170,11 +170,18 @@ if(MSVC)
         "${VCS_PROFILE_DIR}/host/vcs_tier2_superblocks.cpp"
         ${VCS_TIER2_CLUSTER_SOURCES}
         PROPERTIES COMPILE_OPTIONS "/O2;/Ob3;/bigobj;/GL-")
+    # Geometry is the largest V4 hot TU (~7k generated lines) and /Ob3 can
+    # make MSVC spend many minutes in pathological inlining/optimization.
+    # Keep full /O2 codegen and normal aggressive /Ob2 inlining here; this
+    # preserves GPR shadow/SIMD/dataflow while avoiding the compile-time cliff.
+    set_source_files_properties(
+        "${VCS_PROFILE_DIR}/host/vcs_tier2_cluster_geometry.cpp"
+        PROPERTIES COMPILE_OPTIONS "/O2;/Ob2;/bigobj;/GL-")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties(
         "${VCS_PROFILE_DIR}/host/vcs_tier2_superblocks.cpp"
         ${VCS_TIER2_CLUSTER_SOURCES}
-        PROPERTIES COMPILE_OPTIONS "-O3;-g0")
+        PROPERTIES COMPILE_OPTIONS "-O2;-g0")
 endif()
 
 set(VCS_GPU_BACKEND_SOURCE host/ge_gpu_backend_dx12.cpp)

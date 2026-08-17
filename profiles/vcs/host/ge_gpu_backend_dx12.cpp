@@ -44,6 +44,10 @@ using Microsoft::WRL::ComPtr;
 constexpr std::uint32_t kReferenceWidth = 480u;
 constexpr std::uint32_t kReferenceHeight = 272u;
 constexpr std::size_t kGeometryUploadCapacity = 64u * 1024u * 1024u;
+// V4 ExecuteIndirect arguments live in their own persistently mapped upload
+// arena. Keeping them separate means a draw-heavy frame can never steal bytes
+// from the established 64 MiB geometry budget. 4 MiB holds >20k commands.
+constexpr std::size_t kIndirectUploadCapacity = 4u * 1024u * 1024u;
 // Stage 45.2: persistent per-frame texture upload arena. The 44.7 path created,
 // mapped and destroyed one committed upload resource for every decoded texture.
 // Streaming bursts therefore paid kernel/D3D12 allocation overhead on the hot GE
@@ -122,6 +126,23 @@ struct Dx12PixelConstants {
 };
 static_assert(sizeof(Dx12PixelConstants) == 5u * sizeof(std::uint32_t));
 
+// Tier-2 V4 / 150-FPS path. ExecuteIndirect moves the two per-draw root
+// constant writes and Draw* call out of the CPU command-recording loop.  Runs
+// still preserve guest order; only adjacent draws with identical fixed GPU
+// state participate.
+struct Dx12IndirectDrawCommand {
+    std::uint32_t transform[40]{};
+    std::uint32_t pixel[5]{};
+    D3D12_DRAW_ARGUMENTS draw{};
+};
+struct Dx12IndirectDrawIndexedCommand {
+    std::uint32_t transform[40]{};
+    std::uint32_t pixel[5]{};
+    D3D12_DRAW_INDEXED_ARGUMENTS draw{};
+};
+static_assert(sizeof(Dx12IndirectDrawCommand) == 196u);
+static_assert(sizeof(Dx12IndirectDrawIndexedCommand) == 200u);
+
 struct CloudCameraCandidate {
     std::array<float, 12> view{};
     std::array<float, 16> projection{};
@@ -162,6 +183,8 @@ struct Dx12FrameResources {
     ComPtr<ID3D12CommandAllocator> allocator;
     ComPtr<ID3D12Resource> upload_buffer;
     std::byte *mapped_upload{};
+    ComPtr<ID3D12Resource> indirect_upload_buffer;
+    std::byte *mapped_indirect_upload{};
     ComPtr<ID3D12Resource> texture_upload_buffer;
     std::byte *mapped_texture_upload{};
     std::size_t texture_upload_cursor{};
@@ -274,6 +297,8 @@ struct Dx12GeState {
     UINT64 next_fence{1u};
     ComPtr<ID3D12RootSignature> root_signature;
     ComPtr<ID3D12RootSignature> cloud_root_signature;
+    ComPtr<ID3D12CommandSignature> indirect_draw_signature;
+    ComPtr<ID3D12CommandSignature> indirect_draw_indexed_signature;
     ComPtr<ID3DBlob> vertex_shader;
     ComPtr<ID3DBlob> packed_0115_vertex_shader;
     ComPtr<ID3DBlob> pixel_shader;
@@ -387,6 +412,10 @@ std::uint64_t texture_key(const GeGpuDrawDescriptor &draw) noexcept {
     key = hash_mix(key, static_cast<std::uint64_t>(draw.texture_clamp_v));
     return key;
 }
+
+// Forward declaration used by batch/indirect compatibility checks. The sampler
+// implementation lives next to sampler creation below.
+std::uint64_t sampler_key(const GeGpuDrawDescriptor &draw) noexcept;
 
 D3D12_CPU_DESCRIPTOR_HANDLE rtv_cpu(Dx12GeState &s, UINT index) noexcept {
     D3D12_CPU_DESCRIPTOR_HANDLE h = s.rtv_heap->GetCPUDescriptorHandleForHeapStart();
@@ -1043,7 +1072,9 @@ bool adjacent_batch_merge_compatible(const Dx12Batch &a, const Dx12Batch &b) noe
         (b.hardware_transform && b.transform.primitive != 3u)) return false;
     if (pipeline_key(a.draw) != pipeline_key(b.draw)) return false;
     if (a.draw.texture_enabled != b.draw.texture_enabled) return false;
-    if (a.draw.texture_enabled && texture_key(a.draw) != texture_key(b.draw)) return false;
+    if (a.draw.texture_enabled &&
+        (texture_key(a.draw) != texture_key(b.draw) || sampler_key(a.draw) != sampler_key(b.draw)))
+        return false;
     if (a.draw.scissor_x0 != b.draw.scissor_x0 || a.draw.scissor_y0 != b.draw.scissor_y0 ||
         a.draw.scissor_x1 != b.draw.scissor_x1 || a.draw.scissor_y1 != b.draw.scissor_y1)
         return false;
@@ -1058,6 +1089,107 @@ bool adjacent_batch_merge_compatible(const Dx12Batch &a, const Dx12Batch &b) noe
     if (a.draw.texture_mipmap_enabled != b.draw.texture_mipmap_enabled ||
         a.draw.texture_mipmap_linear != b.draw.texture_mipmap_linear) return false;
     return !a.hardware_transform || hardware_transform_equal(a.transform, b.transform);
+}
+
+bool dx12_execute_indirect_enabled() noexcept {
+    static const bool enabled = [] {
+        const char *text = std::getenv("PSPRECOMP_DX12_EXECUTE_INDIRECT");
+        return text == nullptr || (*text != '\0' && std::strcmp(text, "0") != 0 &&
+               std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
+               std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0);
+    }();
+    return enabled;
+}
+
+D3D12_PRIMITIVE_TOPOLOGY batch_topology(const Dx12Batch &batch) noexcept {
+    return batch.hardware_transform && batch.transform.primitive == 4u
+        ? D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP
+        : D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+}
+
+std::uint64_t batch_full_pipeline_key(const Dx12Batch &batch) noexcept {
+    const bool cull = batch.hardware_transform && batch.transform.cull_enabled;
+    const bool accept_ccw = cull && batch.transform.accept_counter_clockwise;
+    return pipeline_key(batch.draw) |
+        (batch.packed_0115 ? (std::uint64_t{1} << 63u) : 0u) |
+        (cull ? (std::uint64_t{1} << 62u) : 0u) |
+        (accept_ccw ? (std::uint64_t{1} << 61u) : 0u);
+}
+
+bool indirect_run_compatible(const Dx12Batch &a, const Dx12Batch &b) noexcept {
+    if (a.framebuffer_feedback || b.framebuffer_feedback) return false;
+    if (a.draw.clear_mode || b.draw.clear_mode) return false;
+    if (a.indexed != b.indexed || a.packed_0115 != b.packed_0115) return false;
+    if ((a.draw.framebuffer_address & 0x001FFFF0u) !=
+        (b.draw.framebuffer_address & 0x001FFFF0u)) return false;
+    if (batch_topology(a) != batch_topology(b)) return false;
+    if (batch_full_pipeline_key(a) != batch_full_pipeline_key(b)) return false;
+    if (a.draw.texture_enabled != b.draw.texture_enabled) return false;
+    if (a.draw.texture_enabled &&
+        (texture_key(a.draw) != texture_key(b.draw) || sampler_key(a.draw) != sampler_key(b.draw)))
+        return false;
+    if (a.draw.scissor_x0 != b.draw.scissor_x0 || a.draw.scissor_y0 != b.draw.scissor_y0 ||
+        a.draw.scissor_x1 != b.draw.scissor_x1 || a.draw.scissor_y1 != b.draw.scissor_y1)
+        return false;
+    const Dx12BlendPlan ba = dx12_blend_plan(a.draw);
+    const Dx12BlendPlan bb = dx12_blend_plan(b.draw);
+    if (ba.uses_constant != bb.uses_constant) return false;
+    if (ba.uses_constant && ba.constant_rgb != bb.constant_rgb) return false;
+    return true;
+}
+
+void account_executed_batch(Dx12GeState &s, const Dx12Batch &batch,
+                            std::uint32_t srv_index, const Dx12BlendPlan &blend_plan) {
+    if (batch.draw.depth_test_enabled) s.report.depth_tested_game_draw_calls += batch.logical_draw_count;
+    if (batch.draw.depth_write_enabled) s.report.depth_writing_game_draw_calls += batch.logical_draw_count;
+    if (batch.draw.alpha_test_enabled) s.report.alpha_tested_game_draw_calls += batch.logical_draw_count;
+    switch (blend_variant(batch.draw)) {
+    case 1u: s.report.standard_alpha_blended_game_draw_calls += batch.logical_draw_count; break;
+    case 2u: s.report.fixed_replace_blended_game_draw_calls += batch.logical_draw_count; break;
+    case 3u: s.report.additive_blended_game_draw_calls += batch.logical_draw_count; break;
+    default: break;
+    }
+    if (batch.draw.blend_enabled && !batch.draw.clear_mode && !blend_plan.exact) {
+        s.report.unsupported_blend_game_draw_calls += batch.logical_draw_count;
+        static std::uint32_t diagnostic_count = 0u;
+        if (std::getenv("PSPRECOMP_DX12_BLEND_DIAG") != nullptr && diagnostic_count < 32u) {
+            std::ostringstream line;
+            line << "DX12 unsupported PSP blend fallback #" << (diagnostic_count + 1u)
+                 << ": eq=" << (batch.draw.blend_equation & 7u)
+                 << " src=" << (batch.draw.blend_source_factor & 0xFu)
+                 << " dst=" << (batch.draw.blend_dest_factor & 0xFu)
+                 << " fixS=0x" << std::hex << (batch.draw.blend_fix_source & 0x00FFFFFFu)
+                 << " fixD=0x" << (batch.draw.blend_fix_dest & 0x00FFFFFFu) << std::dec;
+            const std::string message = line.str();
+            std::cerr << "[blend] " << message << "\n";
+            runtime_log_error("blend", message);
+            ++diagnostic_count;
+        }
+    }
+    if (batch.draw.fog_enabled) s.report.fogged_game_draw_calls += batch.logical_draw_count;
+    if (srv_index != 0u) {
+        const std::uint32_t submitted_vertices = batch.indexed ? batch.index_count : batch.vertex_count;
+        s.report.textured_game_triangles +=
+            batch.hardware_transform && batch.transform.primitive == 4u
+                ? (submitted_vertices > 2u ? submitted_vertices - 2u : 0u)
+                : submitted_vertices / 3u;
+        s.report.textured_game_vertices += submitted_vertices;
+        switch (batch.draw.texture_function & 7u) {
+        case 0u: s.report.modulate_texture_game_draw_calls += batch.logical_draw_count; break;
+        case 1u: s.report.decal_texture_game_draw_calls += batch.logical_draw_count; break;
+        case 2u: s.report.blend_texture_game_draw_calls += batch.logical_draw_count; break;
+        case 3u: s.report.replace_texture_game_draw_calls += batch.logical_draw_count; break;
+        case 4u: s.report.add_texture_game_draw_calls += batch.logical_draw_count; break;
+        default: ++s.report.unsupported_texture_function_game_draw_calls; break;
+        }
+        if (batch.draw.texture_double_color)
+            s.report.double_color_texture_game_draw_calls += batch.logical_draw_count;
+        if (batch.draw.texture_mipmap_enabled) {
+            s.report.mipmapped_game_draw_calls += batch.logical_draw_count;
+            if (batch.draw.texture_mipmap_linear)
+                s.report.mip_linear_game_draw_calls += batch.logical_draw_count;
+        }
+    }
 }
 
 bool append_or_merge_batch(Dx12GeState &s, Dx12Batch batch) {
@@ -1451,6 +1583,42 @@ bool create_root_signature(Dx12GeState &s, std::string &error) noexcept {
                                        IID_PPV_ARGS(&s.root_signature));
     if (FAILED(hr)) {
         error = hr_text(hr, "CreateRootSignature(DX12 GE)");
+        return false;
+    }
+    return true;
+}
+
+bool create_indirect_signatures(Dx12GeState &s, std::string &error) noexcept {
+    std::array<D3D12_INDIRECT_ARGUMENT_DESC, 3> args{};
+    args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+    args[0].Constant.RootParameterIndex = 2u;
+    args[0].Constant.DestOffsetIn32BitValues = 0u;
+    args[0].Constant.Num32BitValuesToSet = 40u;
+    args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+    args[1].Constant.RootParameterIndex = 3u;
+    args[1].Constant.DestOffsetIn32BitValues = 0u;
+    args[1].Constant.Num32BitValuesToSet = 5u;
+
+    D3D12_COMMAND_SIGNATURE_DESC desc{};
+    desc.NumArgumentDescs = static_cast<UINT>(args.size());
+    desc.pArgumentDescs = args.data();
+
+    args[2].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+    desc.ByteStride = sizeof(Dx12IndirectDrawCommand);
+    HRESULT hr = s.device->CreateCommandSignature(&desc, s.root_signature.Get(),
+                                                  IID_PPV_ARGS(&s.indirect_draw_signature));
+    if (FAILED(hr)) {
+        error = hr_text(hr, "CreateCommandSignature(DX12 GE draw)");
+        return false;
+    }
+
+    args[2].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+    desc.ByteStride = sizeof(Dx12IndirectDrawIndexedCommand);
+    hr = s.device->CreateCommandSignature(&desc, s.root_signature.Get(),
+                                          IID_PPV_ARGS(&s.indirect_draw_indexed_signature));
+    if (FAILED(hr)) {
+        error = hr_text(hr, "CreateCommandSignature(DX12 GE draw indexed)");
+        s.indirect_draw_signature.Reset();
         return false;
     }
     return true;
@@ -2283,7 +2451,8 @@ const CloudCameraCandidate *select_cloud_camera(const Dx12GeState &s) noexcept {
     bool changed = true;
     while (changed && ancestors.size() < kFramebufferTargetCapacity) {
         changed = false;
-        for (const Dx12Batch &batch : s.batches) {
+        for (std::size_t batch_cursor = 0u; batch_cursor < s.batches.size(); ++batch_cursor) {
+        const Dx12Batch &batch = s.batches[batch_cursor];
             if (!batch.framebuffer_feedback) continue;
             const std::uint32_t source = batch.feedback_address & 0x001FFFF0u;
             const std::uint32_t destination = batch.draw.framebuffer_address & 0x001FFFF0u;
@@ -3080,6 +3249,25 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
         if (FAILED(hr) || mapped == nullptr) { error = hr_text(hr, "Map(DX12 GE geometry upload)"); return false; }
         frame.mapped_upload = static_cast<std::byte *>(mapped);
 
+        // Optional V4 arena. Failure here must never make the renderer fail to
+        // boot on an older/low-memory driver; that frame simply uses scalar
+        // Draw*/root-constant recording.
+        D3D12_RESOURCE_DESC indirect_upload = upload;
+        indirect_upload.Width = kIndirectUploadCapacity;
+        hr = s.device->CreateCommittedResource(&upload_heap, D3D12_HEAP_FLAG_NONE, &indirect_upload,
+                                                D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+                                                IID_PPV_ARGS(&frame.indirect_upload_buffer));
+        if (SUCCEEDED(hr) && frame.indirect_upload_buffer) {
+            mapped = nullptr;
+            hr = frame.indirect_upload_buffer->Map(0u, &no_read, &mapped);
+            if (SUCCEEDED(hr) && mapped != nullptr) {
+                frame.mapped_indirect_upload = static_cast<std::byte *>(mapped);
+            } else {
+                frame.indirect_upload_buffer.Reset();
+                frame.mapped_indirect_upload = nullptr;
+            }
+        }
+
         if (s.texture_upload_ring_enabled) {
             D3D12_RESOURCE_DESC texture_upload = upload;
             texture_upload.Width = kTextureUploadCapacity;
@@ -3113,6 +3301,16 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
     if (s.fence_event == nullptr) { error = "CreateEventW failed for DX12 GE fence"; return false; }
     if (!compile_shaders(s, error)) return false;
     if (!create_root_signature(s, error)) return false;
+    {
+        std::string indirect_error;
+        if (!create_indirect_signatures(s, indirect_error)) {
+            // Scalar recording is the fully supported fallback. Command
+            // signatures are an optimization, never a backend requirement.
+            s.indirect_draw_signature.Reset();
+            s.indirect_draw_indexed_signature.Reset();
+            if (!indirect_error.empty()) runtime_log_error("dx12 execute indirect disabled", indirect_error);
+        }
+    }
     if (!create_cloud_root_signature(s, error)) return false;
     if (!create_targets(s, error)) return false;
     if (!create_present_pipeline(s, error)) return false;
@@ -3144,11 +3342,15 @@ void destroy_backend(Dx12GeState &s) noexcept {
     for (Dx12FrameResources &frame : s.frames) {
         if (frame.upload_buffer && frame.mapped_upload != nullptr)
             frame.upload_buffer->Unmap(0u, nullptr);
+        if (frame.indirect_upload_buffer && frame.mapped_indirect_upload != nullptr)
+            frame.indirect_upload_buffer->Unmap(0u, nullptr);
         if (frame.texture_upload_buffer && frame.mapped_texture_upload != nullptr)
             frame.texture_upload_buffer->Unmap(0u, nullptr);
         frame.mapped_upload = nullptr;
+        frame.mapped_indirect_upload = nullptr;
         frame.mapped_texture_upload = nullptr;
         frame.transient_resources.clear();
+        frame.indirect_upload_buffer.Reset();
         frame.texture_upload_buffer.Reset();
         frame.upload_buffer.Reset();
         frame.texture_upload_cursor = 0u;
@@ -3186,6 +3388,8 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.pixel_shader.Reset();
     s.packed_0115_vertex_shader.Reset();
     s.vertex_shader.Reset();
+    s.indirect_draw_signature.Reset();
+    s.indirect_draw_indexed_signature.Reset();
     s.root_signature.Reset();
     s.cloud_root_signature.Reset();
     s.readback_buffer.Reset();
@@ -3904,6 +4108,9 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     Dx12FramebufferTarget *display_target = find_framebuffer_target(s, s.display_framebuffer);
 
     Dx12FrameResources &frame = s.frames[s.frame_cursor];
+    const bool indirect_enabled = dx12_execute_indirect_enabled() &&
+        s.indirect_draw_signature && s.indirect_draw_indexed_signature &&
+        frame.indirect_upload_buffer && frame.mapped_indirect_upload != nullptr;
     std::string error;
     if (!wait_for_fence(s, frame.fence_value, error)) {
         runtime_log_error("dx12 ge frame wait", error);
@@ -3974,6 +4181,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     Dx12FramebufferTarget *current_target = nullptr;
     std::uint32_t current_address = 0xFFFFFFFFu;
     std::uint32_t executed_batches = 0u;
+    std::size_t indirect_cursor = 0u;
     std::uint32_t bound_srv = std::numeric_limits<std::uint32_t>::max();
     std::uint32_t bound_sampler = std::numeric_limits<std::uint32_t>::max();
     Dx12TransformConstants active_transform{};
@@ -4006,7 +4214,8 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     }
 
     constexpr float black[4]{0.0f, 0.0f, 0.0f, 1.0f};
-    for (const Dx12Batch &batch : s.batches) {
+    for (std::size_t batch_cursor = 0u; batch_cursor < s.batches.size(); ++batch_cursor) {
+        const Dx12Batch &batch = s.batches[batch_cursor];
         const std::uint32_t address = batch.draw.framebuffer_address & 0x001FFFF0u;
         const bool cloud_target_batch = address == cloud_target_address;
         if (trace_cloud_frame && (cloud_target_batch || address == s.display_framebuffer)) {
@@ -4192,26 +4401,45 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
             bound_sampler = sampler_index;
         }
 
+        // Discover an indirect run before writing root constants. If the run
+        // fits the dedicated arena, ExecuteIndirect owns those constants too,
+        // avoiding even the first scalar SetGraphicsRoot32BitConstants pair.
+        std::size_t indirect_end = batch_cursor + 1u;
+        if (indirect_enabled && !trace_cloud_frame && !batch.framebuffer_feedback &&
+            !batch.draw.clear_mode) {
+            while (indirect_end < s.batches.size() &&
+                   indirect_run_compatible(batch, s.batches[indirect_end])) {
+                ++indirect_end;
+            }
+        }
+        const std::size_t indirect_count = indirect_end - batch_cursor;
+        const std::size_t indirect_stride = batch.indexed
+            ? sizeof(Dx12IndirectDrawIndexedCommand)
+            : sizeof(Dx12IndirectDrawCommand);
+        const std::size_t indirect_command_bytes = indirect_stride * indirect_count;
+        const bool execute_indirect_run = indirect_count >= 3u &&
+            indirect_cursor + indirect_command_bytes <= kIndirectUploadCapacity;
+
         const std::uint32_t logical_width = current_target != nullptr && current_target->logical_width != 0u
             ? current_target->logical_width : kReferenceWidth;
         const std::uint32_t logical_height = current_target != nullptr && current_target->logical_height != 0u
             ? current_target->logical_height : kReferenceHeight;
-        const Dx12TransformConstants draw_transform =
-            make_transform_constants(batch, logical_width, logical_height);
-        if (!active_transform_valid ||
-            std::memcmp(&draw_transform, &active_transform, sizeof(draw_transform)) != 0) {
-            s.list->SetGraphicsRoot32BitConstants(
-                2u, 40u, &draw_transform, 0u);
-            active_transform = draw_transform;
-            active_transform_valid = true;
-        }
-
-        const Dx12PixelConstants pixel_state = make_pixel_constants(batch.draw, srv_index != 0u);
-        if (!active_pixel_valid ||
-            std::memcmp(&pixel_state, &active_pixel, sizeof(pixel_state)) != 0) {
-            s.list->SetGraphicsRoot32BitConstants(3u, 5u, &pixel_state, 0u);
-            active_pixel = pixel_state;
-            active_pixel_valid = true;
+        if (!execute_indirect_run) {
+            const Dx12TransformConstants draw_transform =
+                make_transform_constants(batch, logical_width, logical_height);
+            const Dx12PixelConstants pixel_state = make_pixel_constants(batch.draw, srv_index != 0u);
+            if (!active_transform_valid ||
+                std::memcmp(&draw_transform, &active_transform, sizeof(draw_transform)) != 0) {
+                s.list->SetGraphicsRoot32BitConstants(2u, 40u, &draw_transform, 0u);
+                active_transform = draw_transform;
+                active_transform_valid = true;
+            }
+            if (!active_pixel_valid ||
+                std::memcmp(&pixel_state, &active_pixel, sizeof(pixel_state)) != 0) {
+                s.list->SetGraphicsRoot32BitConstants(3u, 5u, &pixel_state, 0u);
+                active_pixel = pixel_state;
+                active_pixel_valid = true;
+            }
         }
 
         // The PSP scissor is expressed in 480x272 logical pixels and has to be
@@ -4266,63 +4494,70 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                 active_blend_fix = fix;
             }
         }
+        // V4 high-margin path: collapse adjacent draws that differ only in
+        // per-draw root constants into one ExecuteIndirect call. No draw is
+        // reordered and framebuffer-feedback/clear boundaries never participate.
+        if (execute_indirect_run) {
+                const std::size_t stride = indirect_stride;
+                const std::size_t command_bytes = indirect_command_bytes;
+                std::byte *command_dst = frame.mapped_indirect_upload + indirect_cursor;
+                for (std::size_t j = batch_cursor; j < indirect_end; ++j) {
+                    const Dx12Batch &ibatch = s.batches[j];
+                    const Dx12TransformConstants itransform =
+                        make_transform_constants(ibatch, logical_width, logical_height);
+                    const Dx12PixelConstants ipixel =
+                        make_pixel_constants(ibatch.draw, srv_index != 0u);
+                    if (batch.indexed) {
+                        Dx12IndirectDrawIndexedCommand command{};
+                        std::memcpy(command.transform, &itransform, sizeof(itransform));
+                        std::memcpy(command.pixel, &ipixel, sizeof(ipixel));
+                        command.draw.IndexCountPerInstance = ibatch.index_count;
+                        command.draw.InstanceCount = 1u;
+                        command.draw.StartIndexLocation = ibatch.first_index;
+                        command.draw.BaseVertexLocation = static_cast<INT>(ibatch.first_vertex);
+                        command.draw.StartInstanceLocation = 0u;
+                        std::memcpy(command_dst, &command, sizeof(command));
+                    } else {
+                        Dx12IndirectDrawCommand command{};
+                        std::memcpy(command.transform, &itransform, sizeof(itransform));
+                        std::memcpy(command.pixel, &ipixel, sizeof(ipixel));
+                        command.draw.VertexCountPerInstance = ibatch.vertex_count;
+                        command.draw.InstanceCount = 1u;
+                        command.draw.StartVertexLocation = ibatch.first_vertex;
+                        command.draw.StartInstanceLocation = 0u;
+                        std::memcpy(command_dst, &command, sizeof(command));
+                    }
+                    command_dst += stride;
+                }
+                ID3D12CommandSignature *signature = batch.indexed
+                    ? s.indirect_draw_indexed_signature.Get()
+                    : s.indirect_draw_signature.Get();
+                s.list->ExecuteIndirect(signature, static_cast<UINT>(indirect_count),
+                                        frame.indirect_upload_buffer.Get(), indirect_cursor,
+                                        nullptr, 0u);
+                indirect_cursor += command_bytes;
+                executed_batches += static_cast<std::uint32_t>(indirect_count);
+                ++s.report.dx12_indirect_executes;
+                s.report.dx12_indirect_draws += indirect_count;
+                s.report.dx12_indirect_saved_api_draws += indirect_count - 1u;
+                for (std::size_t j = batch_cursor; j < indirect_end; ++j)
+                    account_executed_batch(s, s.batches[j], srv_index, blend_plan);
+                batch_cursor = indirect_end - 1u;
+                cloud_batch_index += indirect_count - 1u;
+                // ExecuteIndirect leaves root constants equal to the last command;
+                // force the scalar cache to repopulate before the next ordinary draw.
+                active_transform_valid = false;
+                active_pixel_valid = false;
+                continue;
+        }
+
         if (batch.indexed)
             s.list->DrawIndexedInstanced(batch.index_count, 1u, batch.first_index,
                                          static_cast<INT>(batch.first_vertex), 0u);
         else
             s.list->DrawInstanced(batch.vertex_count, 1u, batch.first_vertex, 0u);
         ++executed_batches;
-
-        if (batch.draw.depth_test_enabled) s.report.depth_tested_game_draw_calls += batch.logical_draw_count;
-        if (batch.draw.depth_write_enabled) s.report.depth_writing_game_draw_calls += batch.logical_draw_count;
-        if (batch.draw.alpha_test_enabled) s.report.alpha_tested_game_draw_calls += batch.logical_draw_count;
-        switch (blend_variant(batch.draw)) {
-        case 1u: s.report.standard_alpha_blended_game_draw_calls += batch.logical_draw_count; break;
-        case 2u: s.report.fixed_replace_blended_game_draw_calls += batch.logical_draw_count; break;
-        case 3u: s.report.additive_blended_game_draw_calls += batch.logical_draw_count; break;
-        default: break;
-        }
-        if (batch.draw.blend_enabled && !batch.draw.clear_mode && !blend_plan.exact) {
-            s.report.unsupported_blend_game_draw_calls += batch.logical_draw_count;
-            static std::uint32_t diagnostic_count = 0u;
-            if (std::getenv("PSPRECOMP_DX12_BLEND_DIAG") != nullptr && diagnostic_count < 32u) {
-                std::ostringstream line;
-                line << "DX12 unsupported PSP blend fallback #" << (diagnostic_count + 1u)
-                     << ": eq=" << (batch.draw.blend_equation & 7u)
-                     << " src=" << (batch.draw.blend_source_factor & 0xFu)
-                     << " dst=" << (batch.draw.blend_dest_factor & 0xFu)
-                     << " fixS=0x" << std::hex << (batch.draw.blend_fix_source & 0x00FFFFFFu)
-                     << " fixD=0x" << (batch.draw.blend_fix_dest & 0x00FFFFFFu) << std::dec;
-                const std::string message = line.str();
-                std::cerr << "[blend] " << message << "\n";
-                runtime_log_error("blend", message);
-                ++diagnostic_count;
-            }
-        }
-        if (batch.draw.fog_enabled) s.report.fogged_game_draw_calls += batch.logical_draw_count;
-        if (srv_index != 0u) {
-            const std::uint32_t submitted_vertices = batch.indexed ? batch.index_count : batch.vertex_count;
-            s.report.textured_game_triangles +=
-                batch.hardware_transform && batch.transform.primitive == 4u
-                    ? (submitted_vertices > 2u ? submitted_vertices - 2u : 0u)
-                    : submitted_vertices / 3u;
-            s.report.textured_game_vertices += submitted_vertices;
-            switch (batch.draw.texture_function & 7u) {
-            case 0u: s.report.modulate_texture_game_draw_calls += batch.logical_draw_count; break;
-            case 1u: s.report.decal_texture_game_draw_calls += batch.logical_draw_count; break;
-            case 2u: s.report.blend_texture_game_draw_calls += batch.logical_draw_count; break;
-            case 3u: s.report.replace_texture_game_draw_calls += batch.logical_draw_count; break;
-            case 4u: s.report.add_texture_game_draw_calls += batch.logical_draw_count; break;
-            default: ++s.report.unsupported_texture_function_game_draw_calls; break;
-            }
-            if (batch.draw.texture_double_color)
-                s.report.double_color_texture_game_draw_calls += batch.logical_draw_count;
-            if (batch.draw.texture_mipmap_enabled) {
-                s.report.mipmapped_game_draw_calls += batch.logical_draw_count;
-                if (batch.draw.texture_mipmap_linear)
-                    s.report.mip_linear_game_draw_calls += batch.logical_draw_count;
-            }
-        }
+        account_executed_batch(s, batch, srv_index, blend_plan);
     }
     if (trace_cloud_frame) {
         runtime_log_line(std::string("CLOUD_TRACE_END injected=") +
