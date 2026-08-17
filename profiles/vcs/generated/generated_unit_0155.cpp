@@ -3417,12 +3417,12 @@ L_08A710F8:
       goto L_08A71100;
     }
 L_08A71100:
-// TIER2_SUPERBLOCK_V1_HOOK_BEGIN
-    if (vcs::tier2_superblocks_enabled()) {
-        vcs::tier2_superblock_154_155(rt, ctx, aot_mem, 0x08A71100u);
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+        vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A71100u);
         return;
     }
-// TIER2_SUPERBLOCK_V1_HOOK_END
+// TIER2_SUPERBLOCK_V2_HOOK_END
     { const bool branch_taken = ctx.gpr[4] != 0u;
     // nop
       if (branch_taken) {
@@ -3596,12 +3596,12 @@ L_08A711D4:
     if (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 104u, 0x08A68CDCu>(ctx, &aot_mem) && ctx.pc == 0x08A711E0u) goto L_08A711E0;
     return;
 L_08A711E0:
-// TIER2_SUPERBLOCK_V1_HOOK_BEGIN
-    if (vcs::tier2_superblocks_enabled()) {
-        vcs::tier2_superblock_154_155(rt, ctx, aot_mem, 0x08A711E0u);
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+        vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A711E0u);
         return;
     }
-// TIER2_SUPERBLOCK_V1_HOOK_END
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(1576)));
     { const bool branch_taken = ctx.gpr[4] != 0u;
     // nop
@@ -3611,12 +3611,12 @@ L_08A711E0:
       goto L_08A711EC;
     }
 L_08A711EC:
-// TIER2_SUPERBLOCK_V1_HOOK_BEGIN
-    if (vcs::tier2_superblocks_enabled()) {
-        vcs::tier2_superblock_154_155(rt, ctx, aot_mem, 0x08A711ECu);
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+        vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A711ECu);
         return;
     }
-// TIER2_SUPERBLOCK_V1_HOOK_END
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(1600)));
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(4));
     ctx.gpr[5] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(1596)));

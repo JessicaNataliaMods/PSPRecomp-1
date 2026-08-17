@@ -14,6 +14,7 @@
 #include "savedata_utility_ui.hpp"
 #include "vcs_texture_replacement.hpp"
 #include "vcs_runtime_log.hpp"
+#include "vcs_tier2_superblocks.hpp"
 
 #include "psprecomp/common.hpp"
 #include "psprecomp/deflate.hpp"
@@ -7618,6 +7619,44 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                           << " fence_us=" << (d(r.perf_wait_for_frame_ns, o.perf_wait_for_frame_ns) / 1000u)
                           << " finish_us=" << (d(r.perf_finish_frame_ns, o.perf_finish_frame_ns) / 1000u);
                         runtime_log_line(t.str());
+
+                        // Tier-2 V2 coverage is reported at the same 60-vblank cadence as
+                        // PERF. Counters are thread-local to the Allegrex execution thread,
+                        // so there are no atomics on the hot superblock edges.
+                        if (tier2_superblocks_enabled()) {
+                            const Tier2CountersSnapshot tier2 = consume_tier2_counters();
+                            std::uint64_t total_entries = 0u;
+                            std::uint64_t total_tail = 0u;
+                            std::uint64_t total_calls = 0u;
+                            std::uint64_t total_cold = 0u;
+                            std::uint64_t total_fallback = 0u;
+                            std::uint64_t total_sample_ns = 0u;
+                            std::uint64_t total_sample_entries = 0u;
+                            std::ostringstream tier2_line;
+                            tier2_line << "TIER2 window=" << n << " vblank=" << display_vblank_index;
+                            for (std::size_t i = 0; i < kTier2ClusterCount; ++i) {
+                                const auto id = static_cast<Tier2ClusterId>(i);
+                                const Tier2ClusterCounters &c = tier2.cluster[i];
+                                total_entries += c.entries;
+                                total_tail += c.fused_tail_edges;
+                                total_calls += c.fused_calls;
+                                total_cold += c.cold_exits;
+                                total_fallback += c.fallbacks;
+                                total_sample_ns += c.sampled_ns;
+                                total_sample_entries += c.sampled_entries;
+                                tier2_line << ' ' << tier2_cluster_name(id) << "_e=" << c.entries
+                                           << ' ' << tier2_cluster_name(id) << "_x="
+                                           << (c.fused_tail_edges + c.fused_calls);
+                            }
+                            tier2_line << " total_entries=" << total_entries
+                                       << " fused_tail=" << total_tail
+                                       << " fused_calls=" << total_calls
+                                       << " cold=" << total_cold
+                                       << " fallback=" << total_fallback
+                                       << " sampled=" << total_sample_entries
+                                       << " sampled_us=" << (total_sample_ns / 1000u);
+                            runtime_log_line(tier2_line.str());
+                        }
                         if (vcs_configuration().diagnostics.guest_hotspot_profile &&
                             ++guest_hotspot_perf_windows >= 5u) {
                             report_guest_hotspot_window(display_vblank_index);

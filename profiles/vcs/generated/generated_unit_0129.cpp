@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -3859,6 +3860,12 @@ L_08A09AD0:
     ctx.pc = jump_target;
     return;
 L_08A09B2C:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Physics)) {
+        vcs::tier2_superblock_physics(rt, ctx, aot_mem, 0x08A09B2Cu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-16));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(0), ctx.gpr[16]);
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(4), ctx.gpr[17]);

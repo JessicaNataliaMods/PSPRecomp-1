@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -3649,6 +3650,12 @@ L_0895543C:
     ctx.pc = jump_target;
     return;
 L_08955444:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+        vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x08955444u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[9] = (aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(11768)));
     ctx.set_vfpu_scalar_bits_ct<12u>(aot_mem.aot_load32(ctx.gpr[5] + static_cast<std::uint32_t>(4)));
     ctx.set_vfpu_scalar_bits_ct<44u>(aot_mem.aot_load32(ctx.gpr[5] + static_cast<std::uint32_t>(8)));
@@ -3716,6 +3723,12 @@ L_089554A0:
     ctx.pc = jump_target;
     return;
 L_089554A8:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+        vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x089554A8u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-64));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(12), std::bit_cast<std::uint32_t>(ctx.fpr[20]));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(16), ctx.gpr[16]);

@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -2460,6 +2461,12 @@ L_08958CF8:
     ctx.pc = jump_target;
     return;
 L_08958D28:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+        vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x08958D28u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-624));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(576), std::bit_cast<std::uint32_t>(ctx.fpr[20]));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(580), ctx.gpr[16]);
@@ -5787,6 +5794,12 @@ L_0895A72C:
     ctx.pc = jump_target;
     return;
 L_0895A760:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+        vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x0895A760u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-144));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(72), std::bit_cast<std::uint32_t>(ctx.fpr[20]));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(76), std::bit_cast<std::uint32_t>(ctx.fpr[22]));
@@ -8395,6 +8408,12 @@ L_0895BF04:
     aot_mem.aot_store32(ctx.gpr[17] + static_cast<std::uint32_t>(29552), ctx.gpr[4]);
     goto L_0895BF3C;
 L_0895BF3C:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary)) {
+        vcs::tier2_superblock_boundary(rt, ctx, aot_mem, 0x0895BF3Cu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (0u | 0u);
     aot_mem.aot_store8(ctx.gpr[29] + static_cast<std::uint32_t>(120), static_cast<std::uint8_t>(ctx.gpr[4]));
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(100)));
@@ -8419,6 +8438,12 @@ L_0895BF5C:
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(108), ctx.gpr[4]);
     goto L_0895BF7C;
 L_0895BF7C:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary)) {
+        vcs::tier2_superblock_boundary(rt, ctx, aot_mem, 0x0895BF7Cu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[18] = (ctx.gpr[20] | 0u);
     { const bool branch_taken = ctx.gpr[30] == 0u;
     ctx.gpr[4] = (15u << 16u);

@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -6336,6 +6337,12 @@ L_08A7EC20:
     ctx.pc = jump_target;
     return;
 L_08A7EC68:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A7EC68u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-80));
     ctx.gpr[5] = (0u | 12u);
     ctx.gpr[6] = (aot_mem.aot_load8(ctx.gpr[28] + static_cast<std::uint32_t>(-7080)));
@@ -6884,6 +6891,12 @@ L_08A7F048:
     ctx.pc = jump_target;
     return;
 L_08A7F080:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A7F080u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-80));
     ctx.gpr[5] = (0u | 12u);
     ctx.gpr[6] = (aot_mem.aot_load8(ctx.gpr[28] + static_cast<std::uint32_t>(-7080)));

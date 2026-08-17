@@ -1,0 +1,153 @@
+{
+  "release": "PSPRecomp-VCS-TIER2-SUPERBLOCK-V2-COMPLETE-2026-08-16",
+  "base": "PSPRecomp-VCS-TIER2-SUPERBLOCK-V1-PYFIX-2026-08-16",
+  "architecture": {
+    "clusters": 7,
+    "hot_blocks": 1060,
+    "generated_cluster_lines": 17660,
+    "static_fused_calls": 49,
+    "static_fused_tail_edges": 13,
+    "cold_exits": 9,
+    "hooks": 25,
+    "hooked_units": [
+      "0043",
+      "0044",
+      "0084",
+      "0085",
+      "0086",
+      "0129",
+      "0154",
+      "0155",
+      "0157",
+      "0158"
+    ],
+    "cluster_mask_all": "0x7f",
+    "global_kill_switch": "PSPRECOMP_TIER2_SUPERBLOCKS=0",
+    "cluster_mask_env": "PSPRECOMP_TIER2_CLUSTER_MASK"
+  },
+  "clusters": {
+    "entity": {
+      "mask": "0x01",
+      "units": [
+        "0152",
+        "0153",
+        "0154",
+        "0155"
+      ],
+      "blocks": 94,
+      "fused_calls": 13,
+      "fused_tail": 8,
+      "hooks": 5
+    },
+    "geometry": {
+      "mask": "0x02",
+      "units": [
+        "0084",
+        "0085"
+      ],
+      "blocks": 379,
+      "fused_calls": 33,
+      "fused_tail": 0,
+      "hooks": 4
+    },
+    "boundary": {
+      "mask": "0x04",
+      "units": [
+        "0085",
+        "0086"
+      ],
+      "blocks": 62,
+      "fused_calls": 0,
+      "fused_tail": 4,
+      "hooks": 5
+    },
+    "matrix": {
+      "mask": "0x08",
+      "units": [
+        "0044"
+      ],
+      "blocks": 73,
+      "fused_calls": 0,
+      "fused_tail": 0,
+      "hooks": 1
+    },
+    "physics": {
+      "mask": "0x10",
+      "units": [
+        "0129"
+      ],
+      "blocks": 15,
+      "fused_calls": 0,
+      "fused_tail": 0,
+      "hooks": 1
+    },
+    "world": {
+      "mask": "0x20",
+      "units": [
+        "0157",
+        "0158"
+      ],
+      "blocks": 402,
+      "fused_calls": 1,
+      "fused_tail": 0,
+      "hooks": 6
+    },
+    "edge43": {
+      "mask": "0x40",
+      "units": [
+        "0043",
+        "0044"
+      ],
+      "blocks": 35,
+      "fused_calls": 2,
+      "fused_tail": 1,
+      "hooks": 3
+    }
+  },
+  "telemetry": {
+    "perf_interval_vblanks": 60,
+    "tier2_line_per_perf_window": true,
+    "entry_timing_sample_stride": 256,
+    "fields": [
+      "cluster entries",
+      "cluster fused edges",
+      "total_entries",
+      "fused_tail",
+      "fused_calls",
+      "cold",
+      "fallback",
+      "sampled",
+      "sampled_us"
+    ]
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests": "PASS incl. Tier2 counter snapshot/reset",
+    "vfpu_tier2_tests": "PASS",
+    "cluster_object_compile": "7/7 PASS with actual VCSNative target flags",
+    "hooked_unit_object_compile": "10/10 PASS with actual VCSNative target flags",
+    "generator_idempotence": "PASS: host_changed=0, hook_units_changed=0",
+    "cfg_audit": "PASS: zero unresolved SB gotos, zero raw LOCAL_DISPATCH",
+    "bootfix_check": "PASS: zero changes",
+    "full_linux_vcsnative_link": "NOT COMPLETED: whole target rebuild exceeded container execution window; no compiler/source diagnostic before interruption"
+  },
+  "msvc": {
+    "cluster_options": [
+      "/O2",
+      "/Ob3",
+      "/bigobj",
+      "/GL-"
+    ],
+    "cmake_property_overwrite_fix": true,
+    "python_detection": [
+      "py -3",
+      "python"
+    ]
+  },
+  "performance_status": "UNMEASURED on Windows for V2; runtime log required",
+  "progress_estimate": {
+    "overall_project_percent": 88,
+    "tier2_percent": 86,
+    "second_layer_architecture_percent": 85
+  }
+}

@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -877,6 +878,12 @@ LOCAL_DISPATCH:
     }
     }
 L_088B4004:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43)) {
+        vcs::tier2_superblock_edge43(rt, ctx, aot_mem, 0x088B4004u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[17] = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(aot_mem.aot_load16(ctx.gpr[18] + static_cast<std::uint32_t>(6))))));
     ctx.gpr[4] = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(aot_mem.aot_load16(ctx.gpr[18] + static_cast<std::uint32_t>(14))))));
     ctx.gpr[4] = (static_cast<std::int32_t>(ctx.gpr[4]) < static_cast<std::int32_t>(ctx.gpr[17]) ? 1u : 0u);
@@ -979,6 +986,12 @@ L_088B40F4:
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(48)));
     goto L_088B40F8;
 L_088B40F8:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43)) {
+        vcs::tier2_superblock_edge43(rt, ctx, aot_mem, 0x088B40F8u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(1));
     ctx.gpr[5] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(52)));
     ctx.gpr[30] = (ctx.gpr[30] + static_cast<std::uint32_t>(16));
@@ -1819,6 +1832,12 @@ L_088B4708:
     ctx.pc = jump_target;
     return;
 L_088B4738:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Matrix)) {
+        vcs::tier2_superblock_matrix(rt, ctx, aot_mem, 0x088B4738u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-352));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(296), std::bit_cast<std::uint32_t>(ctx.fpr[20]));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(300), ctx.gpr[16]);

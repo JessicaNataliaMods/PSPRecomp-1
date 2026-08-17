@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -4358,6 +4359,12 @@ L_08A79DEC:
     ctx.pc = jump_target;
     return;
 L_08A79DF8:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A79DF8u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-32));
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(4), ctx.gpr[17]);
     ctx.gpr[17] = (2238u << 16u);
@@ -5478,6 +5485,12 @@ L_08A7A658:
     ctx.pc = jump_target;
     return;
 L_08A7A664:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A7A664u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-32));
     ctx.gpr[5] = (ctx.gpr[5] & 255u);
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -5877,6 +5890,12 @@ L_08A7A928:
     ctx.pc = jump_target;
     return;
 L_08A7A94C:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A7A94Cu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[29] = (ctx.gpr[29] + static_cast<std::uint32_t>(-80));
     ctx.gpr[4] = (2236u << 16u);
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(56), ctx.gpr[20]);
@@ -7468,6 +7487,12 @@ L_08A7B5A0:
     ctx.pc = jump_target;
     return;
 L_08A7B5A8:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::World)) {
+        vcs::tier2_superblock_world(rt, ctx, aot_mem, 0x08A7B5A8u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     jump_target = ctx.gpr[31];
     // nop
     local_pc = jump_target;

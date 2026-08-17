@@ -1,5 +1,6 @@
 #include "vcs_runtime_log.hpp"
 #include "vcs_config.hpp"
+#include "vcs_tier2_superblocks.hpp"
 
 #include <chrono>
 #include <ctime>
@@ -62,7 +63,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=tier2-superblock-v1-2026-08-16\n";
+    s.file << "stage=tier2-superblock-v2-unwind-hotfix-2026-08-16\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
     s.file << "started=" << timestamp_now() << '\n';
     s.file << "perf_telemetry=" << (configuration.diagnostics.perf_telemetry ? 1 : 0)
@@ -70,7 +71,9 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
            << "\n";
     s.file << "guest_hotspot=" << (configuration.diagnostics.guest_hotspot_profile ? 1 : 0)
            << " sample_stride=256 interval_vblanks=300\n";
-    s.file << "tier2_superblocks=1 cluster=0154+0155 hot_region_edges=8 cold_exits=3\n\n";
+    s.file << "tier2_superblocks=" << (tier2_superblocks_enabled() ? 1 : 0)
+           << " version=2 clusters=7 mask=0x" << std::hex << tier2_cluster_mask() << std::dec
+           << " hot_blocks=1060 static_fused_calls=49 static_fused_tail=13 hooks=25 unwind_fix=1 reentry_guard=1\n\n";
     if (s.flush_every_line) s.file.flush();
 }
 

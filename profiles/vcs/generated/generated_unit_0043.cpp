@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -9480,6 +9481,12 @@ L_088B3FC8:
     ctx.gpr[30] = (0u | 0u);
     goto L_088B3FCC;
 L_088B3FCC:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43)) {
+        vcs::tier2_superblock_edge43(rt, ctx, aot_mem, 0x088B3FCCu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[18] = (aot_mem.aot_load32(ctx.gpr[19] + static_cast<std::uint32_t>(68)));
     ctx.gpr[18] = (ctx.gpr[18] + ctx.gpr[30]);
     ctx.gpr[5] = (ctx.gpr[29] + static_cast<std::uint32_t>(16));

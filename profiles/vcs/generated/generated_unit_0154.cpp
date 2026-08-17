@@ -6792,12 +6792,12 @@ L_08A6E828:
     aot_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(1584), ctx.gpr[6]);
     goto L_08A6E894;
 L_08A6E894:
-// TIER2_SUPERBLOCK_V1_HOOK_BEGIN
-    if (vcs::tier2_superblocks_enabled()) {
-        vcs::tier2_superblock_154_155(rt, ctx, aot_mem, 0x08A6E894u);
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+        vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A6E894u);
         return;
     }
-// TIER2_SUPERBLOCK_V1_HOOK_END
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(1600)));
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(0)));
     { const bool branch_taken = ctx.gpr[4] == 0u;
@@ -6808,12 +6808,12 @@ L_08A6E894:
       goto L_08A6E8A4;
     }
 L_08A6E8A4:
-// TIER2_SUPERBLOCK_V1_HOOK_BEGIN
-    if (vcs::tier2_superblocks_enabled()) {
-        vcs::tier2_superblock_154_155(rt, ctx, aot_mem, 0x08A6E8A4u);
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+        vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A6E8A4u);
         return;
     }
-// TIER2_SUPERBLOCK_V1_HOOK_END
+// TIER2_SUPERBLOCK_V2_HOOK_END
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(1576)));
     ctx.gpr[17] = (aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(0)));
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(8)));

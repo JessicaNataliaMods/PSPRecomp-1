@@ -1,6 +1,7 @@
 #include "framebuffer_capture.hpp"
 #include "ge_renderer.hpp"
 #include "vcs_profile.hpp"
+#include "vcs_tier2_superblocks.hpp"
 
 #include "psprecomp/guest_memory.hpp"
 
@@ -678,6 +679,63 @@ void test_ge_fixed_mip_level_selection() {
             "constant PSP LOD did not select mip level 1");
 }
 
+
+void test_tier2_counter_snapshot_reset() {
+    using vcs::Tier2ClusterId;
+    auto &entity = vcs::tier2_detail::counters(Tier2ClusterId::Entity);
+    auto &world = vcs::tier2_detail::counters(Tier2ClusterId::World);
+
+    (void)vcs::consume_tier2_counters();
+
+    entity.entries = 3;
+    entity.fused_tail_edges = 5;
+    entity.fused_calls = 7;
+    entity.cold_exits = 11;
+    entity.fallbacks = 13;
+    entity.sampled_entries = 17;
+    entity.sampled_ns = 19000;
+    world.entries = 23;
+    world.fused_calls = 29;
+
+    const auto snapshot = vcs::consume_tier2_counters();
+    const auto &entity_snapshot =
+        snapshot.cluster[static_cast<std::size_t>(Tier2ClusterId::Entity)];
+    const auto &world_snapshot =
+        snapshot.cluster[static_cast<std::size_t>(Tier2ClusterId::World)];
+
+    require(entity_snapshot.entries == 3, "Tier2 entity entry counter snapshot mismatch");
+    require(entity_snapshot.fused_tail_edges == 5, "Tier2 fused-tail snapshot mismatch");
+    require(entity_snapshot.fused_calls == 7, "Tier2 fused-call snapshot mismatch");
+    require(entity_snapshot.cold_exits == 11, "Tier2 cold-exit snapshot mismatch");
+    require(entity_snapshot.fallbacks == 13, "Tier2 fallback snapshot mismatch");
+    require(entity_snapshot.sampled_entries == 17, "Tier2 sampled-entry snapshot mismatch");
+    require(entity_snapshot.sampled_ns == 19000, "Tier2 sampled-time snapshot mismatch");
+    require(world_snapshot.entries == 23 && world_snapshot.fused_calls == 29,
+            "Tier2 multi-cluster snapshot mismatch");
+
+    const auto reset_snapshot = vcs::consume_tier2_counters();
+    for (const auto &cluster : reset_snapshot.cluster) {
+        require(cluster.entries == 0 && cluster.fused_tail_edges == 0 &&
+                    cluster.fused_calls == 0 && cluster.cold_exits == 0 &&
+                    cluster.fallbacks == 0 && cluster.sampled_entries == 0 &&
+                    cluster.sampled_ns == 0,
+                "Tier2 counters were not reset after consume");
+    }
+
+    require(vcs::tier2_detail::g_active_depth == 0u,
+            "Tier2 active-depth started nonzero");
+    {
+        vcs::tier2_detail::SampleScope scope(Tier2ClusterId::Entity);
+        require(vcs::tier2_detail::g_active_depth == 1u,
+                "Tier2 SampleScope did not arm reentry guard");
+        require(!vcs::tier2_cluster_enabled(Tier2ClusterId::Geometry),
+                "Tier2 allowed nested cluster reentry while a superblock was active");
+    }
+    require(vcs::tier2_detail::g_active_depth == 0u,
+            "Tier2 SampleScope leaked active-depth on unwind");
+    (void)vcs::consume_tier2_counters();
+}
+
 void test_framebuffer_formats() {
     psprecomp::GuestMemory memory;
     constexpr std::uint32_t address = 0x04000000u;
@@ -705,6 +763,7 @@ void test_framebuffer_formats() {
 
     bool rejected = false;
     try {
+        test_tier2_counter_snapshot_reset();
         auto invalid = format;
         invalid.stride = 0u;
         (void)vcs::decode_framebuffer_rgb(memory, invalid);
