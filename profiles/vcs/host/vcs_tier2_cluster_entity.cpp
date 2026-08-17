@@ -1436,21 +1436,20 @@ SB_L_08A71100:
 SB_L_08A71108:
     ctx.gpr[31] = (0x08A71110u);
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<152u, 0x08A65EB4u>(ctx)) {
-            ctx.pc = 0x08A65EB4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71110u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A65EB4;
+    tier2_gpr_4 = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(72));
+    tier2_gpr_4 = (tier2_gpr_4 & 14u);
+    ctx.gpr[2] = (tier2_gpr_4 ^ 8u);
+    ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71110u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0152_entry, 152u, 433u, 0x08A65EB4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71110u) goto SB_L_08A71110;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71110;
 
 SB_L_08A71110:
     { const bool branch_taken = ctx.gpr[2] == 0u;
@@ -1464,21 +1463,17 @@ SB_L_08A71110:
 SB_L_08A71118:
     ctx.gpr[31] = (0x08A71120u);
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CBCu>(ctx)) {
-            ctx.pc = 0x08A68CBCu;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71120u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CBC;
+    ctx.gpr[2] = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(444));
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71120u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 100u, 0x08A68CBCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71120u) goto SB_L_08A71120;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71120;
 
 SB_L_08A71120:
     { const bool branch_taken = ctx.gpr[2] != tier2_gpr_17;
@@ -1493,21 +1488,17 @@ SB_L_08A71128:
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
     ctx.gpr[31] = (0x08A71134u);
     tier2_gpr_5 = (0u | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CC4u>(ctx)) {
-            ctx.pc = 0x08A68CC4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71134u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CC4;
+    aot_mem.aot_store32(tier2_gpr_4 + static_cast<std::uint32_t>(444), tier2_gpr_5);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71134u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 101u, 0x08A68CC4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71134u) goto SB_L_08A71134;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71134;
 
 SB_L_08A71134:
     { const bool branch_taken = 0u == 0u;
@@ -1521,21 +1512,20 @@ SB_L_08A71134:
 SB_L_08A7113C:
     ctx.gpr[31] = (0x08A71144u);
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<152u, 0x08A65EB4u>(ctx)) {
-            ctx.pc = 0x08A65EB4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71144u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A65EB4;
+    tier2_gpr_4 = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(72));
+    tier2_gpr_4 = (tier2_gpr_4 & 14u);
+    ctx.gpr[2] = (tier2_gpr_4 ^ 8u);
+    ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71144u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0152_entry, 152u, 433u, 0x08A65EB4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71144u) goto SB_L_08A71144;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71144;
 
 SB_L_08A71144:
     { const bool branch_taken = ctx.gpr[2] == 0u;
@@ -1549,21 +1539,17 @@ SB_L_08A71144:
 SB_L_08A7114C:
     ctx.gpr[31] = (0x08A71154u);
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CBCu>(ctx)) {
-            ctx.pc = 0x08A68CBCu;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71154u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CBC;
+    ctx.gpr[2] = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(444));
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71154u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 100u, 0x08A68CBCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71154u) goto SB_L_08A71154;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71154;
 
 SB_L_08A71154:
     { const bool branch_taken = ctx.gpr[2] != tier2_gpr_19;
@@ -1577,21 +1563,17 @@ SB_L_08A71154:
 SB_L_08A7115C:
     ctx.gpr[31] = (0x08A71164u);
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CCCu>(ctx)) {
-            ctx.pc = 0x08A68CCCu;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71164u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CCC;
+    ctx.gpr[2] = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(448));
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71164u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 102u, 0x08A68CCCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71164u) goto SB_L_08A71164;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71164;
 
 SB_L_08A71164:
     { const bool branch_taken = ctx.gpr[2] == tier2_gpr_19;
@@ -1606,21 +1588,17 @@ SB_L_08A7116C:
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
     ctx.gpr[31] = (0x08A71178u);
     tier2_gpr_5 = (0u | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CC4u>(ctx)) {
-            ctx.pc = 0x08A68CC4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71178u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CC4;
+    aot_mem.aot_store32(tier2_gpr_4 + static_cast<std::uint32_t>(444), tier2_gpr_5);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71178u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 101u, 0x08A68CC4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71178u) goto SB_L_08A71178;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71178;
 
 SB_L_08A71178:
     { const bool branch_taken = 0u == 0u;
@@ -1634,21 +1612,20 @@ SB_L_08A71178:
 SB_L_08A71180:
     ctx.gpr[31] = (0x08A71188u);
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<152u, 0x08A65EA0u>(ctx)) {
-            ctx.pc = 0x08A65EA0u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71188u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A65EA0;
+    tier2_gpr_4 = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(72));
+    tier2_gpr_4 = (tier2_gpr_4 & 14u);
+    ctx.gpr[2] = (tier2_gpr_4 ^ 6u);
+    ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71188u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0152_entry, 152u, 432u, 0x08A65EA0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71188u) goto SB_L_08A71188;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71188;
 
 SB_L_08A71188:
     { const bool branch_taken = ctx.gpr[2] == 0u;
@@ -1662,21 +1639,17 @@ SB_L_08A71188:
 SB_L_08A71190:
     ctx.gpr[31] = (0x08A71198u);
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CD4u>(ctx)) {
-            ctx.pc = 0x08A68CD4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A71198u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CD4;
+    ctx.gpr[2] = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(2116));
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A71198u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 103u, 0x08A68CD4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A71198u) goto SB_L_08A71198;
-    TIER2_SB_RETURN();
+    goto SB_L_08A71198;
 
 SB_L_08A71198:
     { const bool branch_taken = ctx.gpr[2] != tier2_gpr_17;
@@ -1691,21 +1664,17 @@ SB_L_08A711A0:
     tier2_gpr_4 = (tier2_gpr_19 | 0u);
     ctx.gpr[31] = (0x08A711ACu);
     tier2_gpr_5 = (0u | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CDCu>(ctx)) {
-            ctx.pc = 0x08A68CDCu;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A711ACu;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CDC;
+    aot_mem.aot_store32(tier2_gpr_4 + static_cast<std::uint32_t>(2116), tier2_gpr_5);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A711ACu;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 104u, 0x08A68CDCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A711ACu) goto SB_L_08A711AC;
-    TIER2_SB_RETURN();
+    goto SB_L_08A711AC;
 
 SB_L_08A711AC:
     { const bool branch_taken = 0u == 0u;
@@ -1719,21 +1688,20 @@ SB_L_08A711AC:
 SB_L_08A711B4:
     ctx.gpr[31] = (0x08A711BCu);
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<152u, 0x08A65EA0u>(ctx)) {
-            ctx.pc = 0x08A65EA0u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A711BCu;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A65EA0;
+    tier2_gpr_4 = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(72));
+    tier2_gpr_4 = (tier2_gpr_4 & 14u);
+    ctx.gpr[2] = (tier2_gpr_4 ^ 6u);
+    ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A711BCu;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0152_entry, 152u, 432u, 0x08A65EA0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A711BCu) goto SB_L_08A711BC;
-    TIER2_SB_RETURN();
+    goto SB_L_08A711BC;
 
 SB_L_08A711BC:
     { const bool branch_taken = ctx.gpr[2] == 0u;
@@ -1747,21 +1715,17 @@ SB_L_08A711BC:
 SB_L_08A711C4:
     ctx.gpr[31] = (0x08A711CCu);
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CD4u>(ctx)) {
-            ctx.pc = 0x08A68CD4u;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A711CCu;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CD4;
+    ctx.gpr[2] = aot_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(2116));
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A711CCu;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 103u, 0x08A68CD4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A711CCu) goto SB_L_08A711CC;
-    TIER2_SB_RETURN();
+    goto SB_L_08A711CC;
 
 SB_L_08A711CC:
     { const bool branch_taken = ctx.gpr[2] != tier2_gpr_19;
@@ -1776,21 +1740,17 @@ SB_L_08A711D4:
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
     ctx.gpr[31] = (0x08A711E0u);
     tier2_gpr_5 = (0u | 0u);
-    if (tier2_return_depth < kTier2ReturnCapacity) {
-        if (!rt.tier2_enter_fused_transfer<153u, 0x08A68CDCu>(ctx)) {
-            ctx.pc = 0x08A68CDCu;
-            TIER2_SB_RETURN();
-        }
-        tier2_return_pc[tier2_return_depth] = 0x08A711E0u;
-        tier2_return_unit[tier2_return_depth] = 155u;
-        tier2_return_pending_base[tier2_return_depth] = tier2_pending_transfers;
-        ++tier2_return_depth;
-        ++tier2_stats.fused_calls;
-        goto SB_L_08A68CDC;
+    aot_mem.aot_store32(tier2_gpr_4 + static_cast<std::uint32_t>(2116), tier2_gpr_5);
+    // Publish the exact JAL return PC before scheduler accounting.
+    // A starvation boundary may switch PSP ownership here; the
+    // resumed context must never observe the stale superblock PC.
+    ctx.pc = 0x08A711E0u;
+    TIER2_GPR_SYNC_OUT();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
     }
-    ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0153_entry, 153u, 104u, 0x08A68CDCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A711E0u) goto SB_L_08A711E0;
-    TIER2_SB_RETURN();
+    goto SB_L_08A711E0;
 
 SB_L_08A711E0:
     tier2_gpr_4 = (aot_mem.aot_load32(tier2_gpr_29 + static_cast<std::uint32_t>(1576)));

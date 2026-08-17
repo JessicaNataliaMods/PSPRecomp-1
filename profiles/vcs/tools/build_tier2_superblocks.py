@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate VCS Tier-2 SUPERBLOCK V4 150FPS multi-cluster second-layer AOT.
+"""Generate VCS Tier-2 V6 entity-leaf-inline multi-cluster second-layer AOT.
 
 V4 is profile-guided and intentionally keeps the original generated corpus as
 its semantic fallback.  It extracts only measured hot control-flow closures,
@@ -44,6 +44,42 @@ LOCAL_DISPATCH_SEQUENCE_RE = re.compile(
     r'(?P=indent)if \(\+\+local_transfers < 256u\) \{ entry_id = 0u; goto LOCAL_DISPATCH; \}\n'
     r'(?P=indent)ctx\.pc = (?P<pc_expr>[^;]+);\n'
     r'(?P=indent)return;')
+
+
+# Tiny leaf accessors used repeatedly by the 0155 entity-link maintenance loop.
+# V6 emits their exact architectural bodies directly into 0155, eliminating
+# C++ return-stack/chain-depth plumbing while keeping scheduler accounting at
+# the original guest call cadence.  If the runtime chain is already at its
+# depth limit we retain the ordinary fused-call path below.
+ENTITY_INLINE_LEAF_BODIES = {
+    0x08A65EA0: (152, [
+        'ctx.gpr[4] = aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(72));',
+        'ctx.gpr[4] = (ctx.gpr[4] & 14u);',
+        'ctx.gpr[2] = (ctx.gpr[4] ^ 6u);',
+        'ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);',
+    ]),
+    0x08A65EB4: (152, [
+        'ctx.gpr[4] = aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(72));',
+        'ctx.gpr[4] = (ctx.gpr[4] & 14u);',
+        'ctx.gpr[2] = (ctx.gpr[4] ^ 8u);',
+        'ctx.gpr[2] = (ctx.gpr[2] < static_cast<std::uint32_t>(1) ? 1u : 0u);',
+    ]),
+    0x08A68CBC: (153, [
+        'ctx.gpr[2] = aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(444));',
+    ]),
+    0x08A68CC4: (153, [
+        'aot_mem.aot_store32(ctx.gpr[4] + static_cast<std::uint32_t>(444), ctx.gpr[5]);',
+    ]),
+    0x08A68CCC: (153, [
+        'ctx.gpr[2] = aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(448));',
+    ]),
+    0x08A68CD4: (153, [
+        'ctx.gpr[2] = aot_mem.aot_load32(ctx.gpr[4] + static_cast<std::uint32_t>(2116));',
+    ]),
+    0x08A68CDC: (153, [
+        'aot_mem.aot_store32(ctx.gpr[4] + static_cast<std::uint32_t>(2116), ctx.gpr[5]);',
+    ]),
+}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -337,7 +373,13 @@ def optimize_tier2_gpr_shadow(text: str, cluster_key: str) -> tuple[str, Dict[st
     body = text[body_start:end]
     eligible = cluster_key not in {'physics', 'matrix', 'geometry'}
     counts = collections.Counter(int(x) for x in re.findall(r'ctx\.gpr\[(\d+)\]', body))
-    selected = [reg for reg, _ in counts.most_common() if reg != 0][:6] if eligible else []
+    if cluster_key == 'entity':
+        # Preserve the exact V4-stable entity shadow ownership set. V6 leaf
+        # inlining makes gpr[2] syntactically hotter, but replacing stack pointer
+        # gpr[29] with it would pessimize the much larger 0154 stack-local body.
+        selected = [4, 6, 19, 17, 5, 29]
+    else:
+        selected = [reg for reg, _ in counts.most_common() if reg != 0][:6] if eligible else []
 
     if selected:
         decls = ''.join(f'    std::uint32_t tier2_gpr_{r} = ctx.gpr[{r}];\n' for r in selected)
@@ -559,6 +601,29 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
         indent = m.group('indent')
         if target_pc not in selected_all or pc_owner[target_pc] != target_unit:
             return m.group(0)
+        if source_unit == 155 and target_pc in ENTITY_INLINE_LEAF_BODIES:
+            leaf_unit, leaf_body = ENTITY_INLINE_LEAF_BODIES[target_pc]
+            if leaf_unit != target_unit:
+                raise RuntimeError(f'entity inline leaf unit mismatch for 0x{target_pc:08X}')
+            stats['inlined_leaf_sites'] += 1
+            body = '\n'.join(f'{indent}{line}' for line in leaf_body)
+            # The caller has already materialized $ra and arguments exactly as
+            # the original JAL would. Execute the tiny leaf body in place, then
+            # preserve the removed call's scheduler cadence. Entity GPR shadow
+            # publication costs the same sync-out the old fused-return path paid,
+            # but all chain-depth, return-stack and local-dispatch plumbing is gone.
+            return (
+                f'{body}\n'
+                f'{indent}// Publish the exact JAL return PC before scheduler accounting.\n'
+                f'{indent}// A starvation boundary may switch PSP ownership here; the\n'
+                f'{indent}// resumed context must never observe the stale superblock PC.\n'
+                f'{indent}ctx.pc = 0x{cont:08X}u;\n'
+                f'{indent}TIER2_GPR_SYNC_OUT();\n'
+                f'{indent}if (!rt.account_inlined_generated_leaf(ctx)) {{\n'
+                f'{indent}    tier2_gpr_shadow_valid = false;\n'
+                f'{indent}    TIER2_SB_RETURN();\n'
+                f'{indent}}}\n'
+                f'{indent}goto SB_L_{cont:08X};')
         stats['fused_calls'] += 1
         fused_continuations[(source_unit, cont)] = sources[source_unit].entries.get(cont, -1)
         original = m.group(0).replace('return;', 'TIER2_SB_RETURN();')
@@ -914,7 +979,7 @@ def main() -> int:
     # common file is handwritten by V2 and must remain; generated cluster files
     # carry all hot code.
 
-    print('Tier2 SUPERBLOCK V4 150FPS:',
+    print('Tier2 V6 ENTITY LEAF INLINE:',
           f'clusters={len(CLUSTERS)} hook_units_changed={hook_units_changed}',
           f'blocks={total["blocks"]} lines={total["lines"]}',
           f'fused_calls={total["fused_calls"]} fused_tail={total["fused_tail"]}',
