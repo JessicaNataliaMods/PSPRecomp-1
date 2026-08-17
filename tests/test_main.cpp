@@ -1832,6 +1832,56 @@ int main() {
         unaligned_aot.aot_store_word_right(unaligned_base + 3u, 0xAABBCCDDu);
         require(unaligned_memory.load32(unaligned_base) == 0xDD332211u, "AOT SWR lane 3 failed");
 
+        // Tier-2 V3 batches adjacent 32-bit memory traffic behind one RAM
+        // canonicalization/bounds check. Verify both the direct RAM path and
+        // the slow EDRAM fallback stay bit-identical to scalar AOT accesses.
+        constexpr std::uint32_t batch_base = 0x08810100u;
+        const std::uint32_t batch_write[4]{0x11223344u, 0x55667788u, 0x99AABBCCu, 0xDDEEFF00u};
+        unaligned_aot.aot_store32_block(batch_base, batch_write);
+        std::uint32_t batch_read[4]{};
+        unaligned_aot.aot_load32_block(batch_base, batch_read);
+        for (std::size_t i = 0; i < 4u; ++i)
+            require(batch_read[i] == batch_write[i], "AOT 32-bit RAM block transfer failed");
+        std::uint32_t batch_try[4]{};
+        require(unaligned_aot.aot_try_load32_block(batch_base, batch_try),
+                "AOT RAM block direct-path probe failed");
+        constexpr std::uint32_t batch_vram = 0x04000100u;
+        unaligned_aot.aot_store32_block(batch_vram, batch_write);
+        std::uint32_t batch_vram_read[4]{};
+        unaligned_aot.aot_load32_block(batch_vram, batch_vram_read);
+        require(!unaligned_aot.aot_try_load32_block(batch_vram, batch_try),
+                "AOT EDRAM block unexpectedly used RAM direct path");
+        for (std::size_t i = 0; i < 4u; ++i)
+            require(batch_vram_read[i] == batch_write[i], "AOT 32-bit EDRAM block fallback failed");
+
+        constexpr std::uint32_t append_cursor = batch_base + 0x40u;
+        constexpr std::uint32_t append_target = batch_base + 0x80u;
+        unaligned_memory.store32(append_cursor, append_target);
+        std::uint32_t append_old = 0u;
+        const std::uint32_t append_next =
+            unaligned_aot.aot_append32(append_cursor, 0xDEADBEEFu, &append_old);
+        require(append_old == append_target && append_next == append_target + 4u,
+                "AOT append32 direct-path pointer result failed");
+        require(unaligned_memory.load32(append_target) == 0xDEADBEEFu &&
+                unaligned_memory.load32(append_cursor) == append_target + 4u,
+                "AOT append32 direct-path memory result failed");
+        // Self-alias forces the exact scalar fallback: the data store mutates
+        // the cursor before its architectural reload.
+        constexpr std::uint32_t alias_cursor = batch_base + 0xC0u;
+        unaligned_memory.store32(alias_cursor, alias_cursor);
+        append_old = 0u;
+        const std::uint32_t alias_next =
+            unaligned_aot.aot_append32(alias_cursor, 0x0881F000u, &append_old);
+        require(append_old == alias_cursor && alias_next == 0x0881F004u &&
+                unaligned_memory.load32(alias_cursor) == 0x0881F004u,
+                "AOT append32 alias fallback semantics failed");
+
+        constexpr std::uint32_t advance_cursor = batch_base + 0xE0u;
+        unaligned_memory.store32(advance_cursor, 0x0881A000u);
+        require(unaligned_aot.aot_advance32(advance_cursor) == 0x0881A004u &&
+                unaligned_memory.load32(advance_cursor) == 0x0881A004u,
+                "AOT advance32 direct-path semantics failed");
+
         psprecomp::NidRegistry nids;
         require(nids.resolve("IoFileMgrForUser", 0x109F50BCu) == "sceIoOpen", "NID registry failed");
         require(nids.resolve("SysMemUserForUser", 0x7591C7DBu) == "sceKernelSetCompiledSdkVersion",

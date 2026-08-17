@@ -117,6 +117,127 @@ public:
             }
             owner_->aot_store32_slow(address, value);
         }
+
+        // Tier-2 dataflow helpers: collapse a run of adjacent 32-bit guest
+        // accesses into one address canonicalization / bounds check.  These are
+        // deliberately available only through AotFastView so generated Tier-2
+        // code can use them without changing the generic GuestMemory contract.
+        //
+        // On the little-endian hosts VCS targets, memcpy lets MSVC/GCC emit a
+        // compact vector move for small compile-time N.  Slow/EDRAM/watch paths
+        // retain the exact per-word behavior and ordering of the original AOT.
+        template <std::size_t N>
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH bool aot_try_load32_block(
+            std::uint32_t address, std::uint32_t (&values)[N]) const {
+            static_assert(N != 0u);
+            constexpr std::uint32_t kTail = static_cast<std::uint32_t>((N - 1u) * 4u);
+            const std::uint32_t offset = ram_offset_of_fast(address);
+            if (offset > ram_limit32_ || kTail > (ram_limit32_ - offset))
+                return false;
+            if constexpr (std::endian::native == std::endian::little) {
+                std::memcpy(values, ram_data_ + offset, N * sizeof(std::uint32_t));
+            } else {
+                for (std::size_t i = 0; i < N; ++i)
+                    values[i] = GuestMemory::read_le32(ram_data_ + offset + i * 4u);
+            }
+            return true;
+        }
+
+        template <std::size_t N>
+        PSPRECOMP_MEMORY_FAST_PATH void aot_load32_block(
+            std::uint32_t address, std::uint32_t (&values)[N]) const {
+            if (aot_try_load32_block(address, values)) return;
+            for (std::size_t i = 0; i < N; ++i)
+                values[i] = aot_load32(address + static_cast<std::uint32_t>(i * 4u));
+        }
+
+        template <std::size_t N>
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH bool aot_try_store32_block(
+            std::uint32_t address, const std::uint32_t (&values)[N]) const {
+            static_assert(N != 0u);
+            constexpr std::uint32_t kTail = static_cast<std::uint32_t>((N - 1u) * 4u);
+            const std::uint32_t offset = ram_offset_of_fast(address);
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            const bool direct = offset <= ram_limit32_ && kTail <= (ram_limit32_ - offset);
+#else
+            const bool direct = !write_watch_enabled_ && offset <= ram_limit32_ &&
+                                kTail <= (ram_limit32_ - offset);
+#endif
+            if (!direct) return false;
+            if constexpr (std::endian::native == std::endian::little) {
+                std::memcpy(ram_data_ + offset, values, N * sizeof(std::uint32_t));
+            } else {
+                for (std::size_t i = 0; i < N; ++i)
+                    GuestMemory::write_le32(ram_data_ + offset + i * 4u, values[i]);
+            }
+            return true;
+        }
+
+        template <std::size_t N>
+        PSPRECOMP_MEMORY_FAST_PATH void aot_store32_block(
+            std::uint32_t address, const std::uint32_t (&values)[N]) const {
+            if (aot_try_store32_block(address, values)) return;
+            for (std::size_t i = 0; i < N; ++i)
+                aot_store32(address + static_cast<std::uint32_t>(i * 4u), values[i]);
+        }
+
+        // Common PSP command/list builder idiom:
+        //   p = *cursor; *p = value; p = *cursor; p += 4; *cursor = p;
+        // VCS executes this sequence extremely often in the geometry/boundary
+        // hot traces.  The direct RAM path performs one cursor read, one data
+        // write and one cursor write.  If the data write aliases the cursor, or
+        // if either address leaves plain RAM/write-watch-safe memory, fall back
+        // to the exact scalar sequence so the second cursor load observes any
+        // aliasing side effect just like the generated MIPS did.
+        PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_append32(
+            std::uint32_t cursor_address, std::uint32_t value,
+            std::uint32_t *old_pointer = nullptr) const {
+            const std::uint32_t cursor_offset = ram_offset_of_fast(cursor_address);
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            const bool cursor_direct = cursor_offset <= ram_limit32_;
+#else
+            const bool cursor_direct = !write_watch_enabled_ && cursor_offset <= ram_limit32_;
+#endif
+            if (cursor_direct) {
+                const std::uint32_t pointer = GuestMemory::read_le32(ram_data_ + cursor_offset);
+                const std::uint32_t target_offset = ram_offset_of_fast(pointer);
+                const bool target_direct = target_offset <= ram_limit32_;
+                const bool disjoint = target_direct &&
+                    (target_offset + 3u < cursor_offset || cursor_offset + 3u < target_offset);
+                if (disjoint) {
+                    GuestMemory::write_le32(ram_data_ + target_offset, value);
+                    const std::uint32_t next = pointer + 4u;
+                    GuestMemory::write_le32(ram_data_ + cursor_offset, next);
+                    if (old_pointer != nullptr) *old_pointer = pointer;
+                    return next;
+                }
+            }
+            const std::uint32_t pointer = aot_load32(cursor_address);
+            if (old_pointer != nullptr) *old_pointer = pointer;
+            aot_store32(pointer, value);
+            const std::uint32_t reloaded = aot_load32(cursor_address);
+            const std::uint32_t next = reloaded + 4u;
+            aot_store32(cursor_address, next);
+            return next;
+        }
+        PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_advance32(
+            std::uint32_t cursor_address) const {
+            const std::uint32_t cursor_offset = ram_offset_of_fast(cursor_address);
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (cursor_offset <= ram_limit32_) {
+#else
+            if (!write_watch_enabled_ && cursor_offset <= ram_limit32_) {
+#endif
+                const std::uint32_t next =
+                    GuestMemory::read_le32(ram_data_ + cursor_offset) + 4u;
+                GuestMemory::write_le32(ram_data_ + cursor_offset, next);
+                return next;
+            }
+            const std::uint32_t next = aot_load32(cursor_address) + 4u;
+            aot_store32(cursor_address, next);
+            return next;
+        }
+
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_load_word_left(
             std::uint32_t address, std::uint32_t existing) const {
             const std::uint32_t shift = (address & 3u) * 8u;

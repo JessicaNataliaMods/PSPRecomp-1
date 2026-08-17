@@ -92,7 +92,7 @@ if not exist "%CTEST_EXE%" set "CTEST_EXE=ctest.exe"
 
 set "NINJA_STATUS=[%%f/%%t %%p ^| %%e elapsed ^| %%r running] "
 set "BOOTFIX_STAMP=%BUILD%\.vcs_tier2_bootfix_20260816_v1"
-set "SUPERBLOCK_STAMP=%BUILD%\.vcs_tier2_superblock_v2_unwind_hotfix_20260816"
+set "SUPERBLOCK_STAMP=%BUILD%\.vcs_tier2_superblock_v3_dataflow_20260816"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -104,7 +104,7 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; Tier2 V2 clusters O2 /Ob3 /GL-
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; Tier2 V3 dataflow clusters O2 /Ob3 /GL-
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo ================================================================
@@ -113,7 +113,7 @@ echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms 
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building profile-guided Tier-2 V2 multi-cluster second layer...
+echo [0b2/7] Building profile-guided Tier-2 V3 dataflow second layer...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -128,7 +128,7 @@ if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
   echo.
-  echo [0c-super/7] Tier2 SUPERBLOCK V2 UNWIND HOTFIX - invalidating measured hook/cluster objects once...
+  echo [0c-super/7] Tier2 SUPERBLOCK V3 DATAFLOW - invalidating measured hook/cluster objects once...
   for %%U in (0043 0044 0084 0085 0086 0129 0154 0155 0157 0158) do del /s /q "%BUILD%\*generated_unit_%%U*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_tier2_superblocks*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_tier2_cluster_*.obj" >nul 2>&1
@@ -170,7 +170,7 @@ echo [2/7] Building VCSNative with Ninja...
 "%CMAKE_EXE%" --build "%BUILD%" --parallel %JOBS% --target VCSNative
 if errorlevel 1 goto :FAIL
 >"%BOOTFIX_STAMP%" echo VCS Tier2 BOOTFIX 2026-08-16 v1
->"%SUPERBLOCK_STAMP%" echo VCS Tier2 SUPERBLOCK V2 UNWIND HOTFIX 2026-08-16
+>"%SUPERBLOCK_STAMP%" echo VCS Tier2 SUPERBLOCK V3 DATAFLOW 2026-08-16
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

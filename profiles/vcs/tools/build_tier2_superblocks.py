@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate VCS Tier-2 SUPERBLOCK V2 multi-cluster second-layer AOT.
+"""Generate VCS Tier-2 SUPERBLOCK V3 dataflow multi-cluster second-layer AOT.
 
-V2 is profile-guided and intentionally keeps the original generated corpus as
+V3 is profile-guided and intentionally keeps the original generated corpus as
 its semantic fallback.  It extracts only measured hot control-flow closures,
 fuses selected cross-unit direct calls/tails inside those closures, and leaves
 all cold/external paths in the original AOT units.
@@ -135,6 +135,205 @@ CLUSTERS: List[Cluster] = [
     ),
 ]
 
+
+
+# Tier-2 V3 dataflow/memory lowering.  V2 proved that eliminating dispatch
+# alone is not enough: the hot clusters still spend most of their time in the
+# translated body.  These transforms deliberately target memory-access runs
+# where semantics can be preserved without keeping guest registers dirty
+# across control-flow boundaries.
+QUAD_VFPU_LOAD_RE = re.compile(
+    r'float vfpu_value\[4\]\{\s*'
+    r'std::bit_cast<float>\(aot_mem\.aot_load32\(vfpu_address \+ 0u\)\),\s*'
+    r'std::bit_cast<float>\(aot_mem\.aot_load32\(vfpu_address \+ 4u\)\),\s*'
+    r'std::bit_cast<float>\(aot_mem\.aot_load32\(vfpu_address \+ 8u\)\),\s*'
+    r'std::bit_cast<float>\(aot_mem\.aot_load32\(vfpu_address \+ 12u\)\)\};',
+    re.S)
+
+QUAD_VFPU_STORE_RE = re.compile(
+    r'aot_mem\.aot_store32\(vfpu_address \+ 0u, (?P<v0>[^;]+)\);\s*'
+    r'aot_mem\.aot_store32\(vfpu_address \+ 4u, (?P<v1>[^;]+)\);\s*'
+    r'aot_mem\.aot_store32\(vfpu_address \+ 8u, (?P<v2>[^;]+)\);\s*'
+    r'aot_mem\.aot_store32\(vfpu_address \+ 12u, (?P<v3>[^;]+)\);')
+
+_SIMPLE_GPR_LOAD_RE = re.compile(
+    r'^(?P<indent>\s*)ctx\.gpr\[(?P<dst>\d+)\] = \(aot_mem\.aot_load32\('
+    r'ctx\.gpr\[(?P<base>\d+)\] \+ static_cast<std::uint32_t>\((?P<offset>-?\d+)\)\)\);$')
+_SIMPLE_FPR_LOAD_RE = re.compile(
+    r'^(?P<indent>\s*)ctx\.fpr\[(?P<dst>\d+)\] = std::bit_cast<float>\(aot_mem\.aot_load32\('
+    r'ctx\.gpr\[(?P<base>\d+)\] \+ static_cast<std::uint32_t>\((?P<offset>-?\d+)\)\)\);$')
+
+
+def _match_simple_load(line: str):
+    m = _SIMPLE_GPR_LOAD_RE.match(line)
+    if m is not None:
+        return m, 'gpr'
+    m = _SIMPLE_FPR_LOAD_RE.match(line)
+    if m is not None:
+        return m, 'fpr'
+    return None, None
+
+
+APPEND32_RE = re.compile(
+    r'(?P<indent>\s*)ctx\.gpr\[(?P<old>\d+)\] = \(aot_mem\.aot_load32\('
+    r'ctx\.gpr\[(?P<base>\d+)\] \+ static_cast<std::uint32_t>\((?P<off>-?\d+)\)\)\);\n'
+    r'(?P=indent)aot_mem\.aot_store32\(ctx\.gpr\[(?P=old)\] \+ static_cast<std::uint32_t>\(0\), '
+    r'(?P<value>ctx\.gpr\[(?P<value_reg>\d+)\])\);\n'
+    r'(?P=indent)ctx\.gpr\[(?P<new>\d+)\] = \(aot_mem\.aot_load32\('
+    r'ctx\.gpr\[(?P=base)\] \+ static_cast<std::uint32_t>\((?P=off)\)\)\);\n'
+    r'(?P=indent)ctx\.gpr\[(?P=new)\] = \(ctx\.gpr\[(?P=new)\] \+ static_cast<std::uint32_t>\(4\)\);\n'
+    r'(?P=indent)aot_mem\.aot_store32\(ctx\.gpr\[(?P=base)\] \+ static_cast<std::uint32_t>\((?P=off)\), '
+    r'ctx\.gpr\[(?P=new)\]\);')
+
+ADVANCE32_RE = re.compile(
+    r'(?P<indent>\s*)ctx\.gpr\[(?P<reg>\d+)\] = \(aot_mem\.aot_load32\('
+    r'ctx\.gpr\[(?P<base>\d+)\] \+ static_cast<std::uint32_t>\((?P<off>-?\d+)\)\)\);\n'
+    r'(?P=indent)ctx\.gpr\[(?P=reg)\] = \(ctx\.gpr\[(?P=reg)\] \+ static_cast<std::uint32_t>\(4\)\);\n'
+    r'(?P=indent)aot_mem\.aot_store32\(ctx\.gpr\[(?P=base)\] \+ static_cast<std::uint32_t>\((?P=off)\), '
+    r'ctx\.gpr\[(?P=reg)\]\);')
+
+_SIMPLE_STORE_RE = re.compile(
+    r'^(?P<indent>\s*)aot_mem\.aot_store32\('
+    r'ctx\.gpr\[(?P<base>\d+)\] \+ static_cast<std::uint32_t>\((?P<offset>-?\d+)\), '
+    r'(?P<value>.+)\);$')
+
+_SAFE_STORE_VALUE_RE = re.compile(
+    r'^(?:ctx\.gpr\[\d+\]|std::bit_cast<std::uint32_t>\(ctx\.fpr\[\d+\]\)|'
+    r'static_cast<std::uint32_t>\([^;]+\)|0x[0-9A-Fa-f]+u|\d+u?)$')
+
+
+def _batch_simple_load_runs(text: str) -> tuple[str, int, int]:
+    lines = text.splitlines()
+    out: List[str] = []
+    runs = 0
+    words = 0
+    i = 0
+    while i < len(lines):
+        first, first_kind = _match_simple_load(lines[i])
+        if first is None:
+            out.append(lines[i]); i += 1; continue
+        base = int(first.group('base'))
+        indent = first.group('indent')
+        group = [(first, first_kind)]
+        j = i + 1
+        expected = int(first.group('offset')) + 4
+        while j < len(lines):
+            m, kind = _match_simple_load(lines[j])
+            if m is None or int(m.group('base')) != base or m.group('indent') != indent or int(m.group('offset')) != expected:
+                break
+            # Do not batch a run that overwrites the address base before all
+            # loads have executed.  That would change later effective addresses.
+            if kind == 'gpr' and int(m.group('dst')) == base:
+                break
+            group.append((m, kind))
+            expected += 4
+            j += 1
+        if len(group) < 3 or (first_kind == 'gpr' and int(first.group('dst')) == base):
+            out.append(lines[i]); i += 1; continue
+
+        n = len(group)
+        start = int(group[0][0].group('offset'))
+        out.append(f'{indent}{{ std::uint32_t tier2_words[{n}]{{}};')
+        out.append(f'{indent}  if (aot_mem.aot_try_load32_block(ctx.gpr[{base}] + static_cast<std::uint32_t>({start}), tier2_words)) {{')
+        for k, (m, kind) in enumerate(group):
+            if kind == 'gpr':
+                out.append(f'{indent}    ctx.gpr[{m.group("dst")}] = tier2_words[{k}];')
+            else:
+                out.append(f'{indent}    ctx.fpr[{m.group("dst")}] = std::bit_cast<float>(tier2_words[{k}]);')
+        out.append(f'{indent}  }} else {{')
+        # Preserve exact slow/fault path ordering and partial architectural state.
+        out.extend(f'{indent}    {lines[i+k].lstrip()}' for k in range(n))
+        out.append(f'{indent}  }} }}')
+        runs += 1; words += n
+        i = j
+    return '\n'.join(out) + ('\n' if text.endswith('\n') else ''), runs, words
+
+
+def _batch_simple_store_runs(text: str) -> tuple[str, int, int]:
+    lines = text.splitlines()
+    out: List[str] = []
+    runs = 0
+    words = 0
+    i = 0
+    while i < len(lines):
+        first = _SIMPLE_STORE_RE.match(lines[i])
+        if first is None or _SAFE_STORE_VALUE_RE.match(first.group('value').strip()) is None:
+            out.append(lines[i]); i += 1; continue
+        base = int(first.group('base'))
+        indent = first.group('indent')
+        group = [first]
+        j = i + 1
+        expected = int(first.group('offset')) + 4
+        while j < len(lines):
+            m = _SIMPLE_STORE_RE.match(lines[j])
+            if (m is None or int(m.group('base')) != base or m.group('indent') != indent or
+                    int(m.group('offset')) != expected or
+                    _SAFE_STORE_VALUE_RE.match(m.group('value').strip()) is None):
+                break
+            group.append(m); expected += 4; j += 1
+        if len(group) < 3:
+            out.append(lines[i]); i += 1; continue
+        n = len(group)
+        start = int(group[0].group('offset'))
+        values = ', '.join(m.group('value').strip() for m in group)
+        out.append(f'{indent}{{ const std::uint32_t tier2_words[{n}]{{{values}}};')
+        out.append(f'{indent}  aot_mem.aot_store32_block(ctx.gpr[{base}] + static_cast<std::uint32_t>({start}), tier2_words); }}')
+        runs += 1; words += n
+        i = j
+    return '\n'.join(out) + ('\n' if text.endswith('\n') else ''), runs, words
+
+
+def optimize_tier2_dataflow(text: str) -> tuple[str, Dict[str, int]]:
+    stats: Dict[str, int] = {
+        'vfpu_quad_loads': 0, 'vfpu_quad_stores': 0, 'append32': 0, 'advance32': 0,
+        'load_runs': 0, 'load_words': 0, 'store_runs': 0, 'store_words': 0,
+    }
+
+    def quad_load_repl(_: re.Match[str]) -> str:
+        stats['vfpu_quad_loads'] += 1
+        return ('std::uint32_t tier2_vfpu_words[4]{}; '
+                'aot_mem.aot_load32_block(vfpu_address, tier2_vfpu_words);\n'
+                '      float vfpu_value[4]{\n'
+                '        std::bit_cast<float>(tier2_vfpu_words[0]),\n'
+                '        std::bit_cast<float>(tier2_vfpu_words[1]),\n'
+                '        std::bit_cast<float>(tier2_vfpu_words[2]),\n'
+                '        std::bit_cast<float>(tier2_vfpu_words[3])};')
+    text = QUAD_VFPU_LOAD_RE.sub(quad_load_repl, text)
+
+    def quad_store_repl(m: re.Match[str]) -> str:
+        stats['vfpu_quad_stores'] += 1
+        vals = ', '.join(m.group(f'v{i}').strip() for i in range(4))
+        return (f'const std::uint32_t tier2_vfpu_words[4]{{{vals}}};\n'
+                '      aot_mem.aot_store32_block(vfpu_address, tier2_vfpu_words);')
+    text = QUAD_VFPU_STORE_RE.sub(quad_store_repl, text)
+
+    def append32_repl(m: re.Match[str]) -> str:
+        # The value is constrained to a plain GPR read. The cursor load itself
+        # has no side effects, so moving that read into aot_append32 cannot
+        # reorder any architectural mutation. Preserve both destination GPRs.
+        if m.group('old') == m.group('new') or m.group('old') == m.group('value_reg'):
+            return m.group(0)
+        stats['append32'] += 1
+        indent = m.group('indent')
+        cursor = (f'ctx.gpr[{m.group("base")}] + '
+                  f'static_cast<std::uint32_t>({m.group("off")})')
+        return (f'{indent}{{ std::uint32_t tier2_old_pointer = 0u;\n'
+                f'{indent}  ctx.gpr[{m.group("new")}] = aot_mem.aot_append32('
+                f'{cursor}, {m.group("value")}, &tier2_old_pointer);\n'
+                f'{indent}  ctx.gpr[{m.group("old")}] = tier2_old_pointer; }}')
+    text = APPEND32_RE.sub(append32_repl, text)
+
+    def advance32_repl(m: re.Match[str]) -> str:
+        stats['advance32'] += 1
+        indent = m.group('indent')
+        cursor = (f'ctx.gpr[{m.group("base")}] + '
+                  f'static_cast<std::uint32_t>({m.group("off")})')
+        return f'{indent}ctx.gpr[{m.group("reg")}] = aot_mem.aot_advance32({cursor});'
+    text = ADVANCE32_RE.sub(advance32_repl, text)
+
+    text, stats['load_runs'], stats['load_words'] = _batch_simple_load_runs(text)
+    text, stats['store_runs'], stats['store_words'] = _batch_simple_store_runs(text)
+    return text, stats
 
 def strip_hooks(text: str) -> str:
     for begin, end in ((HOOK_BEGIN, HOOK_END), (OLD_HOOK_BEGIN, OLD_HOOK_END)):
@@ -430,7 +629,7 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
         break;''')
 
     cpp = f'''// AUTO-GENERATED by profiles/vcs/tools/build_tier2_superblocks.py.
-// Tier-2 SUPERBLOCK V2 cluster: {cluster.key}
+// Tier-2 SUPERBLOCK V3 DATAFLOW cluster: {cluster.key}
 #include "vcs_tier2_superblocks.hpp"
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
@@ -516,6 +715,9 @@ TIER2_ENTRY_DISPATCH:
 
 }} // namespace vcs
 '''
+    cpp, dataflow_stats = optimize_tier2_dataflow(cpp)
+    stats.update({f'dataflow_{k}': v for k, v in dataflow_stats.items()})
+
     path = host / f'vcs_tier2_cluster_{cluster.key}.cpp'
     old = path.read_text(encoding='utf-8') if path.exists() else None
     if old != cpp:
@@ -577,7 +779,7 @@ def main() -> int:
         selected_by_cluster[cluster.key] = selected
         path, stats = emit_cluster(cluster, selected, sources, host)
         generated_paths.append(path)
-        print(f'Tier2 V2 cluster {cluster.key}: ' + ' '.join(f'{k}={v}' for k, v in sorted(stats.items())))
+        print(f'Tier2 V3 cluster {cluster.key}: ' + ' '.join(f'{k}={v}' for k, v in sorted(stats.items())))
         total.update(stats)
 
     hooks_by_unit: Dict[int, List[Tuple[Cluster, int]]] = collections.defaultdict(list)
@@ -600,7 +802,7 @@ def main() -> int:
     # common file is handwritten by V2 and must remain; generated cluster files
     # carry all hot code.
 
-    print('Tier2 SUPERBLOCK V2 COMPLETE:',
+    print('Tier2 SUPERBLOCK V3 DATAFLOW:',
           f'clusters={len(CLUSTERS)} hook_units_changed={hook_units_changed}',
           f'blocks={total["blocks"]} lines={total["lines"]}',
           f'fused_calls={total["fused_calls"]} fused_tail={total["fused_tail"]}',
