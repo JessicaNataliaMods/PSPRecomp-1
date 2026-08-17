@@ -93,6 +93,7 @@ if not exist "%CTEST_EXE%" set "CTEST_EXE=ctest.exe"
 set "NINJA_STATUS=[%%f/%%t %%p ^| %%e elapsed ^| %%r running] "
 set "BOOTFIX_STAMP=%BUILD%\.vcs_tier2_bootfix_20260816_v1"
 set "SUPERBLOCK_STAMP=%BUILD%\.vcs_tier2_v4_150fps_buildfix3_20260816"
+set "AMD_COMPAT_STAMP=%BUILD%\.vcs_dx12_amd_uma_compat_20260816"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -104,7 +105,7 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; Tier2 V4 150FPS clusters O2 /Ob3; Geometry /Ob2 + shadow-off compile-guard; /GL- + GPR shadow + SIMD
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; Tier2 V4 + AMD/UMA DX12 compatibility; Geometry /Ob2 + shadow-off guard
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo ================================================================
@@ -132,6 +133,14 @@ if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
   rem BUILDFIX3 only changes Geometry codegen/shadow policy and runtime metadata.
   rem Keep every already-valid V4 object so Ninja does not repeat the expensive build.
   del /s /q "%BUILD%\*vcs_tier2_cluster_geometry*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%AMD_COMPAT_STAMP%" (
+  echo.
+  echo [0c-amd/7] DX12 AMD/UMA compatibility - invalidating backend + runtime log once...
+  rem Do not touch generated/Tier2 objects: this compatibility revision only changes host DX12 policy.
+  del /s /q "%BUILD%\*ge_gpu_backend_dx12*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
@@ -170,6 +179,7 @@ echo [2/7] Building VCSNative with Ninja...
 if errorlevel 1 goto :FAIL
 >"%BOOTFIX_STAMP%" echo VCS Tier2 BOOTFIX 2026-08-16 v1
 >"%SUPERBLOCK_STAMP%" echo VCS Tier2 V4 BUILDFIX3 2026-08-16
+>"%AMD_COMPAT_STAMP%" echo VCS DX12 AMD UMA COMPAT 2026-08-16
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

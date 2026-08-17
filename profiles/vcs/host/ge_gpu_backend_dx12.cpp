@@ -62,6 +62,10 @@ constexpr UINT kFrameCount = 2u;
 constexpr UINT kSrvCapacity = 65536u;
 constexpr UINT kSamplerCapacity = 128u;
 constexpr UINT kFramebufferTargetCapacity = 256u;
+constexpr UINT kAmdVendorId = 0x1002u;
+constexpr std::size_t kPacked0115GuestStride = 10u;
+constexpr UINT kPacked0115NativeStride = 10u;
+constexpr UINT kPacked0115AmdUmaStride = 12u;
 
 struct Dx12Batch {
     GeGpuDrawDescriptor draw{};
@@ -255,6 +259,14 @@ struct Dx12GeState {
     std::uint32_t target_height{272u};
     UINT sample_count{1u};
     UINT sample_quality{};
+    UINT adapter_vendor_id{};
+    UINT adapter_device_id{};
+    std::uint64_t adapter_dedicated_video_memory{};
+    std::uint64_t adapter_shared_system_memory{};
+    bool adapter_uma{};
+    bool adapter_cache_coherent_uma{};
+    bool amd_uma_safe_mode{};
+    UINT packed_0115_gpu_stride{kPacked0115NativeStride};
     DXGI_FORMAT depth_format{kDepthFormat};
     std::uint32_t depth_bits{32u};
     std::vector<Dx12UploadVertex> vertices;
@@ -538,6 +550,14 @@ Dx12UploadVertex make_upload_vertex(const GeGpuVertex &source) noexcept {
             source.fog_factor, source.q};
 }
 
+bool env_truthy(const char *name) noexcept {
+    const char *text = std::getenv(name);
+    if (text == nullptr || *text == '\0') return false;
+    return std::strcmp(text, "0") != 0 &&
+           std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
+           std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0;
+}
+
 bool native_indexed_draw_enabled() noexcept {
     static const bool enabled = [] {
         const char *text = std::getenv("PSPRECOMP_DX12_NATIVE_INDEXED_DRAW");
@@ -680,6 +700,10 @@ bool select_adapter(Dx12GeState &s, std::string &error) noexcept {
         if (SUCCEEDED(D3D12CreateDevice(candidate.Get(), D3D_FEATURE_LEVEL_11_0,
                                          __uuidof(ID3D12Device), nullptr))) {
             s.adapter = candidate;
+            s.adapter_vendor_id = desc.VendorId;
+            s.adapter_device_id = desc.DeviceId;
+            s.adapter_dedicated_video_memory = static_cast<std::uint64_t>(desc.DedicatedVideoMemory);
+            s.adapter_shared_system_memory = static_cast<std::uint64_t>(desc.SharedSystemMemory);
             char utf8[512]{};
             const int count = WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1,
                                                    utf8, static_cast<int>(sizeof(utf8)), nullptr, nullptr);
@@ -689,6 +713,45 @@ bool select_adapter(Dx12GeState &s, std::string &error) noexcept {
     }
     error = "No Direct3D 12-capable hardware adapter was found for the GE renderer";
     return false;
+}
+
+void detect_adapter_architecture_and_compat(Dx12GeState &s) noexcept {
+    s.adapter_uma = false;
+    s.adapter_cache_coherent_uma = false;
+    if (s.device) {
+        D3D12_FEATURE_DATA_ARCHITECTURE1 architecture{};
+        architecture.NodeIndex = 0u;
+        if (SUCCEEDED(s.device->CheckFeatureSupport(
+                D3D12_FEATURE_ARCHITECTURE1, &architecture, sizeof(architecture)))) {
+            s.adapter_uma = architecture.UMA != FALSE;
+            s.adapter_cache_coherent_uma = architecture.CacheCoherentUMA != FALSE;
+        } else {
+            D3D12_FEATURE_DATA_ARCHITECTURE legacy{};
+            legacy.NodeIndex = 0u;
+            if (SUCCEEDED(s.device->CheckFeatureSupport(
+                    D3D12_FEATURE_ARCHITECTURE, &legacy, sizeof(legacy)))) {
+                s.adapter_uma = legacy.UMA != FALSE;
+                s.adapter_cache_coherent_uma = legacy.CacheCoherentUMA != FALSE;
+            }
+        }
+    }
+
+    const bool amd_uma = s.adapter_vendor_id == kAmdVendorId && s.adapter_uma;
+    const bool force_fast = env_truthy("PSPRECOMP_DX12_AMD_UMA_FASTPATHS");
+    s.amd_uma_safe_mode = amd_uma && !force_fast;
+    s.packed_0115_gpu_stride =
+        s.amd_uma_safe_mode ? kPacked0115AmdUmaStride : kPacked0115NativeStride;
+
+    std::ostringstream line;
+    line << "dx12 adapter compatibility vendor=0x" << std::hex << s.adapter_vendor_id
+         << " device=0x" << s.adapter_device_id << std::dec
+         << " uma=" << (s.adapter_uma ? 1 : 0)
+         << " coherent_uma=" << (s.adapter_cache_coherent_uma ? 1 : 0)
+         << " amd_uma_safe=" << (s.amd_uma_safe_mode ? 1 : 0)
+         << " packed0115_stride=" << s.packed_0115_gpu_stride
+         << " dedicated_mb=" << (s.adapter_dedicated_video_memory / (1024u * 1024u))
+         << " shared_mb=" << (s.adapter_shared_system_memory / (1024u * 1024u));
+    runtime_log_line(line.str());
 }
 
 DXGI_FORMAT requested_depth_format(std::uint32_t bits) noexcept {
@@ -718,6 +781,18 @@ void select_depth_and_msaa(Dx12GeState &s) noexcept {
     UINT requested = static_cast<UINT>(std::clamp(rendering.msaa, 1u, 16u));
     if (requested != 1u && requested != 2u && requested != 4u &&
         requested != 8u && requested != 16u) requested = 1u;
+
+    // Each PSP framebuffer target is represented at the selected internal
+    // resolution. On UMA this makes MSAA multiply shared-memory pressure across
+    // several color+depth targets at once. Vega 8/5700G drivers have been seen
+    // to device-remove instead of cleanly returning OOM. Prefer a deterministic
+    // 1x fallback on UMA; advanced users can opt back in for diagnostics.
+    if (s.adapter_uma && requested > 1u && !env_truthy("PSPRECOMP_DX12_UMA_MSAA")) {
+        runtime_log_line("dx12 msaa compatibility: UMA adapter requested " +
+                         std::to_string(requested) +
+                         "x; forcing 1x to avoid multisampled framebuffer memory/device-removal");
+        requested = 1u;
+    }
     s.sample_count = 1u;
     s.sample_quality = 0u;
     for (UINT samples = requested; samples >= 2u; samples >>= 1u) {
@@ -1199,7 +1274,8 @@ bool append_or_merge_batch(Dx12GeState &s, Dx12Batch batch) {
                std::strcmp(text, "false") != 0 && std::strcmp(text, "FALSE") != 0 &&
                std::strcmp(text, "off") != 0 && std::strcmp(text, "OFF") != 0);
     }();
-    if (merge_enabled && !s.batches.empty() && adjacent_batch_merge_compatible(s.batches.back(), batch)) {
+    if (merge_enabled && !s.amd_uma_safe_mode && !s.batches.empty() &&
+        adjacent_batch_merge_compatible(s.batches.back(), batch)) {
         Dx12Batch &previous = s.batches.back();
         const bool counts_fit =
             batch.vertex_count <= std::numeric_limits<std::uint32_t>::max() - previous.vertex_count &&
@@ -3219,6 +3295,7 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
     if (!select_adapter(s, error)) return false;
     hr = D3D12CreateDevice(s.adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&s.device));
     if (FAILED(hr)) { error = hr_text(hr, "D3D12CreateDevice(DX12 GE)"); return false; }
+    detect_adapter_architecture_and_compat(s);
     select_depth_and_msaa(s);
     D3D12_COMMAND_QUEUE_DESC queue_desc{};
     queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -3419,6 +3496,14 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.frame_epoch = 1u;
     s.sample_count = 1u;
     s.sample_quality = 0u;
+    s.adapter_vendor_id = 0u;
+    s.adapter_device_id = 0u;
+    s.adapter_dedicated_video_memory = 0u;
+    s.adapter_shared_system_memory = 0u;
+    s.adapter_uma = false;
+    s.adapter_cache_coherent_uma = false;
+    s.amd_uma_safe_mode = false;
+    s.packed_0115_gpu_stride = kPacked0115NativeStride;
     s.depth_format = kDepthFormat;
     s.depth_bits = 32u;
     s.swap_width = s.swap_height = 0u;
@@ -3507,12 +3592,21 @@ bool initialize_ge_gpu_backend(std::string &error) {
     s.report.observed_blend_modes_pipeline_active = true;
     s.report.color_write_mask_pipeline_active = true;
     s.report.fog_shader_active = true;
-    s.report.message = "DirectX 12 native GE path: packed/lit 0x0115 GPU decode + native strips/indexing + hardware culling + batch merge + PSP textures + widescreen HUD + direct swapchain";
-    runtime_log_line(std::string("dx12 ge initialized adapter=") + s.adapter_name +
-                     " target=" + std::to_string(s.target_width) + "x" +
-                     std::to_string(s.target_height) +
-                     " msaa=" + std::to_string(s.sample_count) +
-                     " depth=" + std::to_string(s.depth_bits));
+    s.report.message = s.amd_uma_safe_mode
+        ? "DirectX 12 native GE path: AMD UMA compatibility (12-byte packed 0x0115 + scalar/nonindexed submission) + hardware transform + PSP textures + direct swapchain"
+        : "DirectX 12 native GE path: packed/lit 0x0115 GPU decode + native strips/indexing + hardware culling + batch merge + PSP textures + widescreen HUD + direct swapchain";
+    {
+        std::ostringstream init;
+        init << "dx12 ge initialized adapter=" << s.adapter_name
+             << " target=" << s.target_width << 'x' << s.target_height
+             << " msaa=" << s.sample_count
+             << " depth=" << s.depth_bits
+             << " vendor=0x" << std::hex << s.adapter_vendor_id << std::dec
+             << " uma=" << (s.adapter_uma ? 1 : 0)
+             << " amd_uma_safe=" << (s.amd_uma_safe_mode ? 1 : 0)
+             << " packed0115_stride=" << s.packed_0115_gpu_stride;
+        runtime_log_line(init.str());
+    }
     error.clear();
     return true;
 }
@@ -3840,7 +3934,7 @@ void ge_gpu_backend_accumulate_hardware_triangles(
     // in the same regression window, so the original crash never proved the
     // index buffer itself guilty. 45.4 reintroduces only this one optimization;
     // the compatibility launcher can turn it off without rebuilding.
-    const bool indexed = native_indexed_draw_enabled() && !triangle_indices.empty();
+    const bool indexed = native_indexed_draw_enabled() && !s.amd_uma_safe_mode && !triangle_indices.empty();
     const std::size_t emitted_count = triangle_indices.empty() ? vertices.size()
                                                                : triangle_indices.size();
     if (emitted_count == 0u ||
@@ -3936,26 +4030,34 @@ bool ge_gpu_backend_accumulate_hardware_packed_0115(
     std::uint32_t vertex_count,
     std::span<const std::uint32_t> triangle_indices) noexcept {
     Dx12GeState &s = state();
-    constexpr std::size_t kPackedStride = 10u;
+    const std::size_t storage_stride = static_cast<std::size_t>(s.packed_0115_gpu_stride);
     if (!s.enabled || vertex_count == 0u ||
-        packed_vertices.size() != static_cast<std::size_t>(vertex_count) * kPackedStride)
+        packed_vertices.size() != static_cast<std::size_t>(vertex_count) * kPacked0115GuestStride ||
+        storage_stride < kPacked0115GuestStride)
         return false;
 
-    const bool indexed = native_indexed_draw_enabled() && !triangle_indices.empty();
+    // Vega 8/AMD UMA compatibility: keep the direct GPU unpack shader, but
+    // avoid the 10-byte IA stride and native indexed path. 12-byte records keep
+    // every vertex start 4-byte aligned while preserving the guest fields at
+    // offsets 0/2/4/8. This avoids vendor-sensitive packed fetch corruption
+    // without falling all the way back to the 36-byte CPU-decoded stream.
+    const bool indexed = native_indexed_draw_enabled() &&
+        !s.amd_uma_safe_mode && !triangle_indices.empty();
     const std::size_t emitted_count = triangle_indices.empty()
         ? static_cast<std::size_t>(vertex_count) : triangle_indices.size();
     if (emitted_count == 0u ||
         (transform.primitive == 4u ? emitted_count < 3u : (emitted_count % 3u) != 0u)) return false;
 
     const std::size_t first_packed_byte = s.packed_0115_vertices.size();
-    if ((first_packed_byte % kPackedStride) != 0u) return false;
-    const std::size_t first_vertex64 = first_packed_byte / kPackedStride;
+    if ((first_packed_byte % storage_stride) != 0u) return false;
+    const std::size_t first_vertex64 = first_packed_byte / storage_stride;
     if (first_vertex64 > std::numeric_limits<std::uint32_t>::max() ||
         s.indices.size() > std::numeric_limits<std::uint32_t>::max())
         return false;
 
-    const std::size_t packed_append_bytes = indexed || triangle_indices.empty()
-        ? packed_vertices.size() : emitted_count * kPackedStride;
+    const std::size_t stored_vertex_count =
+        indexed || triangle_indices.empty() ? static_cast<std::size_t>(vertex_count) : emitted_count;
+    const std::size_t packed_append_bytes = stored_vertex_count * storage_stride;
     const std::size_t index_append_count = indexed ? triangle_indices.size() : 0u;
     const std::size_t required = s.vertices.size() * sizeof(Dx12UploadVertex) +
         s.packed_0115_vertices.size() + packed_append_bytes +
@@ -3967,24 +4069,34 @@ bool ge_gpu_backend_accumulate_hardware_packed_0115(
 
     const std::uint32_t first_vertex = static_cast<std::uint32_t>(first_vertex64);
     const std::uint32_t first_index = static_cast<std::uint32_t>(s.indices.size());
+
+    const auto append_record = [&](std::uint32_t index) {
+        const std::byte *source = packed_vertices.data() +
+            static_cast<std::size_t>(index) * kPacked0115GuestStride;
+        s.packed_0115_vertices.insert(
+            s.packed_0115_vertices.end(), source, source + kPacked0115GuestStride);
+        for (std::size_t padding = kPacked0115GuestStride; padding < storage_stride; ++padding)
+            s.packed_0115_vertices.push_back(std::byte{0});
+    };
+
     try {
-        if (indexed || triangle_indices.empty()) {
-            s.packed_0115_vertices.insert(s.packed_0115_vertices.end(),
-                                          packed_vertices.begin(), packed_vertices.end());
+        if (storage_stride == kPacked0115GuestStride &&
+            (indexed || triangle_indices.empty())) {
+            s.packed_0115_vertices.insert(
+                s.packed_0115_vertices.end(), packed_vertices.begin(), packed_vertices.end());
+        } else if (indexed || triangle_indices.empty()) {
+            for (std::uint32_t index = 0u; index < vertex_count; ++index)
+                append_record(index);
         } else {
-            // Compatibility mode keeps Stage 44.7 DrawInstanced semantics while
-            // still avoiding CPU vertex conversion: duplicate only the original
-            // 10-byte PSP records according to the triangle stream.
+            // Stable compatibility path: duplicate local records according to
+            // the submitted strip/list instead of exposing native indexing.
             for (std::uint32_t index : triangle_indices) {
                 if (index >= vertex_count) {
                     ++s.report.game_vertex_overflows;
                     s.packed_0115_vertices.resize(first_packed_byte);
                     return false;
                 }
-                const std::byte *source = packed_vertices.data() +
-                    static_cast<std::size_t>(index) * kPackedStride;
-                s.packed_0115_vertices.insert(s.packed_0115_vertices.end(),
-                                               source, source + kPackedStride);
+                append_record(index);
             }
         }
         if (indexed) {
@@ -4007,8 +4119,7 @@ bool ge_gpu_backend_accumulate_hardware_packed_0115(
         Dx12Batch batch{};
         batch.draw = draw;
         batch.first_vertex = first_vertex;
-        batch.vertex_count = static_cast<std::uint32_t>(indexed || triangle_indices.empty()
-            ? vertex_count : emitted_count);
+        batch.vertex_count = static_cast<std::uint32_t>(stored_vertex_count);
         batch.first_index = first_index;
         batch.index_count = indexed ? static_cast<std::uint32_t>(triangle_indices.size()) : 0u;
         batch.indexed = indexed;
@@ -4032,7 +4143,7 @@ bool ge_gpu_backend_accumulate_hardware_packed_0115(
         if (draw.texture_enabled && ge_gpu_backend_texture_available(draw))
             s.report.textured_game_draw_calls += logical;
         else if (draw.texture_enabled)
-            s.report.game_textured_draws_without_texture += logical;
+            ++s.report.game_textured_draws_without_texture;
         return true;
     } catch (...) {
         s.packed_0115_vertices.resize(first_packed_byte);
@@ -4109,6 +4220,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
 
     Dx12FrameResources &frame = s.frames[s.frame_cursor];
     const bool indirect_enabled = dx12_execute_indirect_enabled() &&
+        !s.amd_uma_safe_mode &&
         s.indirect_draw_signature && s.indirect_draw_indexed_signature &&
         frame.indirect_upload_buffer && frame.mapped_indirect_upload != nullptr;
     std::string error;
@@ -4163,7 +4275,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
         static_cast<UINT>(sizeof(Dx12UploadVertex))};
     const D3D12_VERTEX_BUFFER_VIEW packed_vb{
         frame.upload_buffer->GetGPUVirtualAddress() + packed_offset,
-        static_cast<UINT>(packed_bytes), 10u};
+        static_cast<UINT>(packed_bytes), s.packed_0115_gpu_stride};
     D3D12_INDEX_BUFFER_VIEW ib{};
     if (index_bytes != 0u) {
         ib.BufferLocation = frame.upload_buffer->GetGPUVirtualAddress() + index_offset;
