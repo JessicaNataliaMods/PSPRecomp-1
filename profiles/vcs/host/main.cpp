@@ -177,6 +177,17 @@ int main(int argc, char **argv) {
 
         psprecomp::Elf32Image elf = psprecomp::Elf32Image::from_file(executable);
         psprecomp::Runtime runtime(32u * 1024u * 1024u);
+        {
+            std::ostringstream fastmem_line;
+            fastmem_line << "aot direct fastmem enabled="
+                         << (runtime.memory().direct_fastmem_enabled() ? 1 : 0);
+            if (runtime.memory().direct_fastmem_enabled())
+                fastmem_line << " base=0x" << std::hex
+                             << runtime.memory().direct_fastmem_base_address() << std::dec;
+            else
+                fastmem_line << " fallback=checked-memory";
+            vcs::runtime_log_line(fastmem_line.str());
+        }
         // The heavy GUESTHOT sampler is opt-in. The rolling PERF telemetry stays on,
         // but normal gameplay does not pay a census/timestamp branch per cross-unit edge.
         psprecomp::set_guest_hotspot_profile(configuration.diagnostics.guest_hotspot_profile, 8u);

@@ -101,6 +101,7 @@ set "PERF_V5_SYNC_RECOVERY_STAMP=%BUILD%\.vcs_perf_v5_sync_recovery_20260817"
 set "PERF_V5_STABLE_RECOVERY2_STAMP=%BUILD%\.vcs_perf_v5_stable_recovery2_20260817"
 set "PERF_V6_ENTITY_LEAF_STAMP=%BUILD%\.vcs_perf_v6_entity_leaf_inline_20260817"
 set "PERF_V6_ENTITY_LEAF_FIX1_STAMP=%BUILD%\.vcs_perf_v6_entity_leaf_inline_crashfix1_20260817"
+set "PERF_V7_ARCH_FASTMEM_STAMP=%BUILD%\.vcs_perf_v7_arch_fastmem_20260817"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -112,7 +113,7 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V6 Entity leaf-inline CRASHFIX1 over V4-stable Tier2; risky async/decode quarantined
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V7 architectural direct-fastmem over V6 CRASHFIX1; risky async/decode quarantined
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo ================================================================
@@ -121,7 +122,7 @@ echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms 
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building V6 Entity leaf-inline CRASHFIX1 over gameplay-stable V4 Tier2...
+echo [0b2/7] Building V7 ARCH FASTMEM over gameplay-stable V6 CRASHFIX1...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -223,6 +224,21 @@ if exist "%BUILD%" if not exist "%PERF_V6_ENTITY_LEAF_FIX1_STAMP%" (
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%PERF_V7_ARCH_FASTMEM_STAMP%" (
+  echo.
+  echo [0c-v7fastmem/7] V7 ARCH FASTMEM - one-time AOT memory-model rebuild...
+  rem This is intentionally not a micro hotfix: guest_memory.hpp is inlined into every
+  rem generated unit so all AOT objects must see the direct-fastmem address model.
+  rem Geometry/Boundary keep their exact V4 Tier2 source; they only recompile against
+  rem the new memory view. This one-time rebuild is required for a global CPU change.
+  del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*guest_memory*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*main*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
   echo.
   echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
@@ -266,6 +282,7 @@ if errorlevel 1 goto :FAIL
 >"%PERF_V5_STABLE_RECOVERY2_STAMP%" echo VCS PERF V5 STABLE RECOVERY2 2026-08-17
 >"%PERF_V6_ENTITY_LEAF_STAMP%" echo VCS PERF V6 ENTITY LEAF INLINE 2026-08-17
 >"%PERF_V6_ENTITY_LEAF_FIX1_STAMP%" echo VCS PERF V6 ENTITY LEAF INLINE CRASHFIX1 2026-08-17
+>"%PERF_V7_ARCH_FASTMEM_STAMP%" echo VCS PERF V7 ARCH FASTMEM 2026-08-17
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

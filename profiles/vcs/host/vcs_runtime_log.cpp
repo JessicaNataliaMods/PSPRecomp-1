@@ -65,7 +65,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=perf-v6-entity-leaf-inline-crashfix1-2026-08-17\n";
+    s.file << "stage=perf-v7-arch-fastmem-2026-08-17\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
     s.file << "started=" << timestamp_now() << '\n';
     s.file << "perf_telemetry=" << (configuration.diagnostics.perf_telemetry ? 1 : 0)
@@ -80,7 +80,8 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
            << " unwind_fix=1 reentry_guard=1 dataflow=1 vfpu_block32=133 mem_runs=35 mem_words=287"
            << " append32=51 advance32=89 simd_mat4=4 simd_matvec=19"
            << " gpr_shadow_clusters=4 gpr_shadow_regs=24 gpr_shadow_occurrences=3461 geometry_shadow=0"
-           << " perf_layer=6 entity_leaf_inline=1 entity_leaf_scheduler_accounting=1 entity_leaf_resume_pc_fix=1"
+           << " perf_layer=7 arch_fastmem=1 aot_direct_fastmem_default=1"
+           << " entity_leaf_inline=1 entity_leaf_scheduler_accounting=1 entity_leaf_resume_pc_fix=1"
            << " ge_async_default=0 parallel_vertex_decode_default=0"
            << " v5_vfpu_fast_quarantined=1 native_vfpu_088b1780_v4=1"
            << " dx12_execute_indirect_default=0 indirect_buffer_mb=4"

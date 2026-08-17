@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
@@ -29,6 +30,7 @@ public:
     static constexpr std::uint32_t kPhysicalBase = 0x08000000u;
 
     explicit GuestMemory(std::uint32_t size_bytes = 32u * 1024u * 1024u);
+    ~GuestMemory();
 
     // The AOT fast paths below index cached region pointers, so an instance may
     // not be relocated after construction.  Runtime owns exactly one by value
@@ -67,21 +69,29 @@ public:
     class AotFastView {
     public:
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint8_t aot_load8(std::uint32_t address) const {
+            if (fastmem_base_ != nullptr) return *fastmem_pointer(fastmem_base_, address);
             const std::uint32_t offset = ram_offset_of_fast(address);
             if (offset <= ram_limit8_) return ram_data_[offset];
             return owner_->aot_load8_slow(address);
         }
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint16_t aot_load16(std::uint32_t address) const {
+            if (fastmem_base_ != nullptr) return GuestMemory::read_le16(fastmem_pointer(fastmem_base_, address));
             const std::uint32_t offset = ram_offset_of_fast(address);
             if (offset <= ram_limit16_) return GuestMemory::read_le16(ram_data_ + offset);
             return owner_->aot_load16_slow(address);
         }
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_load32(std::uint32_t address) const {
+            if (fastmem_base_ != nullptr) return GuestMemory::read_le32(fastmem_pointer(fastmem_base_, address));
             const std::uint32_t offset = ram_offset_of_fast(address);
             if (offset <= ram_limit32_) return GuestMemory::read_le32(ram_data_ + offset);
             return owner_->aot_load32_slow(address);
         }
         PSPRECOMP_MEMORY_FAST_PATH void aot_store8(std::uint32_t address, std::uint8_t value) const {
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) { *fastmem_pointer(fastmem_base_, address) = value; return; }
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) { *fastmem_pointer(fastmem_base_, address) = value; return; }
+#endif
             const std::uint32_t offset = ram_offset_of_fast(address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             if (offset <= ram_limit8_) {
@@ -94,6 +104,11 @@ public:
             owner_->aot_store8_slow(address, value);
         }
         PSPRECOMP_MEMORY_FAST_PATH void aot_store16(std::uint32_t address, std::uint16_t value) const {
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) { GuestMemory::write_le16(fastmem_pointer(fastmem_base_, address), value); return; }
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) { GuestMemory::write_le16(fastmem_pointer(fastmem_base_, address), value); return; }
+#endif
             const std::uint32_t offset = ram_offset_of_fast(address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             if (offset <= ram_limit16_) {
@@ -106,6 +121,11 @@ public:
             owner_->aot_store16_slow(address, value);
         }
         PSPRECOMP_MEMORY_FAST_PATH void aot_store32(std::uint32_t address, std::uint32_t value) const {
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) { GuestMemory::write_le32(fastmem_pointer(fastmem_base_, address), value); return; }
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) { GuestMemory::write_le32(fastmem_pointer(fastmem_base_, address), value); return; }
+#endif
             const std::uint32_t offset = ram_offset_of_fast(address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             if (offset <= ram_limit32_) {
@@ -131,6 +151,15 @@ public:
             std::uint32_t address, std::uint32_t (&values)[N]) const {
             static_assert(N != 0u);
             constexpr std::uint32_t kTail = static_cast<std::uint32_t>((N - 1u) * 4u);
+            if (fastmem_base_ != nullptr) {
+                if constexpr (std::endian::native == std::endian::little) {
+                    std::memcpy(values, fastmem_pointer(fastmem_base_, address), N * sizeof(std::uint32_t));
+                } else {
+                    for (std::size_t i = 0; i < N; ++i)
+                        values[i] = GuestMemory::read_le32(fastmem_pointer(fastmem_base_, address + static_cast<std::uint32_t>(i * 4u)));
+                }
+                return true;
+            }
             const std::uint32_t offset = ram_offset_of_fast(address);
             if (offset > ram_limit32_ || kTail > (ram_limit32_ - offset))
                 return false;
@@ -156,6 +185,19 @@ public:
             std::uint32_t address, const std::uint32_t (&values)[N]) const {
             static_assert(N != 0u);
             constexpr std::uint32_t kTail = static_cast<std::uint32_t>((N - 1u) * 4u);
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) {
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) {
+#endif
+                if constexpr (std::endian::native == std::endian::little) {
+                    std::memcpy(fastmem_pointer(fastmem_base_, address), values, N * sizeof(std::uint32_t));
+                } else {
+                    for (std::size_t i = 0; i < N; ++i)
+                        GuestMemory::write_le32(fastmem_pointer(fastmem_base_, address + static_cast<std::uint32_t>(i * 4u)), values[i]);
+                }
+                return true;
+            }
             const std::uint32_t offset = ram_offset_of_fast(address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             const bool direct = offset <= ram_limit32_ && kTail <= (ram_limit32_ - offset);
@@ -192,6 +234,30 @@ public:
         PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_append32(
             std::uint32_t cursor_address, std::uint32_t value,
             std::uint32_t *old_pointer = nullptr) const {
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) {
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) {
+#endif
+                const std::uint32_t pointer =
+                    GuestMemory::read_le32(fastmem_pointer(fastmem_base_, cursor_address));
+                // Preserve the alias-aware overlap rule from the baseline: two
+                // numerically different MIPS aliases may refer to the same four
+                // physical RAM bytes.
+                const std::uint32_t cursor_offset = ram_offset_of_fast(cursor_address);
+                const std::uint32_t target_offset = ram_offset_of_fast(pointer);
+                const bool target_direct = cursor_offset <= ram_limit32_ &&
+                                           target_offset <= ram_limit32_;
+                const bool disjoint = target_direct &&
+                    (target_offset + 3u < cursor_offset || cursor_offset + 3u < target_offset);
+                if (disjoint) {
+                    GuestMemory::write_le32(fastmem_pointer(fastmem_base_, pointer), value);
+                    const std::uint32_t next = pointer + 4u;
+                    GuestMemory::write_le32(fastmem_pointer(fastmem_base_, cursor_address), next);
+                    if (old_pointer != nullptr) *old_pointer = pointer;
+                    return next;
+                }
+            }
             const std::uint32_t cursor_offset = ram_offset_of_fast(cursor_address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             const bool cursor_direct = cursor_offset <= ram_limit32_;
@@ -222,6 +288,16 @@ public:
         }
         PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_advance32(
             std::uint32_t cursor_address) const {
+#if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
+            if (fastmem_base_ != nullptr) {
+#else
+            if (fastmem_base_ != nullptr && !write_watch_enabled_) {
+#endif
+                const std::uint32_t next =
+                    GuestMemory::read_le32(fastmem_pointer(fastmem_base_, cursor_address)) + 4u;
+                GuestMemory::write_le32(fastmem_pointer(fastmem_base_, cursor_address), next);
+                return next;
+            }
             const std::uint32_t cursor_offset = ram_offset_of_fast(cursor_address);
 #if defined(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
             if (cursor_offset <= ram_limit32_) {
@@ -271,13 +347,19 @@ public:
         friend class GuestMemory;
         AotFastView(GuestMemory *owner, std::uint8_t *ram_data,
                     std::uint32_t limit8, std::uint32_t limit16,
-                    std::uint32_t limit32, bool write_watch) noexcept
+                    std::uint32_t limit32, bool write_watch,
+                    std::uint8_t *fastmem_base) noexcept
             : owner_(owner), ram_data_(ram_data), ram_limit8_(limit8),
               ram_limit16_(limit16), ram_limit32_(limit32),
-              write_watch_enabled_(write_watch) {}
+              write_watch_enabled_(write_watch), fastmem_base_(fastmem_base) {}
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static constexpr std::uint32_t ram_offset_of_fast(
             std::uint32_t address) noexcept {
             return (address & 0x1FFFFFFFu) - GuestMemory::kPhysicalBase;
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH static std::uint8_t *fastmem_pointer(
+            std::uint8_t *base, std::uint32_t address) noexcept {
+            return reinterpret_cast<std::uint8_t *>(
+                reinterpret_cast<std::uintptr_t>(base) + static_cast<std::uintptr_t>(address));
         }
         GuestMemory *owner_{};
         std::uint8_t *ram_data_{};
@@ -285,11 +367,16 @@ public:
         std::uint32_t ram_limit16_{};
         std::uint32_t ram_limit32_{};
         bool write_watch_enabled_{};
+        std::uint8_t *fastmem_base_{};
+    public:
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH bool direct_fastmem_enabled() const noexcept {
+            return fastmem_base_ != nullptr;
+        }
     };
 
     [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH AotFastView aot_fast_view() noexcept {
         return AotFastView(this, ram_data_, ram_limit8_, ram_limit16_, ram_limit32_,
-                           write_watch_enabled_);
+                           write_watch_enabled_, direct_fastmem_base_);
     }
 
     // Fast paths used only by statically generated AOT code. They retain
@@ -391,8 +478,12 @@ public:
     void zero(std::uint32_t address, std::size_t length);
 
     [[nodiscard]] std::string read_c_string(std::uint32_t address, std::size_t max_length = 256u) const;
-    [[nodiscard]] const std::vector<std::uint8_t> &bytes() const noexcept;
-    [[nodiscard]] const std::vector<std::uint8_t> &vram_bytes() const noexcept;
+    [[nodiscard]] std::span<const std::uint8_t> bytes() const noexcept;
+    [[nodiscard]] std::span<const std::uint8_t> vram_bytes() const noexcept;
+    [[nodiscard]] bool direct_fastmem_enabled() const noexcept { return direct_fastmem_base_ != nullptr; }
+    [[nodiscard]] std::uintptr_t direct_fastmem_base_address() const noexcept {
+        return reinterpret_cast<std::uintptr_t>(direct_fastmem_base_);
+    }
 
 private:
     enum class Region { Vram, Ram };
@@ -404,8 +495,8 @@ private:
     [[nodiscard]] ResolvedAddress resolve(std::uint32_t address, std::size_t length) const;
     [[nodiscard]] bool is_vram_window(std::uint32_t canonical_address) const noexcept;
     [[nodiscard]] std::size_t vram_offset(std::uint32_t canonical_address) const noexcept;
-    [[nodiscard]] const std::vector<std::uint8_t> &region_bytes(Region region) const noexcept;
-    [[nodiscard]] std::vector<std::uint8_t> &region_bytes(Region region) noexcept;
+    [[nodiscard]] std::span<const std::uint8_t> region_bytes(Region region) const noexcept;
+    [[nodiscard]] std::span<std::uint8_t> region_bytes(Region region) noexcept;
 
     // Canonicalize and rebase in one step.  An address below kPhysicalBase --
     // EDRAM included -- wraps to a value far above any RAM size, so a single
@@ -450,9 +541,11 @@ private:
     void aot_store16_slow(std::uint32_t address, std::uint16_t value);
     void aot_store32_slow(std::uint32_t address, std::uint32_t value);
 
-    std::vector<std::uint8_t> vram_;
-    std::vector<std::uint8_t> bytes_;
-    // Cached view of bytes_ for the inline fast paths.  Neither region is ever
+    std::vector<std::uint8_t> fallback_vram_;
+    std::vector<std::uint8_t> fallback_ram_;
+    std::uint32_t ram_size_{};
+    std::uint8_t *vram_data_{};
+    // Cached view of main RAM for the inline fast paths.  The fallback vectors
     // resized after construction, so these stay valid for the object's life.
     //
     // Deliberately not __restrict.  It was tried on the theory that aliasing
@@ -462,6 +555,18 @@ private:
     // sound here -- this pointer aliases bytes_ below, which other members of
     // this class access directly.
     std::uint8_t *ram_data_{};
+    // V7 architectural fastmem. On 64-bit Windows the same RAM/VRAM sections
+    // are mapped at their PSP virtual aliases inside a sparse 4 GiB arena.
+    // Generated AOT can then load/store at fastmem_base + guest_address, which
+    // provides a sparse direct-address fast-memory model for generated AOT code.
+    std::uint8_t *direct_fastmem_base_{};
+    static constexpr std::size_t kFastmemMaxViews = 40u;
+    std::array<void *, kFastmemMaxViews> fastmem_views_{};
+    std::size_t fastmem_view_count_{};
+    void *fastmem_ram_mapping_{};
+    void *fastmem_vram_mapping_{};
+    [[nodiscard]] bool initialize_direct_fastmem(std::uint32_t size_bytes) noexcept;
+    void shutdown_direct_fastmem() noexcept;
     std::uint32_t ram_limit8_{};
     std::uint32_t ram_limit16_{};
     std::uint32_t ram_limit32_{};

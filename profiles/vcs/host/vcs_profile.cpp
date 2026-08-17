@@ -1413,7 +1413,7 @@ void dump_ram_if_requested(const psprecomp::GuestMemory &memory) {
     std::filesystem::create_directories(config.directory);
     std::ostringstream stem;
     stem << "ram_vblank_" << std::setw(6) << std::setfill('0') << display_vblank_index;
-    const auto write_bytes = [&](const std::filesystem::path &path, const std::vector<std::uint8_t> &bytes) {
+    const auto write_bytes = [&](const std::filesystem::path &path, std::span<const std::uint8_t> bytes) {
         std::ofstream output(path, std::ios::binary | std::ios::trunc);
         if (!output) throw std::runtime_error("Unable to create RAM diagnostic dump: " + path.string());
         output.write(reinterpret_cast<const char *>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
@@ -2379,7 +2379,7 @@ SavedataDisplayMetadata read_savedata_metadata_file(const std::filesystem::path 
     return metadata;
 }
 
-// Imported PSP/PPSSPP savedata directories may already contain a standard
+// Imported PSP savedata directories may already contain a standard
 // PARAM.SFO. Read the three user-facing strings directly so pre-existing saves
 // can show their title/mission metadata without first being re-saved by
 // VCSNative. This is deliberately a tiny bounded PSF reader, not a general SFO
@@ -7651,9 +7651,11 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                                 total_fallback += c.fallbacks;
                                 total_sample_ns += c.sampled_ns;
                                 total_sample_entries += c.sampled_entries;
+                                const std::uint64_t estimated_us = (c.sampled_ns * 256u) / 1000u;
                                 tier2_line << ' ' << tier2_cluster_name(id) << "_e=" << c.entries
                                            << ' ' << tier2_cluster_name(id) << "_x="
-                                           << (c.fused_tail_edges + c.fused_calls);
+                                           << (c.fused_tail_edges + c.fused_calls)
+                                           << ' ' << tier2_cluster_name(id) << "_est_us=" << estimated_us;
                             }
                             tier2_line << " total_entries=" << total_entries
                                        << " fused_tail=" << total_tail
