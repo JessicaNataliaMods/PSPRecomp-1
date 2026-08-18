@@ -45,9 +45,20 @@
 #include <stdexcept>
 #include <tuple>
 #include <thread>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
 
 namespace psprecomp {
 using RuntimePostImportHook = void (*)(Runtime &, AllegrexContext &);
@@ -192,6 +203,10 @@ struct FileTable {
     std::uint32_t next_virtual_sector{0x00010000u};
     std::unordered_map<std::int32_t, std::fstream> files;
     std::unordered_map<std::int32_t, std::filesystem::path> file_paths;
+    // V8.2.6 save-repro checkpoint: remember the guest open flags so a
+    // persistent checkpoint can reopen each live PSP descriptor at the same
+    // host path/position after a rebuilt VCSNative starts.
+    std::unordered_map<std::int32_t, std::uint32_t> file_open_flags;
     // Producer tracking for ATRAC setup. A guest buffer filled directly from an
     // AT3/AA3/OMA can be associated with its host source without reopening and
     // rescanning candidate files on the audio thread.
@@ -1042,6 +1057,7 @@ std::uint32_t atrac_bitrate_kbps(const AtracContextState &state) {
 
 ThreadTable thread_table;
 PartitionTable partition_table;
+std::uint32_t partition_arena_base{};
 CallbackTable callback_table;
 SemaphoreTable semaphore_table;
 EventFlagTable event_flag_table;
@@ -2310,8 +2326,841 @@ struct SavedataUtilityState {
     bool direct_load_picker{};
 };
 
+
 SavedataUtilityState savedata_utility{};
 bool startup_load_picker_consumed = false;
+
+// -------------------------------------------------------------------------
+// V8.2.6 SAVE REPRO CAPTURE
+// -------------------------------------------------------------------------
+// The post-mission save bug is expensive to reach manually.  This diagnostic
+// checkpoint captures the PSP-visible machine/kernel state at a completed
+// vblank and persists it beside VCSNative.exe.  A later rebuilt executable can
+// restore that state before Runtime::run(), turning one long mission playthrough
+// into a repeatable save repro.
+//
+// F8  : arm/capture a checkpoint at the next safe vblank.
+// F10 : dump the circular dispatch/HLE trace after the save black-screen occurs.
+// RESTORE_SAVE_REPRO.bat sets PSPRECOMP_SAVE_REPRO_AUTO_RESTORE=1.
+
+constexpr std::uint64_t kSaveReproMagic = 0x3632435253435650ull; // "PVCSRC26"
+constexpr std::uint32_t kSaveReproVersion = 826u;
+constexpr std::size_t kSaveReproTraceCapacity = 131072u;
+constexpr std::uint32_t kSaveReproDispatchSampleStride = 64u;
+
+struct SaveReproWriter {
+    std::vector<std::uint8_t> bytes;
+
+    template <typename T>
+    void pod(const T &value) {
+        static_assert(std::is_trivially_copyable_v<T>);
+        const auto *src = reinterpret_cast<const std::uint8_t *>(&value);
+        bytes.insert(bytes.end(), src, src + sizeof(T));
+    }
+    void raw(std::span<const std::uint8_t> value) {
+        const std::uint64_t size = value.size();
+        pod(size);
+        bytes.insert(bytes.end(), value.begin(), value.end());
+    }
+    void string(std::string_view value) {
+        const std::uint64_t size = value.size();
+        pod(size);
+        bytes.insert(bytes.end(), value.begin(), value.end());
+    }
+    void path(const std::filesystem::path &value) { string(value.generic_string()); }
+};
+
+struct SaveReproReader {
+    std::span<const std::uint8_t> bytes;
+    std::size_t offset{};
+    std::string error;
+
+    template <typename T>
+    bool pod(T &value) {
+        static_assert(std::is_trivially_copyable_v<T>);
+        if (offset > bytes.size() || sizeof(T) > bytes.size() - offset) {
+            error = "checkpoint truncated while reading POD";
+            return false;
+        }
+        std::memcpy(&value, bytes.data() + offset, sizeof(T));
+        offset += sizeof(T);
+        return true;
+    }
+    bool raw(std::span<std::uint8_t> destination) {
+        std::uint64_t size{};
+        if (!pod(size)) return false;
+        if (size != destination.size()) {
+            error = "checkpoint memory section size mismatch";
+            return false;
+        }
+        if (offset > bytes.size() || size > bytes.size() - offset) {
+            error = "checkpoint truncated while reading byte section";
+            return false;
+        }
+        std::memcpy(destination.data(), bytes.data() + offset, static_cast<std::size_t>(size));
+        offset += static_cast<std::size_t>(size);
+        return true;
+    }
+    bool string(std::string &value) {
+        std::uint64_t size{};
+        if (!pod(size)) return false;
+        if (size > (64ull * 1024ull * 1024ull) || offset > bytes.size() || size > bytes.size() - offset) {
+            error = "checkpoint invalid string length";
+            return false;
+        }
+        value.assign(reinterpret_cast<const char *>(bytes.data() + offset), static_cast<std::size_t>(size));
+        offset += static_cast<std::size_t>(size);
+        return true;
+    }
+    bool path(std::filesystem::path &value) {
+        std::string text;
+        if (!string(text)) return false;
+        value = std::filesystem::path(text);
+        return true;
+    }
+};
+
+std::uint64_t save_repro_fnv1a(std::span<const std::uint8_t> bytes) noexcept {
+    std::uint64_t hash = 1469598103934665603ull;
+    for (const std::uint8_t value : bytes) {
+        hash ^= value;
+        hash *= 1099511628211ull;
+    }
+    return hash;
+}
+
+std::filesystem::path save_repro_checkpoint_path(const psprecomp::Runtime &runtime) {
+    return runtime.game_root().parent_path() / "VCS_SAVE_REPRO_CHECKPOINT.bin";
+}
+
+std::filesystem::path save_repro_trace_path(const psprecomp::Runtime &runtime) {
+    return runtime.game_root().parent_path() / "VCS_SAVE_REPRO_TRACE.txt";
+}
+
+struct SaveReproTraceRecord {
+    enum class Kind : std::uint8_t { Dispatch, Hle };
+    Kind kind{Kind::Dispatch};
+    std::uint64_t sequence{};
+    std::uint64_t vblank{};
+    std::uint64_t guest_us{};
+    std::int32_t uid{};
+    std::uint32_t pc{};
+    std::uint32_t next_pc{};
+    std::uint32_t a0{};
+    std::uint32_t a1{};
+    std::uint32_t a2{};
+    std::uint32_t a3{};
+    std::uint32_t sp{};
+    std::uint32_t ra{};
+    std::uint32_t nid{};
+    std::array<char, 32> library{};
+    std::array<char, 64> name{};
+};
+
+std::array<SaveReproTraceRecord, kSaveReproTraceCapacity> save_repro_trace{};
+std::size_t save_repro_trace_count{};
+std::size_t save_repro_trace_next{};
+std::uint64_t save_repro_trace_sequence{};
+bool save_repro_trace_enabled{};
+bool save_repro_checkpoint_available{};
+
+// V8.2.7 SAVE THREAD LIFECYCLE FIX.  Old V8.2.6 checkpoints can contain
+// worker threads which already called sceKernelExitDeleteThread but were left
+// behind as dormant/Completed records by the old HLE.  The live HLE fix below
+// prevents future leaks; this narrowly-scoped migration repairs the already
+// captured post-mission checkpoint without making the user replay the mission.
+struct LegacyExitDeleteRepairStats {
+    std::uint32_t threads{};
+    std::uint64_t stack_bytes{};
+    std::uint32_t stack_top_before{};
+    std::uint32_t stack_top_after{};
+};
+
+LegacyExitDeleteRepairStats repair_legacy_vcs_exit_delete_threads();
+void recompute_partition_frontier();
+bool save_repro_capture_requested{};
+bool save_repro_capture_error_reported{};
+bool save_repro_self_test_mode{};
+
+void save_repro_copy_text(auto &destination, std::string_view text) {
+    destination.fill('\0');
+    const std::size_t count = std::min(destination.size() - 1u, text.size());
+    std::memcpy(destination.data(), text.data(), count);
+}
+
+void save_repro_push_trace(const SaveReproTraceRecord &record) {
+    if (!save_repro_trace_enabled) return;
+    save_repro_trace[save_repro_trace_next] = record;
+    save_repro_trace_next = (save_repro_trace_next + 1u) % save_repro_trace.size();
+    save_repro_trace_count = std::min(save_repro_trace_count + 1u, save_repro_trace.size());
+}
+
+void save_repro_trace_dispatch(std::uint32_t dispatch_pc, std::int32_t uid,
+                               const psprecomp::AllegrexContext &ctx) {
+    if (!save_repro_trace_enabled) return;
+    // Preserve seconds of history without turning the diagnostic build into a
+    // different scheduler workload. Every HLE is recorded separately; regular
+    // guest dispatches are sampled at a fixed power-of-two cadence.
+    static std::uint32_t sample_ticket = 0u;
+    if ((sample_ticket++ & (kSaveReproDispatchSampleStride - 1u)) != 0u) return;
+    SaveReproTraceRecord item{};
+    item.kind = SaveReproTraceRecord::Kind::Dispatch;
+    item.sequence = ++save_repro_trace_sequence;
+    item.vblank = display_vblank_index;
+    item.guest_us = virtual_time_us;
+    item.uid = uid;
+    item.pc = dispatch_pc;
+    item.next_pc = ctx.pc;
+    item.a0 = ctx.gpr[4]; item.a1 = ctx.gpr[5]; item.a2 = ctx.gpr[6]; item.a3 = ctx.gpr[7];
+    item.sp = ctx.gpr[29]; item.ra = ctx.gpr[31];
+    save_repro_push_trace(item);
+}
+
+void save_repro_write_context(SaveReproWriter &writer, const psprecomp::AllegrexContext &ctx) {
+    writer.pod(ctx);
+}
+
+bool save_repro_read_context(SaveReproReader &reader, psprecomp::AllegrexContext &ctx) {
+    return reader.pod(ctx);
+}
+
+void save_repro_write_thread_record(SaveReproWriter &w, const ThreadRecord &r) {
+    w.string(r.name); w.pod(r.entry); w.pod(r.priority); w.pod(r.stack_size); w.pod(r.attributes);
+    w.pod(r.stack_top); w.pod(r.stack_bottom); w.pod(r.kernel_context); w.pod(r.state);
+    w.pod(r.exit_status); w.pod(r.externally_suspended); save_repro_write_context(w, r.suspended_context);
+    w.pod(r.wakeup_count); w.pod(r.delay_until_us); w.pod(r.delay_sequence);
+}
+
+bool save_repro_read_thread_record(SaveReproReader &r, ThreadRecord &out) {
+    return r.string(out.name) && r.pod(out.entry) && r.pod(out.priority) && r.pod(out.stack_size) &&
+        r.pod(out.attributes) && r.pod(out.stack_top) && r.pod(out.stack_bottom) &&
+        r.pod(out.kernel_context) && r.pod(out.state) && r.pod(out.exit_status) &&
+        r.pod(out.externally_suspended) && save_repro_read_context(r, out.suspended_context) &&
+        r.pod(out.wakeup_count) && r.pod(out.delay_until_us) && r.pod(out.delay_sequence);
+}
+
+void save_repro_write_continuation(SaveReproWriter &w, const ThreadContinuation &c) {
+    w.pod(c.uid); save_repro_write_context(w, c.context); w.pod(c.ready_sequence);
+}
+
+bool save_repro_read_continuation(SaveReproReader &r, ThreadContinuation &c) {
+    return r.pod(c.uid) && save_repro_read_context(r, c.context) && r.pod(c.ready_sequence);
+}
+
+void save_repro_write_kernel_state(SaveReproWriter &w) {
+    w.pod(thread_table.next_uid); w.pod(thread_table.current_uid); w.pod(thread_table.next_stack_top);
+    w.pod(thread_table.next_ready_sequence); w.pod(thread_table.next_delay_sequence);
+    w.pod(static_cast<std::uint64_t>(thread_table.threads.size()));
+    for (const auto &[uid, record] : thread_table.threads) { w.pod(uid); save_repro_write_thread_record(w, record); }
+    w.pod(static_cast<std::uint64_t>(thread_table.continuations.size()));
+    for (const auto &c : thread_table.continuations) save_repro_write_continuation(w, c);
+    w.pod(static_cast<std::uint64_t>(thread_table.thread_end_waiters.size()));
+    for (const auto &[uid, list] : thread_table.thread_end_waiters) {
+        w.pod(uid); w.pod(static_cast<std::uint64_t>(list.size()));
+        for (const auto &c : list) save_repro_write_continuation(w, c);
+    }
+    w.pod(static_cast<std::uint64_t>(thread_table.free_stacks.size()));
+    for (const auto &block : thread_table.free_stacks) w.pod(block);
+
+    w.pod(partition_table.next_uid); w.pod(partition_table.next_address);
+    w.pod(static_cast<std::uint64_t>(partition_table.blocks.size()));
+    for (const auto &[uid, block] : partition_table.blocks) {
+        w.pod(uid); w.string(block.name); w.pod(block.address); w.pod(block.size);
+    }
+
+    w.pod(callback_table.next_uid); w.pod(static_cast<std::uint64_t>(callback_table.callbacks.size()));
+    for (const auto &[uid, cb] : callback_table.callbacks) {
+        w.pod(uid); w.string(cb.name); w.pod(cb.function); w.pod(cb.common); w.pod(cb.owner_uid);
+        w.pod(cb.notify_count); w.pod(cb.notify_argument);
+    }
+
+    w.pod(semaphore_table.next_uid); w.pod(static_cast<std::uint64_t>(semaphore_table.semaphores.size()));
+    for (const auto &[uid, sema] : semaphore_table.semaphores) {
+        w.pod(uid); w.string(sema.name); w.pod(sema.count); w.pod(sema.maximum);
+        w.pod(static_cast<std::uint64_t>(sema.waiters.size()));
+        for (const auto &waiter : sema.waiters) {
+            w.pod(waiter.uid); save_repro_write_context(w, waiter.context); w.pod(waiter.requested);
+        }
+    }
+
+    w.pod(event_flag_table.next_uid); w.pod(static_cast<std::uint64_t>(event_flag_table.flags.size()));
+    for (const auto &[uid, flag] : event_flag_table.flags) {
+        w.pod(uid); w.string(flag.name); w.pod(flag.attributes); w.pod(flag.initial_pattern); w.pod(flag.current_pattern);
+        w.pod(static_cast<std::uint64_t>(flag.waiters.size()));
+        for (const auto &waiter : flag.waiters) {
+            w.pod(waiter.uid); save_repro_write_context(w, waiter.context); w.pod(waiter.requested);
+            w.pod(waiter.mode); w.pod(waiter.output_address);
+        }
+    }
+
+    w.pod(fixed_pool_table.next_uid); w.pod(static_cast<std::uint64_t>(fixed_pool_table.pools.size()));
+    for (const auto &[uid, pool] : fixed_pool_table.pools) {
+        w.pod(uid); w.string(pool.name); w.pod(pool.address); w.pod(pool.block_size); w.pod(pool.block_count);
+        w.pod(static_cast<std::uint64_t>(pool.allocated.size()));
+        for (const bool bit : pool.allocated) { const std::uint8_t value = bit ? 1u : 0u; w.pod(value); }
+    }
+}
+
+bool save_repro_read_kernel_state(SaveReproReader &r) {
+    ThreadTable threads{};
+    if (!r.pod(threads.next_uid) || !r.pod(threads.current_uid) || !r.pod(threads.next_stack_top) ||
+        !r.pod(threads.next_ready_sequence) || !r.pod(threads.next_delay_sequence)) return false;
+    std::uint64_t count{};
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; ThreadRecord record{};
+        if (!r.pod(uid) || !save_repro_read_thread_record(r, record)) return false;
+        threads.threads.emplace(uid, std::move(record));
+    }
+    if (!r.pod(count) || count > 16384u) return false;
+    threads.continuations.resize(static_cast<std::size_t>(count));
+    for (auto &c : threads.continuations) if (!save_repro_read_continuation(r, c)) return false;
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; std::uint64_t n{};
+        if (!r.pod(uid) || !r.pod(n) || n > 16384u) return false;
+        auto &list = threads.thread_end_waiters[uid]; list.resize(static_cast<std::size_t>(n));
+        for (auto &c : list) if (!save_repro_read_continuation(r, c)) return false;
+    }
+    if (!r.pod(count) || count > 16384u) return false;
+    threads.free_stacks.resize(static_cast<std::size_t>(count));
+    for (auto &block : threads.free_stacks) if (!r.pod(block)) return false;
+    thread_table = std::move(threads);
+
+    PartitionTable partitions{};
+    if (!r.pod(partitions.next_uid) || !r.pod(partitions.next_address) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; PartitionBlock block{};
+        if (!r.pod(uid) || !r.string(block.name) || !r.pod(block.address) || !r.pod(block.size)) return false;
+        partitions.blocks.emplace(uid, std::move(block));
+    }
+    partition_table = std::move(partitions);
+
+    CallbackTable callbacks{};
+    if (!r.pod(callbacks.next_uid) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; CallbackRecord cb{};
+        if (!r.pod(uid) || !r.string(cb.name) || !r.pod(cb.function) || !r.pod(cb.common) ||
+            !r.pod(cb.owner_uid) || !r.pod(cb.notify_count) || !r.pod(cb.notify_argument)) return false;
+        callbacks.callbacks.emplace(uid, std::move(cb));
+    }
+    callback_table = std::move(callbacks);
+
+    SemaphoreTable semas{};
+    if (!r.pod(semas.next_uid) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; SemaphoreRecord sema{}; std::uint64_t n{};
+        if (!r.pod(uid) || !r.string(sema.name) || !r.pod(sema.count) || !r.pod(sema.maximum) || !r.pod(n) || n > 16384u) return false;
+        sema.waiters.resize(static_cast<std::size_t>(n));
+        for (auto &waiter : sema.waiters)
+            if (!r.pod(waiter.uid) || !save_repro_read_context(r, waiter.context) || !r.pod(waiter.requested)) return false;
+        semas.semaphores.emplace(uid, std::move(sema));
+    }
+    semaphore_table = std::move(semas);
+
+    EventFlagTable flags{};
+    if (!r.pod(flags.next_uid) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; EventFlagRecord flag{}; std::uint64_t n{};
+        if (!r.pod(uid) || !r.string(flag.name) || !r.pod(flag.attributes) || !r.pod(flag.initial_pattern) ||
+            !r.pod(flag.current_pattern) || !r.pod(n) || n > 16384u) return false;
+        flag.waiters.resize(static_cast<std::size_t>(n));
+        for (auto &waiter : flag.waiters)
+            if (!r.pod(waiter.uid) || !save_repro_read_context(r, waiter.context) || !r.pod(waiter.requested) ||
+                !r.pod(waiter.mode) || !r.pod(waiter.output_address)) return false;
+        flags.flags.emplace(uid, std::move(flag));
+    }
+    event_flag_table = std::move(flags);
+
+    FixedPoolTable pools{};
+    if (!r.pod(pools.next_uid) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; FixedPoolRecord pool{}; std::uint64_t n{};
+        if (!r.pod(uid) || !r.string(pool.name) || !r.pod(pool.address) || !r.pod(pool.block_size) ||
+            !r.pod(pool.block_count) || !r.pod(n) || n > 1'000'000u) return false;
+        pool.allocated.resize(static_cast<std::size_t>(n));
+        for (std::size_t j = 0; j < pool.allocated.size(); ++j) {
+            std::uint8_t value{}; if (!r.pod(value)) return false; pool.allocated[j] = value != 0u;
+        }
+        pools.pools.emplace(uid, std::move(pool));
+    }
+    fixed_pool_table = std::move(pools);
+    return true;
+}
+
+void save_repro_write_file_state(SaveReproWriter &w) {
+    w.pod(file_table.next_fd); w.pod(file_table.next_virtual_sector);
+    w.pod(static_cast<std::uint64_t>(file_table.files.size()));
+    for (auto &[fd, stream] : file_table.files) {
+        w.pod(fd);
+        const auto p = file_table.file_paths.find(fd);
+        w.path(p != file_table.file_paths.end() ? p->second : std::filesystem::path{});
+        const auto f = file_table.file_open_flags.find(fd);
+        w.pod(f != file_table.file_open_flags.end() ? f->second : 0x0001u);
+        const std::ios::iostate old_state = stream.rdstate();
+        stream.clear();
+        std::int64_t position = static_cast<std::int64_t>(stream.tellg());
+        if (position < 0) {
+            stream.clear();
+            position = static_cast<std::int64_t>(stream.tellp());
+        }
+        if (position < 0) position = 0;
+        stream.clear(old_state);
+        w.pod(position);
+    }
+    w.pod(static_cast<std::uint64_t>(file_table.synthetic_empty_files.size()));
+    for (const auto fd : file_table.synthetic_empty_files) w.pod(fd);
+    w.pod(static_cast<std::uint64_t>(file_table.recent_atrac_reads.size()));
+    for (const auto &[address, path] : file_table.recent_atrac_reads) { w.pod(address); w.path(path); }
+    w.pod(static_cast<std::uint64_t>(file_table.directories.size()));
+    for (const auto &[fd, directory] : file_table.directories) {
+        w.pod(fd); w.pod(static_cast<std::uint64_t>(directory.index));
+        w.pod(static_cast<std::uint64_t>(directory.entries.size()));
+        for (const auto &entry : directory.entries) w.path(entry.path());
+    }
+    w.pod(static_cast<std::uint64_t>(file_table.virtual_disc_handles.size()));
+    for (const auto &[fd, handle] : file_table.virtual_disc_handles) { w.pod(fd); w.pod(handle); }
+    w.pod(static_cast<std::uint64_t>(file_table.virtual_files_by_path.size()));
+    for (const auto &[key, file] : file_table.virtual_files_by_path) {
+        w.string(key); w.path(file.native_path); w.pod(file.start_sector); w.pod(file.size);
+    }
+}
+
+bool save_repro_read_file_state(SaveReproReader &r) {
+    FileTable restored{};
+    if (!r.pod(restored.next_fd) || !r.pod(restored.next_virtual_sector)) return false;
+    std::uint64_t count{};
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t fd{}; std::filesystem::path path; std::uint32_t flags{}; std::int64_t position{};
+        if (!r.pod(fd) || !r.path(path) || !r.pod(flags) || !r.pod(position)) return false;
+        std::ios::openmode mode = std::ios::binary;
+        if ((flags & 0x0001u) != 0u) mode |= std::ios::in;
+        if ((flags & 0x0002u) != 0u) mode |= std::ios::out;
+        if ((mode & (std::ios::in | std::ios::out)) == std::ios::openmode{}) mode |= std::ios::in;
+        std::fstream stream(path, mode);
+        if (!stream) { r.error = "checkpoint could not reopen PSP fd " + std::to_string(fd) + " path=" + path.string(); return false; }
+        stream.clear();
+        stream.seekg(static_cast<std::streamoff>(position), std::ios::beg);
+        if ((flags & 0x0002u) != 0u) stream.seekp(static_cast<std::streamoff>(position), std::ios::beg);
+        stream.clear();
+        restored.files.emplace(fd, std::move(stream));
+        restored.file_paths.emplace(fd, path);
+        restored.file_open_flags.emplace(fd, flags);
+    }
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t fd{}; if (!r.pod(fd)) return false; restored.synthetic_empty_files.insert(fd); }
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::uint32_t address{}; std::filesystem::path path;
+        if (!r.pod(address) || !r.path(path)) return false;
+        restored.recent_atrac_reads.emplace(address, std::move(path));
+    }
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t fd{}; std::uint64_t index{}, n{};
+        if (!r.pod(fd) || !r.pod(index) || !r.pod(n) || n > 1'000'000u) return false;
+        DirectoryHandle dir{}; dir.index = static_cast<std::size_t>(index); dir.entries.reserve(static_cast<std::size_t>(n));
+        for (std::uint64_t j = 0; j < n; ++j) { std::filesystem::path path; if (!r.path(path)) return false; dir.entries.emplace_back(path); }
+        restored.directories.emplace(fd, std::move(dir));
+    }
+    if (!r.pod(count) || count > 4096u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t fd{}; VirtualDiscHandle h{}; if (!r.pod(fd) || !r.pod(h)) return false; restored.virtual_disc_handles.emplace(fd, h); }
+    if (!r.pod(count) || count > 1'000'000u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::string key; VirtualDiscFile file{};
+        if (!r.string(key) || !r.path(file.native_path) || !r.pod(file.start_sector) || !r.pod(file.size)) return false;
+        restored.virtual_path_by_sector[file.start_sector] = key;
+        restored.virtual_files_by_path.emplace(std::move(key), std::move(file));
+    }
+    file_table = std::move(restored);
+    return true;
+}
+
+void save_repro_write_media_audio_state(SaveReproWriter &w) {
+    w.pod(next_mpeg_stream_id);
+    // PMF decoders own opaque codec state.  A valid post-mission capture should
+    // have no live movie context; record the count as a safety contract.
+    w.pod(static_cast<std::uint64_t>(mpeg_contexts.size()));
+    for (const auto &state : atrac_contexts) {
+        w.pod(state.allocated); w.pod(state.header); w.pod(state.buffer_address); w.pod(state.initial_read_size);
+        w.pod(state.buffer_size); w.pod(state.buffered_encoded_bytes); w.pod(state.next_file_offset);
+        w.pod(state.write_offset); w.pod(state.last_writable_bytes); w.pod(state.sample_position);
+        w.pod(state.loop_num); w.pod(state.internal_error); w.path(state.source_path); w.pod(state.decoder_eof);
+    }
+    w.pod(audio_channels);
+    w.pod(sas_state.initialized); w.pod(sas_state.core_address); w.pod(sas_state.grain_size);
+    w.pod(sas_state.max_voices); w.pod(sas_state.output_mode); w.pod(sas_state.sample_rate);
+    w.pod(sas_state.voices); w.pod(sas_state.end_flags);
+    w.pod(sas_state.reverb.type); w.pod(sas_state.reverb.delay); w.pod(sas_state.reverb.feedback);
+    w.pod(sas_state.reverb.left_volume); w.pod(sas_state.reverb.right_volume);
+    w.pod(sas_state.reverb.dry); w.pod(sas_state.reverb.wet);
+    w.pod(static_cast<std::uint64_t>(sas_state.reverb.history_left.size()));
+    for (const auto value : sas_state.reverb.history_left) w.pod(value);
+    w.pod(static_cast<std::uint64_t>(sas_state.reverb.history_right.size()));
+    for (const auto value : sas_state.reverb.history_right) w.pod(value);
+    w.pod(static_cast<std::uint64_t>(sas_state.reverb.history_cursor));
+    w.pod(sas_core_mix_calls); w.pod(sas_core_with_mix_calls);
+}
+
+bool save_repro_read_media_audio_state(SaveReproReader &r) {
+    std::uint64_t mpeg_count{};
+    if (!r.pod(next_mpeg_stream_id) || !r.pod(mpeg_count)) return false;
+    if (mpeg_count != 0u) { r.error = "checkpoint was captured while a PMF movie decoder was live; recapture after mission control returns"; return false; }
+    for (auto &state : atrac_contexts) close_atrac_decoder(state);
+    atrac_contexts = {};
+    for (auto &state : atrac_contexts) {
+        if (!r.pod(state.allocated) || !r.pod(state.header) || !r.pod(state.buffer_address) ||
+            !r.pod(state.initial_read_size) || !r.pod(state.buffer_size) || !r.pod(state.buffered_encoded_bytes) ||
+            !r.pod(state.next_file_offset) || !r.pod(state.write_offset) || !r.pod(state.last_writable_bytes) ||
+            !r.pod(state.sample_position) || !r.pod(state.loop_num) || !r.pod(state.internal_error) ||
+            !r.path(state.source_path) || !r.pod(state.decoder_eof)) return false;
+        state.decoder_eof = false; // decoder is reopened lazily at sample_position.
+    }
+    if (!r.pod(audio_channels)) return false;
+    // Host waveOut/XAudio queue itself is not part of the PSP machine. Keep
+    // reservations/formats but restart queue timing at the restored guest time.
+    for (auto &channel : audio_channels) {
+        channel.busy_until_us = virtual_time_us;
+        channel.queue_active = false;
+        channel.queue_anchor_us = virtual_time_us;
+        channel.queued_frames = 0u;
+    }
+    SasState sas{};
+    if (!r.pod(sas.initialized) || !r.pod(sas.core_address) || !r.pod(sas.grain_size) ||
+        !r.pod(sas.max_voices) || !r.pod(sas.output_mode) || !r.pod(sas.sample_rate) ||
+        !r.pod(sas.voices) || !r.pod(sas.end_flags) || !r.pod(sas.reverb.type) ||
+        !r.pod(sas.reverb.delay) || !r.pod(sas.reverb.feedback) || !r.pod(sas.reverb.left_volume) ||
+        !r.pod(sas.reverb.right_volume) || !r.pod(sas.reverb.dry) || !r.pod(sas.reverb.wet)) return false;
+    std::uint64_t n{};
+    if (!r.pod(n) || n > 2'000'000u) return false; sas.reverb.history_left.resize(static_cast<std::size_t>(n));
+    for (auto &v : sas.reverb.history_left) if (!r.pod(v)) return false;
+    if (!r.pod(n) || n > 2'000'000u) return false; sas.reverb.history_right.resize(static_cast<std::size_t>(n));
+    for (auto &v : sas.reverb.history_right) if (!r.pod(v)) return false;
+    if (!r.pod(n)) return false; sas.reverb.history_cursor = static_cast<std::size_t>(n);
+    if (!r.pod(sas_core_mix_calls) || !r.pod(sas_core_with_mix_calls)) return false;
+    sas_state = std::move(sas);
+    return true;
+}
+
+void save_repro_write_ge_state(SaveReproWriter &w) {
+    w.pod(ge_callback_table.next_uid); w.pod(static_cast<std::uint64_t>(ge_callback_table.callbacks.size()));
+    for (const auto &[uid, cb] : ge_callback_table.callbacks) { w.pod(uid); w.pod(cb); }
+    w.pod(ge_state);
+    w.pod(ge_list_table.next_raw_id); w.pod(static_cast<std::uint64_t>(ge_list_table.lists.size()));
+    for (const auto &[id, list] : ge_list_table.lists) {
+        w.pod(id); w.pod(list.guest_id); w.pod(list.start_pc); w.pod(list.pc); w.pod(list.stall);
+        w.pod(list.callback_id); w.pod(list.context_address); w.pod(list.stack_address); w.pod(list.stack_capacity);
+        w.pod(list.state); w.pod(list.signal_behavior); w.pod(list.callback_token);
+        w.pod(static_cast<std::uint64_t>(list.stack.size())); for (const auto &entry : list.stack) w.pod(entry);
+        w.pod(list.histogram); w.pod(list.executed_commands); w.pod(list.primitive_commands);
+        w.pod(list.has_saved_context); w.pod(list.saved_commands); w.pod(list.saved_transform);
+        w.pod(list.saved_offset_address); w.pod(list.saved_vertex_address); w.pod(list.saved_index_address);
+        w.pod(list.saved_bounding_box_result);
+    }
+    w.pod(static_cast<std::uint64_t>(ge_list_table.queue.size())); for (const auto id : ge_list_table.queue) w.pod(id);
+    w.pod(static_cast<std::uint64_t>(pending_guest_callbacks.size()));
+    for (const auto &[uid, list] : pending_guest_callbacks) {
+        w.pod(uid); w.pod(static_cast<std::uint64_t>(list.size())); for (const auto &cb : list) w.pod(cb);
+    }
+    w.pod(static_cast<std::uint64_t>(async_return_frames.size()));
+    for (const auto &[uid, frames] : async_return_frames) {
+        w.pod(uid); w.pod(static_cast<std::uint64_t>(frames.size())); for (const auto &frame : frames) w.pod(frame);
+    }
+    w.pod(static_cast<std::uint64_t>(deferred_io_resumes.size()));
+    for (const auto &[uid, item] : deferred_io_resumes) { w.pod(uid); w.pod(item); }
+}
+
+bool save_repro_read_ge_state(SaveReproReader &r) {
+    ge_async_stop_worker();
+    GeCallbackTable callbacks{}; std::uint64_t count{};
+    if (!r.pod(callbacks.next_uid) || !r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t uid{}; GeCallbackRecord cb{}; if (!r.pod(uid) || !r.pod(cb)) return false; callbacks.callbacks.emplace(uid, cb); }
+    if (!r.pod(ge_state)) return false;
+    GeListTable lists{};
+    if (!r.pod(lists.next_raw_id) || !r.pod(count) || count > 65536u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::uint32_t id{}; GeListRecord list{}; std::uint64_t n{};
+        if (!r.pod(id) || !r.pod(list.guest_id) || !r.pod(list.start_pc) || !r.pod(list.pc) || !r.pod(list.stall) ||
+            !r.pod(list.callback_id) || !r.pod(list.context_address) || !r.pod(list.stack_address) || !r.pod(list.stack_capacity) ||
+            !r.pod(list.state) || !r.pod(list.signal_behavior) || !r.pod(list.callback_token) || !r.pod(n) || n > 4096u) return false;
+        list.stack.resize(static_cast<std::size_t>(n)); for (auto &entry : list.stack) if (!r.pod(entry)) return false;
+        if (!r.pod(list.histogram) || !r.pod(list.executed_commands) || !r.pod(list.primitive_commands) ||
+            !r.pod(list.has_saved_context) || !r.pod(list.saved_commands) || !r.pod(list.saved_transform) ||
+            !r.pod(list.saved_offset_address) || !r.pod(list.saved_vertex_address) || !r.pod(list.saved_index_address) ||
+            !r.pod(list.saved_bounding_box_result)) return false;
+        lists.lists.emplace(id, std::move(list));
+    }
+    if (!r.pod(count) || count > 65536u) return false; lists.queue.resize(static_cast<std::size_t>(count));
+    for (auto &id : lists.queue) if (!r.pod(id)) return false;
+    ge_callback_table = std::move(callbacks); ge_list_table = std::move(lists);
+
+    pending_guest_callbacks.clear();
+    if (!r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; std::uint64_t n{}; if (!r.pod(uid) || !r.pod(n) || n > 65536u) return false;
+        auto &list = pending_guest_callbacks[uid]; list.resize(static_cast<std::size_t>(n)); for (auto &cb : list) if (!r.pod(cb)) return false;
+    }
+    async_return_frames.clear();
+    if (!r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) {
+        std::int32_t uid{}; std::uint64_t n{}; if (!r.pod(uid) || !r.pod(n) || n > 65536u) return false;
+        auto &frames = async_return_frames[uid]; frames.resize(static_cast<std::size_t>(n)); for (auto &frame : frames) if (!r.pod(frame)) return false;
+    }
+    deferred_io_resumes.clear();
+    if (!r.pod(count) || count > 8192u) return false;
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t uid{}; DeferredIoResume item{}; if (!r.pod(uid) || !r.pod(item)) return false; deferred_io_resumes.emplace(uid, item); }
+    ++ge_draw_state_revision; ++ge_lighting_state_revision; ++ge_camera_state_revision;
+    return true;
+}
+
+void save_repro_write_misc_state(SaveReproWriter &w) {
+    w.pod(virtual_time_us); w.pod(display_vblank_index); w.pod(compiled_sdk_version); w.pod(compiler_version);
+    w.pod(next_module_uid); w.pod(static_cast<std::uint64_t>(loaded_modules.size()));
+    for (const auto &[uid, loaded] : loaded_modules) { w.pod(uid); w.pod(loaded); }
+    w.pod(volatile_memory_locked); w.pod(general_purpose_io); w.pod(ge_edram_translation);
+    w.pod(display_state); w.pod(controller_state); w.pod(memory_stick_fat_state);
+    w.pod(static_cast<std::uint64_t>(sub_interrupts.size())); for (const auto &[key, record] : sub_interrupts) { w.pod(key); w.pod(record); }
+    w.pod(startup_load_picker_consumed);
+    w.pod(static_cast<std::uint64_t>(deflate_fast_pending.size()));
+    for (const auto &[uid, pending] : deflate_fast_pending) { w.pod(uid); w.pod(pending); }
+}
+
+bool save_repro_read_misc_state(SaveReproReader &r) {
+    if (!r.pod(virtual_time_us) || !r.pod(display_vblank_index) || !r.pod(compiled_sdk_version) || !r.pod(compiler_version) || !r.pod(next_module_uid)) return false;
+    std::uint64_t count{}; if (!r.pod(count) || count > 8192u) return false; loaded_modules.clear();
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t uid{}; bool loaded{}; if (!r.pod(uid) || !r.pod(loaded)) return false; loaded_modules.emplace(uid, loaded); }
+    if (!r.pod(volatile_memory_locked) || !r.pod(general_purpose_io) || !r.pod(ge_edram_translation) ||
+        !r.pod(display_state) || !r.pod(controller_state) || !r.pod(memory_stick_fat_state)) return false;
+    if (!r.pod(count) || count > 8192u) return false; sub_interrupts.clear();
+    for (std::uint64_t i = 0; i < count; ++i) { std::uint64_t key{}; SubInterruptRecord record{}; if (!r.pod(key) || !r.pod(record)) return false; sub_interrupts.emplace(key, record); }
+    if (!r.pod(startup_load_picker_consumed) || !r.pod(count) || count > 8192u) return false; deflate_fast_pending.clear();
+    for (std::uint64_t i = 0; i < count; ++i) { std::int32_t uid{}; DeflateFastPending pending{}; if (!r.pod(uid) || !r.pod(pending)) return false; deflate_fast_pending.emplace(uid, pending); }
+    return true;
+}
+
+bool save_repro_write_checkpoint(psprecomp::Runtime &runtime,
+                                 const psprecomp::AllegrexContext &resume_context,
+                                 std::string &error) {
+    if (savedata_utility.status != UtilityStatus::None) {
+        error = "savedata utility is active; capture before entering the save marker";
+        return false;
+    }
+    if (!mpeg_contexts.empty()) {
+        error = "movie decoder still active; wait until post-mission gameplay has returned";
+        return false;
+    }
+    const auto current = thread_table.threads.find(thread_table.current_uid);
+    if (current == thread_table.threads.end() || current->second.state != ThreadState::Running) {
+        error = "no running PSP thread at capture boundary";
+        return false;
+    }
+
+    SaveReproWriter w;
+    w.bytes.reserve(static_cast<std::size_t>(runtime.memory().size()) + runtime.memory().vram_size() + 2u * 1024u * 1024u);
+    w.pod(kSaveReproMagic); w.pod(kSaveReproVersion);
+    w.pod(runtime.memory().size()); w.pod(runtime.memory().vram_size());
+    save_repro_write_context(w, resume_context);
+    std::vector<std::uint8_t> ram_snapshot(runtime.memory().size());
+    std::vector<std::uint8_t> vram_snapshot(runtime.memory().vram_size());
+    runtime.memory().copy_out(psprecomp::GuestMemory::kPhysicalBase, ram_snapshot);
+    runtime.memory().copy_out(psprecomp::GuestMemory::kVramPhysicalBase, vram_snapshot);
+    w.raw(ram_snapshot);
+    w.raw(vram_snapshot);
+    save_repro_write_misc_state(w);
+    save_repro_write_kernel_state(w);
+    save_repro_write_file_state(w);
+    save_repro_write_media_audio_state(w);
+    save_repro_write_ge_state(w);
+
+    const std::uint64_t checksum = save_repro_fnv1a(w.bytes);
+    w.pod(checksum);
+    const std::filesystem::path output = save_repro_checkpoint_path(runtime);
+    const std::filesystem::path temporary = output.string() + ".tmp";
+    std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
+    if (!file) { error = "cannot create checkpoint: " + temporary.string(); return false; }
+    file.write(reinterpret_cast<const char *>(w.bytes.data()), static_cast<std::streamsize>(w.bytes.size()));
+    file.close();
+    if (!file) { error = "checkpoint write failed: " + temporary.string(); return false; }
+    std::error_code ec;
+    std::filesystem::remove(output, ec); ec.clear();
+    std::filesystem::rename(temporary, output, ec);
+    if (ec) { error = "checkpoint rename failed: " + ec.message(); return false; }
+    save_repro_checkpoint_available = true;
+    save_repro_trace_enabled = true;
+    save_repro_trace_count = save_repro_trace_next = 0u;
+    save_repro_trace_sequence = 0u;
+    refresh_vcs_post_dispatch_hook();
+    std::ostringstream line;
+    line << "SAVE_REPRO checkpoint=captured path=" << output.string()
+         << " bytes=" << w.bytes.size() << " vblank=" << display_vblank_index
+         << " guest_us=" << virtual_time_us << " uid=" << thread_table.current_uid
+         << " pc=" << psprecomp::hex32(resume_context.pc)
+         << " threads=" << thread_table.threads.size();
+    runtime_log_line(line.str());
+    if (!save_repro_self_test_mode)
+        std::cerr << "\n[SAVE-REPRO] CHECKPOINT CAPTURADO: " << output.string()
+                  << "\n[SAVE-REPRO] Agora tente salvar. Se ficar preto, pressione F10.\n";
+    return true;
+}
+
+bool save_repro_restore_checkpoint_impl(psprecomp::Runtime &runtime, std::string &error) {
+    const std::filesystem::path input_path = save_repro_checkpoint_path(runtime);
+    std::ifstream file(input_path, std::ios::binary | std::ios::ate);
+    if (!file) { error = "checkpoint not found: " + input_path.string(); return false; }
+    const std::streamoff size = file.tellg();
+    if (size < static_cast<std::streamoff>(64u) || size > static_cast<std::streamoff>(128ull * 1024ull * 1024ull)) {
+        error = "checkpoint size is invalid"; return false;
+    }
+    std::vector<std::uint8_t> bytes(static_cast<std::size_t>(size));
+    file.seekg(0, std::ios::beg); file.read(reinterpret_cast<char *>(bytes.data()), size);
+    if (!file) { error = "checkpoint read failed"; return false; }
+    std::uint64_t expected{}; std::memcpy(&expected, bytes.data() + bytes.size() - sizeof(expected), sizeof(expected));
+    const std::uint64_t actual = save_repro_fnv1a(std::span<const std::uint8_t>(bytes.data(), bytes.size() - sizeof(expected)));
+    if (actual != expected) { error = "checkpoint checksum mismatch"; return false; }
+    SaveReproReader r{std::span<const std::uint8_t>(bytes.data(), bytes.size() - sizeof(expected))};
+    std::uint64_t magic{}; std::uint32_t version{}, ram_size{}, vram_size{};
+    if (!r.pod(magic) || !r.pod(version) || !r.pod(ram_size) || !r.pod(vram_size)) { error = r.error; return false; }
+    if (magic != kSaveReproMagic || version != kSaveReproVersion) { error = "checkpoint version mismatch"; return false; }
+    if (ram_size != runtime.memory().size() || vram_size != runtime.memory().vram_size()) { error = "checkpoint RAM/EDRAM size mismatch"; return false; }
+    psprecomp::AllegrexContext resume{};
+    std::vector<std::uint8_t> ram_snapshot(ram_size);
+    std::vector<std::uint8_t> vram_snapshot(vram_size);
+    if (!save_repro_read_context(r, resume) ||
+        !r.raw(ram_snapshot) ||
+        !r.raw(vram_snapshot) ||
+        !save_repro_read_misc_state(r) || !save_repro_read_kernel_state(r) ||
+        !save_repro_read_file_state(r) || !save_repro_read_media_audio_state(r) ||
+        !save_repro_read_ge_state(r)) {
+        error = !r.error.empty() ? r.error : "checkpoint payload parse failed";
+        return false;
+    }
+    if (r.offset != r.bytes.size()) { error = "checkpoint has unexpected trailing payload"; return false; }
+    runtime.memory().copy_in(psprecomp::GuestMemory::kPhysicalBase, ram_snapshot);
+    runtime.memory().copy_in(psprecomp::GuestMemory::kVramPhysicalBase, vram_snapshot);
+
+    const std::uint32_t partition_before = partition_table.next_address;
+    recompute_partition_frontier();
+    const std::uint32_t partition_after = partition_table.next_address;
+    const LegacyExitDeleteRepairStats exitdelete_repair = repair_legacy_vcs_exit_delete_threads();
+    if (exitdelete_repair.threads != 0u || partition_before != partition_after) {
+        std::ostringstream repair_line;
+        const std::uint32_t margin_before = exitdelete_repair.stack_top_before >= partition_before
+            ? exitdelete_repair.stack_top_before - partition_before : 0u;
+        const std::uint32_t margin_after = exitdelete_repair.stack_top_after >= partition_after
+            ? exitdelete_repair.stack_top_after - partition_after : 0u;
+        repair_line << "SAVE_REPRO legacy_memory_repair exitdelete_threads=" << exitdelete_repair.threads
+                    << " stack_bytes=" << exitdelete_repair.stack_bytes
+                    << " partition_before=" << psprecomp::hex32(partition_before)
+                    << " partition_after=" << psprecomp::hex32(partition_after)
+                    << " stack_top_before=" << psprecomp::hex32(exitdelete_repair.stack_top_before)
+                    << " stack_top_after=" << psprecomp::hex32(exitdelete_repair.stack_top_after)
+                    << " margin_before=" << margin_before
+                    << " margin_after=" << margin_after;
+        runtime_log_line(repair_line.str());
+        if (!save_repro_self_test_mode) std::cerr << "[SAVE-REPRO] " << repair_line.str() << "\n";
+    }
+
+    if (thread_table.threads.find(thread_table.current_uid) == thread_table.threads.end()) {
+        error = "checkpoint current thread UID missing"; return false;
+    }
+    runtime.cpu() = resume;
+    auto &current = thread_table.threads.at(thread_table.current_uid);
+    current.state = ThreadState::Running;
+    psprecomp::set_runtime_thread_identity(thread_table.current_uid, current.name);
+    savedata_utility_ui_end(); display_window_set_system_utility_mode(false); savedata_utility = SavedataUtilityState{};
+    vcs::audio_output_shutdown();
+    frozen_clock_guard_dispatches = 0u; frozen_clock_guard_vblank = display_vblank_index;
+    save_repro_checkpoint_available = true; save_repro_trace_enabled = true;
+    save_repro_trace_count = save_repro_trace_next = 0u; save_repro_trace_sequence = 0u;
+    refresh_vcs_post_dispatch_hook();
+    std::ostringstream line;
+    line << "SAVE_REPRO checkpoint=restored path=" << input_path.string()
+         << " bytes=" << bytes.size() << " vblank=" << display_vblank_index
+         << " guest_us=" << virtual_time_us << " uid=" << thread_table.current_uid
+         << " pc=" << psprecomp::hex32(runtime.cpu().pc)
+         << " threads=" << thread_table.threads.size();
+    runtime_log_line(line.str());
+    if (!save_repro_self_test_mode)
+        std::cerr << "\n[SAVE-REPRO] CHECKPOINT RESTAURADO: " << input_path.string()
+                  << "\n[SAVE-REPRO] Va direto ao save. Se ficar preto, pressione F10.\n";
+    return true;
+}
+
+void save_repro_dump_trace(psprecomp::Runtime &runtime, std::string_view reason) {
+    if (!save_repro_trace_enabled) return;
+    const std::filesystem::path output = save_repro_trace_path(runtime);
+    std::ofstream file(output, std::ios::out | std::ios::trunc);
+    if (!file) { runtime_log_line("SAVE_REPRO trace=dump_failed path=" + output.string()); return; }
+    file << "VCS V8.2.6 SAVE REPRO TRACE\n"
+         << "reason=" << reason << "\n"
+         << "vblank=" << display_vblank_index << " guest_us=" << virtual_time_us
+         << " current_uid=" << thread_table.current_uid << " current_pc=" << psprecomp::hex32(runtime.cpu().pc) << "\n"
+         << "records=" << save_repro_trace_count << " capacity=" << save_repro_trace.size()
+         << " dispatch_sample_stride=" << kSaveReproDispatchSampleStride << "\n\n";
+    file << "THREADS\n";
+    for (const auto &[uid, thread] : thread_table.threads) {
+        file << "uid=" << uid << " name=\"" << thread.name << "\" state=" << static_cast<std::uint32_t>(thread.state)
+             << " priority=" << thread.priority << " pc=" << psprecomp::hex32(thread.suspended_context.pc)
+             << " ra=" << psprecomp::hex32(thread.suspended_context.gpr[31])
+             << " delay_until=" << thread.delay_until_us << " wakeups=" << thread.wakeup_count
+             << " externally_suspended=" << thread.externally_suspended << "\n";
+    }
+    file << "\nEVENT_FLAGS\n";
+    for (const auto &[uid, flag] : event_flag_table.flags)
+        file << "uid=" << uid << " name=\"" << flag.name << "\" pattern=" << psprecomp::hex32(flag.current_pattern) << " waiters=" << flag.waiters.size() << "\n";
+    file << "\nSEMAPHORES\n";
+    for (const auto &[uid, sema] : semaphore_table.semaphores)
+        file << "uid=" << uid << " name=\"" << sema.name << "\" count=" << sema.count << " max=" << sema.maximum << " waiters=" << sema.waiters.size() << "\n";
+    file << "\nSAVEDATA status=" << static_cast<std::uint32_t>(savedata_utility.status)
+         << " mode=" << savedata_utility.mode << " param=" << psprecomp::hex32(savedata_utility.parameter_address)
+         << " operation_complete=" << savedata_utility.operation_complete << " last_result=" << psprecomp::hex32(savedata_utility.last_result) << "\n";
+    file << "\nTRACE\n";
+    const std::size_t first = (save_repro_trace_next + save_repro_trace.size() - save_repro_trace_count) % save_repro_trace.size();
+    for (std::size_t index = 0; index < save_repro_trace_count; ++index) {
+        const auto &item = save_repro_trace[(first + index) % save_repro_trace.size()];
+        file << item.sequence << " vb=" << item.vblank << " us=" << item.guest_us << " uid=" << item.uid;
+        if (item.kind == SaveReproTraceRecord::Kind::Hle)
+            file << " HLE " << item.library.data() << "::" << item.name.data() << " nid=" << psprecomp::hex32(item.nid);
+        else
+            file << " DISPATCH";
+        file << " pc=" << psprecomp::hex32(item.pc) << " next=" << psprecomp::hex32(item.next_pc)
+             << " a0=" << psprecomp::hex32(item.a0) << " a1=" << psprecomp::hex32(item.a1)
+             << " a2=" << psprecomp::hex32(item.a2) << " a3=" << psprecomp::hex32(item.a3)
+             << " sp=" << psprecomp::hex32(item.sp) << " ra=" << psprecomp::hex32(item.ra) << "\n";
+    }
+    file.close();
+    runtime_log_line("SAVE_REPRO trace=dumped reason=" + std::string(reason) + " path=" + output.string() + " records=" + std::to_string(save_repro_trace_count));
+    std::cerr << "\n[SAVE-REPRO] TRACE GRAVADO: " << output.string() << "\n";
+}
+
+void save_repro_vblank_hotkeys(psprecomp::Runtime &runtime, const psprecomp::AllegrexContext &ctx) {
+    // The UI thread records F8/F10 edges in WindowState. Before F8/restore this
+    // stays one atomic exchange per vblank, preserving the V8.2.5 mission and
+    // cutscene path. Once tracing is armed we additionally poll F10 on Windows:
+    // VK_F10 can be intercepted by the desktop/window menu path while the guest
+    // is on its black loading screen, which made V8.2.6A silently miss the dump.
+    std::uint32_t commands = display_window_take_save_repro_commands();
+#if defined(_WIN32)
+    static bool f10_async_was_down = false;
+    if (save_repro_trace_enabled) {
+        const bool f10_async_down = (GetAsyncKeyState(VK_F10) & 0x8000) != 0;
+        if (f10_async_down && !f10_async_was_down) commands |= 0x2u;
+        f10_async_was_down = f10_async_down;
+    } else {
+        f10_async_was_down = false;
+    }
+#endif
+    if ((commands & 0x1u) != 0u) {
+        save_repro_capture_requested = true;
+        save_repro_capture_error_reported = false;
+        refresh_vcs_post_dispatch_hook();
+        runtime_log_line("SAVE_REPRO checkpoint=armed vblank=" + std::to_string(display_vblank_index));
+        std::cerr << "\n[SAVE-REPRO] F8: CAPTURA ARMADA. Aguarde a mensagem CHECKPOINT CAPTURADO.\n";
+    }
+    if ((commands & 0x2u) != 0u) save_repro_dump_trace(runtime, "manual-F10");
+    (void)ctx;
+}
 
 constexpr std::uint32_t kPspUtilityStart = 0x000008u;
 constexpr std::uint32_t kPspUtilityUp = 0x000010u;
@@ -3919,6 +4768,67 @@ std::uint32_t wake_thread(std::int32_t uid) {
     return 0u;
 }
 
+struct UserArenaRange {
+    std::uint32_t begin{};
+    std::uint32_t end{};
+};
+
+std::uint32_t fixed_pool_reserved_size(const FixedPoolRecord &pool) noexcept {
+    const std::uint64_t bytes = static_cast<std::uint64_t>(pool.block_size) * pool.block_count;
+    const std::uint64_t aligned = (bytes + 0xFFull) & ~0xFFull;
+    return aligned <= 0xFFFFFFFFull ? static_cast<std::uint32_t>(aligned) : 0u;
+}
+
+std::vector<UserArenaRange> active_user_arena_ranges() {
+    std::vector<UserArenaRange> ranges;
+    ranges.reserve(partition_table.blocks.size() + fixed_pool_table.pools.size());
+    for (const auto &[uid, block] : partition_table.blocks) {
+        (void)uid;
+        if (block.size != 0u && block.address <= 0xFFFFFFFFu - block.size)
+            ranges.push_back({block.address, block.address + block.size});
+    }
+    for (const auto &[uid, pool] : fixed_pool_table.pools) {
+        (void)uid;
+        const std::uint32_t reserved = fixed_pool_reserved_size(pool);
+        if (reserved != 0u && pool.address <= 0xFFFFFFFFu - reserved)
+            ranges.push_back({pool.address, pool.address + reserved});
+    }
+    std::sort(ranges.begin(), ranges.end(), [](const UserArenaRange &left, const UserArenaRange &right) {
+        if (left.begin != right.begin) return left.begin < right.begin;
+        return left.end < right.end;
+    });
+    return ranges;
+}
+
+void recompute_partition_frontier() {
+    std::uint32_t frontier = partition_arena_base;
+    for (const UserArenaRange range : active_user_arena_ranges())
+        frontier = std::max(frontier, range.end);
+    partition_table.next_address = (frontier + 0xFFu) & ~0xFFu;
+}
+
+bool allocate_user_arena_range(std::uint32_t size, std::uint32_t alignment, std::uint32_t &address) {
+    if (size == 0u || alignment == 0u || (alignment & (alignment - 1u)) != 0u) return false;
+    const std::uint64_t mask = static_cast<std::uint64_t>(alignment - 1u);
+    auto align_up = [mask](std::uint64_t value) { return (value + mask) & ~mask; };
+    std::uint64_t candidate = align_up(partition_arena_base);
+    const std::uint64_t ceiling = thread_table.next_stack_top;
+    const std::uint64_t wanted = size;
+
+    for (const UserArenaRange range : active_user_arena_ranges()) {
+        if (range.end <= candidate) continue;
+        if (candidate + wanted <= range.begin) {
+            address = static_cast<std::uint32_t>(candidate);
+            return candidate + wanted <= ceiling;
+        }
+        candidate = align_up(std::max<std::uint64_t>(candidate, range.end));
+        if (candidate > ceiling) return false;
+    }
+    if (candidate + wanted > ceiling || candidate + wanted > 0x100000000ull) return false;
+    address = static_cast<std::uint32_t>(candidate);
+    return true;
+}
+
 void release_thread_stack(const ThreadRecord &thread) {
     if (thread.stack_bottom == 0u || thread.stack_top <= thread.stack_bottom) return;
     thread_table.free_stacks.push_back({thread.stack_bottom, thread.stack_top});
@@ -4003,6 +4913,94 @@ void wake_thread_end_waiters(std::int32_t completed_uid, std::uint32_t result = 
         enqueue_continuation(waiter.uid, waiter.context);
     }
     thread_table.thread_end_waiters.erase(found);
+}
+
+void erase_thread_runtime_state(std::int32_t uid) {
+    thread_table.continuations.erase(
+        std::remove_if(thread_table.continuations.begin(), thread_table.continuations.end(),
+                       [uid](const ThreadContinuation &item) { return item.uid == uid; }),
+        thread_table.continuations.end());
+    pending_guest_callbacks.erase(uid);
+    async_return_frames.erase(uid);
+    deferred_io_resumes.erase(uid);
+    remove_thread_from_wait_queues(uid);
+}
+
+void exit_delete_current_thread(psprecomp::Runtime &runtime, psprecomp::AllegrexContext &ctx) {
+    const std::int32_t deleted_uid = thread_table.current_uid;
+    const auto current = thread_table.threads.find(deleted_uid);
+    if (current == thread_table.threads.end()) {
+        runtime.stop("sceKernelExitDeleteThread called without a current PSP thread");
+        return;
+    }
+
+    // sceKernelExitDeleteThread is not the same operation as
+    // sceKernelExitThread: the thread object and its user stack cease to exist
+    // as part of the call.  Keeping it as Completed leaks top-down PSP user
+    // memory until later thread creation fails.
+    current->second.exit_status = ctx.gpr[4];
+    ThreadRecord deleted = current->second;
+    if (std::getenv("PSPRECOMP_THREAD_DIAG") != nullptr) {
+        std::cerr << "[thread] exit-delete uid=" << deleted_uid
+                  << " name=" << deleted.name
+                  << " status=" << psprecomp::hex32(deleted.exit_status)
+                  << " stack=" << psprecomp::hex32(deleted.stack_bottom)
+                  << "-" << psprecomp::hex32(deleted.stack_top) << "\n";
+    }
+
+    erase_thread_runtime_state(deleted_uid);
+    // A waiter already blocked in sceKernelWaitThreadEnd must observe thread
+    // termination even though the object is deleted immediately afterward.
+    wake_thread_end_waiters(deleted_uid, 0u);
+    release_thread_stack(deleted);
+    thread_table.threads.erase(deleted_uid);
+    refresh_vcs_post_dispatch_hook();
+
+    if (!activate_next_thread(ctx, "thread-exit-delete")) {
+        ctx.set_gpr(2, 0u);
+        runtime.stop("All PSP threads completed after sceKernelExitDeleteThread");
+    }
+}
+
+bool is_legacy_vcs_exit_delete_worker(const ThreadRecord &thread) {
+    if (thread.state != ThreadState::Completed) return false;
+    // These three entry points are VCS workers whose generated guest code ends
+    // by calling import 0x08B734F4 -> ThreadManForUser::0x809CE29B.  They are
+    // the leaked records present in the already captured V8.2.6 checkpoint.
+    return (thread.entry == 0x08934734u && thread.name == "stupidthread") ||
+           (thread.entry == 0x08AB5AA0u && thread.name == "memstick") ||
+           (thread.entry == 0x08986B50u && thread.name == "sfx bank load thread");
+}
+
+LegacyExitDeleteRepairStats repair_legacy_vcs_exit_delete_threads() {
+    LegacyExitDeleteRepairStats stats{};
+    stats.stack_top_before = thread_table.next_stack_top;
+
+    std::vector<std::int32_t> leaked;
+    leaked.reserve(thread_table.threads.size());
+    for (const auto &[uid, thread] : thread_table.threads) {
+        if (uid != thread_table.current_uid && is_legacy_vcs_exit_delete_worker(thread))
+            leaked.push_back(uid);
+    }
+    std::sort(leaked.begin(), leaked.end());
+
+    for (const std::int32_t uid : leaked) {
+        const auto found = thread_table.threads.find(uid);
+        if (found == thread_table.threads.end()) continue;
+        const ThreadRecord deleted = found->second;
+        erase_thread_runtime_state(uid);
+        // The broken historical ExitDelete path already woke end waiters when
+        // it marked the worker Completed.  Calling this is harmless if none
+        // remain and makes migration robust to an interrupted checkpoint.
+        wake_thread_end_waiters(uid, 0u);
+        stats.stack_bytes += static_cast<std::uint64_t>(deleted.stack_top - deleted.stack_bottom);
+        release_thread_stack(deleted);
+        thread_table.threads.erase(found);
+        ++stats.threads;
+    }
+    refresh_vcs_post_dispatch_hook();
+    stats.stack_top_after = thread_table.next_stack_top;
+    return stats;
 }
 
 
@@ -4384,7 +5382,7 @@ bool chained_call_collision_diagnostics_enabled() {
 void refresh_vcs_post_dispatch_hook() {
     const bool frozen_clock_guard_needed =
         execution_clock_dispatch_interval == 0u && frozen_clock_guard_limit != 0u;
-    const bool needed = !deferred_io_resumes.empty() ||
+    const bool needed = save_repro_trace_enabled || save_repro_capture_requested || !deferred_io_resumes.empty() ||
         dispatch_collision_diagnostics_enabled() || frozen_clock_guard_needed;
     psprecomp::set_runtime_post_dispatch_hook(needed ? &vcs_post_dispatch_hook : nullptr);
 }
@@ -4570,6 +5568,19 @@ void vcs_post_chained_call_hook(psprecomp::Runtime &rt, psprecomp::AllegrexConte
 void vcs_post_dispatch_hook(psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx,
                             std::uint32_t dispatch_pc, std::int32_t dispatch_thread_uid) {
 
+    if (save_repro_capture_requested) {
+        std::string error;
+        if (save_repro_write_checkpoint(rt, ctx, error)) {
+            save_repro_capture_requested = false;
+            save_repro_capture_error_reported = false;
+            refresh_vcs_post_dispatch_hook();
+        } else if (!save_repro_capture_error_reported) {
+            save_repro_capture_error_reported = true;
+            runtime_log_line("SAVE_REPRO checkpoint=waiting error=" + error);
+            std::cerr << "\n[SAVE-REPRO] Captura ainda aguardando boundary valido: " << error << "\n";
+        }
+    }
+    save_repro_trace_dispatch(dispatch_pc, dispatch_thread_uid, ctx);
     if (collision_root_probe_in_window() && collision_root_probe_matches(dispatch_pc)) {
         std::cerr << "[collision-root-outer-exit] vblank=" << display_vblank_index
                   << " uid=" << dispatch_thread_uid
@@ -6125,7 +7136,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     event_diag_stop_polls = parse_environment_u64("PSPRECOMP_EVENT_DIAG_STOP_POLLS", 0u);
     event_diag_stall_reported = false;
     partition_table = PartitionTable{};
-    partition_table.next_address = (user_arena_start + 0xFFu) & ~0xFFu;
+    partition_arena_base = (user_arena_start + 0xFFu) & ~0xFFu;
+    partition_table.next_address = partition_arena_base;
     callback_table = CallbackTable{};
     semaphore_table = SemaphoreTable{};
     event_flag_table = EventFlagTable{};
@@ -6193,6 +7205,13 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     savedata_utility_ui_end();
     display_window_set_system_utility_mode(false);
     savedata_utility = SavedataUtilityState{};
+    save_repro_trace_enabled = false;
+    save_repro_checkpoint_available = false;
+    save_repro_capture_requested = false;
+    save_repro_capture_error_reported = false;
+    save_repro_self_test_mode = false;
+    save_repro_trace_count = save_repro_trace_next = 0u;
+    save_repro_trace_sequence = 0u;
     deflate_fast_pending.clear();
     collision_chain_trace_stack.clear();
     psprecomp::set_runtime_post_import_hook(&vcs_post_import_hook);
@@ -6242,16 +7261,25 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             const std::string name = ctx.gpr[5] != 0u ? rt.memory().read_c_string(ctx.gpr[5], 128u) : "partition";
             const std::uint32_t size = ctx.gpr[7];
             const std::uint32_t alignment = 0x100u;
+            if (size > 0xFFFFFFFFu - (alignment - 1u)) {
+                ctx.set_gpr(2, 0x80020190u);
+                return;
+            }
             const std::uint32_t aligned_size = (size + alignment - 1u) & ~(alignment - 1u);
-            const std::uint32_t address = (partition_table.next_address + alignment - 1u) & ~(alignment - 1u);
-            if (aligned_size == 0u || !rt.memory().contains(address, aligned_size)) {
+            std::uint32_t address{};
+            if (aligned_size == 0u || !allocate_user_arena_range(aligned_size, alignment, address) ||
+                !rt.memory().contains(address, aligned_size)) {
+                runtime_log_line("PARTITION_ALLOC failed name=" + name +
+                    " size=" + std::to_string(aligned_size) +
+                    " frontier=" + psprecomp::hex32(partition_table.next_address) +
+                    " stack_top=" + psprecomp::hex32(thread_table.next_stack_top));
                 ctx.set_gpr(2, 0x80020190u);
                 return;
             }
             rt.memory().zero(address, aligned_size);
             const std::int32_t uid = partition_table.next_uid++;
             partition_table.blocks.emplace(uid, PartitionBlock{name, address, aligned_size});
-            partition_table.next_address = address + aligned_size;
+            recompute_partition_frontier();
             if (std::getenv("PSPRECOMP_PARTITION_DIAG") != nullptr) {
                 std::cerr << "[partition] alloc uid=" << uid << " name=\"" << name
                           << "\" addr=" << psprecomp::hex32(address)
@@ -6282,7 +7310,12 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 }
                 std::cerr << "\n";
             }
-            ctx.set_gpr(2, partition_table.blocks.erase(uid) == 1u ? 0u : 0x800200CBu);
+            if (partition_table.blocks.erase(uid) == 1u) {
+                recompute_partition_frontier();
+                ctx.set_gpr(2, 0u);
+            } else {
+                ctx.set_gpr(2, 0x800200CBu);
+            }
         });
 
     runtime.register_hle("ThreadManForUser", 0x446D8DE6u,
@@ -6298,6 +7331,14 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             std::uint32_t stack_top = 0u;
             if (!allocate_thread_stack(stack_size, stack_bottom, stack_top) ||
                 !rt.memory().contains(stack_bottom, stack_size)) {
+                std::ostringstream failure;
+                failure << "THREAD_CREATE stack_alloc_failed name=" << name
+                        << " requested=" << requested_stack
+                        << " aligned=" << stack_size
+                        << " partition_next=" << psprecomp::hex32(partition_table.next_address)
+                        << " stack_top=" << psprecomp::hex32(thread_table.next_stack_top)
+                        << " free_ranges=" << thread_table.free_stacks.size();
+                runtime_log_line(failure.str());
                 ctx.set_gpr(2, 0x80020190u);
                 return;
             }
@@ -6405,7 +7446,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
 
     runtime.register_hle("ThreadManForUser", 0x809CE29Bu,
         [](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx) {
-            complete_current_thread(rt, ctx);
+            exit_delete_current_thread(rt, ctx);
         });
 
     runtime.register_hle("ThreadManForUser", 0x383F7BCCu,
@@ -7088,9 +8129,18 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             }
             const std::uint32_t alignment = 0x100u;
             const std::uint32_t total = block_size * block_count;
-            const std::uint32_t address = (partition_table.next_address + alignment - 1u) & ~(alignment - 1u);
+            if (total > 0xFFFFFFFFu - (alignment - 1u)) {
+                ctx.set_gpr(2, 0x80020190u);
+                return;
+            }
             const std::uint32_t reserved = (total + alignment - 1u) & ~(alignment - 1u);
-            if (!rt.memory().contains(address, reserved) || address + reserved > thread_table.next_stack_top) {
+            std::uint32_t address{};
+            if (!allocate_user_arena_range(reserved, alignment, address) ||
+                !rt.memory().contains(address, reserved)) {
+                runtime_log_line("FPL_CREATE failed name=" + name +
+                    " size=" + std::to_string(reserved) +
+                    " frontier=" + psprecomp::hex32(partition_table.next_address) +
+                    " stack_top=" + psprecomp::hex32(thread_table.next_stack_top));
                 ctx.set_gpr(2, 0x80020190u);
                 return;
             }
@@ -7098,7 +8148,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             const std::int32_t uid = fixed_pool_table.next_uid++;
             fixed_pool_table.pools.emplace(uid, FixedPoolRecord{name, address, block_size, block_count,
                 std::vector<bool>(block_count, false)});
-            partition_table.next_address = address + reserved;
+            recompute_partition_frontier();
             if (std::getenv("PSPRECOMP_TRACE") != nullptr) {
                 std::cerr << "[hle] sceKernelCreateFpl uid=" << uid << " name=" << name
                           << " block=0x" << std::hex << std::uppercase << block_size
@@ -7172,20 +8222,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x800201A8u);
                 return;
             }
-            // The partition allocator only ever bumps a cursor. Returning the
-            // memory when this pool happens to be the most recent allocation
-            // costs one comparison and is what keeps a create/delete cycle --
-            // exactly what repeated in-game loads are -- from walking the
-            // cursor into the thread stacks and failing the fourth or fifth
-            // time. Older pools still leak their range until a proper
-            // allocator exists.
-            const auto &pool = it->second;
-            constexpr std::uint32_t alignment = 0x100u;
-            const std::uint32_t reserved =
-                (pool.block_size * pool.block_count + alignment - 1u) & ~(alignment - 1u);
-            if (pool.address + reserved == partition_table.next_address)
-                partition_table.next_address = pool.address;
             fixed_pool_table.pools.erase(it);
+            recompute_partition_frontier();
             set_success(ctx);
         });
 
@@ -8091,6 +9129,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         // time instead of leaving waveOut one vblank behind during heavy frames.
         vcs::audio_output_advance(virtual_time_us);
         if (display_window_close_requested()) {
+            // F10 is preferred, but never lose an expensive post-mission repro
+            // just because the window was closed while the black screen was up.
+            if (save_repro_trace_enabled) save_repro_dump_trace(rt, "window-close");
             ctx.set_gpr(2, 0u);
             rt.stop("Display window closed by the user");
             return;
@@ -8102,6 +9143,10 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             rt.stop("VBlank diagnostic stop at " + std::to_string(display_vblank_index));
             return;
         }
+        // Capture only after the completed frame has been presented and audio
+        // has been advanced. The restored PC returns from this wait import, so
+        // no half-presented frame or half-sealed audio interval enters the file.
+        save_repro_vblank_hotkeys(rt, ctx);
         const std::uint64_t period = virtual_vblank_period_us();
         const std::uint32_t delay = static_cast<std::uint32_t>(period - (virtual_time_us % period));
         const auto current = thread_table.threads.find(thread_table.current_uid);
@@ -10190,6 +11235,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                                 const auto fd = file_table.next_fd++;
                                 file_table.files.emplace(fd, std::move(stream));
                                 file_table.file_paths.emplace(fd, disc_file->native_path);
+                                file_table.file_open_flags.emplace(fd, 0x0001u);
                                 if (std::getenv("PSPRECOMP_IO_DIAG") != nullptr) {
                                     std::cerr << "[io] raw UMD open lbn=" << raw_lbn
                                               << " size=" << raw_size
@@ -10242,6 +11288,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             const auto fd = file_table.next_fd++;
             file_table.files.emplace(fd, std::move(stream));
             file_table.file_paths.emplace(fd, native);
+            file_table.file_open_flags.emplace(fd, flags);
             if (file_object_diag) {
                 std::cerr << "[fileobj-hle] open-ok fd=" << fd << " path=\"" << path
                           << "\" native=\"" << native.string()
@@ -10365,6 +11412,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 file_table.synthetic_empty_files.erase(fd) == 1u ||
                 file_table.virtual_disc_handles.erase(fd) == 1u;
             file_table.file_paths.erase(fd);
+            file_table.file_open_flags.erase(fd);
             if (std::getenv("PSPRECOMP_FILE_OBJECT_DIAG") != nullptr)
                 std::cerr << "[fileobj-hle] close fd=" << fd << " closed=" << closed << "\n";
             ctx.set_gpr(2, closed ? 0u : 0x80010009u);
@@ -10518,6 +11566,12 @@ void vcs_starvation_tick(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) 
 }
 
 } // namespace
+
+bool restore_save_repro_checkpoint_if_requested(psprecomp::Runtime &runtime, std::string &error) {
+    const char *value = std::getenv("PSPRECOMP_SAVE_REPRO_AUTO_RESTORE");
+    if (value == nullptr || *value == '\0' || std::string_view(value) == "0") return false;
+    return save_repro_restore_checkpoint_impl(runtime, error);
+}
 
 void report_disc_read_stats() {
     const std::uint64_t total =
@@ -11720,6 +12774,217 @@ bool run_profile_self_tests(std::string &error) {
             require(sas_context.gpr[2] == 0u && raw_dry_nonzero && raw_send_nonzero,
                     "SAS raw-mode did not expose dry/effect planes");
 
+        }
+
+        // V8.2.7: partition memory is a reusable arena, not a one-way bump
+        // pointer.  Freeing blocks out of order must expose their holes to new
+        // allocations, and freeing the final live block must collapse the
+        // frontier back to the arena base.
+        {
+            reset();
+            partition_table = PartitionTable{};
+            fixed_pool_table = FixedPoolTable{};
+            partition_arena_base = 0x08810000u;
+            partition_table.next_address = partition_arena_base;
+            thread_table.next_stack_top = 0x08820000u;
+
+            std::uint32_t first{}, second{}, reused{};
+            require(allocate_user_arena_range(0x1000u, 0x100u, first) && first == 0x08810000u,
+                    "partition arena did not allocate the first low block");
+            partition_table.blocks.emplace(0x100, PartitionBlock{"first", first, 0x1000u});
+            recompute_partition_frontier();
+            require(allocate_user_arena_range(0x1000u, 0x100u, second) && second == 0x08811000u,
+                    "partition arena did not allocate the second block after the first");
+            partition_table.blocks.emplace(0x101, PartitionBlock{"second", second, 0x1000u});
+            recompute_partition_frontier();
+
+            partition_table.blocks.erase(0x100);
+            recompute_partition_frontier();
+            require(partition_table.next_address == 0x08812000u,
+                    "partition frontier collapsed across a still-live upper block");
+            require(allocate_user_arena_range(0x800u, 0x100u, reused) && reused == 0x08810000u,
+                    "partition allocator did not reuse a freed lower hole");
+            partition_table.blocks.emplace(0x102, PartitionBlock{"reused", reused, 0x800u});
+            recompute_partition_frontier();
+
+            partition_table.blocks.erase(0x101);
+            partition_table.blocks.erase(0x102);
+            recompute_partition_frontier();
+            require(partition_table.next_address == partition_arena_base,
+                    "partition frontier did not return to the arena base after all frees");
+        }
+
+        // V8.2.7: sceKernelExitDeleteThread must destroy the current thread
+        // object and reclaim its stack immediately.  The old implementation
+        // only marked it Completed, leaking PSP user memory until later thread
+        // creation (including the pre-save transition) failed.
+        {
+            reset();
+            partition_table = PartitionTable{};
+            partition_table.next_address = 0x08810000u;
+            thread_table.next_stack_top = 0x0A000000u;
+
+            std::uint32_t deleted_bottom{}, deleted_top{};
+            require(allocate_thread_stack(0x800u, deleted_bottom, deleted_top),
+                    "ExitDelete self-test could not allocate worker stack");
+            ThreadRecord deleted{};
+            deleted.name = "exit-delete-worker";
+            deleted.entry = 0x08986B50u;
+            deleted.priority = 32u;
+            deleted.stack_size = 0x800u;
+            deleted.stack_bottom = deleted_bottom;
+            deleted.stack_top = deleted_top;
+            deleted.state = ThreadState::Running;
+            thread_table.threads.emplace(10, deleted);
+            thread_table.current_uid = 10;
+
+            ThreadRecord successor{};
+            successor.name = "exit-delete-successor";
+            successor.priority = 20u;
+            successor.state = ThreadState::Ready;
+            successor.suspended_context.pc = 0x08812340u;
+            thread_table.threads.emplace(11, successor);
+            enqueue_continuation(11, successor.suspended_context);
+
+            ThreadRecord waiter{};
+            waiter.name = "exit-delete-waiter";
+            waiter.priority = 80u;
+            waiter.state = ThreadState::Sleeping;
+            thread_table.threads.emplace(12, waiter);
+            ThreadContinuation wait{};
+            wait.uid = 12;
+            wait.context.pc = 0x08845670u;
+            wait.context.set_gpr(2u, 0xDEADBEEFu);
+            thread_table.thread_end_waiters[10].push_back(wait);
+
+            psprecomp::Runtime exitdelete_runtime;
+            psprecomp::AllegrexContext exitdelete_context{};
+            exitdelete_context.set_gpr(4u, 0x1234u);
+            exit_delete_current_thread(exitdelete_runtime, exitdelete_context);
+
+            require(!thread_table.threads.contains(10),
+                    "sceKernelExitDeleteThread left a Completed thread record behind");
+            require(thread_table.next_stack_top == 0x0A000000u && thread_table.free_stacks.empty(),
+                    "sceKernelExitDeleteThread did not reclaim the worker stack");
+            require(thread_table.current_uid == 11 && exitdelete_context.pc == 0x08812340u,
+                    "sceKernelExitDeleteThread did not schedule the next ready thread");
+            const auto awakened = std::find_if(
+                thread_table.continuations.begin(), thread_table.continuations.end(),
+                [](const ThreadContinuation &item) { return item.uid == 12; });
+            require(awakened != thread_table.continuations.end() && awakened->context.gpr[2] == 0u,
+                    "sceKernelExitDeleteThread did not wake thread-end waiters");
+        }
+
+        // V8.2.7 checkpoint migration is deliberately narrow: only completed
+        // VCS worker entry points proven to terminate through ExitDelete are
+        // reclaimed.  Ordinary Completed threads remain available for normal
+        // ExitThread/DeleteThread semantics.
+        {
+            reset();
+            partition_table = PartitionTable{};
+            fixed_pool_table = FixedPoolTable{};
+            partition_arena_base = 0x09F00000u;
+            partition_table.next_address = 0x09F99000u;  // stale V8.2.6 bump cursor
+            thread_table.next_stack_top = 0x09F99800u;
+            thread_table.current_uid = 13;
+
+            ThreadRecord current{}; current.name = "mix sound thread"; current.state = ThreadState::Running;
+            thread_table.threads.emplace(13, current);
+            ThreadRecord leaked_sfx{};
+            leaked_sfx.name = "sfx bank load thread"; leaked_sfx.entry = 0x08986B50u;
+            leaked_sfx.state = ThreadState::Completed; leaked_sfx.stack_bottom = 0x09F99800u;
+            leaked_sfx.stack_top = 0x09F9A000u; leaked_sfx.stack_size = 0x800u;
+            thread_table.threads.emplace(14, leaked_sfx);
+            ThreadRecord leaked_memstick{};
+            leaked_memstick.name = "memstick"; leaked_memstick.entry = 0x08AB5AA0u;
+            leaked_memstick.state = ThreadState::Completed; leaked_memstick.stack_bottom = 0x09F9A000u;
+            leaked_memstick.stack_top = 0x09F9C000u; leaked_memstick.stack_size = 0x2000u;
+            thread_table.threads.emplace(15, leaked_memstick);
+            ThreadRecord ordinary{};
+            ordinary.name = "user_main"; ordinary.entry = 0x08810000u; ordinary.state = ThreadState::Completed;
+            ordinary.stack_bottom = 0x09FA0000u; ordinary.stack_top = 0x09FA8000u; ordinary.stack_size = 0x8000u;
+            thread_table.threads.emplace(1, ordinary);
+
+            recompute_partition_frontier();
+            require(partition_table.next_address == partition_arena_base,
+                    "legacy checkpoint partition cursor was not rebuilt from live allocations");
+            const LegacyExitDeleteRepairStats repaired = repair_legacy_vcs_exit_delete_threads();
+            require(repaired.threads == 2u && repaired.stack_bytes == 0x2800u,
+                    "legacy ExitDelete migration did not reclaim the expected worker stacks");
+            require(repaired.stack_top_before == 0x09F99800u && repaired.stack_top_after == 0x09F9C000u,
+                    "legacy ExitDelete migration did not recover the top-down stack frontier");
+            require(!thread_table.threads.contains(14) && !thread_table.threads.contains(15) &&
+                        thread_table.threads.contains(1) && thread_table.threads.contains(13),
+                    "legacy ExitDelete migration removed the wrong thread records");
+        }
+
+        // V8.2.6 persistent save-repro format: exercise the primitive framing
+        // used by every checkpoint section without touching the filesystem.
+        {
+            SaveReproWriter writer;
+            const std::uint32_t marker = 0x8265A5A5u;
+            const std::array<std::uint8_t, 5> payload{1u, 3u, 5u, 7u, 9u};
+            writer.pod(marker);
+            writer.string("save-repro-roundtrip");
+            writer.raw(payload);
+            const std::uint64_t checksum = save_repro_fnv1a(writer.bytes);
+            require(checksum != 0u, "save-repro checkpoint checksum unexpectedly zero");
+            SaveReproReader reader{writer.bytes};
+            std::uint32_t restored_marker{};
+            std::string restored_text;
+            std::array<std::uint8_t, 5> restored_payload{};
+            require(reader.pod(restored_marker) && reader.string(restored_text) && reader.raw(restored_payload),
+                    "save-repro primitive reader/writer roundtrip failed");
+            require(restored_marker == marker && restored_text == "save-repro-roundtrip" &&
+                        restored_payload == payload && reader.offset == reader.bytes.size(),
+                    "save-repro primitive roundtrip changed checkpoint data");
+        }
+
+        // Exercise the complete persistent checkpoint on a fresh profile state.
+        // This writes the real RAM/EDRAM payload, then mutates RAM/time/CPU and
+        // proves restore reconstructs the captured state. The test file lives in
+        // the host temp directory and is removed immediately.
+        {
+            const auto temp_root = std::filesystem::temp_directory_path() / "psprecomp_v826_save_repro_selftest";
+            std::error_code cleanup_error;
+            std::filesystem::remove_all(temp_root, cleanup_error);
+            std::filesystem::create_directories(temp_root / "PSP_DATA", cleanup_error);
+            require(!cleanup_error, "save-repro self-test could not create temp directory");
+
+            psprecomp::Runtime checkpoint_runtime;
+            checkpoint_runtime.set_game_root(temp_root / "PSP_DATA");
+            install_profile(checkpoint_runtime, 0x08810000u);
+            save_repro_self_test_mode = true;
+            constexpr std::uint32_t marker_address = 0x08824000u;
+            checkpoint_runtime.memory().store32(marker_address, 0x8260CAFEu);
+            virtual_time_us = 0x12345678ull;
+            display_vblank_index = 0x4321ull;
+            controller_state.buttons = 0x00004000u;
+            psprecomp::AllegrexContext captured = checkpoint_runtime.cpu();
+            captured.pc = 0x08958D28u;
+            captured.set_gpr(2u, 0x11223344u);
+            captured.set_gpr(29u, 0x09FFF000u);
+
+            std::string checkpoint_error;
+            if (!save_repro_write_checkpoint(checkpoint_runtime, captured, checkpoint_error))
+                throw std::runtime_error("save-repro full checkpoint write failed: " + checkpoint_error);
+            checkpoint_runtime.memory().store32(marker_address, 0u);
+            virtual_time_us = 0u;
+            display_vblank_index = 0u;
+            controller_state.buttons = 0u;
+            checkpoint_runtime.cpu() = {};
+            checkpoint_error.clear();
+            if (!save_repro_restore_checkpoint_impl(checkpoint_runtime, checkpoint_error))
+                throw std::runtime_error("save-repro full checkpoint restore failed: " + checkpoint_error);
+            require(checkpoint_runtime.memory().load32(marker_address) == 0x8260CAFEu &&
+                        virtual_time_us == 0x12345678ull && display_vblank_index == 0x4321ull &&
+                        controller_state.buttons == 0x00004000u &&
+                        checkpoint_runtime.cpu().pc == captured.pc &&
+                        checkpoint_runtime.cpu().gpr[2] == captured.gpr[2] &&
+                        checkpoint_runtime.cpu().gpr[29] == captured.gpr[29],
+                    "save-repro full checkpoint did not restore RAM/time/controller/CPU exactly");
+            save_repro_self_test_mode = false;
+            std::filesystem::remove_all(temp_root, cleanup_error);
         }
 
         reset();

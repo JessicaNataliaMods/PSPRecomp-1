@@ -109,6 +109,10 @@ set "CORRECTNESS_V822_STAMP=%BUILD%\.vcs_correctness_v822_recovery_20260817"
 set "CORRECTNESS_V823_NEWS_STAMP=%BUILD%\.vcs_correctness_v823_news_audio_20260817"
 set "CORRECTNESS_V824_NEWS_PACING_STAMP=%BUILD%\.vcs_correctness_v824_news_pacing_20260818"
 set "CORRECTNESS_V825_NEWS_ATRAC_STAMP=%BUILD%\.vcs_correctness_v825_news_atrac_stream_20260818"
+set "CORRECTNESS_V826_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826_save_repro_20260818"
+set "CORRECTNESS_V826A_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826a_save_repro_passive_20260818"
+set "CORRECTNESS_V826B_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826b_save_repro_trace_20260818"
+set "CORRECTNESS_V827_SAVE_THREAD_STAMP=%BUILD%\.vcs_correctness_v827_save_thread_lifecycle_20260818"
 if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
 if not defined PSPRECOMP_RUNTIME_CHAIN_TELEMETRY set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
@@ -127,7 +131,7 @@ echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
 echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V8.2 runtime-chain lean + V8.1 Geometry/direct-fastmem baseline
-echo Correctness:      V8.2.5 NEWS ATRAC stream state - resident sentinels + V8.2.3 Output2 base
+echo Correctness:      V8.2.6B SAVE REPRO TRACE HOTFIX over protected V8.2.5 NEWS audio
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
@@ -150,10 +154,10 @@ if not defined PYTHON3_CMD goto :NO_PYTHON3
 echo   Python 3:        %PYTHON3_CMD%
 %PYTHON3_CMD% "%PROFILE%\tools\build_tier2_superblocks.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
-rem V8.2.5 checker includes the protected V8.2 CPU/Geometry invariants and the
-rem V8.2.3 Output2 ABI/watermark invariants. Older revision checkers pin their
-rem exact stage strings and therefore must not gate a newer correctness stage.
-%PYTHON3_CMD% "%PROFILE%\tests\check_v825_news_atrac_stream.py"
+rem V8.2.7 checker includes the protected V8.2 CPU/Geometry, V8.2.5 NEWS,
+rem V8.2.6 passive checkpoint contract and the corrected PSP ExitDelete lifecycle.
+rem Older revision checkers pin exact stage strings and must not gate this stage.
+%PYTHON3_CMD% "%PROFILE%\tests\check_v827_save_thread_lifecycle.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -337,6 +341,48 @@ if exist "%BUILD%" if not exist "%CORRECTNESS_V825_NEWS_ATRAC_STAMP%" (
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%CORRECTNESS_V826_SAVE_REPRO_STAMP%" (
+  echo.
+  echo [0c-v826save/7] V8.2.6 SAVE REPRO CAPTURE - rebuilding only checkpoint/trace host objects...
+  rem No runtime.hpp, generated AOT, Tier2, Geometry or DX12 changes.  runtime.cpp
+  rem only exposes current HLE identity to the diagnostic trace.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*runtime.cpp.obj" >nul 2>&1
+  del /s /q "%BUILD%\*main.cpp.obj" >nul 2>&1
+)
+
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V826A_SAVE_REPRO_STAMP%" (
+  echo.
+  echo [0c-v826a/7] V8.2.6A SAVE REPRO PASSIVE RECOVERY - removing passive HLE instrumentation...
+  rem Revert core runtime.cpp to the exact V8.2.5 hot path.  Diagnostic F8/F10
+  rem edges are queued by the Win32 window thread and consumed once per vblank.
+  rem Rebuild only files touched by this recovery; keep generated AOT/Tier2/DX12.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*runtime.cpp.obj" >nul 2>&1
+  del /s /q "%BUILD%\*display_window*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V826B_SAVE_REPRO_STAMP%" (
+  echo.
+  echo [0c-v826b/7] V8.2.6B SAVE REPRO TRACE HOTFIX - rebuilding trace host objects only...
+  rem Before F8/restore the runtime path remains V8.2.5/V8.2.6A.  The F10
+  rem async-key fallback is active only after trace capture has been armed.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V827_SAVE_THREAD_STAMP%" (
+  echo.
+  echo [0c-v827save/7] V8.2.7 SAVE THREAD LIFECYCLE - rebuilding profile/runtime-log objects only...
+  rem Fix sceKernelExitDeleteThread stack/object reclamation and migrate the
+  rem already captured V8.2.6 checkpoint. Generated AOT/Tier2/DX12 are unchanged.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
   echo.
   echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
@@ -390,6 +436,10 @@ if errorlevel 1 goto :FAIL
 >"%CORRECTNESS_V823_NEWS_STAMP%" echo VCS V8.2.3 NEWS AUDIO FIX 2026-08-17
 >"%CORRECTNESS_V824_NEWS_PACING_STAMP%" echo VCS V8.2.4 NEWS PACING FIX 2026-08-18
 >"%CORRECTNESS_V825_NEWS_ATRAC_STAMP%" echo VCS V8.2.5 NEWS ATRAC STREAM FIX 2026-08-18
+>"%CORRECTNESS_V826_SAVE_REPRO_STAMP%" echo VCS V8.2.6 SAVE REPRO CAPTURE 2026-08-18
+>"%CORRECTNESS_V826A_SAVE_REPRO_STAMP%" echo VCS V8.2.6A SAVE REPRO PASSIVE RECOVERY 2026-08-18
+>"%CORRECTNESS_V826B_SAVE_REPRO_STAMP%" echo VCS V8.2.6B SAVE REPRO TRACE HOTFIX 2026-08-18
+>"%CORRECTNESS_V827_SAVE_THREAD_STAMP%" echo VCS V8.2.7 SAVE THREAD LIFECYCLE FIX 2026-08-18
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

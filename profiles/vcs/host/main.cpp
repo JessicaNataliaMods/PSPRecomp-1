@@ -308,13 +308,19 @@ int main(int argc, char **argv) {
         runtime.cpu().set_gpr(31, 0u);
         runtime.cpu().set_gpr(4, 0u);
         runtime.cpu().set_gpr(5, 0u);
+        std::string save_repro_restore_error;
+        const bool save_repro_restored =
+            vcs::restore_save_repro_checkpoint_if_requested(runtime, save_repro_restore_error);
+        if (!save_repro_restore_error.empty())
+            throw psprecomp::Error("SAVE REPRO restore failed: " + save_repro_restore_error);
+        const std::uint32_t runtime_entry = save_repro_restored ? runtime.cpu().pc : elf.runtime_entry();
         const std::uint64_t max_dispatches = configured_max_dispatches();
         std::cout << "Dispatch cap: " << max_dispatches << "\n";
         vcs::display_window_start();
 
         vcs::install_display_heartbeat();
         vcs::install_starvation_preemption();
-        runtime.run(elf.runtime_entry(), max_dispatches);
+        runtime.run(runtime_entry, max_dispatches);
         const bool shutdown_diag = std::getenv("PSPRECOMP_SHUTDOWN_DIAG") != nullptr;
         if (shutdown_diag) std::cerr << "[shutdown] runtime-run-returned\n";
         std::cout << "Runtime stopped: " << runtime.stop_reason() << "\n";

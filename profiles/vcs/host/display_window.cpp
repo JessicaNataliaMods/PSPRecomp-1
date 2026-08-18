@@ -133,6 +133,7 @@ struct WindowState {
     std::atomic<bool> ready{false};
     std::atomic<bool> focused{false};
     std::atomic<bool> close_requested{false};
+    std::atomic<std::uint32_t> save_repro_commands{0u};
     // Raw mouse motion accumulated by the window thread and drained by the
     // guest's controller poll. Raw input rather than cursor position: the
     // cursor stops at the screen edge, and a camera that stops turning when
@@ -448,10 +449,17 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wparam, LPAR
         state.focused.store(false, std::memory_order_relaxed);
         return 0;
     case WM_KEYDOWN:
-        // Keyboard state is sampled with GetAsyncKeyState. Do not infer pause
-        // menu ownership from Escape here: the guest may consume the press for
-        // an intro/transition. Cursor mode is driven only by VCS' real native
-        // frontend-active byte through display_window_set_guest_frontend_active.
+        // Gameplay keys keep using the existing sampled-input path. Diagnostic
+        // F8/F10 edges are queued here on the UI thread, with auto-repeat
+        // ignored, so no GetAsyncKeyState call is added to guest timing.
+        if ((static_cast<std::uint32_t>(lparam) & (1u << 30u)) == 0u) {
+            if (wparam == VK_F8)
+                state.save_repro_commands.fetch_or(0x1u, std::memory_order_release);
+            else if (wparam == VK_F10)
+                state.save_repro_commands.fetch_or(0x2u, std::memory_order_release);
+        }
+        // Do not infer pause menu ownership from Escape here: the guest may
+        // consume the press for an intro/transition.
         return 0;
     case WM_INPUT: {
         // Raw mouse deltas. Sized from the message rather than assumed: the
@@ -1310,6 +1318,11 @@ bool display_window_close_requested() {
     return window_state().close_requested.load(std::memory_order_relaxed);
 }
 
+std::uint32_t display_window_take_save_repro_commands() noexcept {
+    if (!display_window_enabled()) return 0u;
+    return window_state().save_repro_commands.exchange(0u, std::memory_order_acq_rel);
+}
+
 // Keeps the last rendered frame on screen after the guest stops so the run can
 // be inspected.  PSPRECOMP_WINDOW_HOLD=0 closes immediately instead.
 void display_window_shutdown() {
@@ -1357,6 +1370,7 @@ void display_window_set_guest_frontend_active(bool) noexcept {}
 bool display_window_native_boot_user_committed() noexcept { return false; }
 void display_window_set_system_utility_mode(bool) noexcept {}
 bool display_window_close_requested() { return false; }
+std::uint32_t display_window_take_save_repro_commands() noexcept { return 0u; }
 void display_window_shutdown() {}
 
 } // namespace vcs

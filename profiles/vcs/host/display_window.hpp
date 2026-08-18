@@ -99,6 +99,10 @@ void display_window_set_system_utility_mode(bool active) noexcept;
 // True once the user closed the window or pressed Escape.
 [[nodiscard]] bool display_window_close_requested();
 
+// Diagnostic-only F8/F10 edges captured by the UI thread. The guest runtime
+// consumes and clears these bits at vblank.
+[[nodiscard]] std::uint32_t display_window_take_save_repro_commands() noexcept;
+
 void display_window_shutdown();
 
 // Native window handle (HWND on Windows, nullptr elsewhere or before the window

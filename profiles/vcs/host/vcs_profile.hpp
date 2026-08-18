@@ -6,6 +6,10 @@
 
 namespace vcs {
 void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start);
+// Restores the persistent V8.2.6 post-mission save-repro checkpoint when
+// PSPRECOMP_SAVE_REPRO_AUTO_RESTORE=1. Returns true only when a checkpoint
+// was requested and restored successfully; `error` is populated on failure.
+bool restore_save_repro_checkpoint_if_requested(psprecomp::Runtime &runtime, std::string &error);
 
 // Feeds the display window a dispatch/vblank heartbeat so long synchronous
 // guest phases still show progress instead of looking frozen.
