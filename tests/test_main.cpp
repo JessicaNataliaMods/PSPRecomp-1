@@ -605,9 +605,9 @@ static void test_codegen_vh2f_lowering() {
     }
     require(text.find("ctx.execute_vfpu_vh2f(0u, 0u, 1u)") != std::string::npos,
             "VH2F was not lowered to the dedicated AOT helper");
-    require(text.find("const float vfpu_scale = std::ldexp(1.0f, -static_cast<int>(3u))") != std::string::npos,
+    require(text.find("ctx.execute_vfpu_vi2f_ct<2u, 1u, 2u, 3u>()") != std::string::npos,
             "VI2F scale was not lowered into generated AOT code");
-    require(text.find("static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu_s[vfpu_i]))") != std::string::npos,
+    require(text.find("execute_vfpu_vi2f_ct") != std::string::npos,
             "VI2F did not reinterpret source lanes as signed integers");
     require(text.find("vh2f not lowered yet") == std::string::npos,
             "VH2F codegen retained an unsupported fallback");

@@ -316,6 +316,138 @@ struct alignas(16) AllegrexContext {
         eat_vfpu_prefixes();
     }
 
+    template <std::uint32_t DestinationRegister, std::uint32_t SourceRegister,
+              std::uint32_t TargetRegister, std::uint32_t Length, std::uint32_t Operation>
+    PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vec3_ct() noexcept {
+        static_assert(Length >= 1u && Length <= 4u);
+        static_assert(Operation <= 3u);
+        // V8.5: VCS almost always executes VFPU arithmetic with the architectural
+        // S/T/D prefixes already at their consumed defaults (E4/E4/0).  In that
+        // case avoid three temporary vectors, two prefix decoders and the
+        // destination-prefix writer entirely.  Keep a fully architectural
+        // fallback for the rare explicit VPFX instruction.
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t t0i = vfpu_vector_lane_index(TargetRegister, Length, 0u);
+            constexpr std::size_t d0i = vfpu_vector_lane_index(DestinationRegister, Length, 0u);
+            const float s0 = vfpu[s0i], t0 = vfpu[t0i];
+            float s1 = 0.0f, s2 = 0.0f, s3 = 0.0f;
+            float t1 = 0.0f, t2 = 0.0f, t3 = 0.0f;
+            if constexpr (Length >= 2u) {
+                constexpr std::size_t s1i = vfpu_vector_lane_index(SourceRegister, Length, 1u);
+                constexpr std::size_t t1i = vfpu_vector_lane_index(TargetRegister, Length, 1u);
+                s1 = vfpu[s1i]; t1 = vfpu[t1i];
+            }
+            if constexpr (Length >= 3u) {
+                constexpr std::size_t s2i = vfpu_vector_lane_index(SourceRegister, Length, 2u);
+                constexpr std::size_t t2i = vfpu_vector_lane_index(TargetRegister, Length, 2u);
+                s2 = vfpu[s2i]; t2 = vfpu[t2i];
+            }
+            if constexpr (Length >= 4u) {
+                constexpr std::size_t s3i = vfpu_vector_lane_index(SourceRegister, Length, 3u);
+                constexpr std::size_t t3i = vfpu_vector_lane_index(TargetRegister, Length, 3u);
+                s3 = vfpu[s3i]; t3 = vfpu[t3i];
+            }
+            auto op = [](float a, float b) noexcept {
+                if constexpr (Operation == 0u) return a + b;
+                else if constexpr (Operation == 1u) return a - b;
+                else if constexpr (Operation == 2u) return a * b;
+                else return a / b;
+            };
+            const float r0 = op(s0, t0);
+            float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f;
+            if constexpr (Length >= 2u) r1 = op(s1, t1);
+            if constexpr (Length >= 3u) r2 = op(s2, t2);
+            if constexpr (Length >= 4u) r3 = op(s3, t3);
+            vfpu[d0i] = r0;
+            if constexpr (Length >= 2u) {
+                constexpr std::size_t d1i = vfpu_vector_lane_index(DestinationRegister, Length, 1u);
+                vfpu[d1i] = r1;
+            }
+            if constexpr (Length >= 3u) {
+                constexpr std::size_t d2i = vfpu_vector_lane_index(DestinationRegister, Length, 2u);
+                vfpu[d2i] = r2;
+            }
+            if constexpr (Length >= 4u) {
+                constexpr std::size_t d3i = vfpu_vector_lane_index(DestinationRegister, Length, 3u);
+                vfpu[d3i] = r3;
+            }
+            return;
+        }
+        float source[4]{}, target[4]{}, result[4]{};
+        read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
+        read_vfpu_vector_with_source_prefix_ct<TargetRegister, Length, 1u>(target);
+        auto op = [](float a, float b) noexcept {
+            if constexpr (Operation == 0u) return a + b;
+            else if constexpr (Operation == 1u) return a - b;
+            else if constexpr (Operation == 2u) return a * b;
+            else return a / b;
+        };
+        result[0] = op(source[0], target[0]);
+        if constexpr (Length >= 2u) result[1] = op(source[1], target[1]);
+        if constexpr (Length >= 3u) result[2] = op(source[2], target[2]);
+        if constexpr (Length >= 4u) result[3] = op(source[3], target[3]);
+        write_vfpu_vector_with_destination_prefix_ct<DestinationRegister, Length>(result);
+    }
+
+    template <std::uint32_t Operation>
+    [[nodiscard]] PSPRECOMP_CONTEXT_FORCEINLINE static float vfpu_unary_lane(float value) noexcept {
+        if constexpr (Operation == 0u) return value;
+        else if constexpr (Operation == 1u) return std::fabs(value);
+        else if constexpr (Operation == 2u) return -value;
+        else if constexpr (Operation == 4u) return value <= 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+        else if constexpr (Operation == 5u) return value < -1.0f ? -1.0f : (value > 1.0f ? 1.0f : value);
+        else if constexpr (Operation == 16u) return 1.0f / value;
+        else if constexpr (Operation == 17u) return 1.0f / std::sqrt(value);
+        else if constexpr (Operation == 18u) return std::sin(value * 1.57079632679489661923f);
+        else if constexpr (Operation == 19u) return std::cos(value * 1.57079632679489661923f);
+        else if constexpr (Operation == 20u) return std::exp2(value);
+        else if constexpr (Operation == 21u) return std::log2(value);
+        else if constexpr (Operation == 22u) return std::fabs(std::sqrt(value));
+        else if constexpr (Operation == 23u) return std::asin(value) * 0.63661977236758134308f;
+        else if constexpr (Operation == 24u) return -1.0f / value;
+        else if constexpr (Operation == 26u) return -std::sin(value * 1.57079632679489661923f);
+        else return 1.0f / std::exp2(value);
+    }
+
+    template <std::uint32_t DestinationRegister, std::uint32_t SourceRegister,
+              std::uint32_t Length, std::uint32_t Operation>
+    PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_unary_ct() noexcept {
+        static_assert(Length >= 1u && Length <= 4u);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t d0i = vfpu_vector_lane_index(DestinationRegister, Length, 0u);
+            const float s0 = vfpu[s0i];
+            float s1 = 0.0f, s2 = 0.0f, s3 = 0.0f;
+            if constexpr (Length >= 2u) {
+                constexpr std::size_t s1i = vfpu_vector_lane_index(SourceRegister, Length, 1u); s1 = vfpu[s1i];
+            }
+            if constexpr (Length >= 3u) {
+                constexpr std::size_t s2i = vfpu_vector_lane_index(SourceRegister, Length, 2u); s2 = vfpu[s2i];
+            }
+            if constexpr (Length >= 4u) {
+                constexpr std::size_t s3i = vfpu_vector_lane_index(SourceRegister, Length, 3u); s3 = vfpu[s3i];
+            }
+            const float r0 = vfpu_unary_lane<Operation>(s0);
+            float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f;
+            if constexpr (Length >= 2u) r1 = vfpu_unary_lane<Operation>(s1);
+            if constexpr (Length >= 3u) r2 = vfpu_unary_lane<Operation>(s2);
+            if constexpr (Length >= 4u) r3 = vfpu_unary_lane<Operation>(s3);
+            vfpu[d0i] = r0;
+            if constexpr (Length >= 2u) { constexpr std::size_t d1i = vfpu_vector_lane_index(DestinationRegister, Length, 1u); vfpu[d1i] = r1; }
+            if constexpr (Length >= 3u) { constexpr std::size_t d2i = vfpu_vector_lane_index(DestinationRegister, Length, 2u); vfpu[d2i] = r2; }
+            if constexpr (Length >= 4u) { constexpr std::size_t d3i = vfpu_vector_lane_index(DestinationRegister, Length, 3u); vfpu[d3i] = r3; }
+            return;
+        }
+        float source[4]{}, result[4]{};
+        read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
+        result[0] = vfpu_unary_lane<Operation>(source[0]);
+        if constexpr (Length >= 2u) result[1] = vfpu_unary_lane<Operation>(source[1]);
+        if constexpr (Length >= 3u) result[2] = vfpu_unary_lane<Operation>(source[2]);
+        if constexpr (Length >= 4u) result[3] = vfpu_unary_lane<Operation>(source[3]);
+        write_vfpu_vector_with_destination_prefix_ct<DestinationRegister, Length>(result);
+    }
+
     void read_vfpu_vector(float *destination, std::uint32_t vector_register, std::uint32_t length) const noexcept {
         if (length == 1u) {
             destination[0] = vfpu[vfpu_scalar_index(vector_register & 0x7Fu)];
@@ -704,6 +836,29 @@ struct alignas(16) AllegrexContext {
               std::uint32_t TargetRegister, std::uint32_t Length>
     PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vdot_ct() noexcept {
         static_assert(Length >= 1u && Length <= 4u);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t t0i = vfpu_vector_lane_index(TargetRegister, Length, 0u);
+            float sum = vfpu[s0i] * vfpu[t0i];
+            if constexpr (Length >= 2u) {
+                constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 1u);
+                constexpr std::size_t ti = vfpu_vector_lane_index(TargetRegister, Length, 1u);
+                sum += vfpu[si] * vfpu[ti];
+            }
+            if constexpr (Length >= 3u) {
+                constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 2u);
+                constexpr std::size_t ti = vfpu_vector_lane_index(TargetRegister, Length, 2u);
+                sum += vfpu[si] * vfpu[ti];
+            }
+            if constexpr (Length >= 4u) {
+                constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 3u);
+                constexpr std::size_t ti = vfpu_vector_lane_index(TargetRegister, Length, 3u);
+                sum += vfpu[si] * vfpu[ti];
+            }
+            constexpr std::size_t di = vfpu_vector_lane_index(DestinationScalarRegister, 1u, 0u);
+            vfpu[di] = sum;
+            return;
+        }
         float source[4]{};
         float target[4]{};
         read_vfpu_vector_ct<SourceRegister, Length>(source);
@@ -879,6 +1034,41 @@ struct alignas(16) AllegrexContext {
               std::uint32_t TargetRegister, std::uint32_t Length>
     PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_cross_quat_ct() noexcept {
         static_assert(Length >= 1u && Length <= 4u);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            if constexpr (Length == 3u || Length == 4u) {
+                constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+                constexpr std::size_t s1i = vfpu_vector_lane_index(SourceRegister, Length, 1u);
+                constexpr std::size_t s2i = vfpu_vector_lane_index(SourceRegister, Length, 2u);
+                constexpr std::size_t t0i = vfpu_vector_lane_index(TargetRegister, Length, 0u);
+                constexpr std::size_t t1i = vfpu_vector_lane_index(TargetRegister, Length, 1u);
+                constexpr std::size_t t2i = vfpu_vector_lane_index(TargetRegister, Length, 2u);
+                const float sx = vfpu[s0i], sy = vfpu[s1i], sz = vfpu[s2i];
+                const float tx = vfpu[t0i], ty = vfpu[t1i], tz = vfpu[t2i];
+                float r0, r1, r2, r3 = 0.0f;
+                if constexpr (Length == 3u) {
+                    r0 = sy * tz - sz * ty;
+                    r1 = sz * tx - sx * tz;
+                    r2 = sx * ty - sy * tx;
+                } else {
+                    constexpr std::size_t s3i = vfpu_vector_lane_index(SourceRegister, Length, 3u);
+                    constexpr std::size_t t3i = vfpu_vector_lane_index(TargetRegister, Length, 3u);
+                    const float sw = vfpu[s3i], tw = vfpu[t3i];
+                    r0 = sx * tw + sy * tz - sz * ty + sw * tx;
+                    r1 = -sx * tz + sy * tw + sz * tx + sw * ty;
+                    r2 = sx * ty - sy * tx + sz * tw + sw * tz;
+                    r3 = -sx * tx - sy * ty - sz * tz + sw * tw;
+                }
+                constexpr std::size_t d0i = vfpu_vector_lane_index(DestinationRegister, Length, 0u);
+                constexpr std::size_t d1i = vfpu_vector_lane_index(DestinationRegister, Length, 1u);
+                constexpr std::size_t d2i = vfpu_vector_lane_index(DestinationRegister, Length, 2u);
+                vfpu[d0i] = r0; vfpu[d1i] = r1; vfpu[d2i] = r2;
+                if constexpr (Length == 4u) {
+                    constexpr std::size_t d3i = vfpu_vector_lane_index(DestinationRegister, Length, 3u);
+                    vfpu[d3i] = r3;
+                }
+                return;
+            }
+        }
         float source[4]{};
         float target[4]{};
         float result[4]{};
@@ -1162,11 +1352,6 @@ struct alignas(16) AllegrexContext {
     PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vcmp_ct() noexcept {
         static_assert(Length >= 1u && Length <= 4u);
         static_assert(Condition < 16u);
-        float source[4]{};
-        float target[4]{};
-        read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
-        read_vfpu_vector_with_source_prefix_ct<TargetRegister, Length, 1u>(target);
-
         auto compare_lane = [](float sv, float tv) -> bool {
             if constexpr (Condition == 0u) return false;
             else if constexpr (Condition == 1u) return sv == tv;
@@ -1185,6 +1370,31 @@ struct alignas(16) AllegrexContext {
             else if constexpr (Condition == 14u) return !std::isinf(sv);
             else return !(std::isnan(sv) || std::isinf(sv));
         };
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t t0i = vfpu_vector_lane_index(TargetRegister, Length, 0u);
+            const bool r0 = compare_lane(vfpu[s0i], vfpu[t0i]);
+            bool r1 = false, r2 = false, r3 = false;
+            if constexpr (Length >= 2u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,1u), ti=vfpu_vector_lane_index(TargetRegister,Length,1u); r1=compare_lane(vfpu[si],vfpu[ti]); }
+            if constexpr (Length >= 3u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,2u), ti=vfpu_vector_lane_index(TargetRegister,Length,2u); r2=compare_lane(vfpu[si],vfpu[ti]); }
+            if constexpr (Length >= 4u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,3u), ti=vfpu_vector_lane_index(TargetRegister,Length,3u); r3=compare_lane(vfpu[si],vfpu[ti]); }
+            std::uint32_t lane_bits = static_cast<std::uint32_t>(r0);
+            if constexpr (Length >= 2u) lane_bits |= static_cast<std::uint32_t>(r1) << 1u;
+            if constexpr (Length >= 3u) lane_bits |= static_cast<std::uint32_t>(r2) << 2u;
+            if constexpr (Length >= 4u) lane_bits |= static_cast<std::uint32_t>(r3) << 3u;
+            bool any=r0, all=r0;
+            if constexpr (Length >= 2u) { any|=r1; all&=r1; }
+            if constexpr (Length >= 3u) { any|=r2; all&=r2; }
+            if constexpr (Length >= 4u) { any|=r3; all&=r3; }
+            constexpr std::uint32_t affected=((1u<<Length)-1u)|(1u<<4u)|(1u<<5u);
+            const std::uint32_t update=lane_bits|(static_cast<std::uint32_t>(any)<<4u)|(static_cast<std::uint32_t>(all)<<5u);
+            vfpu_ctrl[3]=(vfpu_ctrl[3]&~affected)|(update&affected);
+            return;
+        }
+        float source[4]{};
+        float target[4]{};
+        read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
+        read_vfpu_vector_with_source_prefix_ct<TargetRegister, Length, 1u>(target);
 
         const bool r0 = compare_lane(source[0], target[0]);
         const bool r1 = Length >= 2u ? compare_lane(source[1], target[1]) : false;
@@ -1260,6 +1470,29 @@ struct alignas(16) AllegrexContext {
     PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vcmov_ct() noexcept {
         static_assert(Length >= 1u && Length <= 4u);
         static_assert(ConditionIndex < 8u);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            // Capture all source lanes before any destination write: VS and VD
+            // may overlap, and hardware observes the pre-instruction source.
+            constexpr std::size_t s0i=vfpu_vector_lane_index(SourceRegister,Length,0u);
+            const float s0=vfpu[s0i];
+            float s1=0.0f,s2=0.0f,s3=0.0f;
+            if constexpr (Length>=2u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,1u); s1=vfpu[si]; }
+            if constexpr (Length>=3u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,2u); s2=vfpu[si]; }
+            if constexpr (Length>=4u) { constexpr std::size_t si=vfpu_vector_lane_index(SourceRegister,Length,3u); s3=vfpu[si]; }
+            const std::uint32_t cc=vfpu_ctrl[3];
+            auto write_lane=[&](std::uint32_t lane,float value) { vfpu[vfpu_vector_lane_index(DestinationRegister,Length,lane)]=value; };
+            if constexpr (ConditionIndex < 6u) {
+                const bool selected=(((cc>>ConditionIndex)&1u)!=0u)==!MoveIfFalse;
+                if (selected) { write_lane(0u,s0); if constexpr(Length>=2u) write_lane(1u,s1); if constexpr(Length>=3u) write_lane(2u,s2); if constexpr(Length>=4u) write_lane(3u,s3); }
+            } else if constexpr (ConditionIndex == 6u) {
+                constexpr bool want=!MoveIfFalse;
+                if ((((cc>>0u)&1u)!=0u)==want) write_lane(0u,s0);
+                if constexpr(Length>=2u) if ((((cc>>1u)&1u)!=0u)==want) write_lane(1u,s1);
+                if constexpr(Length>=3u) if ((((cc>>2u)&1u)!=0u)==want) write_lane(2u,s2);
+                if constexpr(Length>=4u) if ((((cc>>3u)&1u)!=0u)==want) write_lane(3u,s3);
+            }
+            return;
+        }
         float source[4]{};
         float destination[4]{};
         read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
@@ -1324,6 +1557,21 @@ struct alignas(16) AllegrexContext {
               std::uint32_t TargetScalarRegister, std::uint32_t Length>
     PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vscl_ct() noexcept {
         static_assert(Length >= 1u && Length <= 4u);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            const float scale = std::bit_cast<float>(vfpu_scalar_bits_ct<(TargetScalarRegister & 0x7Fu)>());
+            constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t d0i = vfpu_vector_lane_index(DestinationRegister, Length, 0u);
+            const float s0 = vfpu[s0i];
+            float s1 = 0.0f, s2 = 0.0f, s3 = 0.0f;
+            if constexpr (Length >= 2u) { constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 1u); s1 = vfpu[si]; }
+            if constexpr (Length >= 3u) { constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 2u); s2 = vfpu[si]; }
+            if constexpr (Length >= 4u) { constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 3u); s3 = vfpu[si]; }
+            vfpu[d0i] = s0 * scale;
+            if constexpr (Length >= 2u) { constexpr std::size_t di = vfpu_vector_lane_index(DestinationRegister, Length, 1u); vfpu[di] = s1 * scale; }
+            if constexpr (Length >= 3u) { constexpr std::size_t di = vfpu_vector_lane_index(DestinationRegister, Length, 2u); vfpu[di] = s2 * scale; }
+            if constexpr (Length >= 4u) { constexpr std::size_t di = vfpu_vector_lane_index(DestinationRegister, Length, 3u); vfpu[di] = s3 * scale; }
+            return;
+        }
         float source[4]{};
         read_vfpu_vector_with_source_prefix_ct<SourceRegister, Length, 0u>(source);
 
@@ -1545,6 +1793,116 @@ struct alignas(16) AllegrexContext {
                 vfpu[index] = source[j * 4u + i];
             }
         }
+    }
+
+    // V8.6: compile-time matrix/vector transform used by VTFM/VHTFM.  The
+    // encoded matrix/vector registers and dimensions are literals in AOT code,
+    // so keep address decoding and loop trip counts visible to the host
+    // optimizer.  The default-prefix lane is intentionally very small because
+    // matrix transforms dominate world/geometry math in VCS.
+    template <std::uint32_t DestinationRegister, std::uint32_t MatrixRegister,
+              std::uint32_t TargetRegister, std::uint32_t Side,
+              std::uint32_t InputLength>
+    PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vtfm_ct() noexcept {
+        static_assert(Side >= 1u && Side <= 4u);
+        static_assert(InputLength >= 1u && InputLength <= 4u);
+        float matrix[16]{};
+        float target_raw[4]{};
+        float target[4]{};
+        float result[4]{};
+        read_vfpu_matrix_ct<MatrixRegister, Side>(matrix);
+        read_vfpu_vector_ct<TargetRegister, Side>(target_raw);
+        if constexpr (InputLength >= 1u) target[0] = target_raw[0];
+        if constexpr (InputLength >= 2u) target[1] = target_raw[1];
+        if constexpr (InputLength >= 3u) target[2] = target_raw[2];
+        if constexpr (InputLength >= 4u) target[3] = target_raw[3];
+        if constexpr ((Side - 1u) >= InputLength) target[Side - 1u] = 1.0f;
+
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            for (std::uint32_t row = 0u; row < Side; ++row) {
+                float sum = 0.0f;
+                for (std::uint32_t column = 0u; column < Side; ++column)
+                    sum += matrix[row * 4u + column] * target[column];
+                result[row] = sum;
+            }
+            constexpr std::size_t d0 = vfpu_vector_lane_index(DestinationRegister, Side, 0u);
+            vfpu[d0] = result[0];
+            if constexpr (Side >= 2u) {
+                constexpr std::size_t d1 = vfpu_vector_lane_index(DestinationRegister, Side, 1u);
+                vfpu[d1] = result[1];
+            }
+            if constexpr (Side >= 3u) {
+                constexpr std::size_t d2 = vfpu_vector_lane_index(DestinationRegister, Side, 2u);
+                vfpu[d2] = result[2];
+            }
+            if constexpr (Side >= 4u) {
+                constexpr std::size_t d3 = vfpu_vector_lane_index(DestinationRegister, Side, 3u);
+                vfpu[d3] = result[3];
+            }
+            return;
+        }
+
+        for (std::uint32_t row = 0u; row + 1u < Side; ++row) {
+            float sum = 0.0f;
+            for (std::uint32_t column = 0u; column < Side; ++column)
+                sum += matrix[row * 4u + column] * target[column];
+            result[row] = sum;
+        }
+        float final_row[4]{
+            matrix[(Side - 1u) * 4u + 0u], matrix[(Side - 1u) * 4u + 1u],
+            matrix[(Side - 1u) * 4u + 2u], matrix[(Side - 1u) * 4u + 3u]
+        };
+        apply_vfpu_source_prefix_ct<4u, 0u>(final_row);
+        apply_vfpu_source_prefix_ct<4u, 1u>(target);
+        result[Side - 1u] = final_row[0] * target[0] + final_row[1] * target[1] +
+                            final_row[2] * target[2] + final_row[3] * target[3];
+        const std::uint32_t destination_prefix = vfpu_ctrl[2];
+        constexpr std::uint32_t last_lane = Side - 1u;
+        vfpu_ctrl[2] = ((destination_prefix & (1u << 8u)) << last_lane) |
+                       ((destination_prefix & 3u) << (last_lane * 2u));
+        write_vfpu_vector_with_destination_prefix_ct<DestinationRegister, Side>(result);
+    }
+
+    // V8.6: integer-bit VFPU -> float conversion with all operands known at
+    // translation time.  Common default prefixes avoid temporary arrays and
+    // prefix walkers, while the fallback keeps full VPFX semantics.
+    template <std::uint32_t DestinationRegister, std::uint32_t SourceRegister,
+              std::uint32_t Length, std::uint32_t Immediate>
+    PSPRECOMP_CONTEXT_FORCEINLINE void execute_vfpu_vi2f_ct() noexcept {
+        static_assert(Length >= 1u && Length <= 4u);
+        static_assert(Immediate < 32u);
+        constexpr float scale = 1.0f / static_cast<float>(std::uint64_t{1} << Immediate);
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            constexpr std::size_t s0 = vfpu_vector_lane_index(SourceRegister, Length, 0u);
+            constexpr std::size_t d0 = vfpu_vector_lane_index(DestinationRegister, Length, 0u);
+            const float r0 = static_cast<float>(static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu[s0]))) * scale;
+            float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f;
+            if constexpr (Length >= 2u) {
+                constexpr std::size_t s1 = vfpu_vector_lane_index(SourceRegister, Length, 1u);
+                r1 = static_cast<float>(static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu[s1]))) * scale;
+            }
+            if constexpr (Length >= 3u) {
+                constexpr std::size_t s2 = vfpu_vector_lane_index(SourceRegister, Length, 2u);
+                r2 = static_cast<float>(static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu[s2]))) * scale;
+            }
+            if constexpr (Length >= 4u) {
+                constexpr std::size_t s3 = vfpu_vector_lane_index(SourceRegister, Length, 3u);
+                r3 = static_cast<float>(static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu[s3]))) * scale;
+            }
+            vfpu[d0] = r0;
+            if constexpr (Length >= 2u) { constexpr std::size_t d1 = vfpu_vector_lane_index(DestinationRegister, Length, 1u); vfpu[d1] = r1; }
+            if constexpr (Length >= 3u) { constexpr std::size_t d2 = vfpu_vector_lane_index(DestinationRegister, Length, 2u); vfpu[d2] = r2; }
+            if constexpr (Length >= 4u) { constexpr std::size_t d3 = vfpu_vector_lane_index(DestinationRegister, Length, 3u); vfpu[d3] = r3; }
+            return;
+        }
+        float source[4]{}, result[4]{};
+        read_vfpu_vector_ct<SourceRegister, Length>(source);
+        apply_vfpu_source_prefix_ct<Length, 0u>(source);
+        for (std::uint32_t lane = 0u; lane < Length; ++lane) {
+            const auto integer = static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(source[lane]));
+            result[lane] = static_cast<float>(integer) * scale;
+        }
+        write_vfpu_vector_with_destination_prefix_ct<DestinationRegister, Length>(result);
     }
 
     void read_vfpu_matrix(float *destination, std::uint32_t matrix_register, std::uint32_t side) const noexcept {

@@ -958,11 +958,7 @@ L_08BA5394:
       goto L_08BA539C;
     }
 L_08BA539C:
-    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
-      ctx.read_vfpu_vector_with_source_prefix_ct<0u, 1u, 0u>(vfpu_s);
-      ctx.read_vfpu_vector_with_source_prefix_ct<0u, 1u, 1u>(vfpu_t);
-      for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] + vfpu_t[i];
-      ctx.write_vfpu_vector_with_destination_prefix_ct<5u, 1u>(vfpu_d); }
+    ctx.execute_vfpu_vec3_ct<5u, 0u, 0u, 1u, 0u>();
     rt.unsupported(0x08BA53A0u, 0xC0000001u, "unknown not lowered yet"); return;
 L_08BA53A8:
     // nop

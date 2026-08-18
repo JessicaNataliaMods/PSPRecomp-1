@@ -1177,16 +1177,16 @@ L_08BA10A8:
     // nop
     goto L_08BA10CC;
 L_08BA10CC:
-    ctx.execute_vfpu_compare3(99u, 111u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
     rt.unsupported(0x08BA10D0u, 0x7473616Eu, "unknown not lowered yet"); return;
 L_08BA110C:
-    ctx.execute_vfpu_compare3(99u, 111u, 114u, 1u, 6u);
-    ctx.execute_vfpu_compare3(110u, 97u, 109u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
+    ctx.execute_vfpu_compare3_ct<110u, 97u, 109u, 1u, 6u>();
     rt.unsupported(0x08BA1114u, 0x00006E6Fu, "special? not lowered yet"); return;
 L_08BA1144:
     // nop
     // nop
-    ctx.execute_vfpu_compare3(99u, 111u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<110u, 97u, 104u, 1u>();
     rt.unsupported(0x08BA1154u, 0x696C6461u, "unknown not lowered yet"); return;
 L_08BA115C:
@@ -1199,7 +1199,7 @@ L_08BA117C:
     // nop
     // nop
     // nop
-    ctx.execute_vfpu_compare3(99u, 111u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
     rt.unsupported(0x08BA1190u, 0x6963616Eu, "unknown not lowered yet"); return;
 L_08BA11EC:
     // PSP CACHE is a no-op in coherent host memory.

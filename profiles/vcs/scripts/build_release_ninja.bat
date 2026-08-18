@@ -115,6 +115,8 @@ set "CORRECTNESS_V826B_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826b_save_repr
 set "CORRECTNESS_V827_SAVE_THREAD_STAMP=%BUILD%\.vcs_correctness_v827_save_thread_lifecycle_20260818"
 set "CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP=%BUILD%\.vcs_correctness_v827a_save_repro_gate_20260818"
 set "PERF_V84_AGGRESSIVE_CPU_STAMP=%BUILD%\.vcs_perf_v84_aggressive_cpu_direct_20260818"
+set "PERF_V85_VFPU_FASTLANE_STAMP=%BUILD%\.vcs_perf_v85_aggressive_vfpu_fastlane_20260818"
+set "PERF_V86_RADIO_VFPU_CT2_STAMP=%BUILD%\.vcs_perf_v86_radio_identity_vfpu_ct2_20260818"
 if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
 if not defined PSPRECOMP_RUNTIME_CHAIN_TELEMETRY set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
@@ -132,8 +134,8 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3; V8.4 hard direct-fastmem + branchless scalar memory + LV.Q/SV.Q 16-byte blocks
-echo Correctness:      V8.2.7A SAVE + V8.2.5 NEWS protected; scheduler/timing unchanged
+echo Generated AOT:    O3; V8.4 direct-memory + V8.5 fast lanes + V8.6 VFPU CT2
+echo Correctness:      V8.6 radio identity + V8.2.7A SAVE + V8.2.5 NEWS protected
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
@@ -144,7 +146,7 @@ echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms 
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building V8.4 AGGRESSIVE CPU DIRECT over V8.2.7A stable correctness...
+echo [0b2/7] Building V8.6 RADIO IDENTITY + VFPU CT2 over V8.5 baseline...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -158,6 +160,8 @@ echo   Python 3:        %PYTHON3_CMD%
 if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v84_cpu.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v85_vfpu.py" "%PROFILE%"
+if errorlevel 1 goto :FAIL
 rem V8.2.7 checker includes the protected V8.2 CPU/Geometry, V8.2.5 NEWS,
 rem V8.2.6 passive checkpoint contract and the corrected PSP ExitDelete lifecycle.
 rem Older revision checkers pin exact stage strings and must not gate this stage.
@@ -166,6 +170,10 @@ if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tests\check_v827a_internal_save_repro_gate.py"
 if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tests\check_v84_aggressive_cpu.py"
+if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%PROFILE%\tests\check_v85_aggressive_vfpu.py"
+if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%PROFILE%\tests\check_v86_radio_vfpu_ct2.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -414,6 +422,31 @@ if exist "%BUILD%" if not exist "%PERF_V84_AGGRESSIVE_CPU_STAMP%" (
   del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%PERF_V85_VFPU_FASTLANE_STAMP%" (
+  echo.
+  echo [0c-v85vfpu/7] V8.5 AGGRESSIVE VFPU FASTLANE - rebuilding generated AOT/VFPU helpers once...
+  rem V8.5 changes generic VFPU lowering and the checked-in generated corpus only.
+  rem Scheduler/timing, DX12, savedata, ATRAC and host I/O objects stay cached.
+  del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vfpu_tier2_tests*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_codegen_main*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V86_RADIO_VFPU_CT2_STAMP%" (
+  echo.
+  echo [0c-v86/7] V8.6 RADIO IDENTITY + VFPU CT2 - rebuilding affected CPU/profile objects once...
+  rem VFPU CT2 touches 100+ generated units and Allegrex helper templates; radio identity
+  rem changes only vcs_profile. Keep DX12, media backends and scheduler objects cached.
+  del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vfpu_tier2_tests*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_codegen_main*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
   echo.
   echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
@@ -473,6 +506,8 @@ if errorlevel 1 goto :FAIL
 >"%CORRECTNESS_V827_SAVE_THREAD_STAMP%" echo VCS V8.2.7 SAVE THREAD LIFECYCLE FIX 2026-08-18
 >"%CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP%" echo VCS V8.2.7A INTERNAL SAVE_REPRO GATE 2026-08-18
 >"%PERF_V84_AGGRESSIVE_CPU_STAMP%" echo VCS PERF V8.4 AGGRESSIVE CPU DIRECT 2026-08-18
+>"%PERF_V85_VFPU_FASTLANE_STAMP%" echo VCS PERF V8.5 AGGRESSIVE VFPU FASTLANE 2026-08-18
+>"%PERF_V86_RADIO_VFPU_CT2_STAMP%" echo VCS PERF V8.6 RADIO IDENTITY VFPU CT2 2026-08-18
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

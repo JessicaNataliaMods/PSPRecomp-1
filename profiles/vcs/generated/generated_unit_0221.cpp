@@ -405,7 +405,7 @@ L_08B7A0AC:
 L_08B7A0B0:
     rt.unsupported(0x08B7A0B0u, 0x20746F6Eu, "unknown not lowered yet"); return;
 L_08B7A0C4:
-    ctx.execute_vfpu_compare3(101u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<101u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7A0C8u, 0x6E692072u, "vfpu3 not lowered yet"); return;
 L_08B7A0DC:
     rt.unsupported(0x08B7A0DCu, 0x74732043u, "unknown not lowered yet"); return;
@@ -508,7 +508,7 @@ L_08B7A9C8:
     }
     goto L_08B7A9D0;
 L_08B7A9D0:
-    ctx.execute_vfpu_compare3(108u, 101u, 70u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<108u, 101u, 70u, 1u, 6u>();
     rt.unsupported(0x08B7A9D4u, 0x72614772u, "unknown not lowered yet"); return;
 L_08B7A9DC:
     if (ctx.gpr[3] == ctx.gpr[20]) {

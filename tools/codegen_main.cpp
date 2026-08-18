@@ -412,15 +412,8 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t destination = d.word & 0x7Fu;
         const std::uint32_t source = (d.word >> 8u) & 0x7Fu;
         const std::uint32_t immediate = (d.word >> 16u) & 31u;
-        out << "    { float vfpu_s[4]{}, vfpu_d[4]{};\n"
-            << "      ctx.read_vfpu_vector(vfpu_s, " << source << "u, " << length << "u);\n"
-            << "      ctx.apply_vfpu_source_prefix(vfpu_s, " << length << "u, 0u);\n"
-            << "      const float vfpu_scale = std::ldexp(1.0f, -static_cast<int>(" << immediate << "u));\n"
-            << "      for (std::uint32_t vfpu_i = 0; vfpu_i < " << length << "u; ++vfpu_i) {\n"
-            << "        const auto vfpu_integer = static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(vfpu_s[vfpu_i]));\n"
-            << "        vfpu_d[vfpu_i] = static_cast<float>(vfpu_integer) * vfpu_scale;\n"
-            << "      }\n"
-            << "      ctx.write_vfpu_vector_with_destination_prefix(vfpu_d, " << destination << "u, " << length << "u); }\n";
+        out << "    ctx.execute_vfpu_vi2f_ct<" << destination << "u, " << source << "u, "
+            << length << "u, " << immediate << "u>();\n";
         break;
     }
     case psprecomp::OpcodeKind::Vx2i: {
@@ -481,28 +474,8 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t destination = d.word & 0x7Fu;
         const std::uint32_t source = (d.word >> 8u) & 0x7Fu;
         const std::uint32_t target = (d.word >> 16u) & 0x7Fu;
-        out << "    { float vfpu_matrix[16]{}, vfpu_target_raw[4]{}, vfpu_target[4]{}, vfpu_result[4]{};\n"
-            << "      ctx.read_vfpu_matrix(vfpu_matrix, " << source << "u, " << side << "u);\n"
-            << "      ctx.read_vfpu_vector(vfpu_target_raw, " << target << "u, " << side << "u);\n"
-            << "      constexpr std::uint32_t vfpu_side = " << side << "u;\n"
-            << "      constexpr std::uint32_t vfpu_input_length = " << input_length << "u;\n"
-            << "      for (std::uint32_t i = 0; i < 4u; ++i) vfpu_target[i] = i < vfpu_input_length ? vfpu_target_raw[i] : 0.0f;\n"
-            << "      if (vfpu_side - 1u >= vfpu_input_length) vfpu_target[vfpu_side - 1u] = 1.0f;\n"
-            << "      for (std::uint32_t row = 0; row + 1u < vfpu_side; ++row) {\n"
-            << "        float sum = 0.0f;\n"
-            << "        for (std::uint32_t column = 0; column < vfpu_side; ++column) sum += vfpu_matrix[row * 4u + column] * vfpu_target[column];\n"
-            << "        vfpu_result[row] = sum;\n"
-            << "      }\n"
-            << "      float vfpu_final_row[4]{vfpu_matrix[(vfpu_side - 1u) * 4u + 0u], vfpu_matrix[(vfpu_side - 1u) * 4u + 1u],\n"
-            << "                              vfpu_matrix[(vfpu_side - 1u) * 4u + 2u], vfpu_matrix[(vfpu_side - 1u) * 4u + 3u]};\n"
-            << "      ctx.apply_vfpu_source_prefix(vfpu_final_row, 4u, 0u);\n"
-            << "      ctx.apply_vfpu_source_prefix(vfpu_target, 4u, 1u);\n"
-            << "      for (std::uint32_t column = 0; column < 4u; ++column) vfpu_result[vfpu_side - 1u] += vfpu_final_row[column] * vfpu_target[column];\n"
-            << "      const std::uint32_t vfpu_destination_prefix = ctx.vfpu_ctrl[2];\n"
-            << "      const std::uint32_t vfpu_last_lane = vfpu_side - 1u;\n"
-            << "      ctx.vfpu_ctrl[2] = ((vfpu_destination_prefix & (1u << 8u)) << vfpu_last_lane) |\n"
-            << "                         ((vfpu_destination_prefix & 3u) << (vfpu_last_lane * 2u));\n"
-            << "      ctx.write_vfpu_vector_with_destination_prefix(vfpu_result, " << destination << "u, vfpu_side); }\n";
+        out << "    ctx.execute_vfpu_vtfm_ct<" << destination << "u, " << source << "u, "
+            << target << "u, " << side << "u, " << input_length << "u>();\n";
         break;
     }
     case psprecomp::OpcodeKind::VfpuVectorInit: {
@@ -582,15 +555,8 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t target = (d.word >> 16u) & 0x7Fu;
         const std::uint32_t major = d.word >> 26u;
         const std::uint32_t operation = major == 0x19u ? 2u : ((d.word >> 23u) & 7u);
-        const char *expression = operation == 0u ? "vfpu_s[i] + vfpu_t[i]"
-                               : operation == 1u ? "vfpu_s[i] - vfpu_t[i]"
-                               : operation == 2u ? "vfpu_s[i] * vfpu_t[i]"
-                                                 : "vfpu_s[i] / vfpu_t[i]";
-        out << "    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};\n"
-            << "      ctx.read_vfpu_vector_with_source_prefix(vfpu_s, " << source << "u, " << length << "u, 0u);\n"
-            << "      ctx.read_vfpu_vector_with_source_prefix(vfpu_t, " << target << "u, " << length << "u, 1u);\n"
-            << "      for (std::uint32_t i = 0; i < " << length << "u; ++i) vfpu_d[i] = " << expression << ";\n"
-            << "      ctx.write_vfpu_vector_with_destination_prefix(vfpu_d, " << destination << "u, " << length << "u); }\n";
+        out << "    ctx.execute_vfpu_vec3_ct<" << destination << "u, " << source << "u, "
+            << target << "u, " << length << "u, " << operation << "u>();\n";
         break;
     }
     case psprecomp::OpcodeKind::Vdot: {
@@ -683,29 +649,8 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t destination = d.word & 0x7Fu;
         const std::uint32_t source = (d.word >> 8u) & 0x7Fu;
         const std::uint32_t operation = (d.word >> 16u) & 31u;
-        std::string expression;
-        switch (operation) {
-        case 0u: expression = "vfpu_s[i]"; break;
-        case 1u: expression = "std::fabs(vfpu_s[i])"; break;
-        case 2u: expression = "-vfpu_s[i]"; break;
-        case 4u: expression = "vfpu_s[i] <= 0.0f ? 0.0f : (vfpu_s[i] > 1.0f ? 1.0f : vfpu_s[i])"; break;
-        case 5u: expression = "vfpu_s[i] < -1.0f ? -1.0f : (vfpu_s[i] > 1.0f ? 1.0f : vfpu_s[i])"; break;
-        case 16u: expression = "1.0f / vfpu_s[i]"; break;
-        case 17u: expression = "1.0f / std::sqrt(vfpu_s[i])"; break;
-        case 18u: expression = "std::sin(vfpu_s[i] * 1.57079632679489661923f)"; break;
-        case 19u: expression = "std::cos(vfpu_s[i] * 1.57079632679489661923f)"; break;
-        case 20u: expression = "std::exp2(vfpu_s[i])"; break;
-        case 21u: expression = "std::log2(vfpu_s[i])"; break;
-        case 22u: expression = "std::fabs(std::sqrt(vfpu_s[i]))"; break;
-        case 23u: expression = "std::asin(vfpu_s[i]) * 0.63661977236758134308f"; break;
-        case 24u: expression = "-1.0f / vfpu_s[i]"; break;
-        case 26u: expression = "-std::sin(vfpu_s[i] * 1.57079632679489661923f)"; break;
-        default: expression = "1.0f / std::exp2(vfpu_s[i])"; break;
-        }
-        out << "    { float vfpu_s[4]{}, vfpu_d[4]{};\n"
-            << "      ctx.read_vfpu_vector_with_source_prefix(vfpu_s, " << source << "u, " << length << "u, 0u);\n"
-            << "      for (std::uint32_t i = 0; i < " << length << "u; ++i) vfpu_d[i] = " << expression << ";\n"
-            << "      ctx.write_vfpu_vector_with_destination_prefix(vfpu_d, " << destination << "u, " << length << "u); }\n";
+        out << "    ctx.execute_vfpu_unary_ct<" << destination << "u, " << source << "u, "
+            << length << "u, " << operation << "u>();\n";
         break;
     }
     case psprecomp::OpcodeKind::Vcst: {
@@ -1405,6 +1350,71 @@ std::string lower_constant_vfpu_accesses(std::string text) {
         R"(ctx\.execute_vfpu_vscl\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
     text = std::regex_replace(text, vscl,
         "ctx.execute_vfpu_vscl_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex vf2h(
+        R"(ctx\.execute_vfpu_vf2h\(([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vf2h,
+        "ctx.execute_vfpu_vf2h_ct<$1u, $2u, $3u>();");
+
+    const std::regex vh2f(
+        R"(ctx\.execute_vfpu_vh2f\(([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vh2f,
+        "ctx.execute_vfpu_vh2f_ct<$1u, $2u, $3u>();");
+
+    const std::regex vx2i(
+        R"(ctx\.execute_vfpu_vx2i\(([0-9]+)u, ([0-9]+)u, ([1-4])u, ([0-3])u\);)" );
+    text = std::regex_replace(text, vx2i,
+        "ctx.execute_vfpu_vx2i_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex vhdp(
+        R"(ctx\.execute_vfpu_vhdp\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vhdp,
+        "ctx.execute_vfpu_vhdp_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex cross_quat(
+        R"(ctx\.execute_vfpu_cross_quat\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, cross_quat,
+        "ctx.execute_vfpu_cross_quat_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex vminmax(
+        R"(ctx\.execute_vfpu_vminmax\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u, (true|false)\);)" );
+    text = std::regex_replace(text, vminmax,
+        "ctx.execute_vfpu_vminmax_ct<$1u, $2u, $3u, $4u, $5>();");
+
+    const std::regex compare3(
+        R"(ctx\.execute_vfpu_compare3\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u, ([0-9]+)u\);)" );
+    text = std::regex_replace(text, compare3,
+        "ctx.execute_vfpu_compare3_ct<$1u, $2u, $3u, $4u, $5u>();");
+
+    const std::regex vrot(
+        R"(ctx\.execute_vfpu_vrot\(([0-9]+)u, ([0-9]+)u, ([1-4])u, ([0-9]+)u\);)" );
+    text = std::regex_replace(text, vrot,
+        "ctx.execute_vfpu_vrot_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex vocp(
+        R"(ctx\.execute_vfpu_vocp\(([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vocp,
+        "ctx.execute_vfpu_vocp_ct<$1u, $2u, $3u>();");
+
+    const std::regex horizontal(
+        R"(ctx\.execute_vfpu_horizontal\(([0-9]+)u, ([0-9]+)u, ([1-4])u, (true|false)\);)" );
+    text = std::regex_replace(text, horizontal,
+        "ctx.execute_vfpu_horizontal_ct<$1u, $2u, $3u, $4>();");
+
+    const std::regex vmscl(
+        R"(ctx\.execute_vfpu_vmscl\(([0-9]+)u, ([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vmscl,
+        "ctx.execute_vfpu_vmscl_ct<$1u, $2u, $3u, $4u>();");
+
+    const std::regex vmmov(
+        R"(ctx\.execute_vfpu_vmmov\(([0-9]+)u, ([0-9]+)u, ([1-4])u\);)" );
+    text = std::regex_replace(text, vmmov,
+        "ctx.execute_vfpu_vmmov_ct<$1u, $2u, $3u>();");
+
+    const std::regex matrix_init(
+        R"(ctx\.execute_vfpu_matrix_init\(([0-9]+)u, ([1-4])u, ([367])u\);)" );
+    text = std::regex_replace(text, matrix_init,
+        "ctx.execute_vfpu_matrix_init_ct<$1u, $2u, $3u>();");
 
     const std::regex scalar_read(R"(ctx\.vfpu_scalar_bits\(([0-9]+)u\))");
     text = std::regex_replace(text, scalar_read,

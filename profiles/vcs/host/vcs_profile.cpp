@@ -198,6 +198,13 @@ struct VirtualDiscStream {
     bool position_valid{};
 };
 
+struct AtracSourceIdentity {
+    std::uint64_t file_size{};
+    std::array<std::uint8_t, 256> prefix{};
+    std::size_t prefix_size{};
+    bool valid{};
+};
+
 struct FileTable {
     std::int32_t next_fd{3};
     std::uint32_t next_virtual_sector{0x00010000u};
@@ -211,6 +218,12 @@ struct FileTable {
     // AT3/AA3/OMA can be associated with its host source without reopening and
     // rescanning candidate files on the audio thread.
     std::unordered_map<std::uint32_t, std::filesystem::path> recent_atrac_reads;
+    // V8.6 radio identity guard: cache an exact prefix for each host ATRAC source.
+    // The producer hint above is intentionally not trusted on its own because VCS
+    // reuses staging buffers and may overwrite them between sceIoRead and
+    // sceAtracSetHalfwayBufferAndGetID.  This cache is host-only and need not be
+    // serialized in diagnostic checkpoints; it is rebuilt lazily after restore.
+    std::unordered_map<std::string, AtracSourceIdentity> atrac_source_identities;
     std::unordered_set<std::int32_t> synthetic_empty_files;
     std::unordered_map<std::int32_t, DirectoryHandle> directories;
     std::unordered_map<std::int32_t, VirtualDiscHandle> virtual_disc_handles;
@@ -560,6 +573,44 @@ bool is_atrac_source_path(const std::filesystem::path &path) {
     std::transform(extension.begin(), extension.end(), extension.begin(),
                    [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
     return extension == ".AT3" || extension == ".AA3" || extension == ".OMA";
+}
+
+const AtracSourceIdentity *atrac_source_identity(const std::filesystem::path &path) {
+    if (path.empty() || !is_atrac_source_path(path)) return nullptr;
+    const std::string key = normalized_native_path(path);
+    if (const auto found = file_table.atrac_source_identities.find(key);
+        found != file_table.atrac_source_identities.end()) {
+        return found->second.valid ? &found->second : nullptr;
+    }
+
+    AtracSourceIdentity identity{};
+    std::error_code error;
+    identity.file_size = std::filesystem::file_size(path, error);
+    if (!error) {
+        std::ifstream input(path, std::ios::binary);
+        if (input) {
+            input.read(reinterpret_cast<char *>(identity.prefix.data()),
+                       static_cast<std::streamsize>(identity.prefix.size()));
+            const auto count = input.gcount();
+            if (count > 0) {
+                identity.prefix_size = static_cast<std::size_t>(count);
+                identity.valid = true;
+            }
+        }
+    }
+    const auto [it, inserted] = file_table.atrac_source_identities.emplace(key, std::move(identity));
+    (void)inserted;
+    return it->second.valid ? &it->second : nullptr;
+}
+
+[[nodiscard]] bool atrac_source_matches_header(const std::filesystem::path &path,
+                                                std::span<const std::uint8_t> header,
+                                                const ParsedAtracHeader &parsed) {
+    const AtracSourceIdentity *identity = atrac_source_identity(path);
+    if (identity == nullptr || identity->file_size != parsed.file_size) return false;
+    const std::size_t compare_size = std::min<std::size_t>(header.size(), identity->prefix.size());
+    if (compare_size == 0u || identity->prefix_size < compare_size) return false;
+    return std::equal(identity->prefix.begin(), identity->prefix.begin() + compare_size, header.begin());
 }
 
 const VirtualDiscFile *virtual_disc_file_at_offset(std::uint64_t absolute) {
@@ -927,28 +978,37 @@ std::filesystem::path identify_atrac_source(std::uint32_t guest_buffer,
                                               const ParsedAtracHeader &parsed) {
     const auto started = std::chrono::steady_clock::now();
     bool direct_buffer = false;
-    std::uint32_t fallback_reads = 0u;
+    bool direct_rejected = false;
+    std::uint32_t fallback_candidates = 0u;
     std::filesystem::path matched;
 
+    // A recent sceIoRead is only a producer hint.  VCS reuses radio staging
+    // buffers and can copy/overwrite them before ATRAC setup, so accepting the
+    // old path solely because the guest address matches can attach CITY.AT3's
+    // timeline to EMOTION.AT3 (or another station).  Validate the *current*
+    // guest header against a cached exact host-file prefix before trusting it.
     if (const auto direct = file_table.recent_atrac_reads.find(guest_buffer);
         direct != file_table.recent_atrac_reads.end()) {
-        matched = direct->second;
-        direct_buffer = true;
+        const std::filesystem::path candidate = direct->second;
         file_table.recent_atrac_reads.erase(direct);
+        if (atrac_source_matches_header(candidate, header, parsed)) {
+            matched = candidate;
+            direct_buffer = true;
+        } else {
+            direct_rejected = true;
+        }
     }
 
-    const std::size_t compare_size = std::min<std::size_t>(header.size(), 256u);
+    // The same identity cache also makes the correctness fallback cheap after
+    // the first lookup: no repeated open/read of every radio file on later
+    // station switches.  Exact prefix comparison keeps same-sized RIFF files
+    // distinct without hard-coding any VCS station index.
     if (matched.empty()) {
         for (const auto &[key, file] : file_table.virtual_files_by_path) {
             (void)key;
             if (file.size != parsed.file_size || !is_atrac_source_path(file.native_path)) continue;
-            ++fallback_reads;
-            std::vector<std::uint8_t> candidate(compare_size);
-            std::ifstream input(file.native_path, std::ios::binary);
-            if (!input) continue;
-            input.read(reinterpret_cast<char *>(candidate.data()), static_cast<std::streamsize>(candidate.size()));
-            if (input.gcount() == static_cast<std::streamsize>(candidate.size()) &&
-                std::equal(candidate.begin(), candidate.end(), header.begin())) {
+            ++fallback_candidates;
+            if (atrac_source_matches_header(file.native_path, header, parsed)) {
                 matched = file.native_path;
                 break;
             }
@@ -961,7 +1021,8 @@ std::filesystem::path identify_atrac_source(std::uint32_t guest_buffer,
     std::ostringstream line;
     line << "ATRAC_SOURCE resolve_us=" << elapsed_us
          << " direct_buffer=" << (direct_buffer ? 1 : 0)
-         << " fallback_reads=" << fallback_reads
+         << " direct_rejected=" << (direct_rejected ? 1 : 0)
+         << " fallback_candidates=" << fallback_candidates
          << " source=" << (matched.empty() ? "<none>" : matched.filename().string());
     runtime_log_line(line.str());
     return matched;
@@ -11458,7 +11519,12 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 if (read != 0u && read_file != nullptr && is_atrac_source_path(read_file->native_path)) {
                     const std::uint64_t file_start =
                         static_cast<std::uint64_t>(read_file->start_sector) * 2048u;
-                    if (read_absolute >= file_start &&
+                    // Only a read that begins at the ATRAC file header can be a
+                    // direct producer for SetHalfwayBuffer.  Interior streaming
+                    // chunks are deliberately not associated with the guest
+                    // address; that stale hint was the radio X/UI -> radio Y/audio
+                    // regression introduced by the NEWS-era producer shortcut.
+                    if (read_absolute == file_start && read >= 12u &&
                         read_absolute + read <= file_start + read_file->size) {
                         if (file_table.recent_atrac_reads.size() >= 32u)
                             file_table.recent_atrac_reads.erase(file_table.recent_atrac_reads.begin());
@@ -11523,6 +11589,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 return;
             }
             file_table.recent_atrac_reads.erase(dst);
+            const std::streampos read_start = it->second.tellg();
             const bool time_io = perf_timing_enabled();
             const auto io_entry = time_io ? std::chrono::steady_clock::now()
                                           : std::chrono::steady_clock::time_point{};
@@ -11532,6 +11599,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             if (time_io) io_host_time_this_vblank += std::chrono::steady_clock::now() - io_entry;
             if (read != 0u) {
                 if (const auto path_it = file_table.file_paths.find(fd);
+                    read_start == std::streampos(0) && read >= 12u &&
                     path_it != file_table.file_paths.end() && is_atrac_source_path(path_it->second)) {
                     if (file_table.recent_atrac_reads.size() >= 32u)
                         file_table.recent_atrac_reads.erase(file_table.recent_atrac_reads.begin());
@@ -12561,6 +12629,57 @@ bool run_profile_self_tests(std::string &error) {
             atrac_context.set_gpr(4u, 0u);
             wlan_runtime.invoke_import("sceAtrac3plus", 0x61EB33F5u, atrac_context);
             require(atrac_context.gpr[2] == 0u, "sceAtracReleaseAtracID failed for a valid context");
+
+            // V8.6 regression guard: a reused guest staging address may still
+            // carry a producer hint for another same-sized radio stream.  The
+            // current RIFF bytes, not the stale address->path association, must
+            // choose the decoder source.
+            {
+                const auto temp_root = std::filesystem::temp_directory_path() /
+                    "psprecomp_v86_atrac_identity";
+                std::error_code temp_error;
+                std::filesystem::remove_all(temp_root, temp_error);
+                std::filesystem::create_directories(temp_root, temp_error);
+                require(!temp_error, "cannot create ATRAC identity self-test directory");
+                const auto right_path = temp_root / "RIGHT.AT3";
+                const auto wrong_path = temp_root / "WRONG.AT3";
+                std::vector<std::uint8_t> right_bytes(0x1000u, 0u);
+                std::vector<std::uint8_t> wrong_bytes(0x1000u, 0u);
+                std::copy(atrac_header.begin(), atrac_header.end(), right_bytes.begin());
+                std::copy(atrac_header.begin(), atrac_header.end(), wrong_bytes.begin());
+                wrong_bytes[0x60u] ^= 0x5Au; // data payload only; parsed metadata stays identical.
+                { std::ofstream out(right_path, std::ios::binary);
+                  out.write(reinterpret_cast<const char *>(right_bytes.data()),
+                            static_cast<std::streamsize>(right_bytes.size())); }
+                { std::ofstream out(wrong_path, std::ios::binary);
+                  out.write(reinterpret_cast<const char *>(wrong_bytes.data()),
+                            static_cast<std::streamsize>(wrong_bytes.size())); }
+                file_table.virtual_files_by_path.emplace(
+                    normalized_native_path(right_path), VirtualDiscFile{right_path, 0x1000u, 0x1000u});
+                file_table.virtual_files_by_path.emplace(
+                    normalized_native_path(wrong_path), VirtualDiscFile{wrong_path, 0x1002u, 0x1000u});
+                file_table.recent_atrac_reads[atrac_buffer] = wrong_path;
+                wlan_runtime.memory().copy_in(atrac_buffer, atrac_header);
+
+                psprecomp::AllegrexContext radio_identity_context{};
+                radio_identity_context.set_gpr(4u, atrac_buffer);
+                radio_identity_context.set_gpr(5u, 0x100u);
+                radio_identity_context.set_gpr(6u, 0x400u);
+                wlan_runtime.invoke_import("sceAtrac3plus", 0x0FAE370Eu, radio_identity_context);
+                require(radio_identity_context.gpr[2] == 0u &&
+                            atrac_contexts[0].allocated &&
+                            atrac_contexts[0].source_path.filename() == right_path.filename(),
+                        "ATRAC source identity trusted a stale radio staging-buffer hint");
+                radio_identity_context = {};
+                radio_identity_context.set_gpr(4u, 0u);
+                wlan_runtime.invoke_import("sceAtrac3plus", 0x61EB33F5u, radio_identity_context);
+                require(radio_identity_context.gpr[2] == 0u,
+                        "ATRAC source identity self-test could not release its context");
+                file_table.recent_atrac_reads.clear();
+                file_table.atrac_source_identities.clear();
+                file_table.virtual_files_by_path.clear();
+                std::filesystem::remove_all(temp_root, temp_error);
+            }
 
             constexpr std::uint32_t sas_core = 0x08820000u;
             constexpr std::uint32_t sas_data = 0x08821000u;

@@ -714,11 +714,11 @@ L_08B7D614:
 L_08B7D640:
     rt.unsupported(0x08B7D640u, 0x736E6F63u, "unknown not lowered yet"); return;
 L_08B7D658:
-    ctx.execute_vfpu_vminmax(105u, 116u, 101u, 1u, false);
+    ctx.execute_vfpu_vminmax_ct<105u, 116u, 101u, 1u, false>();
     rt.unsupported(0x08B7D65Cu, 0x6E692073u, "vfpu3 not lowered yet"); return;
 L_08B7D670:
-    ctx.execute_vfpu_vminmax(60u, 110u, 97u, 1u, false);
-    ctx.execute_vfpu_compare3(101u, 62u, 32u, 1u, 6u);
+    ctx.execute_vfpu_vminmax_ct<60u, 110u, 97u, 1u, false>();
+    ctx.execute_vfpu_compare3_ct<101u, 62u, 32u, 1u, 6u>();
     (void)(ctx.gpr[19] < static_cast<std::uint32_t>(8306) ? 1u : 0u);
     rt.unsupported(0x08B7D67Cu, 0x20272E2Eu, "unknown not lowered yet"); return;
 L_08B7D68C:
@@ -858,7 +858,7 @@ L_08B7E328:
     rt.unsupported(0x08B7E32Cu, 0x6E795320u, "vfpu3 not lowered yet"); return;
 L_08B7E354:
     ctx.gpr[1] = (ctx.gpr[19] ^ 30028u);
-    ctx.execute_vfpu_vminmax(32u, 77u, 101u, 1u, false);
+    ctx.execute_vfpu_vminmax_ct<32u, 77u, 101u, 1u, false>();
     rt.unsupported(0x08B7E35Cu, 0x2079726Fu, "unknown not lowered yet"); return;
 L_08B7E374:
     ctx.gpr[1] = (ctx.gpr[19] ^ 30028u);
@@ -895,7 +895,7 @@ L_08B7E458:
     rt.unsupported(0x08B7E458u, 0x43646574u, "unknown not lowered yet"); return;
 L_08B7E464:
     if (ctx.gpr[19] != ctx.gpr[20]) {
-    ctx.execute_vfpu_compare3(101u, 99u, 116u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<101u, 99u, 116u, 1u, 6u>();
         (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 81u, 0x08B979B4u>(ctx, &aot_mem); return;
     }
     goto L_08B7E46C;
@@ -1315,11 +1315,7 @@ L_08B7EA38:
 L_08B7EA64:
     rt.unsupported(0x08B7EA64u, 0x72646461u, "unknown not lowered yet"); return;
 L_08B7EA88:
-    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
-      ctx.read_vfpu_vector_with_source_prefix_ct<111u, 1u, 0u>(vfpu_s);
-      ctx.read_vfpu_vector_with_source_prefix_ct<97u, 1u, 1u>(vfpu_t);
-      for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] * vfpu_t[i];
-      ctx.write_vfpu_vector_with_destination_prefix_ct<76u, 1u>(vfpu_d); }
+    ctx.execute_vfpu_vec3_ct<76u, 111u, 97u, 1u, 2u>();
     if (ctx.gpr[1] == 0u) {
     rt.unsupported(0x08B7EA90u, 0x43206465u, "unknown not lowered yet"); return;
         (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 85u, 0x08B97C24u>(ctx, &aot_mem); return;
@@ -1337,11 +1333,7 @@ L_08B7EAB0:
 L_08B7EABC:
     rt.unsupported(0x08B7EABCu, 0x72617453u, "unknown not lowered yet"); return;
 L_08B7EAE0:
-    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
-      ctx.read_vfpu_vector_with_source_prefix_ct<111u, 1u, 0u>(vfpu_s);
-      ctx.read_vfpu_vector_with_source_prefix_ct<97u, 1u, 1u>(vfpu_t);
-      for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] * vfpu_t[i];
-      ctx.write_vfpu_vector_with_destination_prefix_ct<76u, 1u>(vfpu_d); }
+    ctx.execute_vfpu_vec3_ct<76u, 111u, 97u, 1u, 2u>();
     rt.unsupported(0x08B7EAE4u, 0x20676E69u, "unknown not lowered yet"); return;
 L_08B7EAF4:
     rt.unsupported(0x08B7EAF4u, 0x44414F4Cu, "unsupported CFC1 control register"); return;
@@ -1439,11 +1431,7 @@ L_08B7F3A0:
 L_08B7F3B0:
     rt.unsupported(0x08B7F3B0u, 0x69736F50u, "unknown not lowered yet"); return;
 L_08B7F3BC:
-    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
-      ctx.read_vfpu_vector_with_source_prefix_ct<105u, 1u, 0u>(vfpu_s);
-      ctx.read_vfpu_vector_with_source_prefix_ct<110u, 1u, 1u>(vfpu_t);
-      for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] * vfpu_t[i];
-      ctx.write_vfpu_vector_with_destination_prefix_ct<70u, 1u>(vfpu_d); }
+    ctx.execute_vfpu_vec3_ct<70u, 105u, 110u, 1u, 2u>();
     rt.unsupported(0x08B7F3C0u, 0x4E68744Eu, "unknown not lowered yet"); return;
 L_08B7F3D8:
     rt.unsupported(0x08B7F3D8u, 0x4D746553u, "unknown not lowered yet"); return;
@@ -1499,7 +1487,7 @@ L_08B7F688:
     ctx.execute_vfpu_vscl_ct<97u, 116u, 116u, 1u>();
     rt.unsupported(0x08B7F68Cu, 0x2074706Du, "unknown not lowered yet"); return;
 L_08B7F6A4:
-    ctx.execute_vfpu_vhdp(112u, 101u, 114u, 1u);
+    ctx.execute_vfpu_vhdp_ct<112u, 101u, 114u, 1u>();
     rt.unsupported(0x08B7F6A8u, 0x206D726Fu, "unknown not lowered yet"); return;
 L_08B7F6BC:
     ctx.execute_vfpu_vscl_ct<97u, 116u, 116u, 1u>();
@@ -1532,11 +1520,7 @@ L_08B7FA78:
     ctx.gpr[26] = (ctx.gpr[9] + static_cast<std::uint32_t>(29477));
     (void)(ctx.gpr[9] + static_cast<std::uint32_t>(14948));
     ctx.execute_vfpu_vscl_ct<115u, 32u, 110u, 1u>();
-    { float vfpu_s[4]{}, vfpu_t[4]{}, vfpu_d[4]{};
-      ctx.read_vfpu_vector_with_source_prefix_ct<114u, 1u, 0u>(vfpu_s);
-      ctx.read_vfpu_vector_with_source_prefix_ct<32u, 1u, 1u>(vfpu_t);
-      for (std::uint32_t i = 0; i < 1u; ++i) vfpu_d[i] = vfpu_s[i] + vfpu_t[i];
-      ctx.write_vfpu_vector_with_destination_prefix_ct<97u, 1u>(vfpu_d); }
+    ctx.execute_vfpu_vec3_ct<97u, 114u, 32u, 1u, 0u>();
     ctx.gpr[14] = (ctx.gpr[1] | ctx.gpr[7]);
     goto L_08B7FA8C;
 L_08B7FA8C:
@@ -1545,7 +1529,7 @@ L_08B7FA8C:
 L_08B7FAA0:
     rt.unsupported(0x08B7FAA0u, 0x69626D61u, "unknown not lowered yet"); return;
 L_08B7FAD8:
-    ctx.execute_vfpu_vhdp(109u, 97u, 108u, 1u);
+    ctx.execute_vfpu_vhdp_ct<109u, 97u, 108u, 1u>();
     ctx.execute_vfpu_vscl_ct<111u, 114u, 109u, 1u>();
     rt.unsupported(0x08B7FAE0u, 0x756E2064u, "unknown not lowered yet"); return;
 L_08B7FAEC:
@@ -1565,47 +1549,47 @@ L_08B7FC70:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
     rt.unsupported(0x08B7FC74u, 0x74206465u, "unknown not lowered yet"); return;
 L_08B7FC84:
-    ctx.execute_vfpu_compare3(77u, 101u, 109u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<77u, 101u, 109u, 1u, 6u>();
     rt.unsupported(0x08B7FC88u, 0x61207972u, "vfpu0 not lowered yet"); return;
 L_08B7FCA0:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7FCA4u, 0x61702072u, "vfpu0 not lowered yet"); return;
 L_08B7FCB8:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
     rt.unsupported(0x08B7FCBCu, 0x74206465u, "unknown not lowered yet"); return;
 L_08B7FCD4:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<114u, 32u, 114u, 1u>();
     rt.unsupported(0x08B7FCDCu, 0x6E696461u, "vfpu3 not lowered yet"); return;
 L_08B7FCF4:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<114u, 32u, 114u, 1u>();
     rt.unsupported(0x08B7FCFCu, 0x6E696461u, "vfpu3 not lowered yet"); return;
 L_08B7FD10:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<114u, 58u, 32u, 1u>();
     rt.unsupported(0x08B7FD18u, 0x7974706Du, "unknown not lowered yet"); return;
 L_08B7FD24:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<114u, 32u, 114u, 1u>();
     rt.unsupported(0x08B7FD2Cu, 0x6E696461u, "vfpu3 not lowered yet"); return;
 L_08B7FD3C:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7FD40u, 0x61702072u, "vfpu0 not lowered yet"); return;
 L_08B7FD54:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7FD58u, 0x61702072u, "vfpu0 not lowered yet"); return;
 L_08B7FD6C:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7FD70u, 0x61702072u, "vfpu0 not lowered yet"); return;
 L_08B7FD88:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
-    ctx.execute_vfpu_compare3(114u, 32u, 100u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
+    ctx.execute_vfpu_compare3_ct<114u, 32u, 100u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<99u, 117u, 109u, 1u>();
     ctx.execute_vfpu_vscl_ct<110u, 116u, 32u, 1u>();
     rt.unsupported(0x08B7FD98u, 0x7974706Du, "unknown not lowered yet"); return;
 L_08B7FDA0:
-    ctx.execute_vfpu_compare3(69u, 114u, 114u, 1u, 6u);
+    ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     rt.unsupported(0x08B7FDA4u, 0x756E2072u, "unknown not lowered yet"); return;
 L_08B7FDD8:
     rt.unsupported(0x08B7FDD8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
