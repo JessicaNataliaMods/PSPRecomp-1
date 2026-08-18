@@ -102,6 +102,11 @@ set "PERF_V5_STABLE_RECOVERY2_STAMP=%BUILD%\.vcs_perf_v5_stable_recovery2_202608
 set "PERF_V6_ENTITY_LEAF_STAMP=%BUILD%\.vcs_perf_v6_entity_leaf_inline_20260817"
 set "PERF_V6_ENTITY_LEAF_FIX1_STAMP=%BUILD%\.vcs_perf_v6_entity_leaf_inline_crashfix1_20260817"
 set "PERF_V7_ARCH_FASTMEM_STAMP=%BUILD%\.vcs_perf_v7_arch_fastmem_20260817"
+set "PERF_V8_CPU_FUSION_STAMP=%BUILD%\.vcs_perf_v8_cpu_fusion_20260817"
+set "PERF_V81_CPU_LEAN_STAMP=%BUILD%\.vcs_perf_v81_cpu_lean_20260817"
+if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
+if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
+if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="0" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -113,16 +118,17 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V7 architectural direct-fastmem over V6 CRASHFIX1; risky async/decode quarantined
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V8.1 CPU LEAN: V7-size Geometry + Tier2 direct-fastmem; deep Tier2 telemetry build-switch
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
+echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
 echo ================================================================
 echo.
 echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms disabled)...
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building V7 ARCH FASTMEM over gameplay-stable V6 CRASHFIX1...
+echo [0b2/7] Building V8.1 CPU LEAN over V8/V7 stable architecture...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -133,6 +139,8 @@ if not defined PYTHON3_CMD (
 if not defined PYTHON3_CMD goto :NO_PYTHON3
 echo   Python 3:        %PYTHON3_CMD%
 %PYTHON3_CMD% "%PROFILE%\tools\build_tier2_superblocks.py" "%PROFILE%"
+if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%PROFILE%\tests\check_v81_cpu_lean.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -224,6 +232,25 @@ if exist "%BUILD%" if not exist "%PERF_V6_ENTITY_LEAF_FIX1_STAMP%" (
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%PERF_V8_CPU_FUSION_STAMP%" (
+  echo.
+  echo [0c-v8cpu/7] V8 CPU FUSION - invalidating Tier2 clusters + hook units only...
+  rem V8 does not alter the generic AOT memory ABI. Keep the 234-unit corpus cached;
+  rem only Tier2 clusters and their 10 hook units need fresh codegen.
+  del /s /q "%BUILD%\*vcs_tier2_cluster*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0043*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0044*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0084*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0085*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0086*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0129*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0154*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0155*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0157*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*generated_unit_0158*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%PERF_V7_ARCH_FASTMEM_STAMP%" (
   echo.
   echo [0c-v7fastmem/7] V7 ARCH FASTMEM - one-time AOT memory-model rebuild...
@@ -237,6 +264,16 @@ if exist "%BUILD%" if not exist "%PERF_V7_ARCH_FASTMEM_STAMP%" (
   del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
   del /s /q "%BUILD%\*main*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V81_CPU_LEAN_STAMP%" (
+  echo.
+  echo [0c-v81lean/7] V8.1 CPU LEAN - rolling back Geometry code bloat, keeping direct-fastmem...
+  rem V8 runtime data shows the extra Geometry closure regresses heavy city CPU time.
+  rem The lean direct-memory view is now pointer-only, so rebuild the seven small Tier2 objects.
+  rem Generated AOT and DX12 objects are intentionally preserved.
+  del /s /q "%BUILD%\*vcs_tier2_cluster*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
@@ -264,6 +301,7 @@ echo [1/7] Configuring persistent Ninja Release tree...
   -DPSPRECOMP_GENERATED_INLINE_LEVEL=0 ^
   -DPSPRECOMP_HOT_GENERATED_INLINE_LEVEL=3 ^
   -DPSPRECOMP_VCS_AOT_LTO=OFF ^
+  -DPSPRECOMP_VCS_TIER2_DEEP_TELEMETRY=%PSPRECOMP_TIER2_DEEP_TELEMETRY% ^
   -DPSPRECOMP_BUILD_TESTS=ON ^
   -DPSPRECOMP_BUILD_PROFILE_TESTS=ON
 if errorlevel 1 goto :FAIL
@@ -283,6 +321,8 @@ if errorlevel 1 goto :FAIL
 >"%PERF_V6_ENTITY_LEAF_STAMP%" echo VCS PERF V6 ENTITY LEAF INLINE 2026-08-17
 >"%PERF_V6_ENTITY_LEAF_FIX1_STAMP%" echo VCS PERF V6 ENTITY LEAF INLINE CRASHFIX1 2026-08-17
 >"%PERF_V7_ARCH_FASTMEM_STAMP%" echo VCS PERF V7 ARCH FASTMEM 2026-08-17
+>"%PERF_V8_CPU_FUSION_STAMP%" echo VCS PERF V8 CPU FUSION 2026-08-17
+>"%PERF_V81_CPU_LEAN_STAMP%" echo VCS PERF V8.1 CPU LEAN 2026-08-17
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

@@ -82,6 +82,21 @@ ENTITY_INLINE_LEAF_BODIES = {
 }
 
 
+# Tiny geometry leaves observed in the 0084/0085 hot closure. Unlike the large
+# geometry helpers, these bodies contain no nested call/HLE edge and are cheaper
+# to execute in the caller than to push/pop the Tier-2 logical return stack.
+GEOMETRY_INLINE_LEAF_BODIES = {}
+
+
+# Cross-unit generated functions that are statically proven leaves: their local
+# closure contains no generated/HLE/syscall call and every dynamic return goes
+# through $ra. Tier-2 may call these entry points directly and account the removed
+# generated-call scheduler edge without paying invoke_chained_direct's profiling,
+# chain-depth and fallback plumbing. Large/indirect helpers are deliberately absent.
+DIRECT_GENERATED_LEAF_TARGETS = set()
+
+
+
 @dataclasses.dataclass(frozen=True)
 class UnitSource:
     unit: int
@@ -378,6 +393,12 @@ def optimize_tier2_gpr_shadow(text: str, cluster_key: str) -> tuple[str, Dict[st
         # inlining makes gpr[2] syntactically hotter, but replacing stack pointer
         # gpr[29] with it would pessimize the much larger 0154 stack-local body.
         selected = [4, 6, 19, 17, 5, 29]
+    elif cluster_key == 'world':
+        # The V8 closure pulls measured external helpers into World. Keep the
+        # already gameplay-stable World ownership set instead of allowing those
+        # extra helper bodies to reshuffle which architectural registers live in
+        # host locals across the giant CFG.
+        selected = [4, 5, 16, 29, 6, 31]
     else:
         selected = [reg for reg, _ in counts.most_common() if reg != 0][:6] if eligible else []
 
@@ -535,6 +556,26 @@ def window_blocks(source: UnitSource, windows: Sequence[Tuple[int, int]]) -> Set
     return out
 
 
+def validate_direct_generated_leaf(source: UnitSource, seed_pc: int) -> None:
+    closure = local_closure(source, [seed_pc], 128)
+    for pc in closure:
+        block = source.blocks[pc]
+        if ('invoke_chained_direct' in block or 'invoke_chained_call' in block or
+                'invoke_hle' in block or 'invoke_syscall' in block):
+            raise RuntimeError(
+                f'unit {source.unit:04d} leaf 0x{seed_pc:08X}: nested call at 0x{pc:08X}')
+        for value in re.findall(r'jump_target = ([^;]+);', block):
+            if value.strip() != 'ctx.gpr[31]':
+                raise RuntimeError(
+                    f'unit {source.unit:04d} leaf 0x{seed_pc:08X}: non-$ra jump {value!r}')
+        for value in re.findall(r'ctx\.pc = ([^;]+);', block):
+            if value.strip() not in {'jump_target', 'local_pc'}:
+                raise RuntimeError(
+                    f'unit {source.unit:04d} leaf 0x{seed_pc:08X}: explicit PC {value!r}')
+    if seed_pc not in source.entries:
+        raise RuntimeError(f'unit {source.unit:04d}: direct leaf entry 0x{seed_pc:08X} missing')
+
+
 def selected_for_cluster(cluster: Cluster, sources: Mapping[int, UnitSource]) -> Dict[int, Set[int]]:
     units = sorted(set(cluster.seeds) | set(cluster.windows))
     selected: Dict[int, Set[int]] = {u: set() for u in units}
@@ -599,8 +640,27 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
         target_pc = int(m.group('target_pc'), 16)
         cont = int(m.group('cont'), 16)
         indent = m.group('indent')
-        if target_pc not in selected_all or pc_owner[target_pc] != target_unit:
-            return m.group(0)
+        direct_leaf = (target_unit, target_pc) in DIRECT_GENERATED_LEAF_TARGETS
+        if target_pc not in selected_all or pc_owner.get(target_pc) != target_unit:
+            if not direct_leaf:
+                return m.group(0)
+            entry = sources[target_unit].entries[target_pc]
+            stats['direct_generated_leaf_sites'] += 1
+            # The generated leaf has no nested scheduler/HLE edge by static audit.
+            # Call its exact direct entry, then preserve the scheduler cadence the
+            # removed invoke_chained_direct frame would have contributed.  GPR
+            # shadows are published around the external AOT function.
+            return (
+                f'{indent}TIER2_GPR_SYNC_OUT();\n'
+                f'{indent}psprecomp::recomp_unit_{target_unit:04d}_entry(rt, ctx, {entry}u, aot_mem);\n'
+                f'{indent}TIER2_GPR_SYNC_IN();\n'
+                f'{indent}if (!rt.account_inlined_generated_leaf(ctx)) {{\n'
+                f'{indent}    tier2_gpr_shadow_valid = false;\n'
+                f'{indent}    TIER2_SB_RETURN();\n'
+                f'{indent}}}\n'
+                f'{indent}if (ctx.pc == 0x{cont:08X}u) goto SB_L_{cont:08X};\n'
+                f'{indent}tier2_gpr_shadow_valid = false;\n'
+                f'{indent}TIER2_SB_RETURN();')
         if source_unit == 155 and target_pc in ENTITY_INLINE_LEAF_BODIES:
             leaf_unit, leaf_body = ENTITY_INLINE_LEAF_BODIES[target_pc]
             if leaf_unit != target_unit:
@@ -617,6 +677,22 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
                 f'{indent}// Publish the exact JAL return PC before scheduler accounting.\n'
                 f'{indent}// A starvation boundary may switch PSP ownership here; the\n'
                 f'{indent}// resumed context must never observe the stale superblock PC.\n'
+                f'{indent}ctx.pc = 0x{cont:08X}u;\n'
+                f'{indent}TIER2_GPR_SYNC_OUT();\n'
+                f'{indent}if (!rt.account_inlined_generated_leaf(ctx)) {{\n'
+                f'{indent}    tier2_gpr_shadow_valid = false;\n'
+                f'{indent}    TIER2_SB_RETURN();\n'
+                f'{indent}}}\n'
+                f'{indent}goto SB_L_{cont:08X};')
+        if target_pc in GEOMETRY_INLINE_LEAF_BODIES:
+            leaf_unit, leaf_body = GEOMETRY_INLINE_LEAF_BODIES[target_pc]
+            if leaf_unit != target_unit:
+                raise RuntimeError(f'geometry inline leaf unit mismatch for 0x{target_pc:08X}')
+            stats['geometry_inline_leaf_sites'] += 1
+            body = '\n'.join(f'{indent}{line}' for line in leaf_body)
+            prefix = body + ('\n' if body else '')
+            return (
+                f'{prefix}'
                 f'{indent}ctx.pc = 0x{cont:08X}u;\n'
                 f'{indent}TIER2_GPR_SYNC_OUT();\n'
                 f'{indent}if (!rt.account_inlined_generated_leaf(ctx)) {{\n'
@@ -795,6 +871,7 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
 #include "vcs_fast_paths.hpp"
+#include "vcs_tier2_direct_memory.hpp"
 
 #include <cstdint>
 
@@ -807,12 +884,13 @@ void {cluster.function}(psprecomp::Runtime &rt,
                         std::uint32_t entry_pc) {{
     tier2_detail::SampleScope tier2_scope(Tier2ClusterId::{cluster.enum_name});
     auto &tier2_stats = tier2_scope.stats();
+    Tier2DirectMemoryView tier2_mem(rt.memory().direct_fastmem_base_address());
     constexpr std::uint32_t kTier2ReturnCapacity = 32u;
     std::uint32_t tier2_pending_transfers = 0u;
     std::uint32_t tier2_return_depth = 0u;
-    std::uint32_t tier2_return_pc[kTier2ReturnCapacity]{{}};
-    std::uint32_t tier2_return_unit[kTier2ReturnCapacity]{{}};
-    std::uint32_t tier2_return_pending_base[kTier2ReturnCapacity]{{}};
+    std::uint32_t tier2_return_pc[kTier2ReturnCapacity];
+    std::uint32_t tier2_return_unit[kTier2ReturnCapacity];
+    std::uint32_t tier2_return_pending_base[kTier2ReturnCapacity];
     std::uint32_t tier2_resume_pc = 0u;
     std::uint32_t tier2_resume_unit = 0u;
     std::uint32_t jump_target = 0u;
@@ -891,6 +969,9 @@ TIER2_ENTRY_DISPATCH:
     stats.update({f'dataflow_{k}': v for k, v in dataflow_stats.items()})
     cpp, simd_stats = optimize_tier2_simd(cpp)
     stats.update({f'simd_{k}': v for k, v in simd_stats.items()})
+    direct_memory_sites = cpp.count('aot_mem.aot_')
+    cpp = cpp.replace('aot_mem.aot_', 'tier2_mem.aot_')
+    stats['direct_memory_sites'] = direct_memory_sites
     cpp, gpr_stats = optimize_tier2_gpr_shadow(cpp, cluster.key)
     stats['gpr_shadow_occurrences'] = int(gpr_stats['occurrences'])
     stats['gpr_shadow_registers'] = len(gpr_stats['registers'])
@@ -921,7 +1002,7 @@ def patch_hooks(raw: str, unit: int, hook_specs: Sequence[Tuple[Cluster, int]]) 
             raise RuntimeError(f'unit {unit:04d}: hook label 0x{pc:08X} missing')
         hook = (
             label + HOOK_BEGIN +
-            f'    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::{cluster.enum_name})) {{\n'
+            f'    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::{cluster.enum_name}) && rt.memory().direct_fastmem_enabled()) {{\n'
             f'        vcs::{cluster.function}(rt, ctx, aot_mem, 0x{pc:08X}u);\n'
             f'        return;\n'
             f'    }}\n' + HOOK_END
@@ -945,8 +1026,12 @@ def main() -> int:
     generated = profile / 'generated'
     host = profile / 'host'
 
-    all_units = sorted({u for c in CLUSTERS for u in (set(c.seeds) | set(c.windows) | set(c.hooks))})
+    all_units = sorted(
+        {u for c in CLUSTERS for u in (set(c.seeds) | set(c.windows) | set(c.hooks))} |
+        {u for u, _pc in DIRECT_GENERATED_LEAF_TARGETS})
     sources = {u: parse_unit(generated / f'generated_unit_{u:04d}.cpp', u) for u in all_units}
+    for unit, pc in sorted(DIRECT_GENERATED_LEAF_TARGETS):
+        validate_direct_generated_leaf(sources[unit], pc)
 
     total = collections.Counter()
     selected_by_cluster: Dict[str, Dict[int, Set[int]]] = {}

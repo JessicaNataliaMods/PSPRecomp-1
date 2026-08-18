@@ -49,9 +49,13 @@ inline Tier2ClusterCounters &counters(Tier2ClusterId id) noexcept {
     return g_counters[static_cast<std::size_t>(id)];
 }
 
-// Entry timing is sampled 1/256 so coverage telemetry remains cheap enough to
-// leave enabled in performance builds.  The destructor sees every exit path,
-// including cold fallback and scheduler invalidation.
+// Deep Tier-2 coverage/timing is intentionally compile-time opt-in in V8.
+// The V7 log showed tens of thousands of Tier-2 entries per 60-vblank window;
+// even a "cheap" counter increment + sample branch at every entry pollutes the
+// CPU benchmark we are trying to improve. Normal performance builds therefore
+// compile this instrumentation out completely. Overall PERF telemetry remains
+// available. Define PSPRECOMP_TIER2_DEEP_TELEMETRY for profiling builds.
+#if defined(PSPRECOMP_TIER2_DEEP_TELEMETRY)
 class SampleScope {
 public:
     explicit SampleScope(Tier2ClusterId id) noexcept
@@ -91,6 +95,24 @@ private:
     bool finished_{};
     bool active_{};
 };
+#else
+struct NoopCounter {
+    constexpr NoopCounter &operator++() noexcept { return *this; }
+};
+struct NoopTier2ClusterCounters {
+    NoopCounter entries, fused_tail_edges, fused_calls, cold_exits, fallbacks;
+    NoopCounter sampled_entries, sampled_ns;
+};
+class SampleScope {
+public:
+    explicit SampleScope(Tier2ClusterId) noexcept { ++g_active_depth; }
+    ~SampleScope() noexcept { if (g_active_depth != 0u) --g_active_depth; }
+    constexpr void finish() noexcept {}
+    constexpr NoopTier2ClusterCounters &stats() noexcept { return counter_; }
+private:
+    NoopTier2ClusterCounters counter_{};
+};
+#endif
 } // namespace tier2_detail
 
 bool tier2_superblocks_enabled() noexcept;

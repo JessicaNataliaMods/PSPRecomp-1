@@ -6793,7 +6793,7 @@ L_08A6E828:
     goto L_08A6E894;
 L_08A6E894:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A6E894u);
         return;
     }
@@ -6809,7 +6809,7 @@ L_08A6E894:
     }
 L_08A6E8A4:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Entity) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_entity(rt, ctx, aot_mem, 0x08A6E8A4u);
         return;
     }

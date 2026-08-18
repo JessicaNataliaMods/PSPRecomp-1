@@ -7627,6 +7627,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                           << " finish_us=" << (d(r.perf_finish_frame_ns, o.perf_finish_frame_ns) / 1000u);
                         runtime_log_line(t.str());
 
+#if defined(PSPRECOMP_TIER2_DEEP_TELEMETRY)
                         // Tier-2 V2 coverage is reported at the same 60-vblank cadence as
                         // PERF. Counters are thread-local to the Allegrex execution thread,
                         // so there are no atomics on the hot superblock edges.
@@ -7666,6 +7667,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                                        << " sampled_us=" << (total_sample_ns / 1000u);
                             runtime_log_line(tier2_line.str());
                         }
+#endif
                         if (vcs_configuration().diagnostics.guest_hotspot_profile &&
                             ++guest_hotspot_perf_windows >= 5u) {
                             report_guest_hotspot_window(display_vblank_index);

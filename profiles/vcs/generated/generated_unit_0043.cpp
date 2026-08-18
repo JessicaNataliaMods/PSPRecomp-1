@@ -9482,7 +9482,7 @@ L_088B3FC8:
     goto L_088B3FCC;
 L_088B3FCC:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_edge43(rt, ctx, aot_mem, 0x088B3FCCu);
         return;
     }

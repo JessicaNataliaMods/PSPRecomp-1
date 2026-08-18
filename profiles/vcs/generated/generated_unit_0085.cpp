@@ -2462,7 +2462,7 @@ L_08958CF8:
     return;
 L_08958D28:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x08958D28u);
         return;
     }
@@ -5795,7 +5795,7 @@ L_0895A72C:
     return;
 L_0895A760:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Geometry) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_geometry(rt, ctx, aot_mem, 0x0895A760u);
         return;
     }
@@ -8409,7 +8409,7 @@ L_0895BF04:
     goto L_0895BF3C;
 L_0895BF3C:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_boundary(rt, ctx, aot_mem, 0x0895BF3Cu);
         return;
     }
@@ -8439,7 +8439,7 @@ L_0895BF5C:
     goto L_0895BF7C;
 L_0895BF7C:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Boundary) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_boundary(rt, ctx, aot_mem, 0x0895BF7Cu);
         return;
     }

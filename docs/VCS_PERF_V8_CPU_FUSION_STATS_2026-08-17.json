@@ -1,0 +1,60 @@
+{
+  "stage": "perf-v8-cpu-fusion-2026-08-17",
+  "base": "perf-v7-arch-fastmem-buildfix1-2026-08-17",
+  "focus": "CPU/AOT/Tier-2 execution; renderer behavior unchanged",
+  "v7_runtime_baseline": {
+    "gameplay_perf_windows": 171,
+    "heavy_windows_game_draws_gte_50000": 120,
+    "heavy_avg_fps": 57.29,
+    "heavy_avg_frame_ms": 17.611,
+    "heavy_avg_guest_cpu_ms": 12.781,
+    "heavy_avg_ge_ms": 3.623,
+    "heavy_avg_present_ms": 1.198,
+    "heavy_avg_game_draws": 74461
+  },
+  "tier2_v8": {
+    "clusters": 7,
+    "hot_blocks": 1098,
+    "static_fused_calls": 52,
+    "static_fused_tail": 13,
+    "hooks": 25,
+    "tier2_direct_memory_sites": 2068,
+    "entity_inline_leaf_sites": 13,
+    "geometry_inline_leaf_sites": 3,
+    "geometry_direct_generated_leaf_sites": 6,
+    "gpr_shadow_clusters": 4,
+    "gpr_shadow_registers": 24,
+    "gpr_shadow_occurrences": 3461,
+    "geometry_shadow": false,
+    "deep_tier2_telemetry_default": false,
+    "active_depth_reentry_guard_preserved": true
+  },
+  "stability_preserved": {
+    "ge_async_default": false,
+    "parallel_vertex_decode_default": false,
+    "experimental_v5_vfpu_quarantined": true,
+    "dx12_execute_indirect_default": false,
+    "v7_generic_aot_fastmem_preserved": true,
+    "v6_entity_leaf_scheduler_fix_preserved": true
+  },
+  "validation": {
+    "generator_idempotence": "PASS",
+    "static_v8_audit": "PASS (8 checks)",
+    "tier2_cluster_compile": "7/7 PASS",
+    "hook_generated_unit_syntax": "10/10 PASS",
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "deep_tier2_telemetry_compile": "PASS",
+    "git_diff_check": "PASS",
+    "full_linux_vcsnative_link": "NOT COMPLETED; pre-existing build tree selected unrelated AOT units and exceeded interactive build window without a V8 source diagnostic",
+    "windows_msvc_runtime": "PENDING USER BUILD/BENCHMARK"
+  },
+  "progress_estimate": {
+    "overall_project_percent": 92,
+    "cpu_tier2_architecture_percent": 96,
+    "performance_150fps_goal_percent": 60
+  },
+  "runtime_claim": "No FPS gain claimed until Windows same-route V8 log is measured"
+}

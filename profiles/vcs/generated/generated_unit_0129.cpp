@@ -3861,7 +3861,7 @@ L_08A09AD0:
     return;
 L_08A09B2C:
 // TIER2_SUPERBLOCK_V2_HOOK_BEGIN
-    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Physics)) {
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Physics) && rt.memory().direct_fastmem_enabled()) {
         vcs::tier2_superblock_physics(rt, ctx, aot_mem, 0x08A09B2Cu);
         return;
     }

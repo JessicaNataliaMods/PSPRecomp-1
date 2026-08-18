@@ -8,6 +8,9 @@ set(VCS_PROFILE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 option(PSPRECOMP_VCS_AOT_LTO
     "Include generated VCS AOT units in MSVC whole-program optimization" OFF)
 
+option(PSPRECOMP_VCS_TIER2_DEEP_TELEMETRY
+    "Compile expensive per-entry Tier-2 coverage/timing counters" OFF)
+
 option(PSPRECOMP_PROFILE_GUIDED_AOT
     "Optimize the measured VCS hot AOT units above the base generated level" ON)
 set(PSPRECOMP_HOT_GENERATED_OPT_LEVEL "2" CACHE STRING
@@ -262,6 +265,9 @@ add_executable(VCSNative
 )
 vcs_target_common(VCSNative)
 vcs_set_runtime_output(VCSNative)
+if(PSPRECOMP_VCS_TIER2_DEEP_TELEMETRY)
+    target_compile_definitions(VCSNative PRIVATE PSPRECOMP_TIER2_DEEP_TELEMETRY=1)
+endif()
 if(MSVC)
     # /Ob3 must stay off the target: target_compile_options lands in the vcxproj
     # AdditionalOptions, which cl.exe sees *after* the per-source
