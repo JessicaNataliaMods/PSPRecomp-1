@@ -99,3 +99,7 @@ Its source lives in `profiles/vcs/tools/vcs_codegen_main.cpp`. Profile-only lowe
 ## Development history
 
 Old stage reports, validation notes and handoffs are stored under `profiles/vcs/progress`. That directory is intentionally ignored by the repository so development history does not pollute the public source tree.
+
+### Internal SAVE_REPRO diagnostics
+
+`VCSNative.ini` ships with `[Testing] SaveRepro=false`. This keeps the F8 checkpoint and F10 trace harness completely unavailable during normal play. Developers may temporarily set it to `true` for controlled debugging. `RESTORE_SAVE_REPRO.bat` explicitly opts the harness in for its own process and does not require changing the normal INI. These checkpoints are diagnostic snapshots, not supported gameplay save states.

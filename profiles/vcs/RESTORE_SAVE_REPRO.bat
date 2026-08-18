@@ -20,6 +20,7 @@ if not exist "%GAME%\PSP_GAME\SYSDIR\EBOOT_DECRYPTED.ELF" (
   exit /b 3
 )
 if exist "%TRACE%" del /q "%TRACE%" >nul 2>&1
+set "PSPRECOMP_SAVE_REPRO_TESTING=1"
 set "PSPRECOMP_SAVE_REPRO_AUTO_RESTORE=1"
 echo ================================================================
 echo VCS SAVE REPRO - AUTO RESTORE

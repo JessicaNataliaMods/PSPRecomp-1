@@ -3135,6 +3135,9 @@ void save_repro_dump_trace(psprecomp::Runtime &runtime, std::string_view reason)
 }
 
 void save_repro_vblank_hotkeys(psprecomp::Runtime &runtime, const psprecomp::AllegrexContext &ctx) {
+    // Shipped builds keep SAVE_REPRO disabled. Return before even touching the
+    // UI command atomic so normal gameplay follows the V8.2.7 path exactly.
+    if (!save_repro_testing_enabled()) return;
     // The UI thread records F8/F10 edges in WindowState. Before F8/restore this
     // stays one atomic exchange per vblank, preserving the V8.2.5 mission and
     // cutscene path. Once tracing is armed we additionally poll F10 on Windows:
@@ -11568,6 +11571,7 @@ void vcs_starvation_tick(psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) 
 } // namespace
 
 bool restore_save_repro_checkpoint_if_requested(psprecomp::Runtime &runtime, std::string &error) {
+    if (!save_repro_testing_enabled()) return false;
     const char *value = std::getenv("PSPRECOMP_SAVE_REPRO_AUTO_RESTORE");
     if (value == nullptr || *value == '\0' || std::string_view(value) == "0") return false;
     return save_repro_restore_checkpoint_impl(runtime, error);

@@ -561,6 +561,16 @@ void apply_timing_key(VcsConfiguration &config, const std::string &key,
     warning(config, line, "unknown [Timing] key '" + key + "'");
 }
 
+void apply_testing_key(VcsConfiguration &config, const std::string &key,
+                       const std::string &value, std::size_t line) {
+    if (key == "saverepro" || key == "savereprodiagnostics") {
+        if (!parse_bool(value, config.testing.save_repro))
+            warning(config, line, "Testing.SaveRepro expects true/false");
+        return;
+    }
+    warning(config, line, "unknown [Testing] key '" + key + "'");
+}
+
 void apply_diagnostics_key(VcsConfiguration &config, const std::string &key,
                            const std::string &value, std::size_t line) {
     if (key == "logtofile" || key == "enablelog" || key == "enabled") {
@@ -760,6 +770,8 @@ VcsConfiguration load_vcs_configuration(const std::filesystem::path &path) {
             apply_timing_key(config, key, value, line_number);
         else if (section == "diagnostics" || section == "logging")
             apply_diagnostics_key(config, key, value, line_number);
+        else if (section == "testing")
+            apply_testing_key(config, key, value, line_number);
         else if (section == "widescreen")
             apply_widescreen_key(config, key, value, line_number);
         else if (section == "controls")
@@ -801,6 +813,17 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
 
     VcsConfiguration loaded = load_vcs_configuration(path);
     load_proper_shaders_configuration(loaded, executable_directory / "ProperShaders.ini");
+    // SAVE_REPRO is intentionally off in the shipped INI. The internal restore
+    // script/environment is an explicit developer opt-in and may enable it for
+    // that process without requiring the user's normal configuration to change.
+    const auto env_enabled = [](const char *name) noexcept {
+        const char *value = std::getenv(name);
+        return value != nullptr && *value != '\0' && std::string_view(value) != "0";
+    };
+    if (env_enabled("PSPRECOMP_SAVE_REPRO_TESTING") ||
+        env_enabled("PSPRECOMP_SAVE_REPRO_AUTO_RESTORE")) {
+        loaded.testing.save_repro = true;
+    }
     loaded.initialized = true;
     loaded.executable_directory = executable_directory;
     {
@@ -877,6 +900,11 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
 
 const VcsConfiguration &vcs_configuration() {
     return global_configuration();
+}
+
+bool save_repro_testing_enabled() noexcept {
+    const VcsConfiguration &config = global_configuration();
+    return config.initialized && config.testing.save_repro;
 }
 
 const char *display_resolution_mode_name(DisplayResolutionMode mode) noexcept {

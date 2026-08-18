@@ -452,7 +452,8 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wparam, LPAR
         // Gameplay keys keep using the existing sampled-input path. Diagnostic
         // F8/F10 edges are queued here on the UI thread, with auto-repeat
         // ignored, so no GetAsyncKeyState call is added to guest timing.
-        if ((static_cast<std::uint32_t>(lparam) & (1u << 30u)) == 0u) {
+        if (save_repro_testing_enabled() &&
+            (static_cast<std::uint32_t>(lparam) & (1u << 30u)) == 0u) {
             if (wparam == VK_F8)
                 state.save_repro_commands.fetch_or(0x1u, std::memory_order_release);
             else if (wparam == VK_F10)

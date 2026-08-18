@@ -113,6 +113,7 @@ set "CORRECTNESS_V826_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826_save_repro_
 set "CORRECTNESS_V826A_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826a_save_repro_passive_20260818"
 set "CORRECTNESS_V826B_SAVE_REPRO_STAMP=%BUILD%\.vcs_correctness_v826b_save_repro_trace_20260818"
 set "CORRECTNESS_V827_SAVE_THREAD_STAMP=%BUILD%\.vcs_correctness_v827_save_thread_lifecycle_20260818"
+set "CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP=%BUILD%\.vcs_correctness_v827a_save_repro_gate_20260818"
 if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
 if not defined PSPRECOMP_RUNTIME_CHAIN_TELEMETRY set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
@@ -131,7 +132,7 @@ echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
 echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V8.2 runtime-chain lean + V8.1 Geometry/direct-fastmem baseline
-echo Correctness:      V8.2.6B SAVE REPRO TRACE HOTFIX over protected V8.2.5 NEWS audio
+echo Correctness:      V8.2.7A SAVE lifecycle + internal SAVE_REPRO gate; protected V8.2.5 NEWS audio
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
@@ -158,6 +159,8 @@ rem V8.2.7 checker includes the protected V8.2 CPU/Geometry, V8.2.5 NEWS,
 rem V8.2.6 passive checkpoint contract and the corrected PSP ExitDelete lifecycle.
 rem Older revision checkers pin exact stage strings and must not gate this stage.
 %PYTHON3_CMD% "%PROFILE%\tests\check_v827_save_thread_lifecycle.py"
+if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%PROFILE%\tests\check_v827a_internal_save_repro_gate.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -383,6 +386,17 @@ if exist "%BUILD%" if not exist "%CORRECTNESS_V827_SAVE_THREAD_STAMP%" (
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP%" (
+  echo.
+  echo [0c-v827a/7] V8.2.7A INTERNAL SAVE_REPRO GATE - rebuilding host config/diagnostic objects only...
+  rem Normal gameplay has SAVE_REPRO disabled in VCSNative.ini. The internal
+  rem restore script opts in explicitly; generated AOT/Tier2/DX12 are unchanged.
+  del /s /q "%BUILD%\*vcs_config*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*display_window*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
   echo.
   echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
@@ -440,6 +454,7 @@ if errorlevel 1 goto :FAIL
 >"%CORRECTNESS_V826A_SAVE_REPRO_STAMP%" echo VCS V8.2.6A SAVE REPRO PASSIVE RECOVERY 2026-08-18
 >"%CORRECTNESS_V826B_SAVE_REPRO_STAMP%" echo VCS V8.2.6B SAVE REPRO TRACE HOTFIX 2026-08-18
 >"%CORRECTNESS_V827_SAVE_THREAD_STAMP%" echo VCS V8.2.7 SAVE THREAD LIFECYCLE FIX 2026-08-18
+>"%CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP%" echo VCS V8.2.7A INTERNAL SAVE_REPRO GATE 2026-08-18
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

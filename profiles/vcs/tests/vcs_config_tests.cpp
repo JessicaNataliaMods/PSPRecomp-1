@@ -62,6 +62,8 @@ int main() {
                    << "MouseSensitivity=17\n"
                    << "InvertCameraY=true\n"
                    << "PedCameraUpLimitDegrees=40\n"
+                   << "[Testing]\n"
+                   << "SaveRepro=true\n"
                    << "[Widescreen]\n"
                    << "Enabled=true\n"
                    << "AspectRatio=21:9\n"
@@ -148,6 +150,8 @@ int main() {
         require(config.controls.invert_camera_y, "camera inversion was not parsed");
         require(config.controls.ped_camera_up_limit_degrees == 40u,
                 "on-foot camera upper limit was not parsed");
+        require(config.testing.save_repro,
+                "Testing.SaveRepro was not parsed");
 
         const vcs::PresentationRectangle fit = vcs::calculate_presentation_rectangle(
             1920u, 1080u, 480u, 272u, vcs::DisplayAspectMode::Preserve, false);
@@ -164,6 +168,8 @@ int main() {
 
         const vcs::VcsConfiguration missing =
             vcs::load_vcs_configuration(root / "missing.ini");
+        require(!missing.testing.save_repro,
+                "SAVE_REPRO must be disabled by default");
         {
             std::ofstream proper(root / "ProperShaders.ini", std::ios::trunc);
             proper << "[VolumetricClouds]\n"

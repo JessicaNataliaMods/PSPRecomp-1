@@ -18,8 +18,8 @@ def need(cond, msg):
         raise SystemExit(1)
     print('PASS:', msg)
 
-need('stage=correctness-v8.2.7-save-thread-lifecycle-fix-2026-08-18' in log, 'V8.2.7 runtime stage')
-need('correctness_revision=827' in log, 'V8.2.7 correctness revision')
+need(('stage=correctness-v8.2.7-save-thread-lifecycle-fix-2026-08-18' in log) or ('stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18' in log), 'V8.2.7/V8.2.7A runtime stage')
+need(('correctness_revision=827 ' in log) or ('correctness_revision=8271 ' in log), 'V8.2.7/V8.2.7A correctness revision')
 need('save_exitdelete_semantics=1' in log and 'save_repro_legacy_exitdelete_repair=1' in log and 'save_partition_reuse=1' in log,
      'ExitDelete/partition fix and migration metadata')
 need('atrac_stream_resident_status=1' in log and 'atrac_nonloop_resident=-2' in log and

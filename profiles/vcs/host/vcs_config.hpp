@@ -151,6 +151,13 @@ struct TimingConfiguration {
     std::uint64_t realtime_speed_interval_vblanks{120u};
 };
 
+struct TestingConfiguration {
+    // Internal developer-only SAVE_REPRO checkpoint/trace harness. This is not
+    // a general user save-state system: checkpoints can contain host-side state
+    // that is only safe for controlled diagnostics. Keep disabled for normal play.
+    bool save_repro{false};
+};
+
 struct DiagnosticsConfiguration {
     // Optional text log beside the executable. Used for startup failures,
     // DirectX 12 device/present errors, missing-asset reports and other host
@@ -272,6 +279,7 @@ struct VcsConfiguration {
     AudioConfiguration audio{};
     TimingConfiguration timing{};
     DiagnosticsConfiguration diagnostics{};
+    TestingConfiguration testing{};
     WidescreenConfiguration widescreen{};
     VolumetricCloudsConfiguration volumetric_clouds{};
     std::filesystem::path source_path{};
@@ -294,6 +302,9 @@ struct VcsConfiguration {
 void initialize_vcs_configuration(const std::filesystem::path &executable_directory);
 
 [[nodiscard]] const VcsConfiguration &vcs_configuration();
+// Resolved once at startup. Explicit SAVE_REPRO restore/test environment flags
+// can opt the internal harness in even when the INI keeps it disabled.
+[[nodiscard]] bool save_repro_testing_enabled() noexcept;
 [[nodiscard]] const char *display_resolution_mode_name(DisplayResolutionMode mode) noexcept;
 [[nodiscard]] const char *display_aspect_mode_name(DisplayAspectMode mode) noexcept;
 [[nodiscard]] const char *display_upscale_filter_name(DisplayUpscaleFilter filter) noexcept;
