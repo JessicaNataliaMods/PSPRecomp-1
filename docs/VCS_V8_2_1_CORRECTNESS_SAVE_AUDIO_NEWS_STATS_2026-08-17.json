@@ -1,0 +1,54 @@
+{
+  "release": "PSPRecomp-VCS-V8.2.1-CORRECTNESS-SAVE-AUDIO-NEWS-2026-08-17",
+  "base": "PSPRecomp-VCS-PERF-V8.2-CPU-RUNTIME-LEAN-2026-08-17",
+  "stage": "correctness-v8.2.1-save-audio-news-2026-08-17",
+  "performance_baseline_preserved": {
+    "hot_blocks": 1060,
+    "static_fused_calls": 36,
+    "static_fused_tail": 13,
+    "hooks": 25,
+    "boundary_direct_generated_leaf_sites": 5,
+    "geometry_direct_generated_leaf_sites": 0,
+    "cpu_lean_revision": 2,
+    "scheduler_changed": false,
+    "geometry_changed": false,
+    "dx12_changed": false
+  },
+  "savedata": {
+    "transactional_buffer_snapshot": true,
+    "stage_before_replace": true,
+    "rollback_on_commit_failure": true,
+    "listsave_system_utility_released_at_shutdown": true,
+    "v9_6_cancel_policy_changed": false
+  },
+  "sas": {
+    "error_80420016_name": "InvalidState",
+    "keyoff_while_paused_latches_release": true,
+    "zero_release_fallback_preserved": true,
+    "paused_loop_regression_test": true
+  },
+  "news_atrac": {
+    "direct_sceIoRead_buffer_source_resolution": true,
+    "common_path_host_file_scan": false,
+    "lazy_prefix_fallback_bytes": 256,
+    "runtime_source_timing_log": true,
+    "runtime_decode_open_timing_log": true,
+    "slow_decode_threshold_us": 2000,
+    "ffmpeg_open_hitch_physically_verified": false
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "v8_2_baseline_audit": "PASS",
+    "v8_2_1_correctness_audit": "13/13 PASS",
+    "vcsnative_vcs_profile_object": "PASS",
+    "vcsnative_runtime_log_object": "PASS"
+  },
+  "progress_estimate_percent": {
+    "overall": 92,
+    "correctness_frontend_audio_implementation": 94,
+    "cpu_tier2_architecture": 97
+  }
+}

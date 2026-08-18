@@ -104,9 +104,17 @@ set "PERF_V6_ENTITY_LEAF_FIX1_STAMP=%BUILD%\.vcs_perf_v6_entity_leaf_inline_cras
 set "PERF_V7_ARCH_FASTMEM_STAMP=%BUILD%\.vcs_perf_v7_arch_fastmem_20260817"
 set "PERF_V8_CPU_FUSION_STAMP=%BUILD%\.vcs_perf_v8_cpu_fusion_20260817"
 set "PERF_V81_CPU_LEAN_STAMP=%BUILD%\.vcs_perf_v81_cpu_lean_20260817"
+set "PERF_V82_CPU_RUNTIME_LEAN_STAMP=%BUILD%\.vcs_perf_v82_cpu_runtime_lean_20260817"
+set "CORRECTNESS_V822_STAMP=%BUILD%\.vcs_correctness_v822_recovery_20260817"
+set "CORRECTNESS_V823_NEWS_STAMP=%BUILD%\.vcs_correctness_v823_news_audio_20260817"
+set "CORRECTNESS_V824_NEWS_PACING_STAMP=%BUILD%\.vcs_correctness_v824_news_pacing_20260818"
+set "CORRECTNESS_V825_NEWS_ATRAC_STAMP=%BUILD%\.vcs_correctness_v825_news_atrac_stream_20260818"
 if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
+if not defined PSPRECOMP_RUNTIME_CHAIN_TELEMETRY set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="0" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
+if /I "%PSPRECOMP_RUNTIME_CHAIN_TELEMETRY%"=="1" set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=ON"
+if /I "%PSPRECOMP_RUNTIME_CHAIN_TELEMETRY%"=="0" set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 
 echo ================================================================
 echo VCS - NINJA PERFORMANCE INCREMENTAL BUILD
@@ -118,17 +126,19 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V8.1 CPU LEAN: V7-size Geometry + Tier2 direct-fastmem; deep Tier2 telemetry build-switch
+echo Generated AOT:    O3, cold /Ob0, measured hot /Ob3; V8.2 runtime-chain lean + V8.1 Geometry/direct-fastmem baseline
+echo Correctness:      V8.2.5 NEWS ATRAC stream state - resident sentinels + V8.2.3 Output2 base
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
+echo Chain telemetry:   %PSPRECOMP_RUNTIME_CHAIN_TELEMETRY%
 echo ================================================================
 echo.
 echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms disabled)...
 call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
 if errorlevel 1 goto :FAIL
 
-echo [0b2/7] Building V8.1 CPU LEAN over V8/V7 stable architecture...
+echo [0b2/7] Building V8.2 CPU RUNTIME LEAN over V8.1 stable architecture...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -140,7 +150,10 @@ if not defined PYTHON3_CMD goto :NO_PYTHON3
 echo   Python 3:        %PYTHON3_CMD%
 %PYTHON3_CMD% "%PROFILE%\tools\build_tier2_superblocks.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
-%PYTHON3_CMD% "%PROFILE%\tests\check_v81_cpu_lean.py"
+rem V8.2.5 checker includes the protected V8.2 CPU/Geometry invariants and the
+rem V8.2.3 Output2 ABI/watermark invariants. Older revision checkers pin their
+rem exact stage strings and therefore must not gate a newer correctness stage.
+%PYTHON3_CMD% "%PROFILE%\tests\check_v825_news_atrac_stream.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -276,6 +289,54 @@ if exist "%BUILD%" if not exist "%PERF_V81_CPU_LEAN_STAMP%" (
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
 )
 
+if exist "%BUILD%" if not exist "%PERF_V82_CPU_RUNTIME_LEAN_STAMP%" (
+  echo.
+  echo [0c-v82runtime/7] V8.2 CPU RUNTIME LEAN - one-time native-chain rebuild...
+  rem runtime.hpp is inline in every generated AOT unit. Rebuild the corpus once so
+  rem compile-time-known chains lose per-call diagnostic branches in production.
+  rem Keep the build tree itself: Ninja reuses every unaffected dependency and cache.
+  del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*runtime*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V822_STAMP%" (
+  echo.
+  echo [0c-v822fix/7] V8.2.2 CORRECTNESS RECOVERY - rebuilding VCS host correctness objects...
+  rem V8.2.2 is based on the stable V8.2 runtime. Replace any V8.2.1 host
+  rem objects but keep generated AOT, Tier2 and DX12 objects intact.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V823_NEWS_STAMP%" (
+  echo.
+  echo [0c-v823news/7] V8.2.3 NEWS AUDIO - rebuilding audio/profile correctness objects...
+  rem Output2 ABI and host watermark only: keep generated AOT, Tier2 and DX12.
+  del /s /q "%BUILD%\*audio_output*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V824_NEWS_PACING_STAMP%" (
+  echo.
+  echo [0c-v824news/7] V8.2.4 NEWS PACING - rebuilding profile/runtime correctness objects...
+  rem Output2 guest-time pacing only. Keep generated AOT, Tier2, DX12 and the
+  rem V8.2.3 host watermark object intact.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%CORRECTNESS_V825_NEWS_ATRAC_STAMP%" (
+  echo.
+  echo [0c-v825news/7] V8.2.5 NEWS ATRAC STREAM - rebuilding profile/runtime correctness objects...
+  rem ATRAC remain-frame semantics plus rollback of the rejected V8.2.4
+  rem Output2 catch-up experiment. Keep AOT, Tier2, DX12 and host watermark.
+  del /s /q "%BUILD%\*vcs_profile*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+)
+
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
   echo.
   echo [0c/7] BOOTFIX revision changed - invalidating stale .obj/.pch once...
@@ -294,6 +355,7 @@ echo [1/7] Configuring persistent Ninja Release tree...
   -DPSPRECOMP_NATIVE_AVX2=ON ^
   -DPSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH=ON ^
   -DPSPRECOMP_AOT_PRODUCTION_FASTPATHS=ON ^
+  -DPSPRECOMP_RUNTIME_CHAIN_TELEMETRY=%PSPRECOMP_RUNTIME_CHAIN_TELEMETRY% ^
   -DPSPRECOMP_MSVC_CGTHREADS=0 ^
   -DPSPRECOMP_MSVC_MP_JOBS=1 ^
   -DPSPRECOMP_PROFILE_GUIDED_AOT=ON ^
@@ -323,6 +385,11 @@ if errorlevel 1 goto :FAIL
 >"%PERF_V7_ARCH_FASTMEM_STAMP%" echo VCS PERF V7 ARCH FASTMEM 2026-08-17
 >"%PERF_V8_CPU_FUSION_STAMP%" echo VCS PERF V8 CPU FUSION 2026-08-17
 >"%PERF_V81_CPU_LEAN_STAMP%" echo VCS PERF V8.1 CPU LEAN 2026-08-17
+>"%PERF_V82_CPU_RUNTIME_LEAN_STAMP%" echo VCS PERF V8.2 CPU RUNTIME LEAN 2026-08-17
+>"%CORRECTNESS_V822_STAMP%" echo VCS V8.2.2 CORRECTNESS RECOVERY 2026-08-17
+>"%CORRECTNESS_V823_NEWS_STAMP%" echo VCS V8.2.3 NEWS AUDIO FIX 2026-08-17
+>"%CORRECTNESS_V824_NEWS_PACING_STAMP%" echo VCS V8.2.4 NEWS PACING FIX 2026-08-18
+>"%CORRECTNESS_V825_NEWS_ATRAC_STAMP%" echo VCS V8.2.5 NEWS ATRAC STREAM FIX 2026-08-18
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

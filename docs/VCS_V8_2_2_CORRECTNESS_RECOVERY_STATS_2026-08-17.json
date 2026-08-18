@@ -1,0 +1,48 @@
+{
+  "release": "V8.2.2 Correctness Recovery",
+  "date": "2026-08-17",
+  "base": "V8.2 CPU Runtime Lean",
+  "estimated_total_project_progress_percent": 92,
+  "runtime_stage": "correctness-v8.2.2-recovery-save-audio-news-2026-08-17",
+  "recovery": {
+    "v821_paused_keyoff_removed": true,
+    "v821_save_lifecycle_experiment_removed": true,
+    "tier2_scheduler_geometry_unchanged_from_v82": true
+  },
+  "sas": {
+    "end_flags_latched_after_core": true,
+    "vag_loop_predictor_history_restored": true
+  },
+  "savedata": {
+    "transactional_commit": true,
+    "rollback_on_staging_or_commit_failure": true,
+    "v82_v96_lifecycle_preserved": true,
+    "runtime_save_diagnostics": true
+  },
+  "atrac": {
+    "regular_file_buffer_source_tracking": true,
+    "virtual_umd_buffer_source_tracking": true,
+    "header_scan_fallback_retained": true,
+    "source_and_decode_timing_log": true,
+    "v821_observed_max_source_resolution_us": 7152,
+    "matching_decode_open_us": 431
+  },
+  "loading_loop_observation": {
+    "first_stable_vblank": 20461,
+    "last_observed_vblank": 24481,
+    "repeated_game_draws": 4500,
+    "repeated_gpu_draws": 4080,
+    "repeated_batch_merges": 420,
+    "io_us_avg": 0
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "v82_static_audit": "PASS",
+    "v822_static_audit": "PASS",
+    "changed_host_objects": "PASS",
+    "full_windows_runtime": "PENDING_PHYSICAL_TEST"
+  }
+}

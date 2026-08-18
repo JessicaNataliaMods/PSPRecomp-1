@@ -1,4 +1,5 @@
 #include "audio_resampler.hpp"
+#include "audio_output.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -80,6 +81,25 @@ void test_unity_rate_exact() {
     }
 }
 
+
+void test_output2_master_watermark() {
+    // While Output2 is a live producer inside the device prebuffer window, the
+    // host must not commit frames beyond what the game has actually mixed.
+    require(vcs::audio_output_master_seal_frame(4096u, 3072u, true, 2560u, 3072u) == 2560u,
+            "Output2 watermark did not clamp speculative sealing");
+
+    // Never move a seal point backwards when the producer is already ahead.
+    require(vcs::audio_output_master_seal_frame(4096u, 2048u, true, 2560u, 3072u) == 2048u,
+            "Output2 watermark moved an already-safe seal point");
+
+    // A genuinely stalled/stopped Output2 producer must not freeze the other
+    // PSP channels forever once it is beyond the bounded prebuffer grace.
+    require(vcs::audio_output_master_seal_frame(8192u, 7168u, true, 2560u, 3072u) == 7168u,
+            "stale Output2 producer incorrectly blocked the host timeline");
+    require(vcs::audio_output_master_seal_frame(4096u, 3072u, false, 0u, 3072u) == 3072u,
+            "inactive Output2 producer incorrectly changed the host timeline");
+}
+
 void test_mono_duplication() {
     const auto input = make_signal(1024u, false);
     const auto output = run_chunked(input, 1024u, false, 32000u, {127u, 129u});
@@ -96,6 +116,7 @@ int main() {
         test_chunk_invariance(48000u, true);
         test_chunk_invariance(22050u, true);
         test_chunk_invariance(24000u, false);
+        test_output2_master_watermark();
         test_mono_duplication();
         std::cout << "audio_resampler_tests: PASS\n";
         return 0;

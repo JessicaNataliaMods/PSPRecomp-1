@@ -247,6 +247,7 @@ public:
         // invalidation flag.  All active direct ancestors see that same hot
         // byte and unwind. This replaces two process-global 64-bit loads on
         // every fixed cross-unit transfer with one normally-false local load.
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
         bool guest_hotspot_sample = false;
         std::uint64_t guest_hotspot_start_ns = 0u;
         if (g_guest_hotspot_profile_enabled) {
@@ -257,6 +258,7 @@ public:
                 (ticket & static_cast<std::uint64_t>(g_guest_hotspot_sample_mask)) == 0u;
             if (guest_hotspot_sample) guest_hotspot_start_ns = guest_hotspot_clock_ns();
         }
+#endif
 
         struct DepthGuard {
             std::uint32_t &depth;
@@ -278,6 +280,7 @@ public:
         } else {
             Function(*this, ctx);
         }
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
         if (guest_hotspot_sample) {
             const std::uint64_t end_ns = guest_hotspot_clock_ns();
             guest_hotspot_record_sample(UnitIndex, DirectTargetPc,
@@ -285,6 +288,7 @@ public:
                                             ? end_ns - guest_hotspot_start_ns : 0u);
         }
         if (g_unit_profile_enabled) ++g_unit_profile_counts[UnitIndex];
+#endif
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
         if (track_dispatch_counters_) {
             ++chained_dispatches_;
@@ -338,10 +342,12 @@ public:
             return false;
         }
         ++chain_depth_;
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
         if (g_unit_profile_enabled && UnitIndex < kUnitProfileCapacity)
             ++g_unit_profile_counts[UnitIndex];
         if (g_guest_hotspot_profile_enabled && UnitIndex < kUnitProfileCapacity)
             ++g_guest_hotspot_unit_calls[UnitIndex];
+#endif
         return true;
     }
 

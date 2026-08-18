@@ -24,6 +24,8 @@ option(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH
     "Remove per-store write-watch branch from production AOT fast memory" OFF)
 option(PSPRECOMP_AOT_PRODUCTION_FASTPATHS
     "Compile out AOT chain diagnostic/counter branches for production builds" OFF)
+option(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY
+    "Compile per-chain unit/hotspot telemetry into native cross-unit hot paths" ON)
 set(PSPRECOMP_MSVC_CGTHREADS "0" CACHE STRING
     "MSVC LTCG code-generation threads (0 = compiler default)")
 if(NOT PSPRECOMP_MSVC_CGTHREADS MATCHES "^[0-9]+$")
@@ -55,6 +57,9 @@ if(PSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH)
 endif()
 if(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     add_compile_definitions(PSPRECOMP_AOT_PRODUCTION_FASTPATHS=1)
+endif()
+if(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
+    add_compile_definitions(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=1)
 endif()
 if(MSVC AND PSPRECOMP_NATIVE_AVX2)
     add_compile_options($<$<CONFIG:Release>:/arch:AVX2>

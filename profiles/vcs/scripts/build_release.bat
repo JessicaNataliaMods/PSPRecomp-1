@@ -33,6 +33,7 @@ echo Build pipeline restored to the last known-good pre-reorganization behavior.
 echo CMake: !CMAKE_EXE!
 echo Compile workers: %JOBS% ^| AOT /MP%JOBS% ^| MSBuild /m:1
 echo AOT inlining: /Ob3 hot measured units ^| /Ob0 cold units
+echo Runtime chain telemetry: OFF ^(V8.2 performance path^)
 echo Link: host/core LTCG only ^| generated AOT /GL- ^| LTCG status visible
 echo Build dir preserved: %BUILD%
 echo ================================================================
@@ -49,6 +50,7 @@ echo [1/7] Configuring without deleting existing objects...
   -DPSPRECOMP_NATIVE_AVX2=ON ^
   -DPSPRECOMP_AOT_ASSUME_NO_WRITE_WATCH=ON ^
   -DPSPRECOMP_AOT_PRODUCTION_FASTPATHS=ON ^
+  -DPSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF ^
   -DPSPRECOMP_MSVC_CGTHREADS=0 ^
   -DPSPRECOMP_MSVC_MP_JOBS=%JOBS% ^
   -DPSPRECOMP_PROFILE_GUIDED_AOT=ON ^

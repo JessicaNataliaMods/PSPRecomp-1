@@ -244,7 +244,11 @@ Runtime::Runtime(std::uint32_t ram_size) : memory_(ram_size) {
     // in the middle of guest execution; larger profiles can still grow it.
     import_bindings_.resize(256u, nullptr);
     hle_histogram_enabled_ = std::getenv("PSPRECOMP_HLE_HISTOGRAM") != nullptr;
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     g_unit_profile_enabled = std::getenv("PSPRECOMP_UNIT_PROFILE") != nullptr;
+#else
+    g_unit_profile_enabled = false;
+#endif
 #if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     track_dispatch_counters_ = false;
 #else
@@ -359,7 +363,10 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
         if (function == nullptr) return false;
     }
 
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY) || !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint32_t target_pc = ctx.pc;
+#endif
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     std::uint32_t guest_hotspot_unit = static_cast<std::uint32_t>(kUnitProfileCapacity);
     bool guest_hotspot_sample = false;
     std::uint64_t guest_hotspot_start_ns = 0u;
@@ -379,7 +386,10 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
             }
         }
     }
+#endif
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint32_t native_depth = chain_depth_;
+#endif
     // Always guard execution-context ownership. Even a clean generated unit can
     // reach a nested direct chain whose scheduler boundary switches PSP thread.
     // guarded every native chain frame; accidentally weakened
@@ -402,12 +412,14 @@ bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView
     } else {
         function(*this, ctx);
     }
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     if (guest_hotspot_sample) {
         const std::uint64_t end_ns = guest_hotspot_clock_ns();
         guest_hotspot_record_sample(guest_hotspot_unit, target_pc,
                                     end_ns >= guest_hotspot_start_ns
                                         ? end_ns - guest_hotspot_start_ns : 0u);
     }
+#endif
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_post_chained_call_hook != nullptr)
         g_post_chained_call_hook(*this, ctx, target_pc, native_depth);
@@ -434,9 +446,14 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
     if (unit_index >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) return false;
     RecompiledFunction function = generated_units_[unit_index];
     if (function == nullptr) return false;
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     if (g_unit_profile_enabled) ++g_unit_profile_counts[unit_index];
+#endif
 
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY) || !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint32_t target_pc = ctx.pc;
+#endif
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     bool guest_hotspot_sample = false;
     std::uint64_t guest_hotspot_start_ns = 0u;
     if (g_guest_hotspot_profile_enabled) {
@@ -446,7 +463,10 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
             (ticket & static_cast<std::uint64_t>(g_guest_hotspot_sample_mask)) == 0u;
         if (guest_hotspot_sample) guest_hotspot_start_ns = guest_hotspot_clock_ns();
     }
+#endif
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     const std::uint32_t native_depth = chain_depth_;
+#endif
     const std::uint64_t caller_generation = g_runtime_thread_switch_generation_fast;
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_pre_chained_call_hook != nullptr)
@@ -462,12 +482,14 @@ bool Runtime::invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index
     } else {
         function(*this, ctx);
     }
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
     if (guest_hotspot_sample) {
         const std::uint64_t end_ns = guest_hotspot_clock_ns();
         guest_hotspot_record_sample(unit_index, target_pc,
                                     end_ns >= guest_hotspot_start_ns
                                         ? end_ns - guest_hotspot_start_ns : 0u);
     }
+#endif
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     if (g_post_chained_call_hook != nullptr)
         g_post_chained_call_hook(*this, ctx, target_pc, native_depth);

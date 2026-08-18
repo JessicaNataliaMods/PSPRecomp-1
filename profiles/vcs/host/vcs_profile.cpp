@@ -191,6 +191,11 @@ struct FileTable {
     std::int32_t next_fd{3};
     std::uint32_t next_virtual_sector{0x00010000u};
     std::unordered_map<std::int32_t, std::fstream> files;
+    std::unordered_map<std::int32_t, std::filesystem::path> file_paths;
+    // Producer tracking for ATRAC setup. A guest buffer filled directly from an
+    // AT3/AA3/OMA can be associated with its host source without reopening and
+    // rescanning candidate files on the audio thread.
+    std::unordered_map<std::uint32_t, std::filesystem::path> recent_atrac_reads;
     std::unordered_set<std::int32_t> synthetic_empty_files;
     std::unordered_map<std::int32_t, DirectoryHandle> directories;
     std::unordered_map<std::int32_t, VirtualDiscHandle> virtual_disc_handles;
@@ -533,6 +538,26 @@ std::string normalized_native_path(const std::filesystem::path &path) {
     if (error) normalized = std::filesystem::absolute(path, error);
     if (error) normalized = path.lexically_normal();
     return normalized.generic_string();
+}
+
+bool is_atrac_source_path(const std::filesystem::path &path) {
+    std::string extension = path.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
+    return extension == ".AT3" || extension == ".AA3" || extension == ".OMA";
+}
+
+const VirtualDiscFile *virtual_disc_file_at_offset(std::uint64_t absolute) {
+    const std::uint64_t sector64 = absolute / 2048u;
+    if (sector64 > 0xFFFFFFFFull) return nullptr;
+    const auto next = file_table.virtual_path_by_sector.upper_bound(static_cast<std::uint32_t>(sector64));
+    if (next == file_table.virtual_path_by_sector.begin()) return nullptr;
+    const auto previous = std::prev(next);
+    const auto found = file_table.virtual_files_by_path.find(previous->second);
+    if (found == file_table.virtual_files_by_path.end()) return nullptr;
+    const std::uint64_t start = static_cast<std::uint64_t>(found->second.start_sector) * 2048u;
+    if (absolute < start || absolute >= start + found->second.size) return nullptr;
+    return &found->second;
 }
 
 const VirtualDiscFile *register_virtual_disc_file(const std::filesystem::path &path) {
@@ -882,22 +907,49 @@ bool parse_atrac_header(std::span<const std::uint8_t> bytes, ParsedAtracHeader &
     return true;
 }
 
-std::filesystem::path identify_atrac_source(std::span<const std::uint8_t> header, const ParsedAtracHeader &parsed) {
-    const std::size_t compare_size = std::min<std::size_t>(header.size(), 256u);
-    for (const auto &[key, file] : file_table.virtual_files_by_path) {
-        if (file.size != parsed.file_size) continue;
-        std::string extension = file.native_path.extension().string();
-        std::transform(extension.begin(), extension.end(), extension.begin(),
-                       [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
-        if (extension != ".AT3" && extension != ".AA3" && extension != ".OMA") continue;
-        std::vector<std::uint8_t> candidate(compare_size);
-        std::ifstream input(file.native_path, std::ios::binary);
-        if (!input) continue;
-        input.read(reinterpret_cast<char *>(candidate.data()), static_cast<std::streamsize>(candidate.size()));
-        if (input.gcount() == static_cast<std::streamsize>(candidate.size()) &&
-            std::equal(candidate.begin(), candidate.end(), header.begin())) return file.native_path;
+std::filesystem::path identify_atrac_source(std::uint32_t guest_buffer,
+                                              std::span<const std::uint8_t> header,
+                                              const ParsedAtracHeader &parsed) {
+    const auto started = std::chrono::steady_clock::now();
+    bool direct_buffer = false;
+    std::uint32_t fallback_reads = 0u;
+    std::filesystem::path matched;
+
+    if (const auto direct = file_table.recent_atrac_reads.find(guest_buffer);
+        direct != file_table.recent_atrac_reads.end()) {
+        matched = direct->second;
+        direct_buffer = true;
+        file_table.recent_atrac_reads.erase(direct);
     }
-    return {};
+
+    const std::size_t compare_size = std::min<std::size_t>(header.size(), 256u);
+    if (matched.empty()) {
+        for (const auto &[key, file] : file_table.virtual_files_by_path) {
+            (void)key;
+            if (file.size != parsed.file_size || !is_atrac_source_path(file.native_path)) continue;
+            ++fallback_reads;
+            std::vector<std::uint8_t> candidate(compare_size);
+            std::ifstream input(file.native_path, std::ios::binary);
+            if (!input) continue;
+            input.read(reinterpret_cast<char *>(candidate.data()), static_cast<std::streamsize>(candidate.size()));
+            if (input.gcount() == static_cast<std::streamsize>(candidate.size()) &&
+                std::equal(candidate.begin(), candidate.end(), header.begin())) {
+                matched = file.native_path;
+                break;
+            }
+        }
+    }
+
+    const std::uint64_t elapsed_us = static_cast<std::uint64_t>(
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now() - started).count());
+    std::ostringstream line;
+    line << "ATRAC_SOURCE resolve_us=" << elapsed_us
+         << " direct_buffer=" << (direct_buffer ? 1 : 0)
+         << " fallback_reads=" << fallback_reads
+         << " source=" << (matched.empty() ? "<none>" : matched.filename().string());
+    runtime_log_line(line.str());
+    return matched;
 }
 
 // sceAtracDecodeData always hands the caller two interleaved channels: the PSP
@@ -949,6 +1001,35 @@ std::size_t read_atrac_pcm(AtracContextState &state, std::span<std::uint8_t> out
 
 std::uint32_t atrac_samples_per_frame(const AtracContextState &state) {
     return state.header.atrac3plus ? 2048u : 1024u;
+}
+
+// sceAtrac streaming APIs use negative sentinel values once the encoded stream
+// is entirely resident in the caller's halfway buffer.  VCS checks these
+// values directly after every sceAtracDecodeData call: -1/-2 take the
+// all-data-resident path, while a non-negative frame count takes the refill
+// path.  Returning 0 when a short non-loop stream such as NEWS_*.AT3 was fully
+// loaded made the game keep treating it as a streaming/refill source even
+// though no more encoded bytes existed.
+constexpr std::uint32_t kAtracRemainAllDataOnMemory = 0xFFFFFFFFu;       // -1
+constexpr std::uint32_t kAtracRemainNonLoopOnMemory = 0xFFFFFFFEu;      // -2
+constexpr std::uint32_t kAtracRemainLoopOnMemory = 0xFFFFFFFDu;         // -3
+
+bool atrac_has_active_loop(const AtracContextState &state) noexcept {
+    return state.loop_num != 0 && state.header.loop_start >= 0 &&
+        state.header.loop_end >= state.header.loop_start;
+}
+
+std::uint32_t atrac_remain_frame_status(const AtracContextState &state) noexcept {
+    if (state.next_file_offset >= state.header.file_size) {
+        // VCS creates its radio decoders through SetHalfwayBufferAndGetID, so
+        // the streaming-specific -2/-3 statuses are the faithful result once
+        // the whole file has been fed.  (-1 belongs to the all-data API case;
+        // the guest accepts both -1 and -2 for its non-loop fast path.)
+        return atrac_has_active_loop(state) ?
+            kAtracRemainLoopOnMemory : kAtracRemainNonLoopOnMemory;
+    }
+    if (state.header.block_align == 0u) return 0u;
+    return state.buffered_encoded_bytes / state.header.block_align;
 }
 
 std::uint32_t atrac_bitrate_kbps(const AtracContextState &state) {
@@ -1572,6 +1653,10 @@ struct SasState {
     std::uint32_t output_mode{};
     std::uint32_t sample_rate{44100u};
     std::array<SasVoiceState, 32> voices{};
+    // sceSasGetEndFlag exposes a hardware-latched snapshot. The flags are
+    // refreshed by a completed __sceSasCore/__sceSasCoreWithMix cycle, not by
+    // arbitrary setters in the middle of a grain.
+    std::uint32_t end_flags{0xFFFFFFFFu};
     SasReverbState reverb{};
 };
 
@@ -1589,6 +1674,14 @@ std::size_t sas_playing_voice_count() {
     return static_cast<std::size_t>(std::count_if(
         sas_state.voices.begin(), sas_state.voices.end(),
         [](const SasVoiceState &voice) { return voice.playing && !voice.paused; }));
+}
+
+void sas_refresh_end_flags() noexcept {
+    std::uint32_t flags = 0u;
+    for (std::size_t i = 0; i < sas_state.voices.size(); ++i) {
+        if (!sas_state.voices[i].playing) flags |= 1u << i;
+    }
+    sas_state.end_flags = flags;
 }
 
 void sas_log_mix_checkpoint(const char *kind, std::uint64_t count) {
@@ -1866,6 +1959,13 @@ bool sas_decode_next_block(const psprecomp::GuestMemory &memory, SasVoiceState &
         // Resetting it at the marker makes otherwise seamless ambient loops
         // click every time they wrap.
         voice.decode_offset = voice.loop_start_valid ? voice.loop_start_offset : 0u;
+        if (voice.loop_start_valid) {
+            voice.history1 = voice.loop_start_history1;
+            voice.history2 = voice.loop_start_history2;
+        } else {
+            voice.history1 = 0;
+            voice.history2 = 0;
+        }
         voice.remaining_samples = voice.total_samples;
     };
 
@@ -2154,6 +2254,7 @@ void sas_mix_into(psprecomp::Runtime &rt, std::uint32_t output, std::uint32_t fr
         rt.memory().store16(output + frame * 4u + 2u, static_cast<std::uint16_t>(
             static_cast<std::int16_t>(std::clamp<std::int64_t>(r, -32768, 32767))));
     }
+    sas_refresh_end_flags();
 }
 
 // Raw output mode exposes four non-interleaved planes: dry L, dry R, effect L,
@@ -2178,6 +2279,7 @@ void sas_mix_raw(psprecomp::Runtime &rt, std::uint32_t output, std::uint32_t fra
         store(send_left_base, effect_send[frame * 2u]);
         store(send_right_base, effect_send[frame * 2u + 1u]);
     }
+    sas_refresh_end_flags();
 }
 
 enum class UtilityStatus : std::uint32_t {
@@ -2589,15 +2691,120 @@ bool write_guest_file(psprecomp::Runtime &runtime, const std::filesystem::path &
     return output.good();
 }
 
-bool write_savedata_auxiliary(psprecomp::Runtime &runtime, std::uint32_t parameter_address,
-                              std::uint32_t descriptor_offset, const char *filename) {
+struct SavedataPendingWrite {
+    std::filesystem::path target;
+    std::vector<std::uint8_t> bytes;
+};
+
+bool snapshot_guest_bytes(psprecomp::Runtime &runtime, std::uint32_t buffer,
+                          std::uint32_t size, std::vector<std::uint8_t> &bytes) {
+    bytes.clear();
+    if (size == 0u) return true;
+    if (buffer == 0u || !runtime.memory().contains(buffer, size)) return false;
+    bytes.resize(size);
+    runtime.memory().copy_out(buffer, bytes);
+    return true;
+}
+
+bool snapshot_savedata_auxiliary(psprecomp::Runtime &runtime,
+                                 std::uint32_t parameter_address,
+                                 std::uint32_t descriptor_offset,
+                                 const char *filename,
+                                 std::vector<SavedataPendingWrite> &writes) {
     const std::uint32_t descriptor = parameter_address + descriptor_offset;
     const std::uint32_t buffer = runtime.memory().load32(descriptor);
     const std::uint32_t buffer_size = runtime.memory().load32(descriptor + 4u);
     const std::uint32_t actual_size = runtime.memory().load32(descriptor + 8u);
     if (buffer == 0u || actual_size == 0u) return true;
     if (actual_size > buffer_size) return false;
-    return write_guest_file(runtime, savedata_directory(runtime, parameter_address) / filename, buffer, actual_size);
+    SavedataPendingWrite write{};
+    write.target = savedata_directory(runtime, parameter_address) / filename;
+    if (!snapshot_guest_bytes(runtime, buffer, actual_size, write.bytes)) return false;
+    writes.push_back(std::move(write));
+    return true;
+}
+
+bool write_savedata_host_bytes(const std::filesystem::path &path,
+                               std::span<const std::uint8_t> bytes) {
+    std::error_code error;
+    std::filesystem::create_directories(path.parent_path(), error);
+    if (error) return false;
+    std::ofstream output(path, std::ios::binary | std::ios::trunc);
+    if (!output) return false;
+    if (!bytes.empty())
+        output.write(reinterpret_cast<const char *>(bytes.data()),
+                     static_cast<std::streamsize>(bytes.size()));
+    output.flush();
+    return output.good();
+}
+
+bool commit_savedata_writes(std::vector<SavedataPendingWrite> &writes) {
+    struct CommitPath {
+        std::filesystem::path target;
+        std::filesystem::path temporary;
+        std::filesystem::path backup;
+        bool had_target{};
+        bool backup_moved{};
+        bool committed{};
+    };
+    const std::string tag = std::to_string(static_cast<unsigned long long>(
+        std::chrono::steady_clock::now().time_since_epoch().count()));
+    std::vector<CommitPath> paths;
+    paths.reserve(writes.size());
+
+    // Stage every file first. No existing save data is touched until all guest
+    // buffers have validated and every temporary host write has completed.
+    for (std::size_t i = 0u; i < writes.size(); ++i) {
+        CommitPath entry{};
+        entry.target = writes[i].target;
+        entry.temporary = entry.target;
+        entry.temporary += ".vcsnative.tmp." + tag + "." + std::to_string(i);
+        entry.backup = entry.target;
+        entry.backup += ".vcsnative.bak." + tag + "." + std::to_string(i);
+        if (!write_savedata_host_bytes(entry.temporary, writes[i].bytes)) {
+            std::error_code ignore;
+            for (const auto &old : paths) std::filesystem::remove(old.temporary, ignore);
+            std::filesystem::remove(entry.temporary, ignore);
+            return false;
+        }
+        paths.push_back(std::move(entry));
+    }
+
+    auto rollback = [&]() noexcept {
+        std::error_code error;
+        for (auto it = paths.rbegin(); it != paths.rend(); ++it) {
+            if (it->committed) std::filesystem::remove(it->target, error);
+            error.clear();
+            if (it->backup_moved && std::filesystem::exists(it->backup, error)) {
+                error.clear();
+                std::filesystem::rename(it->backup, it->target, error);
+            }
+            error.clear();
+            std::filesystem::remove(it->temporary, error);
+        }
+    };
+
+    for (auto &entry : paths) {
+        std::error_code error;
+        entry.had_target = std::filesystem::exists(entry.target, error) && !error;
+        if (entry.had_target) {
+            std::filesystem::remove(entry.backup, error);
+            error.clear();
+            std::filesystem::rename(entry.target, entry.backup, error);
+            if (error) { rollback(); return false; }
+            entry.backup_moved = true;
+        }
+        error.clear();
+        std::filesystem::rename(entry.temporary, entry.target, error);
+        if (error) { rollback(); return false; }
+        entry.committed = true;
+    }
+    std::error_code ignore;
+    for (auto &entry : paths) {
+        if (entry.backup_moved) std::filesystem::remove(entry.backup, ignore);
+        std::filesystem::remove(entry.temporary, ignore);
+    }
+    return true;
 }
 
 std::uint32_t load_savedata_file(psprecomp::Runtime &runtime, std::uint32_t parameter_address,
@@ -2633,20 +2840,32 @@ std::uint32_t save_savedata_file(psprecomp::Runtime &runtime, std::uint32_t para
     if (size > capacity || (size != 0u && (source == 0u || !runtime.memory().contains(source, size)))) {
         return raw_mode ? 0x80110328u : 0x80110388u;
     }
-    if (!write_guest_file(runtime, path, source, size)) return raw_mode ? 0x80110329u : 0x80110385u;
+
+    // Snapshot every guest buffer before touching the existing slot. Some
+    // missions change the optional savedata payloads; the old path truncated
+    // DATA.BIN first and only then discovered an invalid auxiliary descriptor.
+    // A failed save could therefore leave a half-updated slot and a frontend
+    // completion state that looked successful until VCS tried to leave it.
+    std::vector<SavedataPendingWrite> writes;
+    SavedataPendingWrite main_write{};
+    main_write.target = path;
+    if (!snapshot_guest_bytes(runtime, source, size, main_write.bytes))
+        return raw_mode ? 0x80110328u : 0x80110388u;
+    writes.push_back(std::move(main_write));
+
     if (!raw_mode) {
-        if (!write_savedata_auxiliary(runtime, parameter_address, kSavedataIcon0Offset, "ICON0.PNG") ||
-            !write_savedata_auxiliary(runtime, parameter_address, kSavedataIcon1Offset, "ICON1.PMF") ||
-            !write_savedata_auxiliary(runtime, parameter_address, kSavedataPic1Offset, "PIC1.PNG") ||
-            !write_savedata_auxiliary(runtime, parameter_address, kSavedataSnd0Offset, "SND0.AT3")) {
-            return 0x80110385u;
+        if (!snapshot_savedata_auxiliary(runtime, parameter_address, kSavedataIcon0Offset, "ICON0.PNG", writes) ||
+            !snapshot_savedata_auxiliary(runtime, parameter_address, kSavedataIcon1Offset, "ICON1.PMF", writes) ||
+            !snapshot_savedata_auxiliary(runtime, parameter_address, kSavedataPic1Offset, "PIC1.PNG", writes) ||
+            !snapshot_savedata_auxiliary(runtime, parameter_address, kSavedataSnd0Offset, "SND0.AT3", writes)) {
+            return 0x80110388u;
         }
-        // The PSP firmware normally persists sfoParam to PARAM.SFO and uses
-        // savedataTitle/detail on its load screen. VCSNative's host savedata
-        // path previously dropped that metadata entirely, leaving the slot UI
-        // with only opaque names like S92F0. Preserve the exact guest-provided
-        // display strings in a tiny host sidecar so the in-game overlay can show
-        // the mission/save title on later loads.
+    }
+
+    if (!commit_savedata_writes(writes)) return raw_mode ? 0x80110329u : 0x80110385u;
+    if (!raw_mode) {
+        // Metadata is host-only UI decoration; it must never turn a valid game
+        // save into a failed firmware operation.
         (void)write_savedata_metadata_file(path.parent_path(),
                                            savedata_metadata_from_guest(runtime, parameter_address));
     }
@@ -2867,6 +3086,22 @@ void execute_selected_savedata_slot(psprecomp::Runtime &runtime) {
     runtime.memory().store32(savedata_utility.parameter_address + kUtilityCommonResultOffset, result);
     savedata_utility.operation_complete = true;
     savedata_utility.last_result = result;
+    if (savedata_utility.mode == 5u) {
+        const std::uint32_t data_size = runtime.memory().load32(
+            savedata_utility.parameter_address + kSavedataDataSizeOffset);
+        const auto aux_size = [&](std::uint32_t offset) {
+            return runtime.memory().load32(savedata_utility.parameter_address + offset + 8u);
+        };
+        std::ostringstream line;
+        line << "SAVEDATA_SAVE result=0x" << std::hex << std::uppercase << result
+             << std::nouppercase << std::dec
+             << " data=" << data_size
+             << " icon0=" << aux_size(kSavedataIcon0Offset)
+             << " icon1=" << aux_size(kSavedataIcon1Offset)
+             << " pic1=" << aux_size(kSavedataPic1Offset)
+             << " snd0=" << aux_size(kSavedataSnd0Offset);
+        runtime_log_line(line.str());
+    }
     if ((savedata_utility.startup_picker || savedata_utility.direct_load_picker) && result == 0u) {
         // A successful first-boot choice should hand control back to the retail
         // LOAD completion path immediately. There is no GAME frontend in V9.
@@ -2922,6 +3157,8 @@ void update_savedata_list_utility(psprecomp::Runtime &runtime) {
                 savedata_utility.status = UtilityStatus::Quit;
                 savedata_utility_ui_end();
                 display_window_set_system_utility_mode(false);
+                if (savedata_utility.mode == 5u)
+                    runtime_log_line("SAVEDATA_SAVE acknowledged status=QUIT");
             }
         }
         return;
@@ -2997,6 +3234,11 @@ std::uint32_t audio_buffer_duration_us(std::uint32_t samples) {
     return static_cast<std::uint32_t>((static_cast<std::uint64_t>(samples) * 1000000u + 44099u) / 44100u);
 }
 
+constexpr std::uint32_t audio_resample_success_value(bool return_queued_samples,
+                                                      std::uint32_t sample_count) noexcept {
+    return return_queued_samples ? sample_count : 0u;
+}
+
 // Queues one buffer on a channel and returns the virtual time at which it
 // starts playing.
 //
@@ -3016,16 +3258,19 @@ std::uint64_t audio_queue_buffer(AudioChannelState &channel, std::uint32_t frame
     const auto elapsed_us = [&](std::uint64_t sample_frames) {
         return (sample_frames * 1000000ull) / rate;
     };
+
     std::uint64_t start = channel.queue_anchor_us + elapsed_us(channel.queued_frames);
-    if (!channel.queue_active || start < virtual_time_us) {
-        // Either the first buffer of a stream, or the guest fell far enough
-        // behind that the queue really did drain.  Both are genuine
-        // discontinuities: restart the anchor here.
+    if (!channel.queue_active) {
         channel.queue_active = true;
         channel.queue_anchor_us = virtual_time_us;
         channel.queued_frames = 0u;
         start = virtual_time_us;
+    } else if (start < virtual_time_us) {
+        channel.queue_anchor_us = virtual_time_us;
+        channel.queued_frames = 0u;
+        start = virtual_time_us;
     }
+
     channel.queued_frames += frames;
     channel.busy_until_us = channel.queue_anchor_us + elapsed_us(channel.queued_frames);
     return start;
@@ -8004,6 +8249,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x80110001u);
                 return;
             }
+            if (savedata_utility.mode == 5u)
+                runtime_log_line("SAVEDATA_SAVE shutdown status=FINISHED");
             savedata_utility.status = UtilityStatus::Finished;
             savedata_utility_ui_end();
             display_window_set_system_utility_mode(false);
@@ -8203,11 +8450,14 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             set_success(ctx);
         });
 
-    // sceAudioOutput2OutputBlocking and sceAudioSRCOutputBlocking share this
-    // body: both drain the single resampling channel, and the rate recorded at
-    // reserve time is what tells them apart.
-    const auto audio_src_output =
-        [](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx) {
+    // Output2 and SRC share the single resampling hardware path, but they do
+    // NOT share the same ABI result.  sceAudioOutput2OutputBlocking returns 0
+    // on success while sceAudioSRCOutputBlocking returns the queued sample
+    // count.  VCS imports Output2, so returning 512 here was leaking a false
+    // non-zero result out of its radio mixer every buffer.
+    const auto audio_resample_output =
+        [](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx,
+           bool return_queued_samples) {
             auto &state = audio_channels[8];
             const std::uint32_t volume = ctx.gpr[4];
             const std::uint32_t buffer = ctx.gpr[5];
@@ -8237,7 +8487,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             state.left_volume = volume; state.right_volume = volume;
             // audio_queue_buffer already paces at the channel's own frequency,
             // so a stream that is not 44100 neither starves nor floods the mix.
-            const std::uint64_t start_us = audio_queue_buffer(state, state.sample_count);
+            const std::uint64_t start_us =
+                audio_queue_buffer(state, state.sample_count);
             if (buffer != 0u && vcs::audio_output_enabled()) {
                 std::vector<std::int16_t> pcm(bytes / sizeof(std::int16_t));
                 for (std::size_t index = 0u; index < pcm.size(); ++index) {
@@ -8255,11 +8506,19 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                           << " channels=" << state.channel_count
                           << " freq=" << state.frequency
                           << " start_us=" << start_us << " wait_us=" << wait_us << "\n";
+            const std::uint32_t success_value =
+                audio_resample_success_value(return_queued_samples, state.sample_count);
             (void)delay_current_thread(rt, ctx, static_cast<std::uint32_t>(wait_us),
-                                       state.sample_count);
+                                       success_value);
         };
-    runtime.register_hle("sceAudio", 0x2D53F36Eu, audio_src_output);
-    runtime.register_hle("sceAudio", 0xE0727056u, audio_src_output);
+    runtime.register_hle("sceAudio", 0x2D53F36Eu,
+        [audio_resample_output](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx) {
+            audio_resample_output(rt, ctx, false);
+        });
+    runtime.register_hle("sceAudio", 0xE0727056u,
+        [audio_resample_output](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx) {
+            audio_resample_output(rt, ctx, true);
+        });
 
 
     constexpr std::uint32_t kAtracErrorApiFail = 0x80630002u;
@@ -8308,7 +8567,23 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             state.buffered_encoded_bytes = std::min(state.buffered_encoded_bytes, parsed.data_size);
             state.next_file_offset = std::min(read_size, parsed.file_size);
             state.write_offset = buffer_size == 0u ? 0u : read_size % buffer_size;
-            state.source_path = identify_atrac_source(header_bytes, parsed);
+            state.source_path = identify_atrac_source(buffer, header_bytes, parsed);
+            if (!state.source_path.empty()) {
+                const std::string source_name = state.source_path.filename().string();
+                if (source_name.rfind("NEWS_", 0u) == 0u) {
+                    std::ostringstream line;
+                    line << "ATRAC_NEWS_META source=" << source_name
+                         << " codec=" << (parsed.atrac3plus ? "at3plus" : "at3")
+                         << " channels=" << parsed.channels
+                         << " rate=" << parsed.sample_rate
+                         << " block=" << parsed.block_align
+                         << " total_samples=" << parsed.total_samples
+                         << " initial_read=" << read_size
+                         << " buffer=" << buffer_size
+                         << " file=" << parsed.file_size;
+                    runtime_log_line(line.str());
+                }
+            }
             if (std::getenv("PSPRECOMP_ATRAC_DIAG") != nullptr) {
                 std::cerr << "[atrac] set-halfway id=" << id
                           << " buffer=" << psprecomp::hex32(buffer)
@@ -8420,7 +8695,8 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             if (state->sample_position >= state->header.total_samples && !restart_for_loop()) {
                 if (samples_addr != 0u) rt.memory().store32(samples_addr, 0u);
                 if (finish_addr != 0u) rt.memory().store32(finish_addr, 1u);
-                if (remain_addr != 0u) rt.memory().store32(remain_addr, 0u);
+                if (remain_addr != 0u)
+                    rt.memory().store32(remain_addr, atrac_remain_frame_status(*state));
                 set_success(ctx);
                 return;
             }
@@ -8441,11 +8717,23 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 const char *text = std::getenv("PSPRECOMP_AUDIO_SUMMARY");
                 return text != nullptr && *text != '\0' && std::strcmp(text, "0") != 0;
             }();
-            const auto decode_started = audio_summary_enabled
-                ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
+            const bool decoder_was_open = state->decoder.is_open();
+            const auto decode_started = std::chrono::steady_clock::now();
             std::size_t got = read_atrac_pcm(*state, pcm_span);
             if (got == 0u && restart_for_loop()) {
                 got = read_atrac_pcm(*state, pcm_span);
+            }
+            const std::uint64_t decode_elapsed_us = static_cast<std::uint64_t>(
+                std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::steady_clock::now() - decode_started).count());
+            if (!decoder_was_open || decode_elapsed_us >= 2000u) {
+                std::ostringstream line;
+                line << "ATRAC_DECODE source=" << state->source_path.filename().string()
+                     << " open=" << (!decoder_was_open ? 1 : 0)
+                     << " decode_us=" << decode_elapsed_us
+                     << " bytes=" << got
+                     << " sample=" << state->sample_position;
+                runtime_log_line(line.str());
             }
             if (audio_summary_enabled) {
                 static std::uint64_t decode_calls = 0u;
@@ -8468,14 +8756,15 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             got = static_cast<std::size_t>(samples) * bytes_per_sample;
             if (output != 0u && got != 0u) rt.memory().copy_in(output, std::span<const std::uint8_t>(pcm.data(), got));
             state->sample_position += samples;
-            if (state->buffered_encoded_bytes >= state->header.block_align)
-                state->buffered_encoded_bytes -= state->header.block_align;
-            else
-                state->buffered_encoded_bytes = 0u;
+            if (samples != 0u && state->header.block_align != 0u) {
+                if (state->buffered_encoded_bytes >= state->header.block_align)
+                    state->buffered_encoded_bytes -= state->header.block_align;
+                else
+                    state->buffered_encoded_bytes = 0u;
+            }
             const bool finished = samples == 0u ||
                 (state->sample_position >= state->header.total_samples && state->loop_num == 0);
-            const std::uint32_t remaining_frames = state->header.block_align == 0u ? 0u :
-                state->buffered_encoded_bytes / state->header.block_align;
+            const std::uint32_t remaining_frames = atrac_remain_frame_status(*state);
             if (samples_addr != 0u) rt.memory().store32(samples_addr, samples);
             if (finish_addr != 0u) rt.memory().store32(finish_addr, finished ? 1u : 0u);
             if (remain_addr != 0u) rt.memory().store32(remain_addr, remaining_frames);
@@ -8500,9 +8789,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             auto *state = get_atrac(ctx.gpr[4]);
             if (!state) { ctx.set_gpr(2, kAtracErrorBadId); return; }
             if (!rt.memory().contains(ctx.gpr[5], 4u)) { ctx.set_gpr(2, kAtracErrorBadAddress); return; }
-            const std::uint32_t remaining = state->next_file_offset >= state->header.file_size ? 0xFFFFFFFFu :
-                state->buffered_encoded_bytes / state->header.block_align;
-            rt.memory().store32(ctx.gpr[5], remaining);
+            rt.memory().store32(ctx.gpr[5], atrac_remain_frame_status(*state));
             set_success(ctx);
         });
 
@@ -8854,10 +9141,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     runtime.register_hle("sceSasCore", 0x68A46B95u,
         [](psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
             if (!sas_valid_core(ctx.gpr[4])) { ctx.set_gpr(2, kSasErrorNotInitialized); return; }
-            std::uint32_t flags = 0u;
-            for (std::size_t i = 0; i < sas_state.voices.size(); ++i)
-                if (!sas_state.voices[i].playing) flags |= 1u << i;
-            ctx.set_gpr(2, flags);
+            ctx.set_gpr(2, sas_state.end_flags);
         });
 
     runtime.register_hle("sceSasCore", 0x74AE582Au,
@@ -9905,6 +10189,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                             if (stream) {
                                 const auto fd = file_table.next_fd++;
                                 file_table.files.emplace(fd, std::move(stream));
+                                file_table.file_paths.emplace(fd, disc_file->native_path);
                                 if (std::getenv("PSPRECOMP_IO_DIAG") != nullptr) {
                                     std::cerr << "[io] raw UMD open lbn=" << raw_lbn
                                               << " size=" << raw_size
@@ -9956,6 +10241,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             }
             const auto fd = file_table.next_fd++;
             file_table.files.emplace(fd, std::move(stream));
+            file_table.file_paths.emplace(fd, native);
             if (file_object_diag) {
                 std::cerr << "[fileobj-hle] open-ok fd=" << fd << " path=\"" << path
                           << "\" native=\"" << native.string()
@@ -10078,6 +10364,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             const bool closed = file_table.files.erase(fd) == 1u ||
                 file_table.synthetic_empty_files.erase(fd) == 1u ||
                 file_table.virtual_disc_handles.erase(fd) == 1u;
+            file_table.file_paths.erase(fd);
             if (std::getenv("PSPRECOMP_FILE_OBJECT_DIAG") != nullptr)
                 std::cerr << "[fileobj-hle] close fd=" << fd << " closed=" << closed << "\n";
             ctx.set_gpr(2, closed ? 0u : 0x80010009u);
@@ -10106,6 +10393,10 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                     ctx.set_gpr(2, 0x80010009u);
                     return;
                 }
+                const std::uint64_t read_absolute =
+                    virtual_handle->second.base_offset + virtual_handle->second.position;
+                const VirtualDiscFile *read_file = virtual_disc_file_at_offset(read_absolute);
+                file_table.recent_atrac_reads.erase(dst);
                 const bool time_io = perf_timing_enabled();
                 const auto io_entry = time_io ? std::chrono::steady_clock::now()
                                               : std::chrono::steady_clock::time_point{};
@@ -10113,6 +10404,16 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                     virtual_handle->second,
                     std::span<std::uint8_t>(guest_destination, static_cast<std::size_t>(size)));
                 if (time_io) io_host_time_this_vblank += std::chrono::steady_clock::now() - io_entry;
+                if (read != 0u && read_file != nullptr && is_atrac_source_path(read_file->native_path)) {
+                    const std::uint64_t file_start =
+                        static_cast<std::uint64_t>(read_file->start_sector) * 2048u;
+                    if (read_absolute >= file_start &&
+                        read_absolute + read <= file_start + read_file->size) {
+                        if (file_table.recent_atrac_reads.size() >= 32u)
+                            file_table.recent_atrac_reads.erase(file_table.recent_atrac_reads.begin());
+                        file_table.recent_atrac_reads[dst] = read_file->native_path;
+                    }
+                }
                 static const bool io_diag = std::getenv("PSPRECOMP_IO_DIAG") != nullptr;
                 static const bool umd_stream_diag = std::getenv("PSPRECOMP_UMD_STREAM_DIAG") != nullptr;
                 if (io_diag)
@@ -10170,6 +10471,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 ctx.set_gpr(2, 0x80010009u);
                 return;
             }
+            file_table.recent_atrac_reads.erase(dst);
             const bool time_io = perf_timing_enabled();
             const auto io_entry = time_io ? std::chrono::steady_clock::now()
                                           : std::chrono::steady_clock::time_point{};
@@ -10177,6 +10479,14 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                             static_cast<std::streamsize>(size));
             const auto read = static_cast<std::size_t>(it->second.gcount());
             if (time_io) io_host_time_this_vblank += std::chrono::steady_clock::now() - io_entry;
+            if (read != 0u) {
+                if (const auto path_it = file_table.file_paths.find(fd);
+                    path_it != file_table.file_paths.end() && is_atrac_source_path(path_it->second)) {
+                    if (file_table.recent_atrac_reads.size() >= 32u)
+                        file_table.recent_atrac_reads.erase(file_table.recent_atrac_reads.begin());
+                    file_table.recent_atrac_reads[dst] = path_it->second;
+                }
+            }
             ctx.set_gpr(2, static_cast<std::uint32_t>(read));
         });
 }
@@ -10443,6 +10753,46 @@ bool run_profile_self_tests(std::string &error) {
             virtual_time_us = previous_time;
         }
 
+        // Output2 and SRC share hardware but not their success ABI. VCS uses
+        // Output2; returning 512 instead of 0 escapes from its mixer loop and
+        // changes guest control flow even though the PCM buffer was accepted.
+        {
+            require(audio_resample_success_value(false, 512u) == 0u,
+                    "sceAudioOutput2OutputBlocking success must be zero");
+            require(audio_resample_success_value(true, 512u) == 512u,
+                    "sceAudioSRCOutputBlocking must report queued samples");
+        }
+
+        // VCS branches directly on the negative remain-frame sentinels after
+        // sceAtracDecodeData.  A fully-fed non-loop halfway stream (NEWS) must
+        // report -2; a fully-fed looping stream reports -3; only an incomplete
+        // stream may report a non-negative buffered frame count.
+        {
+            AtracContextState stream{};
+            stream.header.file_size = 16'384u;
+            stream.header.block_align = 384u;
+            stream.header.loop_start = -1;
+            stream.header.loop_end = -1;
+            stream.buffered_encoded_bytes = 1'152u;
+            stream.next_file_offset = 8'192u;
+            require(atrac_remain_frame_status(stream) == 3u,
+                    "partial ATRAC stream did not report buffered frame count");
+
+            stream.next_file_offset = stream.header.file_size;
+            require(atrac_remain_frame_status(stream) == kAtracRemainNonLoopOnMemory,
+                    "fully-fed non-loop halfway stream must report -2");
+
+            stream.header.loop_start = 1024;
+            stream.header.loop_end = 8191;
+            stream.loop_num = -1;
+            require(atrac_remain_frame_status(stream) == kAtracRemainLoopOnMemory,
+                    "fully-fed looping halfway stream must report -3");
+
+            stream.loop_num = 0;
+            require(atrac_remain_frame_status(stream) == kAtracRemainNonLoopOnMemory,
+                    "disabled ATRAC loop must report the non-loop resident status");
+        }
+
         // A voice configured through __sceSasSetADSR alone -- rates only, no
         // call to __sceSasSetADSRmode -- must still retire when the game keys
         // it off.  VCS does exactly this for the vehicle engine, and the old
@@ -10491,6 +10841,81 @@ bool run_profile_self_tests(std::string &error) {
                 sas_step_envelope(voice);
             require(!voice.playing && voice.envelope_height == 0u,
                     "zero-rate KeyOff left a looping SAS voice alive forever");
+        }
+
+        // End flags are a post-Core snapshot. Setters may change a voice in the
+        // middle of a grain, but GetEndFlag must not expose that transition until
+        // the next completed mixer cycle refreshes the hardware-visible flags.
+        {
+            const SasState previous = sas_state;
+            sas_state = SasState{};
+            auto &voice = sas_state.voices[0];
+            voice.type = SasVoiceType::Vag;
+            voice.playing = true;
+            require((sas_state.end_flags & 1u) != 0u,
+                    "SAS end flag changed before a Core refresh");
+            sas_refresh_end_flags();
+            require((sas_state.end_flags & 1u) == 0u,
+                    "SAS Core refresh did not clear the playing voice end flag");
+            voice.playing = false;
+            require((sas_state.end_flags & 1u) == 0u,
+                    "SAS end flag was not latched between Core cycles");
+            sas_refresh_end_flags();
+            require((sas_state.end_flags & 1u) != 0u,
+                    "SAS Core refresh did not publish the ended voice");
+            sas_state = previous;
+        }
+
+        // A VAG loop jump must restore the predictor state captured immediately
+        // before the loop-start block. Keeping the history from the loop-end block
+        // changes the waveform on every pass and can make a vehicle loop drift.
+        {
+            psprecomp::Runtime loop_runtime;
+            constexpr std::uint32_t vag = 0x08850000u;
+            std::array<std::uint8_t, 32> blocks{};
+            blocks[0] = 0u; blocks[1] = 6u;   // loop start
+            blocks[16] = 0u; blocks[17] = 3u; // loop end
+            loop_runtime.memory().copy_in(vag, blocks);
+            SasVoiceState voice{};
+            voice.type = SasVoiceType::Vag;
+            voice.data_address = vag;
+            voice.data_size = 32;
+            voice.loop = true;
+            voice.history1 = 123;
+            voice.history2 = -45;
+            require(sas_decode_next_block(loop_runtime.memory(), voice),
+                    "VAG loop-start block failed to decode");
+            require(voice.loop_start_valid && voice.loop_start_history1 == 123 &&
+                    voice.loop_start_history2 == -45,
+                    "VAG loop-start predictor state was not captured");
+            require(sas_decode_next_block(loop_runtime.memory(), voice),
+                    "VAG loop-end block failed to decode");
+            require(voice.decode_offset == 0u && voice.history1 == 123 && voice.history2 == -45,
+                    "VAG loop jump did not restore predictor history");
+        }
+
+        // Transactional savedata writes must never destroy the existing main file
+        // if a later auxiliary file cannot be staged.
+        {
+            const std::filesystem::path root = std::filesystem::temp_directory_path() /
+                ("vcsnative_savedata_tx_" + std::to_string(static_cast<unsigned long long>(
+                    std::chrono::steady_clock::now().time_since_epoch().count())));
+            const std::filesystem::path existing = root / "DATA.BIN";
+            const std::filesystem::path blocker = root / "blocker";
+            std::error_code error;
+            std::filesystem::create_directories(root, error);
+            require(!error, "could not create savedata transaction fixture");
+            { std::ofstream out(existing, std::ios::binary); out.write("OLD", 3); }
+            { std::ofstream out(blocker, std::ios::binary); out.write("X", 1); }
+            std::vector<SavedataPendingWrite> writes;
+            writes.push_back(SavedataPendingWrite{existing, {'N','E','W'}});
+            writes.push_back(SavedataPendingWrite{blocker / "AUX.DAT", {'B','A','D'}});
+            require(!commit_savedata_writes(writes),
+                    "savedata transaction accepted an impossible auxiliary target");
+            std::ifstream in(existing, std::ios::binary);
+            std::string old((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            require(old == "OLD", "failed savedata staging destroyed the previous slot");
+            std::filesystem::remove_all(root, error);
         }
 
         // A GE context supplied to sceGeListEnQueue is a real serialized PSP
@@ -11146,8 +11571,8 @@ bool run_profile_self_tests(std::string &error) {
             sas_context = {};
             sas_context.set_gpr(4u, sas_core);
             wlan_runtime.invoke_import("sceSasCore", 0x68A46B95u, sas_context);
-            require((sas_context.gpr[2] & 1u) == 0u,
-                    "active SAS voice was reported ended before mixing");
+            require((sas_context.gpr[2] & 1u) != 0u,
+                    "SAS end flag changed before the first Core refresh");
 
             wlan_runtime.memory().zero(sas_output, 0x400u);
             sas_context = {};

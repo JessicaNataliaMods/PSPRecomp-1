@@ -47,6 +47,7 @@ constexpr std::uint64_t kMixSafetyFrames = 1024u;
 // channel lapping the ring during normal realtime play.
 constexpr std::size_t kRingFrames = kSampleRate * 2u;
 constexpr std::size_t kGuestChannels = 9u;
+constexpr std::size_t kOutput2Channel = 8u;
 constexpr std::uint64_t kChannelDiscontinuityFrames = 64u;
 
 struct Block {
@@ -80,6 +81,7 @@ struct AudioState {
     std::uint64_t queued_blocks{};
     std::uint64_t underrun_rebuffers{};
     std::uint64_t timeline_resyncs{};
+    std::uint64_t output2_seal_clamps{};
     std::uint64_t submit_calls{};
     std::uint64_t submit_cpu_ns{};
     std::uint64_t submit_cpu_max_ns{};
@@ -330,8 +332,28 @@ void advance_locked(AudioState &state, std::uint64_t guest_time_us) {
     // audible underrun without changing the normal multi-channel mix path.
     const std::uint64_t safety_frames = state.playback_started && outstanding <= 2u
         ? 0u : kMixSafetyFrames;
-    const std::uint64_t sealed_frame = guest_frame > safety_frames
+    std::uint64_t sealed_frame = guest_frame > safety_frames
         ? guest_frame - safety_frames : 0u;
+
+    // Channel 8 is sceAudioOutput2: VCS' final 44.1-kHz stereo music/radio
+    // mixer.  Do not seal host timeline frames that this producer has not
+    // actually supplied yet.  In heavy scenes virtual_time_us can jump ahead
+    // when the renderer misses wall-clock pace; the old code then committed
+    // zeros to waveOut before Output2 delivered the next 512-frame block.
+    // Once committed those frames cannot be repaired, so spoken NEWS arrived
+    // as a train of missing chunks and sounded dragged/stuttered.
+    //
+    // Keep this bounded: if Output2 really stops for longer than the current
+    // device prebuffer, it stops being the watermark and other PSP channels
+    // are allowed to advance normally.
+    const ChannelStream &output2 = state.channels[kOutput2Channel];
+    const std::uint64_t producer_grace =
+        static_cast<std::uint64_t>(state.prebuffer_blocks) * kBlockFrames;
+    const std::uint64_t unclamped_sealed_frame = sealed_frame;
+    sealed_frame = audio_output_master_seal_frame(
+        guest_frame, sealed_frame, output2.active, output2.cursor, producer_grace);
+    if (sealed_frame != unclamped_sealed_frame) ++state.output2_seal_clamps;
+
     while (sealed_frame >= state.output_frame + kBlockFrames) {
         if (!queue_one_block(state)) break;
     }
@@ -473,6 +495,7 @@ void audio_output_advance(std::uint64_t guest_time_us) {
              << " recovering=" << state.recovering_from_underrun
              << " underrun_rebuffers=" << state.underrun_rebuffers
              << " resyncs=" << state.timeline_resyncs
+             << " output2_clamps=" << state.output2_seal_clamps
              << " late_frames=" << state.late_frames_dropped
              << " overrun_frames=" << state.overrun_frames_dropped
              << " submit_calls=" << state.submit_calls
@@ -529,6 +552,7 @@ void audio_output_shutdown() {
     }
     state.late_frames_dropped = 0u;
     state.overrun_frames_dropped = 0u;
+    state.output2_seal_clamps = 0u;
 }
 
 } // namespace vcs

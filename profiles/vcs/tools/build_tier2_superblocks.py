@@ -93,7 +93,18 @@ GEOMETRY_INLINE_LEAF_BODIES = {}
 # through $ra. Tier-2 may call these entry points directly and account the removed
 # generated-call scheduler edge without paying invoke_chained_direct's profiling,
 # chain-depth and fallback plumbing. Large/indirect helpers are deliberately absent.
-DIRECT_GENERATED_LEAF_TARGETS = set()
+# V8.2 keeps Geometry/World at the V8.1 shape and only bypasses the generic
+# chain wrapper for four tiny Boundary helpers in unit 0206.  All four are
+# statically validated leaves (no nested generated/HLE/syscall edge, $ra-only
+# return).  This is intentionally a five-call-site change, not another CFG
+# expansion: it preserves the V8.1 instruction-cache footprint and scheduler
+# cadence while removing wrapper work around trivial generated helpers.
+DIRECT_GENERATED_LEAF_TARGETS = {
+    (206, 0x08B3E084),
+    (206, 0x08B3E08C),
+    (206, 0x08B3E254),
+    (206, 0x08B3E260),
+}
 
 
 

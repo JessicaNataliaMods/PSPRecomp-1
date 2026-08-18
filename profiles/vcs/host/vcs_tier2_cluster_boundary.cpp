@@ -395,14 +395,30 @@ SB_L_0895C04C:
     ctx.gpr[21] = (ctx.gpr[16] | 0u);
     ctx.gpr[31] = (0x0895C058u);
     tier2_gpr_4 = (ctx.gpr[21] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0206_entry, 206u, 498u, 0x08B3E084u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C058u) goto SB_L_0895C058;
+    TIER2_GPR_SYNC_OUT();
+    psprecomp::recomp_unit_0206_entry(rt, ctx, 498u, aot_mem);
+    TIER2_GPR_SYNC_IN();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
+    }
+    if (ctx.pc == 0x0895C058u) goto SB_L_0895C058;
+    tier2_gpr_shadow_valid = false;
     TIER2_SB_RETURN();
 
 SB_L_0895C058:
     ctx.gpr[16] = (tier2_mem.aot_load32(ctx.gpr[2] + static_cast<std::uint32_t>(0)));
     ctx.gpr[31] = (0x0895C064u);
     tier2_gpr_4 = (ctx.gpr[21] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0206_entry, 206u, 499u, 0x08B3E08Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C064u) goto SB_L_0895C064;
+    TIER2_GPR_SYNC_OUT();
+    psprecomp::recomp_unit_0206_entry(rt, ctx, 499u, aot_mem);
+    TIER2_GPR_SYNC_IN();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
+    }
+    if (ctx.pc == 0x0895C064u) goto SB_L_0895C064;
+    tier2_gpr_shadow_valid = false;
     TIER2_SB_RETURN();
 
 SB_L_0895C064:
@@ -895,7 +911,15 @@ SB_L_0895C694:
     ctx.gpr[16] = (tier2_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(0)));
     ctx.gpr[31] = (0x0895C6B8u);
     tier2_gpr_4 = (ctx.gpr[16] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0206_entry, 206u, 499u, 0x08B3E08Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C6B8u) goto SB_L_0895C6B8;
+    TIER2_GPR_SYNC_OUT();
+    psprecomp::recomp_unit_0206_entry(rt, ctx, 499u, aot_mem);
+    TIER2_GPR_SYNC_IN();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
+    }
+    if (ctx.pc == 0x0895C6B8u) goto SB_L_0895C6B8;
+    tier2_gpr_shadow_valid = false;
     TIER2_SB_RETURN();
 
 SB_L_0895C6B8:
@@ -927,7 +951,15 @@ SB_L_0895C6D0:
 SB_L_0895C6DC:
     ctx.gpr[31] = (0x0895C6E4u);
     tier2_gpr_4 = (ctx.gpr[16] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0206_entry, 206u, 524u, 0x08B3E260u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C6E4u) goto SB_L_0895C6E4;
+    TIER2_GPR_SYNC_OUT();
+    psprecomp::recomp_unit_0206_entry(rt, ctx, 524u, aot_mem);
+    TIER2_GPR_SYNC_IN();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
+    }
+    if (ctx.pc == 0x0895C6E4u) goto SB_L_0895C6E4;
+    tier2_gpr_shadow_valid = false;
     TIER2_SB_RETURN();
 
 SB_L_0895C6E4:
@@ -960,7 +992,15 @@ SB_L_0895C6FC:
 SB_L_0895C708:
     ctx.gpr[31] = (0x0895C710u);
     tier2_gpr_4 = (ctx.gpr[16] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0206_entry, 206u, 523u, 0x08B3E254u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C710u) goto SB_L_0895C710;
+    TIER2_GPR_SYNC_OUT();
+    psprecomp::recomp_unit_0206_entry(rt, ctx, 523u, aot_mem);
+    TIER2_GPR_SYNC_IN();
+    if (!rt.account_inlined_generated_leaf(ctx)) {
+        tier2_gpr_shadow_valid = false;
+        TIER2_SB_RETURN();
+    }
+    if (ctx.pc == 0x0895C710u) goto SB_L_0895C710;
+    tier2_gpr_shadow_valid = false;
     TIER2_SB_RETURN();
 
 SB_L_0895C710:

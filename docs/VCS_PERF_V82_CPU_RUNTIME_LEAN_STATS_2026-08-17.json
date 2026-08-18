@@ -1,0 +1,58 @@
+{
+  "stage": "perf-v8.2-cpu-runtime-lean-2026-08-17",
+  "base": "perf-v8.1-cpu-lean-2026-08-17",
+  "protected_baseline": {
+    "slow_motion_feeling_fixed": true,
+    "geometry_blocks": 379,
+    "world_blocks": 402,
+    "tier2_hot_blocks": 1060,
+    "tier2_direct_mem_sites": 1969,
+    "scheduler_tick_semantics_changed": false
+  },
+  "runtime_chain_optimization": {
+    "generic_psprecomp_option": "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY",
+    "generic_default": true,
+    "vcs_performance_default": false,
+    "perf_telemetry_preserved": true,
+    "scheduler_accounting_preserved": true
+  },
+  "boundary_direct_generated_leaves": {
+    "targets": ["0x08B3E084", "0x08B3E08C", "0x08B3E254", "0x08B3E260"],
+    "call_sites": 5,
+    "world_experiment_enabled": false,
+    "geometry_experiment_enabled": false
+  },
+  "static_text_bytes": {
+    "generated_unit_0085": {"v81": 374333, "v82": 354075, "reduction_percent": 5.41},
+    "generated_unit_0158": {"v81": 360754, "v82": 345782, "reduction_percent": 4.15},
+    "tier2_geometry": {"v81": 170247, "v82": 161163, "reduction_percent": 5.34},
+    "tier2_boundary": {"v81": 24937, "v82": 18257, "reduction_percent": 26.79}
+  },
+  "isolated_microbench_ns_per_call": {
+    "ordinary_invoke_chained_direct_approx": 2.8,
+    "direct_leaf_plus_scheduler_accounting_approx_range": [1.1, 1.2],
+    "game_fps_claim": false
+  },
+  "v81_runtime_baseline_ge_50000_draws": {
+    "windows": 122,
+    "guest_cpu_ms_mean": 11.969,
+    "fps_mean": 60.69,
+    "game_draws_mean": 76124
+  },
+  "validation": {
+    "psprecomp_tests": "PASS",
+    "vcs_profile_tests": "PASS",
+    "vcs_config_tests": "PASS",
+    "vfpu_tier2_tests": "PASS",
+    "v82_static_audit": "PASS",
+    "hook_units_syntax": "10/10 PASS",
+    "tier2_cluster_objects": "7/7 PASS",
+    "full_linux_vcsnative_link": "NOT COMPLETED: generated O3 corpus exceeded interactive build window without source diagnostic",
+    "windows_vs2022": "PENDING USER BUILD"
+  },
+  "progress_estimate": {
+    "overall_project_percent": 92,
+    "cpu_tier2_architecture_percent": 97,
+    "performance_150fps_goal_percent": 61
+  }
+}
