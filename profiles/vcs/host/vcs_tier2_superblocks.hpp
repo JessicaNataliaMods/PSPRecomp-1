@@ -22,7 +22,8 @@ enum class Tier2ClusterId : std::uint32_t {
     Physics = 4u,     // 0129 hot transform/physics function
     World = 5u,       // 0157/0158 dominant world/streaming hot functions
     Edge43 = 6u,      // 0043/0044 cross-unit boundary
-    Count = 7u,
+    CollisionLoop = 7u, // 0037/0038 measured generated-boundary loop
+    Count = 8u,
 };
 
 constexpr std::size_t kTier2ClusterCount = static_cast<std::size_t>(Tier2ClusterId::Count);
@@ -135,5 +136,7 @@ void tier2_superblock_world(psprecomp::Runtime &, psprecomp::AllegrexContext &,
                             psprecomp::GuestMemory::AotFastView &, std::uint32_t entry_pc);
 void tier2_superblock_edge43(psprecomp::Runtime &, psprecomp::AllegrexContext &,
                              psprecomp::GuestMemory::AotFastView &, std::uint32_t entry_pc);
+void tier2_superblock_collisionloop(psprecomp::Runtime &, psprecomp::AllegrexContext &,
+                                    psprecomp::GuestMemory::AotFastView &, std::uint32_t entry_pc);
 
 } // namespace vcs

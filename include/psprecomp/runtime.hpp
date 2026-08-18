@@ -311,17 +311,25 @@ public:
         return run_starvation_boundary(ctx);
     }
 
-    // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
-    // cross-unit generated call would have performed, while allowing trivial
-    // leaf accessors to be emitted directly in their measured caller.  No HLE
-    // or PSP ownership switch can occur inside those leaf bodies, so only the
-    // starvation safe-point cadence needs to be preserved here.
-    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_generated_leaf(
+    // Account one logical outer generated dispatch that was deliberately
+    // removed by a profile-guided superblock.  Publishing the destination PC
+    // before calling this helper is mandatory: a starvation boundary may switch
+    // PSP ownership at exactly the same point where the unfused outer dispatcher
+    // used to run.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_dispatch_boundary(
         AllegrexContext &ctx) {
         const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
         if (starvation_interval == 0u) return true;
         if (++dispatches_since_import_ < starvation_interval) return true;
         return run_starvation_boundary(ctx);
+    }
+
+    // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
+    // cross-unit generated call would have performed, while allowing trivial
+    // leaf accessors to be emitted directly in their measured caller.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_generated_leaf(
+        AllegrexContext &ctx) {
+        return account_inlined_dispatch_boundary(ctx);
     }
 
     // Tier-2 profile-guided superblocks can fuse a cross-unit edge into a local

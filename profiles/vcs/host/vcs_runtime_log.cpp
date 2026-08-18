@@ -65,7 +65,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
         return;
     }
     s.file << "VCSNative runtime log\n";
-    s.file << "stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18\n";
+    s.file << "stage=perf-v8.3-cpu-boundary-fusion-2026-08-18\n";
     s.file << "config=" << configuration.source_path.string() << '\n';
     s.file << "started=" << timestamp_now() << '\n';
     s.file << "perf_telemetry=" << (configuration.diagnostics.perf_telemetry ? 1 : 0)
@@ -81,16 +81,16 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
            << " chain_telemetry_compiled=0\n";
 #endif
     s.file << "tier2_superblocks=" << (tier2_superblocks_enabled() ? 1 : 0)
-           << " version=4 clusters=7 mask=0x" << std::hex << tier2_cluster_mask() << std::dec
-           << " hot_blocks=1060 static_fused_calls=36 static_fused_tail=13 hooks=25"
+           << " version=4 clusters=8 mask=0x" << std::hex << tier2_cluster_mask() << std::dec
+           << " hot_blocks=1139 static_fused_calls=36 static_fused_tail=18 static_pc_fused=1 hooks=29"
            << " entity_leaf_inline_sites=13 geometry_inline_leaf_sites=0 direct_generated_leaf_sites=5"
-           << " unwind_fix=1 reentry_guard=1 dataflow=1 vfpu_block32=133 mem_runs=35 mem_words=287"
-           << " append32=51 advance32=89 simd_mat4=4 simd_matvec=19"
-           << " gpr_shadow_clusters=4 gpr_shadow_regs=24 gpr_shadow_occurrences=3461 geometry_shadow=0"
-           << " perf_layer=8 cpu_lean_revision=2 correctness_revision=8271 recovery_from_821=1"
+           << " unwind_fix=1 reentry_guard=1 dataflow=1 vfpu_block32=153 mem_runs=39 mem_words=299"
+           << " append32=51 advance32=89 simd_mat4=4 simd_matvec=21"
+           << " gpr_shadow_clusters=5 gpr_shadow_regs=30 gpr_shadow_occurrences=3841 geometry_shadow=0"
+           << " perf_layer=9 cpu_lean_revision=3 correctness_revision=8271 recovery_from_821=1 cpu_boundary_fusion=1 edge43_continuation_fused=1 collisionloop_blocks=78 collisionloop_static_pc_fused=1 collisionloop_scheduler_accounting=1"
            << " save_transaction=1 save_lifecycle_v82=1 sas_endflag_latched=1 sas_loop_history_restore=1"
            << " atrac_virtual_source=1 atrac_stall_diag=1 atrac_stream_resident_status=1 atrac_nonloop_resident=-2 atrac_loop_resident=-3 output2_success_zero=1 output2_master_watermark=1 output2_late_catchup=0 save_repro_checkpoint=1 save_repro_trace=1 save_repro_hotkey_f8=1 save_repro_trace_hotkey_f10=1 save_repro_auto_restore=1 save_repro_dispatch_sample_stride=64 save_repro_passive_until_f8=1 save_repro_hle_hotpath=0 save_repro_ui_hotkeys=1 save_repro_f10_async_fallback=1 save_repro_collector_partial_bundle=1 save_repro_internal_ini_gate=1 save_repro_default_enabled=0 save_exitdelete_semantics=1 save_repro_legacy_exitdelete_repair=1 save_partition_reuse=1 news_atrac_v825_guard=1 runtime_chain_telemetry_default=0 arch_fastmem=1 aot_direct_fastmem_default=1"
-           << " tier2_direct_fastmem=1 tier2_direct_mem_sites=1969 tier2_deep_telemetry_default=0 geometry_fusion_rollback=1"
+           << " tier2_direct_fastmem=1 tier2_direct_mem_sites=2115 tier2_deep_telemetry_default=0 geometry_fusion_rollback=1"
            << " entity_leaf_inline=1 entity_leaf_scheduler_accounting=1 entity_leaf_resume_pc_fix=1"
            << " ge_async_default=0 parallel_vertex_decode_default=0"
            << " v5_vfpu_fast_quarantined=1 native_vfpu_088b1780_v4=1"

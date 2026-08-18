@@ -9533,6 +9533,12 @@ L_088B3FCC:
     ctx.gpr[4] = (ctx.gpr[20] | 0u);
     goto L_088B1780;
 L_088B3FFC:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::Edge43) && rt.memory().direct_fastmem_enabled()) {
+        vcs::tier2_superblock_edge43(rt, ctx, aot_mem, 0x088B3FFCu);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     if (ctx.gpr[2] == 0u) {
     ctx.gpr[4] = (aot_mem.aot_load32(ctx.gpr[29] + static_cast<std::uint32_t>(48)));
         (void)rt.invoke_chained_direct<&recomp_unit_0044_entry, 44u, 9u, 0x088B40F8u>(ctx, &aot_mem); return;

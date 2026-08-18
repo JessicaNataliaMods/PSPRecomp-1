@@ -1,5 +1,6 @@
 #include "psprecomp/runtime.hpp"
 #include "generated_units.hpp"
+#include "vcs_tier2_superblocks.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -1025,6 +1026,12 @@ LOCAL_DISPATCH:
     }
     }
 L_0889C000:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::CollisionLoop) && rt.memory().direct_fastmem_enabled()) {
+        vcs::tier2_superblock_collisionloop(rt, ctx, aot_mem, 0x0889C000u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     { const bool branch_taken = ctx.gpr[4] == 0u;
     // nop
       if (branch_taken) {
@@ -1912,6 +1919,12 @@ L_0889C5B0:
     aot_mem.aot_store32(ctx.gpr[4] + static_cast<std::uint32_t>(0), ctx.gpr[18]);
     goto L_0889C5B8;
 L_0889C5B8:
+// TIER2_SUPERBLOCK_V2_HOOK_BEGIN
+    if (vcs::tier2_cluster_enabled(vcs::Tier2ClusterId::CollisionLoop) && rt.memory().direct_fastmem_enabled()) {
+        vcs::tier2_superblock_collisionloop(rt, ctx, aot_mem, 0x0889C5B8u);
+        return;
+    }
+// TIER2_SUPERBLOCK_V2_HOOK_END
     { const bool branch_taken = ctx.gpr[30] != 0u;
     // nop
       if (branch_taken) {

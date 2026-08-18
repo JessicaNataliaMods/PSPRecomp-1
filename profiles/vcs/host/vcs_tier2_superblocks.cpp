@@ -63,6 +63,7 @@ const char *tier2_cluster_name(Tier2ClusterId id) noexcept {
     case Tier2ClusterId::Physics: return "physics";
     case Tier2ClusterId::World: return "world";
     case Tier2ClusterId::Edge43: return "edge43";
+    case Tier2ClusterId::CollisionLoop: return "collisionloop";
     default: return "unknown";
     }
 }

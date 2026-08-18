@@ -39,6 +39,11 @@ TAIL_CALL_RE = re.compile(
     r'(?P<indent>[ \t]*)\(void\)rt\.invoke_chained_direct<&recomp_unit_(?P<target_name>\d+)_entry, '
     r'(?P<target_unit>\d+)u, (?P<entry>\d+)u, (?P<target_pc>0x[0-9A-F]+)u>'
     r'\(ctx, &aot_mem\); return;')
+# Artificial generated-unit partition boundaries are not guest calls.
+STATIC_PC_RETURN_RE = re.compile(
+    r'(?P<indent>[ \t]*)ctx\.pc = (?P<target>0x[0-9A-F]+)u; return;')
+
+
 LOCAL_DISPATCH_SEQUENCE_RE = re.compile(
     r'(?P<indent>[ \t]*)local_pc = (?P<local_expr>[^;]+);\n'
     r'(?P=indent)if \(\+\+local_transfers < 256u\) \{ entry_id = 0u; goto LOCAL_DISPATCH; \}\n'
@@ -132,6 +137,10 @@ class Cluster:
     expand_cross_units: bool = False
     hooks: Dict[int, List[int]] = dataclasses.field(default_factory=dict)
     max_blocks: int = 700
+    # Opt-in fusion for plain generated corpus boundaries of the form
+    # `ctx.pc = constant; return;`. Disabled for all legacy clusters.
+    # These boundaries are not guest calls and therefore add no scheduler frame.
+    fuse_static_pc_returns: bool = False
 
 
 CLUSTERS: List[Cluster] = [
@@ -190,10 +199,26 @@ CLUSTERS: List[Cluster] = [
     ),
     Cluster(
         key='edge43', enum_name='Edge43', function='tier2_superblock_edge43',
-        seeds={43: [0x088B3FCC], 44: [0x088B4004, 0x088B40F8]},
+        # Include the measured $ra continuation; omitting 0x088B3FFC forced an
+        # outer Runtime dispatch immediately before unit 0044.
+        seeds={43: [0x088B3FCC, 0x088B3FFC], 44: [0x088B4004, 0x088B40F8]},
         expand_cross_units=True,
-        hooks={43: [0x088B3FCC], 44: [0x088B4004, 0x088B40F8]},
-        max_blocks=100,
+        hooks={43: [0x088B3FCC, 0x088B3FFC], 44: [0x088B4004, 0x088B40F8]},
+        max_blocks=110,
+    ),
+    Cluster(
+        key='collisionloop', enum_name='CollisionLoop', function='tier2_superblock_collisionloop',
+        seeds={},
+        # Small measured loop straddling generated units 0037/0038. Keep the
+        # footprint intentionally bounded to avoid the rejected V8 Geometry bloat.
+        windows={
+            37: [(0x0889BFC0, 0x0889C000)],
+            38: [(0x0889C000, 0x0889C5C0)],
+        },
+        expand_cross_units=True,
+        hooks={37: [0x0889BFC0], 38: [0x0889C000, 0x0889C5B8]},
+        max_blocks=140,
+        fuse_static_pc_returns=True,
     ),
 ]
 
@@ -640,7 +665,8 @@ def selected_pc_owner(selected: Mapping[int, Set[int]]) -> Dict[int, int]:
 
 def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int]],
                     sources: Mapping[int, UnitSource], stats: MutableMapping[str, int],
-                    fused_continuations: MutableMapping[Tuple[int, int], int]) -> str:
+                    fused_continuations: MutableMapping[Tuple[int, int], int],
+                    fuse_static_pc_returns: bool = False) -> str:
     pc_owner = selected_pc_owner(selected)
     selected_all = set(pc_owner)
     text = re.sub(r'\bL_([0-9A-F]{8})\b', r'SB_L_\1', block)
@@ -754,6 +780,37 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
 
     text = TAIL_CALL_RE.sub(tail_repl, text)
 
+    # Fuse only opted-in plain constant-PC returns whose destination is already
+    # selected in the same superblock.  No tier2_enter/complete call is needed:
+    # the original edge is merely an artificial generated-file boundary.
+    if fuse_static_pc_returns:
+        def static_pc_repl(m: re.Match[str]) -> str:
+            target = int(m.group('target'), 16)
+            if target not in selected_all:
+                return m.group(0)
+            stats['static_pc_fused'] += 1
+            indent = m.group('indent')
+            return (
+                f'{indent}// Generated corpus boundary: unwind any logical tail-call frames first,\n'
+                f'{indent}// then account the outer dispatch that this local edge removes.\n'
+                f'{indent}if (tier2_pending_transfers != 0u) {{\n'
+                f'{indent}    const std::uint32_t tier2_static_pending_ = tier2_pending_transfers;\n'
+                f'{indent}    tier2_pending_transfers = 0u;\n'
+                f'{indent}    if (!tier2_complete_shadow(tier2_static_pending_)) {{\n'
+                f'{indent}        tier2_gpr_shadow_valid = false;\n'
+                f'{indent}        TIER2_SB_RETURN();\n'
+                f'{indent}    }}\n'
+                f'{indent}}}\n'
+                f'{indent}ctx.pc = 0x{target:08X}u;\n'
+                f'{indent}TIER2_GPR_SYNC_OUT();\n'
+                f'{indent}if (!rt.account_inlined_dispatch_boundary(ctx)) {{\n'
+                f'{indent}    tier2_gpr_shadow_valid = false;\n'
+                f'{indent}    TIER2_SB_RETURN();\n'
+                f'{indent}}}\n'
+                f'{indent}TIER2_GPR_SYNC_IN();\n'
+                f'{indent}goto SB_L_{target:08X};')
+        text = STATIC_PC_RETURN_RE.sub(static_pc_repl, text)
+
     # Standard generated indirect/local return path.  The shared unit-specific
     # dispatcher below recognizes a fused-call continuation and performs exactly
     # one logical chain unwind before resuming the caller.
@@ -798,7 +855,8 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
         for pc in src.ordered_pcs:
             if pc not in selected[unit]:
                 continue
-            chunks.append(transform_block(src.blocks[pc], unit, selected, sources, stats, continuations))
+            chunks.append(transform_block(src.blocks[pc], unit, selected, sources, stats, continuations,
+                                          cluster.fuse_static_pc_returns))
 
     # Entry hooks are intentionally narrower than the selected closure: only
     # measured roots pay the extra branch into Tier-2.
@@ -998,6 +1056,8 @@ TIER2_ENTRY_DISPATCH:
     stats['lines'] = len(cpp.splitlines())
     stats['units'] = len(selected)
     stats['hooks'] = sum(len(v) for v in cluster.hooks.values())
+    if cluster.fuse_static_pc_returns and stats.get('fused_calls', 0) != 0:
+        raise RuntimeError(f'{cluster.key}: static PC-return fusion currently requires zero fused JAL calls')
     return path, stats
 
 
