@@ -746,11 +746,12 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::int32_t offset = static_cast<std::int16_t>(d.word & 0xFFFCu);
         const std::uint32_t vector_register = ((d.word >> 16u) & 0x1Fu) | ((d.word & 1u) << 5u);
         out << "    { const std::uint32_t vfpu_address = " << reg(d.rs) << " + static_cast<std::uint32_t>(" << offset << ");\n"
+            << "      std::uint32_t vfpu_words[4]{}; rt.memory().aot_load32_block(vfpu_address, vfpu_words);\n"
             << "      float vfpu_value[4]{\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 0u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 4u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 8u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 12u))};\n"
+            << "        std::bit_cast<float>(vfpu_words[0]),\n"
+            << "        std::bit_cast<float>(vfpu_words[1]),\n"
+            << "        std::bit_cast<float>(vfpu_words[2]),\n"
+            << "        std::bit_cast<float>(vfpu_words[3])};\n"
             << "      ctx.write_vfpu_vector(vfpu_value, " << vector_register << "u, 4u); }\n";
         break;
     }
@@ -759,10 +760,10 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t vector_register = ((d.word >> 16u) & 0x1Fu) | ((d.word & 1u) << 5u);
         out << "    { float vfpu_value[4]{}; ctx.read_vfpu_vector(vfpu_value, " << vector_register << "u, 4u);\n"
             << "      const std::uint32_t vfpu_address = " << reg(d.rs) << " + static_cast<std::uint32_t>(" << offset << ");\n"
-            << "      rt.memory().aot_store32(vfpu_address + 0u, std::bit_cast<std::uint32_t>(vfpu_value[0]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 4u, std::bit_cast<std::uint32_t>(vfpu_value[1]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 8u, std::bit_cast<std::uint32_t>(vfpu_value[2]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 12u, std::bit_cast<std::uint32_t>(vfpu_value[3])); }\n";
+            << "      const std::uint32_t vfpu_words[4]{\n"
+            << "        std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]),\n"
+            << "        std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};\n"
+            << "      rt.memory().aot_store32_block(vfpu_address, vfpu_words); }\n";
         break;
     }
     default:

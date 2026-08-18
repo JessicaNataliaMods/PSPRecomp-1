@@ -39,11 +39,6 @@ TAIL_CALL_RE = re.compile(
     r'(?P<indent>[ \t]*)\(void\)rt\.invoke_chained_direct<&recomp_unit_(?P<target_name>\d+)_entry, '
     r'(?P<target_unit>\d+)u, (?P<entry>\d+)u, (?P<target_pc>0x[0-9A-F]+)u>'
     r'\(ctx, &aot_mem\); return;')
-# Artificial generated-unit partition boundaries are not guest calls.
-STATIC_PC_RETURN_RE = re.compile(
-    r'(?P<indent>[ \t]*)ctx\.pc = (?P<target>0x[0-9A-F]+)u; return;')
-
-
 LOCAL_DISPATCH_SEQUENCE_RE = re.compile(
     r'(?P<indent>[ \t]*)local_pc = (?P<local_expr>[^;]+);\n'
     r'(?P=indent)if \(\+\+local_transfers < 256u\) \{ entry_id = 0u; goto LOCAL_DISPATCH; \}\n'
@@ -137,10 +132,6 @@ class Cluster:
     expand_cross_units: bool = False
     hooks: Dict[int, List[int]] = dataclasses.field(default_factory=dict)
     max_blocks: int = 700
-    # Opt-in fusion for plain generated corpus boundaries of the form
-    # `ctx.pc = constant; return;`. Disabled for all legacy clusters.
-    # These boundaries are not guest calls and therefore add no scheduler frame.
-    fuse_static_pc_returns: bool = False
 
 
 CLUSTERS: List[Cluster] = [
@@ -199,26 +190,10 @@ CLUSTERS: List[Cluster] = [
     ),
     Cluster(
         key='edge43', enum_name='Edge43', function='tier2_superblock_edge43',
-        # Include the measured $ra continuation; omitting 0x088B3FFC forced an
-        # outer Runtime dispatch immediately before unit 0044.
-        seeds={43: [0x088B3FCC, 0x088B3FFC], 44: [0x088B4004, 0x088B40F8]},
+        seeds={43: [0x088B3FCC], 44: [0x088B4004, 0x088B40F8]},
         expand_cross_units=True,
-        hooks={43: [0x088B3FCC, 0x088B3FFC], 44: [0x088B4004, 0x088B40F8]},
-        max_blocks=110,
-    ),
-    Cluster(
-        key='collisionloop', enum_name='CollisionLoop', function='tier2_superblock_collisionloop',
-        seeds={},
-        # Small measured loop straddling generated units 0037/0038. Keep the
-        # footprint intentionally bounded to avoid the rejected V8 Geometry bloat.
-        windows={
-            37: [(0x0889BFC0, 0x0889C000)],
-            38: [(0x0889C000, 0x0889C5C0)],
-        },
-        expand_cross_units=True,
-        hooks={37: [0x0889BFC0], 38: [0x0889C000, 0x0889C5B8]},
-        max_blocks=140,
-        fuse_static_pc_returns=True,
+        hooks={43: [0x088B3FCC], 44: [0x088B4004, 0x088B40F8]},
+        max_blocks=100,
     ),
 ]
 
@@ -539,6 +514,38 @@ def strip_hooks(text: str) -> str:
 
 def parse_unit(path: pathlib.Path, unit: int) -> UnitSource:
     raw = strip_hooks(path.read_text(encoding='utf-8'))
+    # V8.4 automatic AOT is branchless/direct-fastmem. Tier-2 extraction keeps
+    # its own pointer-only memory view, so normalize the direct accessor spelling
+    # back to the canonical AOT form before applying the existing semantic
+    # dataflow transforms and source validators. Hook patching still preserves
+    # the direct spelling in the checked-in generated units.
+    raw = raw.replace('aot_mem.aot_direct_', 'aot_mem.aot_')
+    # The V8.4 corpus also stores LV.Q/SV.Q as 16-byte blocks. Expand those
+    # source-level forms back to the pre-V8.4 scalar spelling so the Tier-2
+    # generator reproduces the protected V8.2.7A clusters byte-for-byte; Tier-2
+    # already performs its own verified block/dataflow lowering.
+    raw = re.sub(
+        r'std::uint32_t vfpu_words\[4\]\{\};\s*'
+        r'aot_mem\.aot_load32_block\(vfpu_address, vfpu_words\);\s*'
+        r'float vfpu_value\[4\]\{\s*'
+        r'std::bit_cast<float>\(vfpu_words\[0\]\),\s*'
+        r'std::bit_cast<float>\(vfpu_words\[1\]\),\s*'
+        r'std::bit_cast<float>\(vfpu_words\[2\]\),\s*'
+        r'std::bit_cast<float>\(vfpu_words\[3\]\)\};',
+        'float vfpu_value[4]{\n'
+        '        std::bit_cast<float>(aot_mem.aot_load32(vfpu_address + 0u)),\n'
+        '        std::bit_cast<float>(aot_mem.aot_load32(vfpu_address + 4u)),\n'
+        '        std::bit_cast<float>(aot_mem.aot_load32(vfpu_address + 8u)),\n'
+        '        std::bit_cast<float>(aot_mem.aot_load32(vfpu_address + 12u))};', raw, flags=re.S)
+    raw = re.sub(
+        r'const std::uint32_t vfpu_words\[4\]\{(?P<v0>[^,;]+), (?P<v1>[^,;]+), (?P<v2>[^,;]+), (?P<v3>[^;]+)\};\s*'
+        r'aot_mem\.aot_store32_block\(vfpu_address, vfpu_words\);',
+        lambda m: (
+            f'aot_mem.aot_store32(vfpu_address + 0u, {m.group("v0").strip()});\n'
+            f'      aot_mem.aot_store32(vfpu_address + 4u, {m.group("v1").strip()});\n'
+            f'      aot_mem.aot_store32(vfpu_address + 8u, {m.group("v2").strip()});\n'
+            f'      aot_mem.aot_store32(vfpu_address + 12u, {m.group("v3").strip()});'),
+        raw, flags=re.S)
     matches = list(LABEL_RE.finditer(raw))
     blocks: Dict[int, str] = {}
     order: List[int] = []
@@ -665,8 +672,7 @@ def selected_pc_owner(selected: Mapping[int, Set[int]]) -> Dict[int, int]:
 
 def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int]],
                     sources: Mapping[int, UnitSource], stats: MutableMapping[str, int],
-                    fused_continuations: MutableMapping[Tuple[int, int], int],
-                    fuse_static_pc_returns: bool = False) -> str:
+                    fused_continuations: MutableMapping[Tuple[int, int], int]) -> str:
     pc_owner = selected_pc_owner(selected)
     selected_all = set(pc_owner)
     text = re.sub(r'\bL_([0-9A-F]{8})\b', r'SB_L_\1', block)
@@ -780,37 +786,6 @@ def transform_block(block: str, source_unit: int, selected: Mapping[int, Set[int
 
     text = TAIL_CALL_RE.sub(tail_repl, text)
 
-    # Fuse only opted-in plain constant-PC returns whose destination is already
-    # selected in the same superblock.  No tier2_enter/complete call is needed:
-    # the original edge is merely an artificial generated-file boundary.
-    if fuse_static_pc_returns:
-        def static_pc_repl(m: re.Match[str]) -> str:
-            target = int(m.group('target'), 16)
-            if target not in selected_all:
-                return m.group(0)
-            stats['static_pc_fused'] += 1
-            indent = m.group('indent')
-            return (
-                f'{indent}// Generated corpus boundary: unwind any logical tail-call frames first,\n'
-                f'{indent}// then account the outer dispatch that this local edge removes.\n'
-                f'{indent}if (tier2_pending_transfers != 0u) {{\n'
-                f'{indent}    const std::uint32_t tier2_static_pending_ = tier2_pending_transfers;\n'
-                f'{indent}    tier2_pending_transfers = 0u;\n'
-                f'{indent}    if (!tier2_complete_shadow(tier2_static_pending_)) {{\n'
-                f'{indent}        tier2_gpr_shadow_valid = false;\n'
-                f'{indent}        TIER2_SB_RETURN();\n'
-                f'{indent}    }}\n'
-                f'{indent}}}\n'
-                f'{indent}ctx.pc = 0x{target:08X}u;\n'
-                f'{indent}TIER2_GPR_SYNC_OUT();\n'
-                f'{indent}if (!rt.account_inlined_dispatch_boundary(ctx)) {{\n'
-                f'{indent}    tier2_gpr_shadow_valid = false;\n'
-                f'{indent}    TIER2_SB_RETURN();\n'
-                f'{indent}}}\n'
-                f'{indent}TIER2_GPR_SYNC_IN();\n'
-                f'{indent}goto SB_L_{target:08X};')
-        text = STATIC_PC_RETURN_RE.sub(static_pc_repl, text)
-
     # Standard generated indirect/local return path.  The shared unit-specific
     # dispatcher below recognizes a fused-call continuation and performs exactly
     # one logical chain unwind before resuming the caller.
@@ -855,8 +830,7 @@ def emit_cluster(cluster: Cluster, selected: Mapping[int, Set[int]],
         for pc in src.ordered_pcs:
             if pc not in selected[unit]:
                 continue
-            chunks.append(transform_block(src.blocks[pc], unit, selected, sources, stats, continuations,
-                                          cluster.fuse_static_pc_returns))
+            chunks.append(transform_block(src.blocks[pc], unit, selected, sources, stats, continuations))
 
     # Entry hooks are intentionally narrower than the selected closure: only
     # measured roots pay the extra branch into Tier-2.
@@ -1056,8 +1030,6 @@ TIER2_ENTRY_DISPATCH:
     stats['lines'] = len(cpp.splitlines())
     stats['units'] = len(selected)
     stats['hooks'] = sum(len(v) for v in cluster.hooks.values())
-    if cluster.fuse_static_pc_returns and stats.get('fused_calls', 0) != 0:
-        raise RuntimeError(f'{cluster.key}: static PC-return fusion currently requires zero fused JAL calls')
     return path, stats
 
 
@@ -1124,8 +1096,12 @@ def main() -> int:
     hook_units_changed = 0
     for unit, specs in sorted(hooks_by_unit.items()):
         path = generated / f'generated_unit_{unit:04d}.cpp'
-        patched = patch_hooks(sources[unit].raw, unit, specs)
-        if path.read_text(encoding='utf-8') != patched:
+        # Patch hooks into the checked-in corpus spelling, not the normalized
+        # Tier-2 extraction copy. This keeps the V8.4 direct/block AOT transform
+        # idempotent across incremental builds.
+        current = path.read_text(encoding='utf-8')
+        patched = patch_hooks(current, unit, specs)
+        if current != patched:
             path.write_text(patched, encoding='utf-8', newline='\n')
             hook_units_changed += 1
 

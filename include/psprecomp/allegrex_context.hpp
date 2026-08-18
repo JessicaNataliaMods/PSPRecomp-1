@@ -277,6 +277,14 @@ struct alignas(16) AllegrexContext {
     PSPRECOMP_CONTEXT_FORCEINLINE void write_vfpu_vector_with_destination_prefix_ct(const float *source) noexcept {
         static_assert(Length >= 1u && Length <= 4u);
         const std::uint32_t destination_prefix = vfpu_ctrl[2];
+        // V8.4: the architectural default has no saturation and no lane mask.
+        // This is by far the common case in geometry code, so bypass the local
+        // copy, four saturation decodes and four mask tests entirely.
+        if (destination_prefix == 0u) {
+            write_vfpu_vector_ct<VectorRegister, Length>(source);
+            eat_vfpu_prefixes();
+            return;
+        }
         float value[4]{source[0], Length >= 2u ? source[1] : 0.0f,
                        Length >= 3u ? source[2] : 0.0f, Length >= 4u ? source[3] : 0.0f};
         auto saturate_lane = [&](std::uint32_t i) {
@@ -1666,6 +1674,20 @@ struct alignas(16) AllegrexContext {
         float source[16]{};
         float target[4]{};
         float result[16]{};
+        // With S/T/D at their architectural defaults VMSCL is exactly a
+        // matrix-by-scalar multiply. Avoid reading the old destination and all
+        // prefix/saturation plumbing while retaining the same final prefix eat.
+        if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
+            read_vfpu_matrix_ct<SourceMatrixRegister, Side>(source);
+            read_vfpu_vector_ct<TargetScalarRegister, 1u>(target);
+            const float scalar = target[0];
+            for (std::uint32_t row = 0u; row < Side; ++row)
+                for (std::uint32_t column = 0u; column < Side; ++column)
+                    result[row * 4u + column] = source[row * 4u + column] * scalar;
+            write_vfpu_matrix_ct<DestinationMatrixRegister, Side>(result);
+            eat_vfpu_prefixes();
+            return;
+        }
         float previous_destination[16]{};
         read_vfpu_matrix_ct<SourceMatrixRegister, Side>(source);
         read_vfpu_matrix_ct<DestinationMatrixRegister, Side>(previous_destination);

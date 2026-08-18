@@ -183,10 +183,20 @@ int main(int argc, char **argv) {
                          << (runtime.memory().direct_fastmem_enabled() ? 1 : 0);
             if (runtime.memory().direct_fastmem_enabled())
                 fastmem_line << " base=0x" << std::hex
-                             << runtime.memory().direct_fastmem_base_address() << std::dec;
+                             << runtime.memory().direct_fastmem_base_address() << std::dec
+                             << " required=1 branchless_aot=1";
             else
-                fastmem_line << " fallback=checked-memory";
+                fastmem_line << " required=1 branchless_aot=1 unavailable=1";
             vcs::runtime_log_line(fastmem_line.str());
+        }
+        // V8.4 specializes the VCS automatic AOT corpus for the direct alias
+        // map.  Do not limp into gameplay with null branchless accessors: fail
+        // with an actionable message before any generated guest code executes.
+        if (!runtime.memory().direct_fastmem_enabled()) {
+            throw psprecomp::Error(
+                "V8.4 aggressive CPU path requires Win64 direct fastmem, but the alias mapping could not be created. "
+                "Ensure PSPRECOMP_AOT_DIRECT_FASTMEM is not disabled and no security/VA policy blocks MapViewOfFileEx. "
+                "Use V8.2.7A if checked-memory fallback is required.");
         }
         // The heavy GUESTHOT sampler is opt-in. The rolling PERF telemetry stays on,
         // but normal gameplay does not pay a census/timestamp branch per cross-unit edge.

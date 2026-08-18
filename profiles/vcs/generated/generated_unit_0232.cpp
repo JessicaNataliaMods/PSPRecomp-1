@@ -472,7 +472,7 @@ L_08BA41B8:
     // nop
     // nop
     // nop
-    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_load8(0u + static_cast<std::uint32_t>(0))))));
+    (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(0u + static_cast<std::uint32_t>(0))))));
     ctx.eat_vfpu_prefixes(); // VFPU sync/no-op consumes prefixes
     ctx.gpr[6] = (11842u << 16u);
     ctx.gpr[25] = (ctx.gpr[11] | 15478u);
@@ -480,9 +480,9 @@ L_08BA41B8:
     // nop
     rt.unsupported(0x08BA41DCu, 0x43500000u, "unknown not lowered yet"); return;
 L_08BA41E8:
-    ctx.gpr[23] = (aot_mem.aot_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
+    ctx.gpr[23] = (aot_mem.aot_direct_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
     ctx.gpr[25] = (39321u << 16u);
-    ctx.gpr[2] = (aot_mem.aot_load16(ctx.gpr[1] + static_cast<std::uint32_t>(-27815)));
+    ctx.gpr[2] = (aot_mem.aot_direct_load16(ctx.gpr[1] + static_cast<std::uint32_t>(-27815)));
     ctx.gpr[18] = (18724u << 16u);
     { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[12]) > 0;
     ctx.gpr[12] = (29125u << 16u);
@@ -492,7 +492,7 @@ L_08BA41E8:
       goto L_08BA4200;
     }
 L_08BA4200:
-    ctx.gpr[11] = (aot_mem.aot_load16(ctx.gpr[22] + static_cast<std::uint32_t>(990)));
+    ctx.gpr[11] = (aot_mem.aot_direct_load16(ctx.gpr[22] + static_cast<std::uint32_t>(990)));
     ctx.gpr[7] = (18020u << 16u);
     { const float vfpu_constant = std::bit_cast<float>(0x00000000u);
       const float vfpu_value[4]{vfpu_constant, vfpu_constant, vfpu_constant, vfpu_constant};
@@ -550,7 +550,7 @@ L_08BA4328:
 L_08BA434C:
     rt.unsupported(0x08BA434Cu, 0x75154FDDu, "unknown not lowered yet"); return;
 L_08BA4350:
-    ctx.gpr[24] = (aot_mem.aot_load16(ctx.gpr[30] + static_cast<std::uint32_t>(-30276)));
+    ctx.gpr[24] = (aot_mem.aot_direct_load16(ctx.gpr[30] + static_cast<std::uint32_t>(-30276)));
     ctx.gpr[28] = (53938u << 16u);
     rt.unsupported(0x08BA4358u, 0xD5A8A733u, "vfpu not lowered yet"); return;
 L_08BA4378:

@@ -747,11 +747,12 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::int32_t offset = static_cast<std::int16_t>(d.word & 0xFFFCu);
         const std::uint32_t vector_register = ((d.word >> 16u) & 0x1Fu) | ((d.word & 1u) << 5u);
         out << "    { const std::uint32_t vfpu_address = " << reg(d.rs) << " + static_cast<std::uint32_t>(" << offset << ");\n"
+            << "      std::uint32_t vfpu_words[4]{}; rt.memory().aot_load32_block(vfpu_address, vfpu_words);\n"
             << "      float vfpu_value[4]{\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 0u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 4u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 8u)),\n"
-            << "        std::bit_cast<float>(rt.memory().aot_load32(vfpu_address + 12u))};\n"
+            << "        std::bit_cast<float>(vfpu_words[0]),\n"
+            << "        std::bit_cast<float>(vfpu_words[1]),\n"
+            << "        std::bit_cast<float>(vfpu_words[2]),\n"
+            << "        std::bit_cast<float>(vfpu_words[3])};\n"
             << "      ctx.write_vfpu_vector(vfpu_value, " << vector_register << "u, 4u); }\n";
         break;
     }
@@ -760,10 +761,10 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
         const std::uint32_t vector_register = ((d.word >> 16u) & 0x1Fu) | ((d.word & 1u) << 5u);
         out << "    { float vfpu_value[4]{}; ctx.read_vfpu_vector(vfpu_value, " << vector_register << "u, 4u);\n"
             << "      const std::uint32_t vfpu_address = " << reg(d.rs) << " + static_cast<std::uint32_t>(" << offset << ");\n"
-            << "      rt.memory().aot_store32(vfpu_address + 0u, std::bit_cast<std::uint32_t>(vfpu_value[0]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 4u, std::bit_cast<std::uint32_t>(vfpu_value[1]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 8u, std::bit_cast<std::uint32_t>(vfpu_value[2]));\n"
-            << "      rt.memory().aot_store32(vfpu_address + 12u, std::bit_cast<std::uint32_t>(vfpu_value[3])); }\n";
+            << "      const std::uint32_t vfpu_words[4]{\n"
+            << "        std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]),\n"
+            << "        std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};\n"
+            << "      rt.memory().aot_store32_block(vfpu_address, vfpu_words); }\n";
         break;
     }
     default:
@@ -1406,12 +1407,19 @@ std::string lower_constant_gpr_writes(std::string text) {
 
 
 std::string lower_aot_memory_accesses(std::string text) {
-    // Stage 45.6: the outer generated-unit wrapper creates one AotFastView and
-    // compile-time direct chains pass it by reference across unit boundaries.
-    // Lower ordinary aligned byte/half/word accesses to that shared view.
+    // V8.4 aggressive CPU path: VCSNative requires direct-fastmem at launch.
+    // Automatic AOT therefore uses branch-free direct accessors instead of
+    // re-testing the nullable fastmem pointer at every translated load/store.
+    // The generic framework and manual fixtures keep checked fallback helpers.
     static const std::regex access_pattern(
         R"(rt\.memory\(\)\.aot_(load|store)(8|16|32)\()" );
-    return std::regex_replace(text, access_pattern, "aot_mem.aot_$1$2(");
+    text = std::regex_replace(text, access_pattern, "aot_mem.aot_direct_$1$2(");
+    static const std::regex unaligned_pattern(
+        R"(rt\.memory\(\)\.aot_(load|store)_word_(left|right)\()" );
+    text = std::regex_replace(text, unaligned_pattern, "aot_mem.aot_direct_$1_word_$2(");
+    static const std::regex block_pattern(
+        R"(rt\.memory\(\)\.aot_(load|store)32_block\()" );
+    return std::regex_replace(text, block_pattern, "aot_mem.aot_direct_$132_block(");
 }
 
 std::string lower_constant_fpr_accesses(std::string text) {

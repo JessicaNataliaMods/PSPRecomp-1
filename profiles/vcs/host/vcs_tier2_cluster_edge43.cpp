@@ -67,7 +67,6 @@ TIER2_FUSED_RETURN_DISPATCH:
     case 0x088B1C2Cu: goto SB_L_088B1C2C;
     case 0x088B1C40u: goto SB_L_088B1C40;
     case 0x088B3FCCu: goto SB_L_088B3FCC;
-    case 0x088B3FFCu: goto SB_L_088B3FFC;
     case 0x088B4004u: goto SB_L_088B4004;
     case 0x088B4018u: goto SB_L_088B4018;
     case 0x088B4020u: goto SB_L_088B4020;
@@ -143,7 +142,6 @@ TIER2_LOCAL_DISPATCH_U0043:
     case 0x088B1C2Cu: goto SB_L_088B1C2C;
     case 0x088B1C40u: goto SB_L_088B1C40;
     case 0x088B3FCCu: goto SB_L_088B3FCC;
-    case 0x088B3FFCu: goto SB_L_088B3FFC;
     default:
         ctx.pc = local_pc;
         TIER2_SB_RETURN();
@@ -211,7 +209,6 @@ TIER2_LOCAL_DISPATCH_U0044:
 TIER2_ENTRY_DISPATCH:
     switch (entry_pc) {
     case 0x088B3FCCu: goto SB_L_088B3FCC;
-    case 0x088B3FFCu: goto SB_L_088B3FFC;
     case 0x088B4004u: goto SB_L_088B4004;
     case 0x088B40F8u: goto SB_L_088B40F8;
     default:
@@ -587,24 +584,6 @@ SB_L_088B3FCC:
     tier2_gpr_4 = (ctx.gpr[20] | 0u);
     goto SB_L_088B1780;
 
-SB_L_088B3FFC:
-    if (ctx.gpr[2] == 0u) {
-    tier2_gpr_4 = (tier2_mem.aot_load32(tier2_gpr_29 + static_cast<std::uint32_t>(48)));
-        if (!rt.tier2_enter_fused_transfer<44u, 0x088B40F8u>(ctx)) {
-            ctx.pc = 0x088B40F8u;
-            TIER2_SB_RETURN();
-        }
-        ++tier2_pending_transfers;
-        ++tier2_stats.fused_tail_edges;
-        goto SB_L_088B40F8;
-    }
-    if (!rt.tier2_enter_fused_transfer<44u, 0x088B4004u>(ctx)) {
-        ctx.pc = 0x088B4004u;
-        TIER2_SB_RETURN();
-    }
-    ++tier2_pending_transfers;
-    ++tier2_stats.fused_tail_edges;
-    goto SB_L_088B4004;
 SB_L_088B4004:
     tier2_gpr_17 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(tier2_mem.aot_load16(ctx.gpr[18] + static_cast<std::uint32_t>(6))))));
     tier2_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(tier2_mem.aot_load16(ctx.gpr[18] + static_cast<std::uint32_t>(14))))));

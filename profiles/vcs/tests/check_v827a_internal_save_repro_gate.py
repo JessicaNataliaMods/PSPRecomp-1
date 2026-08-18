@@ -19,9 +19,9 @@ def need(cond, msg):
         raise SystemExit(1)
     print('PASS:', msg)
 
-need(any(stage in log for stage in ('stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18',
-                                     'stage=perf-v8.3-cpu-boundary-fusion-2026-08-18')),
-     'V8.2.7A gate preserved in current runtime stage')
+need(('stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18' in log) or
+     ('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log),
+     'V8.2.7A correctness lineage runtime stage')
 need('correctness_revision=8271' in log, 'V8.2.7A correctness revision')
 need('save_repro_internal_ini_gate=1' in log and 'save_repro_default_enabled=0' in log,
      'internal-only gate metadata')
@@ -57,7 +57,7 @@ for token, label in [
     ('atrac_nonloop_resident=-2', 'NEWS non-loop ATRAC sentinel preserved'),
     ('atrac_loop_resident=-3', 'NEWS loop ATRAC sentinel preserved'),
     ('output2_late_catchup=0', 'rejected Output2 pacing remains off'),
-    ('geometry_fusion_rollback=1', 'V8.2 Geometry rollback preserved'),
+    ('hot_blocks=1060', 'V8.2 CPU shape preserved'),
     ('geometry_fusion_rollback=1', 'Geometry rollback preserved'),
 ]:
     need(token in log, label)

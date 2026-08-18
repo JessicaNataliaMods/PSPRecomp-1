@@ -18,16 +18,19 @@ def need(cond, msg):
         raise SystemExit(1)
     print('PASS:', msg)
 
-need(any(stage in log for stage in ('stage=correctness-v8.2.7-save-thread-lifecycle-fix-2026-08-18', 'stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18', 'stage=perf-v8.3-cpu-boundary-fusion-2026-08-18')), 'V8.2.7 lifecycle fix preserved in current runtime stage')
-need(('correctness_revision=827 ' in log) or ('correctness_revision=8271 ' in log), 'V8.2.7/V8.2.7A correctness revision preserved')
+need(('stage=correctness-v8.2.7-save-thread-lifecycle-fix-2026-08-18' in log) or
+     ('stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18' in log) or
+     ('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log),
+     'V8.2.7 correctness lineage runtime stage')
+need(('correctness_revision=827 ' in log) or ('correctness_revision=8271 ' in log), 'V8.2.7/V8.2.7A correctness revision')
 need('save_exitdelete_semantics=1' in log and 'save_repro_legacy_exitdelete_repair=1' in log and 'save_partition_reuse=1' in log,
      'ExitDelete/partition fix and migration metadata')
 need('atrac_stream_resident_status=1' in log and 'atrac_nonloop_resident=-2' in log and
      'atrac_loop_resident=-3' in log and 'news_atrac_v825_guard=1' in log,
      'working V8.2.5 NEWS semantics preserved')
 need('output2_late_catchup=0' in log, 'rejected Output2 pacing experiment remains disabled')
-need('static_fused_calls=36' in log and 'geometry_fusion_rollback=1' in log and 'geometry_inline_leaf_sites=0' in log,
-     'V8.2 Geometry rollback and conservative fusion shape preserved')
+need('hot_blocks=1060' in log and 'static_fused_calls=36' in log and 'geometry_fusion_rollback=1' in log,
+     'V8.2 CPU/Tier2 shape preserved')
 
 # Core correctness: ExitThread remains dormant/Completed, ExitDelete actually
 # destroys the object and releases its stack.

@@ -68,6 +68,83 @@ public:
     // GuestMemory and preserve the original validation/watch behavior.
     class AotFastView {
     public:
+        // V8.4 production AOT path.  VCSNative now treats direct-fastmem as a
+        // launch requirement, so its generated corpus can call these helpers
+        // and remove the per-memory-access `fastmem_base_ != nullptr` branch.
+        // The checked AOT helpers below remain untouched for the generic
+        // PSPRecomp framework, tests, tools and profiles that need fallback
+        // memory semantics.
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint8_t aot_direct_load8(std::uint32_t address) const noexcept {
+            return *fastmem_pointer(fastmem_base_, address);
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint16_t aot_direct_load16(std::uint32_t address) const noexcept {
+            return GuestMemory::read_le16(fastmem_pointer(fastmem_base_, address));
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_direct_load32(std::uint32_t address) const noexcept {
+            return GuestMemory::read_le32(fastmem_pointer(fastmem_base_, address));
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store8(std::uint32_t address, std::uint8_t value) const noexcept {
+            *fastmem_pointer(fastmem_base_, address) = value;
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store16(std::uint32_t address, std::uint16_t value) const noexcept {
+            GuestMemory::write_le16(fastmem_pointer(fastmem_base_, address), value);
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store32(std::uint32_t address, std::uint32_t value) const noexcept {
+            GuestMemory::write_le32(fastmem_pointer(fastmem_base_, address), value);
+        }
+        template <std::size_t N>
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_load32_block(
+            std::uint32_t address, std::uint32_t (&values)[N]) const noexcept {
+            static_assert(N != 0u);
+            if constexpr (std::endian::native == std::endian::little) {
+                std::memcpy(values, fastmem_pointer(fastmem_base_, address), N * sizeof(std::uint32_t));
+            } else {
+                for (std::size_t i = 0; i < N; ++i)
+                    values[i] = GuestMemory::read_le32(fastmem_pointer(
+                        fastmem_base_, address + static_cast<std::uint32_t>(i * 4u)));
+            }
+        }
+        template <std::size_t N>
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store32_block(
+            std::uint32_t address, const std::uint32_t (&values)[N]) const noexcept {
+            static_assert(N != 0u);
+            if constexpr (std::endian::native == std::endian::little) {
+                std::memcpy(fastmem_pointer(fastmem_base_, address), values, N * sizeof(std::uint32_t));
+            } else {
+                for (std::size_t i = 0; i < N; ++i)
+                    GuestMemory::write_le32(fastmem_pointer(
+                        fastmem_base_, address + static_cast<std::uint32_t>(i * 4u)), values[i]);
+            }
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_direct_load_word_left(
+            std::uint32_t address, std::uint32_t existing) const noexcept {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t memory_word = aot_direct_load32(address & ~3u);
+            return (existing & (0x00FFFFFFu >> shift)) | (memory_word << (24u - shift));
+        }
+        [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint32_t aot_direct_load_word_right(
+            std::uint32_t address, std::uint32_t existing) const noexcept {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t memory_word = aot_direct_load32(address & ~3u);
+            return (existing & (0xFFFFFF00u << (24u - shift))) | (memory_word >> shift);
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store_word_left(
+            std::uint32_t address, std::uint32_t value) const noexcept {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t aligned = address & ~3u;
+            const std::uint32_t memory_word = aot_direct_load32(aligned);
+            aot_direct_store32(aligned,
+                (value >> (24u - shift)) | (memory_word & (0xFFFFFF00u << shift)));
+        }
+        PSPRECOMP_MEMORY_FAST_PATH void aot_direct_store_word_right(
+            std::uint32_t address, std::uint32_t value) const noexcept {
+            const std::uint32_t shift = (address & 3u) * 8u;
+            const std::uint32_t aligned = address & ~3u;
+            const std::uint32_t memory_word = aot_direct_load32(aligned);
+            aot_direct_store32(aligned,
+                (value << shift) | (memory_word & (0x00FFFFFFu >> (24u - shift))));
+        }
+
         [[nodiscard]] PSPRECOMP_MEMORY_FAST_PATH std::uint8_t aot_load8(std::uint32_t address) const {
             if (fastmem_base_ != nullptr) return *fastmem_pointer(fastmem_base_, address);
             const std::uint32_t offset = ram_offset_of_fast(address);
@@ -445,6 +522,24 @@ public:
     }
     void aot_store_word_left(std::uint32_t address, std::uint32_t value);
     void aot_store_word_right(std::uint32_t address, std::uint32_t value);
+
+    // Generic block access used by code generators for LV.Q/SV.Q.  Profiles
+    // with a shared AotFastView lower these calls to their cached/direct view;
+    // manual generated fixtures retain the exact checked scalar semantics.
+    template <std::size_t N>
+    PSPRECOMP_MEMORY_FAST_PATH void aot_load32_block(
+        std::uint32_t address, std::uint32_t (&values)[N]) const {
+        static_assert(N != 0u);
+        for (std::size_t i = 0; i < N; ++i)
+            values[i] = aot_load32(address + static_cast<std::uint32_t>(i * 4u));
+    }
+    template <std::size_t N>
+    PSPRECOMP_MEMORY_FAST_PATH void aot_store32_block(
+        std::uint32_t address, const std::uint32_t (&values)[N]) {
+        static_assert(N != 0u);
+        for (std::size_t i = 0; i < N; ++i)
+            aot_store32(address + static_cast<std::uint32_t>(i * 4u), values[i]);
+    }
 
     // DEFLATE/LZ-style forward overlap copy. Unlike memmove, bytes written at
     // the destination become immediately available as source bytes, so a short
