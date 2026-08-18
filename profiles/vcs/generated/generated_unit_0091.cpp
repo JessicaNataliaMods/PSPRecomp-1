@@ -6402,6 +6402,13 @@ L_0897299C:
 L_089729E4:
     ctx.gpr[31] = (0x089729ECu);
     ctx.gpr[4] = (aot_mem.aot_direct_load16(ctx.gpr[16] + static_cast<std::uint32_t>(96)));
+    // V87_TINY_LEAF_INLINE unit=0194 pc=0x08B0C498
+    if (rt.can_inline_generated_leaf<194u>()) {
+        aot_mem.aot_direct_store32(ctx.gpr[28] + static_cast<std::uint32_t>(1972), ctx.gpr[4]);
+        ctx.pc = 0x089729ECu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_089729EC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0194_entry, 194u, 60u, 0x08B0C498u>(ctx, &aot_mem) && ctx.pc == 0x089729ECu) goto L_089729EC;
     return;
 L_089729EC:

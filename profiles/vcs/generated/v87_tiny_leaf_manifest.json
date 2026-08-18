@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "targets": 26,
+  "sites": 2017,
+  "changed_units": 122,
+  "selection": {
+    "min_static_jal_sites": 40,
+    "max_simple_statements": 4
+  },
+  "targets_detail": [
+    {
+      "unit": 11,
+      "pc": "0x0883079C",
+      "sites": 59,
+      "statements": 1
+    },
+    {
+      "unit": 11,
+      "pc": "0x088307E0",
+      "sites": 42,
+      "statements": 1
+    },
+    {
+      "unit": 11,
+      "pc": "0x08830934",
+      "sites": 42,
+      "statements": 3
+    },
+    {
+      "unit": 11,
+      "pc": "0x08830A20",
+      "sites": 58,
+      "statements": 1
+    },
+    {
+      "unit": 11,
+      "pc": "0x08830A50",
+      "sites": 47,
+      "statements": 1
+    },
+    {
+      "unit": 11,
+      "pc": "0x08830B10",
+      "sites": 46,
+      "statements": 1
+    },
+    {
+      "unit": 35,
+      "pc": "0x088905F0",
+      "sites": 113,
+      "statements": 4
+    },
+    {
+      "unit": 65,
+      "pc": "0x08908E78",
+      "sites": 50,
+      "statements": 1
+    },
+    {
+      "unit": 65,
+      "pc": "0x0890BE50",
+      "sites": 171,
+      "statements": 1
+    },
+    {
+      "unit": 66,
+      "pc": "0x0890F6B4",
+      "sites": 236,
+      "statements": 1
+    },
+    {
+      "unit": 66,
+      "pc": "0x0890FF64",
+      "sites": 54,
+      "statements": 1
+    },
+    {
+      "unit": 67,
+      "pc": "0x089101A4",
+      "sites": 59,
+      "statements": 1
+    },
+    {
+      "unit": 76,
+      "pc": "0x0893685C",
+      "sites": 73,
+      "statements": 1
+    },
+    {
+      "unit": 89,
+      "pc": "0x0896918C",
+      "sites": 48,
+      "statements": 1
+    },
+    {
+      "unit": 176,
+      "pc": "0x08AC7670",
+      "sites": 43,
+      "statements": 1
+    },
+    {
+      "unit": 176,
+      "pc": "0x08AC79D4",
+      "sites": 44,
+      "statements": 1
+    },
+    {
+      "unit": 176,
+      "pc": "0x08AC7C50",
+      "sites": 80,
+      "statements": 1
+    },
+    {
+      "unit": 176,
+      "pc": "0x08AC7C58",
+      "sites": 63,
+      "statements": 1
+    },
+    {
+      "unit": 177,
+      "pc": "0x08AC8054",
+      "sites": 47,
+      "statements": 1
+    },
+    {
+      "unit": 182,
+      "pc": "0x08ADC734",
+      "sites": 85,
+      "statements": 1
+    },
+    {
+      "unit": 182,
+      "pc": "0x08ADC754",
+      "sites": 40,
+      "statements": 1
+    },
+    {
+      "unit": 182,
+      "pc": "0x08ADC784",
+      "sites": 44,
+      "statements": 1
+    },
+    {
+      "unit": 188,
+      "pc": "0x08AF42C4",
+      "sites": 60,
+      "statements": 2
+    },
+    {
+      "unit": 190,
+      "pc": "0x08AFEDA8",
+      "sites": 52,
+      "statements": 1
+    },
+    {
+      "unit": 190,
+      "pc": "0x08AFEF7C",
+      "sites": 305,
+      "statements": 4
+    },
+    {
+      "unit": 194,
+      "pc": "0x08B0C498",
+      "sites": 56,
+      "statements": 1
+    }
+  ]
+}

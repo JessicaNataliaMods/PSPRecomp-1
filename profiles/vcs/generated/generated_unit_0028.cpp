@@ -1821,6 +1821,13 @@ L_08874254:
       aot_mem.aot_direct_store32_block(ctx.gpr[29] + static_cast<std::uint32_t>(44), aot_run_words); }
     ctx.gpr[31] = (0x08874274u);
     ctx.gpr[4] = (0u | 1u);
+    // V87_TINY_LEAF_INLINE unit=0194 pc=0x08B0C498
+    if (rt.can_inline_generated_leaf<194u>()) {
+        aot_mem.aot_direct_store32(ctx.gpr[28] + static_cast<std::uint32_t>(1972), ctx.gpr[4]);
+        ctx.pc = 0x08874274u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874274;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0194_entry, 194u, 60u, 0x08B0C498u>(ctx, &aot_mem) && ctx.pc == 0x08874274u) goto L_08874274;
     return;
 L_08874274:
@@ -1984,6 +1991,13 @@ L_088743EC:
       aot_mem.aot_direct_store32_block(ctx.gpr[29] + static_cast<std::uint32_t>(44), aot_run_words); }
     ctx.gpr[31] = (0x0887440Cu);
     ctx.gpr[4] = (0u | 1u);
+    // V87_TINY_LEAF_INLINE unit=0194 pc=0x08B0C498
+    if (rt.can_inline_generated_leaf<194u>()) {
+        aot_mem.aot_direct_store32(ctx.gpr[28] + static_cast<std::uint32_t>(1972), ctx.gpr[4]);
+        ctx.pc = 0x0887440Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887440C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0194_entry, 194u, 60u, 0x08B0C498u>(ctx, &aot_mem) && ctx.pc == 0x0887440Cu) goto L_0887440C;
     return;
 L_0887440C:
@@ -2288,6 +2302,13 @@ L_0887468C:
 L_08874698:
     ctx.gpr[31] = (0x088746A0u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088746A0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088746A0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088746A0u) goto L_088746A0;
     return;
 L_088746A0:
@@ -2473,6 +2494,13 @@ L_088747B0:
 L_088747B8:
     ctx.gpr[31] = (0x088747C0u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088747C0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088747C0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088747C0u) goto L_088747C0;
     return;
 L_088747C0:
@@ -2484,6 +2512,13 @@ L_088747C0:
 L_088747CC:
     ctx.gpr[31] = (0x088747D4u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088747D4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088747D4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088747D4u) goto L_088747D4;
     return;
 L_088747D4:
@@ -2563,6 +2598,13 @@ L_0887483C:
 L_08874848:
     ctx.gpr[31] = (0x08874850u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08874850u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874850;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08874850u) goto L_08874850;
     return;
 L_08874850:
@@ -2601,6 +2643,13 @@ L_0887487C:
       aot_mem.aot_direct_store32_block(ctx.gpr[29] + static_cast<std::uint32_t>(4), aot_run_words); }
     ctx.gpr[31] = (0x088748A0u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088748A0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088748A0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088748A0u) goto L_088748A0;
     return;
 L_088748A0:
@@ -2627,6 +2676,13 @@ L_088748B0:
 L_088748C8:
     ctx.gpr[31] = (0x088748D0u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088748D0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088748D0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088748D0u) goto L_088748D0;
     return;
 L_088748D0:
@@ -2665,6 +2721,13 @@ L_08874900:
     ctx.gpr[18] = (0u | 0u);
     ctx.gpr[31] = (0x0887490Cu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x0887490Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887490C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x0887490Cu) goto L_0887490C;
     return;
 L_0887490C:
@@ -2679,6 +2742,13 @@ L_0887490C:
 L_08874918:
     ctx.gpr[31] = (0x08874920u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08874920u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874920;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08874920u) goto L_08874920;
     return;
 L_08874920:
@@ -2704,6 +2774,13 @@ L_08874930:
 L_08874938:
     ctx.gpr[31] = (0x08874940u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874940u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874940;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874940u) goto L_08874940;
     return;
 L_08874940:
@@ -2740,6 +2817,13 @@ L_0887496C:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x0887497Cu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x0887497Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887497C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x0887497Cu) goto L_0887497C;
     return;
 L_0887497C:
@@ -2753,6 +2837,13 @@ L_0887497C:
 L_08874984:
     ctx.gpr[31] = (0x0887498Cu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x0887498Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887498C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x0887498Cu) goto L_0887498C;
     return;
 L_0887498C:
@@ -2779,6 +2870,13 @@ L_088749A0:
 L_088749A8:
     ctx.gpr[31] = (0x088749B0u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088749B0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088749B0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088749B0u) goto L_088749B0;
     return;
 L_088749B0:
@@ -2813,6 +2911,13 @@ L_088749D4:
 L_088749DC:
     ctx.gpr[31] = (0x088749E4u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088749E4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088749E4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088749E4u) goto L_088749E4;
     return;
 L_088749E4:
@@ -2850,6 +2955,13 @@ L_08874A0C:
 L_08874A14:
     ctx.gpr[31] = (0x08874A1Cu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874A1Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874A1C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874A1Cu) goto L_08874A1C;
     return;
 L_08874A1C:
@@ -2887,6 +2999,13 @@ L_08874A44:
 L_08874A4C:
     ctx.gpr[31] = (0x08874A54u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874A54u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874A54;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874A54u) goto L_08874A54;
     return;
 L_08874A54:
@@ -2924,6 +3043,13 @@ L_08874A7C:
 L_08874A84:
     ctx.gpr[31] = (0x08874A8Cu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874A8Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874A8C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874A8Cu) goto L_08874A8C;
     return;
 L_08874A8C:
@@ -2961,6 +3087,13 @@ L_08874AB4:
 L_08874ABC:
     ctx.gpr[31] = (0x08874AC4u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874AC4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874AC4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874AC4u) goto L_08874AC4;
     return;
 L_08874AC4:
@@ -2998,6 +3131,13 @@ L_08874AEC:
 L_08874AF4:
     ctx.gpr[31] = (0x08874AFCu);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874AFCu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874AFC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874AFCu) goto L_08874AFC;
     return;
 L_08874AFC:
@@ -3035,6 +3175,13 @@ L_08874B24:
 L_08874B2C:
     ctx.gpr[31] = (0x08874B34u);
     ctx.gpr[4] = (ctx.gpr[16] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874B34u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874B34;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874B34u) goto L_08874B34;
     return;
 L_08874B34:
@@ -3100,12 +3247,26 @@ L_08874BA8:
     ctx.gpr[18] = (ctx.gpr[2] | 0u);
     ctx.gpr[31] = (0x08874BBCu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08874BBCu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874BBC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08874BBCu) goto L_08874BBC;
     return;
 L_08874BBC:
     ctx.gpr[16] = (ctx.gpr[2] | 0u);
     ctx.gpr[31] = (0x08874BC8u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08874BC8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874BC8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08874BC8u) goto L_08874BC8;
     return;
 L_08874BC8:
@@ -3161,6 +3322,13 @@ L_08874C10:
     ctx.gpr[21] = (0u | 0u);
     ctx.gpr[31] = (0x08874C1Cu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08874C1Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874C1C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08874C1Cu) goto L_08874C1C;
     return;
 L_08874C1C:
@@ -3175,6 +3343,13 @@ L_08874C1C:
 L_08874C28:
     ctx.gpr[31] = (0x08874C30u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08874C30u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874C30;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08874C30u) goto L_08874C30;
     return;
 L_08874C30:
@@ -3226,6 +3401,13 @@ L_08874C64:
     ctx.gpr[21] = (0u | 0u);
     ctx.gpr[31] = (0x08874C70u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08874C70u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874C70;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08874C70u) goto L_08874C70;
     return;
 L_08874C70:
@@ -3239,6 +3421,13 @@ L_08874C70:
 L_08874C78:
     ctx.gpr[31] = (0x08874C80u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08874C80u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874C80;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08874C80u) goto L_08874C80;
     return;
 L_08874C80:
@@ -3284,6 +3473,13 @@ L_08874CB0:
     ctx.gpr[20] = (0u | 0u);
     ctx.gpr[31] = (0x08874CC0u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08874CC0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874CC0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08874CC0u) goto L_08874CC0;
     return;
 L_08874CC0:
@@ -3297,6 +3493,13 @@ L_08874CC0:
 L_08874CC8:
     ctx.gpr[31] = (0x08874CD0u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08874CD0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08874CD0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08874CD0u) goto L_08874CD0;
     return;
 L_08874CD0:
@@ -5131,6 +5334,13 @@ L_08875894:
     ctx.gpr[17] = (0u | 1u);
     ctx.gpr[31] = (0x088758A0u);
     ctx.gpr[4] = (0u | 1u);
+    // V87_TINY_LEAF_INLINE unit=0194 pc=0x08B0C498
+    if (rt.can_inline_generated_leaf<194u>()) {
+        aot_mem.aot_direct_store32(ctx.gpr[28] + static_cast<std::uint32_t>(1972), ctx.gpr[4]);
+        ctx.pc = 0x088758A0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088758A0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0194_entry, 194u, 60u, 0x08B0C498u>(ctx, &aot_mem) && ctx.pc == 0x088758A0u) goto L_088758A0;
     return;
 L_088758A0:
@@ -6786,6 +6996,13 @@ L_08876440:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08876450u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876450u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876450;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876450u) goto L_08876450;
     return;
 L_08876450:
@@ -6888,6 +7105,13 @@ L_088764C4:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088764D0u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088764D0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088764D0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088764D0u) goto L_088764D0;
     return;
 L_088764D0:
@@ -7422,6 +7646,13 @@ L_08876844:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876850u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876850u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876850;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876850u) goto L_08876850;
     return;
 L_08876850:
@@ -7452,6 +7683,13 @@ L_08876870:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08876880u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876880u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876880;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876880u) goto L_08876880;
     return;
 L_08876880:
@@ -7487,6 +7725,13 @@ L_088768B0:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088768BCu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088768BCu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088768BC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088768BCu) goto L_088768BC;
     return;
 L_088768BC:
@@ -7517,6 +7762,13 @@ L_088768DC:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x088768ECu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088768ECu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088768EC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088768ECu) goto L_088768EC;
     return;
 L_088768EC:
@@ -7563,6 +7815,13 @@ L_08876928:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876934u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876934u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876934;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876934u) goto L_08876934;
     return;
 L_08876934:
@@ -8163,6 +8422,13 @@ L_08876D0C:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08876D1Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876D1Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876D1C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876D1Cu) goto L_08876D1C;
     return;
 L_08876D1C:
@@ -8178,6 +8444,13 @@ L_08876D28:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876D34u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876D34u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876D34;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876D34u) goto L_08876D34;
     return;
 L_08876D34:
@@ -8205,6 +8478,13 @@ L_08876D50:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876D5Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08876D5Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876D5C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08876D5Cu) goto L_08876D5C;
     return;
 L_08876D5C:
@@ -8224,6 +8504,13 @@ L_08876D74:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08876D84u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876D84u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876D84;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876D84u) goto L_08876D84;
     return;
 L_08876D84:
@@ -8239,6 +8526,13 @@ L_08876D90:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876D9Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876D9Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876D9C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876D9Cu) goto L_08876D9C;
     return;
 L_08876D9C:
@@ -8266,6 +8560,13 @@ L_08876DB8:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876DC4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08876DC4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876DC4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08876DC4u) goto L_08876DC4;
     return;
 L_08876DC4:
@@ -8284,6 +8585,13 @@ L_08876DDC:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876DE8u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08876DE8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876DE8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08876DE8u) goto L_08876DE8;
     return;
 L_08876DE8:
@@ -8335,6 +8643,13 @@ L_08876E40:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08876E50u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876E50u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876E50;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876E50u) goto L_08876E50;
     return;
 L_08876E50:
@@ -8349,6 +8664,13 @@ L_08876E50:
 L_08876E5C:
     ctx.gpr[31] = (0x08876E64u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876E64u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876E64;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876E64u) goto L_08876E64;
     return;
 L_08876E64:
@@ -8368,6 +8690,13 @@ L_08876E74:
     ctx.gpr[17] = (ctx.gpr[17] & 255u);
     ctx.gpr[31] = (0x08876E84u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876E84u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876E84;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876E84u) goto L_08876E84;
     return;
 L_08876E84:
@@ -8398,6 +8727,13 @@ L_08876EA4:
     ctx.gpr[19] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08876EB4u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876EB4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876EB4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876EB4u) goto L_08876EB4;
     return;
 L_08876EB4:
@@ -8411,6 +8747,13 @@ L_08876EC0:
     ctx.gpr[19] = (0u | 0u);
     ctx.gpr[31] = (0x08876ED0u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876ED0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876ED0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876ED0u) goto L_08876ED0;
     return;
 L_08876ED0:
@@ -8426,6 +8769,13 @@ L_08876EDC:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876EE8u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876EE8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876EE8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876EE8u) goto L_08876EE8;
     return;
 L_08876EE8:
@@ -8468,6 +8818,13 @@ L_08876F18:
     ctx.gpr[19] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08876F28u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876F28u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876F28;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876F28u) goto L_08876F28;
     return;
 L_08876F28:
@@ -8513,6 +8870,13 @@ L_08876F68:
     ctx.gpr[19] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08876F78u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08876F78u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876F78;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08876F78u) goto L_08876F78;
     return;
 L_08876F78:
@@ -8524,6 +8888,13 @@ L_08876F78:
 L_08876F84:
     ctx.gpr[31] = (0x08876F8Cu);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08876F8Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876F8C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08876F8Cu) goto L_08876F8C;
     return;
 L_08876F8C:
@@ -8562,6 +8933,13 @@ L_08876FB8:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08876FC4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08876FC4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876FC4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08876FC4u) goto L_08876FC4;
     return;
 L_08876FC4:
@@ -8577,6 +8955,13 @@ L_08876FD0:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08876FDCu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08876FDCu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08876FDC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08876FDCu) goto L_08876FDC;
     return;
 L_08876FDC:
@@ -8751,6 +9136,13 @@ L_088770E8:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x088770F8u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088770F8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088770F8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088770F8u) goto L_088770F8;
     return;
 L_088770F8:
@@ -8839,6 +9231,13 @@ L_0887717C:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x0887718Cu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x0887718Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887718C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x0887718Cu) goto L_0887718C;
     return;
 L_0887718C:
@@ -8874,6 +9273,13 @@ L_088771C8:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088771D4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x088771D4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088771D4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x088771D4u) goto L_088771D4;
     return;
 L_088771D4:
@@ -8904,6 +9310,13 @@ L_088771F4:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877204u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877204u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877204;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877204u) goto L_08877204;
     return;
 L_08877204:
@@ -9217,6 +9630,13 @@ L_088773E0:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x088773F0u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x088773F0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088773F0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x088773F0u) goto L_088773F0;
     return;
 L_088773F0:
@@ -9362,6 +9782,13 @@ L_088774EC:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088774F8u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088774F8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088774F8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088774F8u) goto L_088774F8;
     return;
 L_088774F8:
@@ -9393,6 +9820,13 @@ L_0887751C:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x0887752Cu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x0887752Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887752C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x0887752Cu) goto L_0887752C;
     return;
 L_0887752C:
@@ -9428,6 +9862,13 @@ L_0887755C:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877568u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877568u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877568;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877568u) goto L_08877568;
     return;
 L_08877568:
@@ -9459,6 +9900,13 @@ L_0887758C:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x0887759Cu);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x0887759Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0887759C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x0887759Cu) goto L_0887759C;
     return;
 L_0887759C:
@@ -9505,6 +9953,13 @@ L_088775D8:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088775E4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088775E4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088775E4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088775E4u) goto L_088775E4;
     return;
 L_088775E4:
@@ -10111,6 +10566,13 @@ L_088779D4:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x088779E4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x088779E4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088779E4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x088779E4u) goto L_088779E4;
     return;
 L_088779E4:
@@ -10126,6 +10588,13 @@ L_088779F0:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x088779FCu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x088779FCu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_088779FC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x088779FCu) goto L_088779FC;
     return;
 L_088779FC:
@@ -10153,6 +10622,13 @@ L_08877A18:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877A24u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877A24u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877A24;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877A24u) goto L_08877A24;
     return;
 L_08877A24:
@@ -10172,6 +10648,13 @@ L_08877A3C:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08877A4Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08877A4Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877A4C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08877A4Cu) goto L_08877A4C;
     return;
 L_08877A4C:
@@ -10187,6 +10670,13 @@ L_08877A58:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877A64u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877A64u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877A64;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877A64u) goto L_08877A64;
     return;
 L_08877A64:
@@ -10214,6 +10704,13 @@ L_08877A80:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877A8Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877A8Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877A8C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877A8Cu) goto L_08877A8C;
     return;
 L_08877A8C:
@@ -10232,6 +10729,13 @@ L_08877AA4:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877AB0u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877AB0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877AB0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877AB0u) goto L_08877AB0;
     return;
 L_08877AB0:
@@ -10284,6 +10788,13 @@ L_08877B0C:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08877B1Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08877B1Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877B1C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08877B1Cu) goto L_08877B1C;
     return;
 L_08877B1C:
@@ -10298,6 +10809,13 @@ L_08877B1C:
 L_08877B28:
     ctx.gpr[31] = (0x08877B30u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877B30u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877B30;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877B30u) goto L_08877B30;
     return;
 L_08877B30:
@@ -10317,6 +10835,13 @@ L_08877B40:
     ctx.gpr[17] = (ctx.gpr[17] & 255u);
     ctx.gpr[31] = (0x08877B50u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877B50u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877B50;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877B50u) goto L_08877B50;
     return;
 L_08877B50:
@@ -10348,6 +10873,13 @@ L_08877B74:
     ctx.gpr[19] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877B84u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877B84u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877B84;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877B84u) goto L_08877B84;
     return;
 L_08877B84:
@@ -10361,6 +10893,13 @@ L_08877B90:
     ctx.gpr[19] = (0u | 0u);
     ctx.gpr[31] = (0x08877BA0u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08877BA0u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877BA0;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08877BA0u) goto L_08877BA0;
     return;
 L_08877BA0:
@@ -10376,6 +10915,13 @@ L_08877BAC:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877BB8u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877BB8u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877BB8;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877BB8u) goto L_08877BB8;
     return;
 L_08877BB8:
@@ -10460,6 +11006,13 @@ L_08877C30:
     ctx.gpr[19] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877C40u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877C40u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877C40;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877C40u) goto L_08877C40;
     return;
 L_08877C40:
@@ -10471,6 +11024,13 @@ L_08877C40:
 L_08877C4C:
     ctx.gpr[31] = (0x08877C54u);
     ctx.gpr[4] = (ctx.gpr[19] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877C54u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877C54;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877C54u) goto L_08877C54;
     return;
 L_08877C54:
@@ -10509,6 +11069,13 @@ L_08877C80:
     ctx.gpr[17] = (0u | 0u);
     ctx.gpr[31] = (0x08877C8Cu);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC734
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(20)));
+        ctx.pc = 0x08877C8Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877C8C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 137u, 0x08ADC734u>(ctx, &aot_mem) && ctx.pc == 0x08877C8Cu) goto L_08877C8C;
     return;
 L_08877C8C:
@@ -10524,6 +11091,13 @@ L_08877C98:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877CA4u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877CA4u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877CA4;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877CA4u) goto L_08877CA4;
     return;
 L_08877CA4:
@@ -10685,6 +11259,13 @@ L_08877D9C:
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877DACu);
     ctx.gpr[17] = (aot_mem.aot_direct_load8(ctx.gpr[4] + static_cast<std::uint32_t>(52)));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877DACu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877DAC;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877DACu) goto L_08877DAC;
     return;
 L_08877DAC:
@@ -10895,6 +11476,13 @@ L_08877EF8:
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877F08u);
     ctx.gpr[17] = (aot_mem.aot_direct_load8(ctx.gpr[4] + static_cast<std::uint32_t>(52)));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC754
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(24)));
+        ctx.pc = 0x08877F08u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877F08;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 141u, 0x08ADC754u>(ctx, &aot_mem) && ctx.pc == 0x08877F08u) goto L_08877F08;
     return;
 L_08877F08:
@@ -10941,6 +11529,13 @@ L_08877F58:
     ctx.gpr[4] = (2237u << 16u);
     ctx.gpr[31] = (0x08877F64u);
     ctx.gpr[4] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877F64u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877F64;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877F64u) goto L_08877F64;
     return;
 L_08877F64:
@@ -10972,6 +11567,13 @@ L_08877F88:
     ctx.gpr[17] = (ctx.gpr[4] + static_cast<std::uint32_t>(-28736));
     ctx.gpr[31] = (0x08877F98u);
     ctx.gpr[4] = (ctx.gpr[17] | 0u);
+    // V87_TINY_LEAF_INLINE unit=0182 pc=0x08ADC784
+    if (rt.can_inline_generated_leaf<182u>()) {
+        ctx.gpr[2] = (aot_mem.aot_direct_load32(ctx.gpr[4] + static_cast<std::uint32_t>(40)));
+        ctx.pc = 0x08877F98u;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_08877F98;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0182_entry, 182u, 147u, 0x08ADC784u>(ctx, &aot_mem) && ctx.pc == 0x08877F98u) goto L_08877F98;
     return;
 L_08877F98:

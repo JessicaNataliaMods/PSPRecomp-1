@@ -1069,6 +1069,23 @@ def main() -> int:
     generated = profile / 'generated'
     host = profile / 'host'
 
+    # V8.7.1C buildfix: CMake intentionally globs host/*.cpp, so an obsolete
+    # generated Tier-2 cluster left behind by an older checkout would still be
+    # compiled even though it is no longer emitted by the current cluster set.
+    # Remove only generated cluster translation units that are not part of the
+    # canonical CLUSTERS list. Handwritten Tier-2 sources are never matched.
+    active_cluster_names = {f'vcs_tier2_cluster_{cluster.key}.cpp' for cluster in CLUSTERS}
+    stale_cluster_paths = sorted(
+        path for path in host.glob('vcs_tier2_cluster_*.cpp')
+        if path.name not in active_cluster_names)
+    for path in stale_cluster_paths:
+        path.unlink()
+    if stale_cluster_paths:
+        print('Tier2 stale cluster cleanup: removed=' + str(len(stale_cluster_paths)) +
+              ' files=' + ','.join(path.name for path in stale_cluster_paths))
+    else:
+        print('Tier2 stale cluster cleanup: removed=0')
+
     all_units = sorted(
         {u for c in CLUSTERS for u in (set(c.seeds) | set(c.windows) | set(c.hooks))} |
         {u for u, _pc in DIRECT_GENERATED_LEAF_TARGETS})

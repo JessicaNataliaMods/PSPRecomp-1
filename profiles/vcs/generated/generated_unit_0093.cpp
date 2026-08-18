@@ -6971,6 +6971,14 @@ L_0897B574:
     aot_mem.aot_direct_store8(ctx.gpr[16] + static_cast<std::uint32_t>(184), static_cast<std::uint8_t>(0u));
     ctx.gpr[31] = (0x0897B58Cu);
     ctx.gpr[4] = (ctx.gpr[16] + static_cast<std::uint32_t>(188));
+    // V87_TINY_LEAF_INLINE unit=0188 pc=0x08AF42C4
+    if (rt.can_inline_generated_leaf<188u>()) {
+        aot_mem.aot_direct_store32(ctx.gpr[4] + static_cast<std::uint32_t>(0), 0u);
+        ctx.gpr[2] = (ctx.gpr[4] | 0u);
+        ctx.pc = 0x0897B58Cu;
+        if (!rt.account_inlined_generated_leaf(ctx)) return;
+        goto L_0897B58C;
+    }
     if (rt.invoke_chained_direct<&recomp_unit_0188_entry, 188u, 30u, 0x08AF42C4u>(ctx, &aot_mem) && ctx.pc == 0x0897B58Cu) goto L_0897B58C;
     return;
 L_0897B58C:

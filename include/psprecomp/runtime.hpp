@@ -311,25 +311,40 @@ public:
         return run_starvation_boundary(ctx);
     }
 
-    // Account one logical outer generated dispatch that was deliberately
-    // removed by a profile-guided superblock.  Publishing the destination PC
-    // before calling this helper is mandatory: a starvation boundary may switch
-    // PSP ownership at exactly the same point where the unfused outer dispatcher
-    // used to run.
-    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_dispatch_boundary(
+    // V8.7 tiny-leaf AOT lowering uses this guard before executing a statically
+    // proven no-call leaf directly in the caller. Keep every rare fallback
+    // condition identical to invoke_chained_direct; diagnostics and poisoned
+    // units therefore retain the original wrapper path. The leaf contains no
+    // nested generated/HLE/syscall edge, so chain depth only needs to be checked
+    // at entry rather than incremented for the duration of its straight-line body.
+    template <std::uint32_t UnitIndex>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool can_inline_generated_leaf() const noexcept {
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        // Keep diagnostics/debug builds on the canonical wrapper so all observer,
+        // dispatch-counter and chain-depth instrumentation remains byte-for-byte
+        // equivalent to the pre-V8.7 runtime. Production VCS builds explicitly
+        // enable PSPRECOMP_AOT_PRODUCTION_FASTPATHS.
+        return false;
+#else
+        if (UnitIndex >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) return false;
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
+        if (g_unit_profile_enabled || g_guest_hotspot_profile_enabled) return false;
+#endif
+        return generated_unit_disabled_[UnitIndex] == 0u && chain_depth_ < chain_depth_limit_;
+#endif
+    }
+
+    // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
+    // cross-unit generated call would have performed, while allowing trivial
+    // leaf accessors to be emitted directly in their measured caller.  No HLE
+    // or PSP ownership switch can occur inside those leaf bodies, so only the
+    // starvation safe-point cadence needs to be preserved here.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_generated_leaf(
         AllegrexContext &ctx) {
         const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
         if (starvation_interval == 0u) return true;
         if (++dispatches_since_import_ < starvation_interval) return true;
         return run_starvation_boundary(ctx);
-    }
-
-    // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
-    // cross-unit generated call would have performed, while allowing trivial
-    // leaf accessors to be emitted directly in their measured caller.
-    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool account_inlined_generated_leaf(
-        AllegrexContext &ctx) {
-        return account_inlined_dispatch_boundary(ctx);
     }
 
     // Tier-2 profile-guided superblocks can fuse a cross-unit edge into a local

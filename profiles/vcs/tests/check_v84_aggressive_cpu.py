@@ -18,8 +18,9 @@ def need(c,m):
         print('FAIL:',m); raise SystemExit(1)
     print('PASS:',m)
 
-need(('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log) or ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log), 'V8.4 lineage stage')
-need((('cpu_aggressive_revision=4' in log) or ('cpu_aggressive_revision=5' in log) or ('cpu_aggressive_revision=6' in log)) and 'aot_hard_fastmem=1' in log and 'aot_branchless_mem=1' in log, 'aggressive CPU metadata')
+need(('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log) or ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or
+     ('stage=perf-v8.7-extreme-cpu-tiny-leaf-2026-08-18' in log), 'V8.4 lineage stage')
+need((('cpu_aggressive_revision=4' in log) or ('cpu_aggressive_revision=5' in log) or ('cpu_aggressive_revision=6' in log) or ('cpu_aggressive_revision=7' in log)) and 'aot_hard_fastmem=1' in log and 'aot_branchless_mem=1' in log, 'aggressive CPU metadata')
 need('aot_vfpu_block32=19455' in log and 'aot_scalar_run_blocks=10665' in log and 'aot_scalar_run_words=53173' in log and 'aot_load_runs=5633' in log and 'aot_store_runs=5032' in log and 'vfpu_default_dest_fast=1' in log and 'vfpu_vmscl_default_fast=1' in log, 'vector/VFPU and scalar-run metadata')
 need((('correctness_revision=8271' in log) or ('correctness_revision=8272' in log)) and 'save_exitdelete_semantics=1' in log, 'V8.2.7 Save fix preserved')
 need('atrac_nonloop_resident=-2' in log and 'atrac_loop_resident=-3' in log and 'output2_late_catchup=0' in log, 'V8.2.5 NEWS fix preserved')
@@ -37,15 +38,49 @@ need('optimize_generated_v84_cpu.py' in build and 'PERF_V84_AGGRESSIVE_CPU_STAMP
 files=sorted((profile/'generated').glob('generated_unit_*.cpp'))
 need(len(files)==234, '234 generated AOT units present')
 text=''.join(p.read_text(encoding='utf-8') for p in files)
+
+# V8.7 preserves the original invoke_chained_direct call as a fallback but may
+# duplicate V8.4/V8.6 memory operations inside its guarded inline body.  The
+# V8.4 auditor must validate the underlying baseline corpus rather than count
+# those deliberately duplicated V8.7 operations as a regression.  The V8.7
+# auditor independently verifies all inline markers/guards/fallbacks.
+def strip_v87_inline_bodies(source: str) -> str:
+    lines=source.splitlines(keepends=True)
+    out=[]; i=0; stripped=0
+    while i < len(lines):
+        line=lines[i]
+        if line.lstrip().startswith('// V87_TINY_LEAF_INLINE '):
+            indent=line[:len(line)-len(line.lstrip())]
+            if i+1 >= len(lines) or not lines[i+1].startswith(indent+'if (rt.can_inline_generated_leaf<'):
+                raise RuntimeError('malformed V8.7 tiny-leaf marker')
+            i += 1
+            depth=0; started=False
+            while i < len(lines):
+                cur=lines[i]
+                depth += cur.count('{') - cur.count('}')
+                started = started or ('{' in cur)
+                i += 1
+                if started and depth == 0:
+                    break
+            else:
+                raise RuntimeError('unterminated V8.7 tiny-leaf inline body')
+            stripped += 1
+            continue
+        out.append(line); i += 1
+    if 'stage=perf-v8.7-extreme-cpu-tiny-leaf-2026-08-18' in log:
+        need(stripped==2017, f'V8.7 inline bodies normalized for V8.4 audit = 2017 (got {stripped})')
+    return ''.join(out)
+
+baseline_text=strip_v87_inline_bodies(text) if '// V87_TINY_LEAF_INLINE ' in text else text
 # No checked AotFastView memory accessor may remain in automatic VCS code.
-remaining=re.findall(r'aot_mem\.aot_(?!direct_)(?:load|store)', text)
+remaining=re.findall(r'aot_mem\.aot_(?!direct_)(?:load|store)', baseline_text)
 need(not remaining, 'automatic VCS AOT has no per-access checked memory calls')
-load_blocks=text.count('aot_mem.aot_direct_load32_block(')
-store_blocks=text.count('aot_mem.aot_direct_store32_block(')
-vfpu_load_blocks=text.count('std::uint32_t vfpu_words[4]{};')
-vfpu_store_blocks=text.count('const std::uint32_t vfpu_words[4]{')
-scalar_load_runs=text.count('aot_mem.aot_direct_load32_block(ctx.gpr[')
-scalar_store_runs=text.count('aot_mem.aot_direct_store32_block(ctx.gpr[')
+load_blocks=baseline_text.count('aot_mem.aot_direct_load32_block(')
+store_blocks=baseline_text.count('aot_mem.aot_direct_store32_block(')
+vfpu_load_blocks=baseline_text.count('std::uint32_t vfpu_words[4]{};')
+vfpu_store_blocks=baseline_text.count('const std::uint32_t vfpu_words[4]{')
+scalar_load_runs=baseline_text.count('aot_mem.aot_direct_load32_block(ctx.gpr[')
+scalar_store_runs=baseline_text.count('aot_mem.aot_direct_store32_block(ctx.gpr[')
 need(vfpu_load_blocks==11861, f'LV.Q block sites = 11861 (got {vfpu_load_blocks})')
 need(vfpu_store_blocks==7594, f'SV.Q block sites = 7594 (got {vfpu_store_blocks})')
 need(vfpu_load_blocks+vfpu_store_blocks==19455, '19455 vector memory operations collapsed to 16-byte blocks')
@@ -53,6 +88,6 @@ need(scalar_load_runs==5633, f'contiguous scalar load runs = 5633 (got {scalar_l
 need(scalar_store_runs==5032, f'contiguous scalar store runs = 5032 (got {scalar_store_runs})')
 need(load_blocks==17494, f'total direct load32 block calls = 17494 (got {load_blocks})')
 need(store_blocks==12626, f'total direct store32 block calls = 12626 (got {store_blocks})')
-scalar=sum(text.count(f'aot_mem.aot_direct_{n}(') for n in ('load8','load16','load32','store8','store16','store32','load_word_left','load_word_right','store_word_left','store_word_right'))
-need(scalar==205600, f'remaining branchless direct scalar/unaligned sites = 205600 (got {scalar})')
+scalar=sum(baseline_text.count(f'aot_mem.aot_direct_{n}(') for n in ('load8','load16','load32','store8','store16','store32','load_word_left','load_word_right','store_word_left','store_word_right'))
+need(scalar==205600, f'baseline branchless direct scalar/unaligned textual sites = 205600 (got {scalar})')
 print('V8.4 AGGRESSIVE CPU DIRECT audit PASS')

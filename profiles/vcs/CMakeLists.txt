@@ -167,7 +167,6 @@ set(VCS_TIER2_CLUSTER_SOURCES
     host/vcs_tier2_cluster_physics.cpp
     host/vcs_tier2_cluster_world.cpp
     host/vcs_tier2_cluster_edge43.cpp
-    host/vcs_tier2_cluster_collisionloop.cpp
 )
 if(MSVC)
     set_source_files_properties(
