@@ -379,6 +379,67 @@ public:
         return run_starvation_boundary(ctx);
     }
 
+    // V8.10 resident generated regions. These are statically proven generated
+    // leaves with no nested guest/HLE/host boundary. Callers pass their current
+    // architectural scalar values by reference; V8.9 register-resident locals
+    // therefore flow directly into the callee without materializing the whole
+    // AllegrexContext at the call boundary. Since the region cannot recurse into
+    // another generated call, chain-depth admission is not needed; preserve the
+    // original logical dispatch/starvation accounting after the leaf completes.
+    // Resident leaves may bypass AllegrexContext materialization only when this
+    // logical dispatch cannot hit the starvation/preemption safe-point.  If the
+    // next dispatch is a safe-point, generated callers fall back to the ordinary
+    // fully-synchronized chained path before any PSP thread ownership can change.
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool resident_generated_leaf_fast_allowed() const noexcept {
+        const std::uint64_t interval = g_runtime_starvation_interval_fast;
+        return interval == 0u || (dispatches_since_import_ + 1u) < interval;
+    }
+
+    template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId,
+              std::uint32_t DirectTargetPc>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_resident_scheduler_fallback(
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
+        return invoke_chained_direct_impl<true, Function, UnitIndex, DirectEntryId, DirectTargetPc>(
+            ctx, shared_aot_mem);
+    }
+
+    template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId,
+              std::uint32_t DirectTargetPc, typename... ResidentArgs>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_resident_generated_leaf(
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem,
+        ResidentArgs &...resident_args) {
+        static_assert(UnitIndex < kGeneratedUnitFastCapacity,
+                      "resident generated leaf unit outside fast table");
+        if (shared_aot_mem != nullptr) {
+            Function(*shared_aot_mem, resident_args...);
+        } else {
+            auto local_aot_mem = memory_.aot_fast_view();
+            Function(local_aot_mem, resident_args...);
+        }
+#if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
+        if (g_unit_profile_enabled && UnitIndex < kUnitProfileCapacity)
+            ++g_unit_profile_counts[UnitIndex];
+#endif
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        if (track_dispatch_counters_) {
+            ++chained_dispatches_;
+            ++dispatch_work_count_;
+        }
+#endif
+        if (chain_context_invalidated_) {
+            const std::uint64_t interval = g_runtime_starvation_interval_fast;
+            if (interval != 0u) ++dispatches_since_import_;
+            return false;
+        }
+        const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
+        if (starvation_interval == 0u) return true;
+        // The caller checked resident_generated_leaf_fast_allowed() immediately
+        // before entering this leaf, so this increment cannot reach a preemption
+        // boundary while architectural state is still resident outside ctx.
+        ++dispatches_since_import_;
+        return true;
+    }
+
     // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary
     // cross-unit generated call would have performed, while allowing trivial
     // leaf accessors to be emitted directly in their measured caller.  No HLE

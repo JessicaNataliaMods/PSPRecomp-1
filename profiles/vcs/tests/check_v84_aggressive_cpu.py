@@ -18,8 +18,8 @@ def need(c,m):
         print('FAIL:',m); raise SystemExit(1)
     print('PASS:',m)
 
-need(('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log) or ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log), 'V8.4 lineage stage')
-need((('cpu_aggressive_revision=4' in log) or ('cpu_aggressive_revision=5' in log) or ('cpu_aggressive_revision=6' in log) or ('cpu_aggressive_revision=8' in log) or ('cpu_aggressive_revision=9' in log)) and 'aot_hard_fastmem=1' in log and 'aot_branchless_mem=1' in log, 'aggressive CPU metadata')
+need(('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log) or ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log) or ('stage=perf-v8.10-extreme-cpu-resident-regions-2026-08-18' in log), 'V8.4 lineage stage')
+need((('cpu_aggressive_revision=4' in log) or ('cpu_aggressive_revision=5' in log) or ('cpu_aggressive_revision=6' in log) or ('cpu_aggressive_revision=8' in log) or ('cpu_aggressive_revision=9' in log) or ('cpu_aggressive_revision=10' in log)) and 'aot_hard_fastmem=1' in log and 'aot_branchless_mem=1' in log, 'aggressive CPU metadata')
 need('aot_vfpu_block32=19455' in log and 'aot_scalar_run_blocks=10665' in log and 'aot_scalar_run_words=53173' in log and 'aot_load_runs=5633' in log and 'aot_store_runs=5032' in log and 'vfpu_default_dest_fast=1' in log and 'vfpu_vmscl_default_fast=1' in log, 'vector/VFPU and scalar-run metadata')
 need((('correctness_revision=8271' in log) or ('correctness_revision=8272' in log)) and 'save_exitdelete_semantics=1' in log, 'V8.2.7 Save fix preserved')
 need('atrac_nonloop_resident=-2' in log and 'atrac_loop_resident=-3' in log and 'output2_late_catchup=0' in log, 'V8.2.5 NEWS fix preserved')

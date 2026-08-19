@@ -14,8 +14,8 @@ gen=read('tools/codegen_main.cpp')
 vgen=read('profiles/vcs/tools/vcs_codegen_main.cpp')
 build=read('profiles/vcs/scripts/build_release_ninja.bat')
 ini=read('profiles/vcs/config/VCSNative.ini')
-need(('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log),'V8.6 lineage stage')
-need((('perf_layer=12' in log and 'cpu_aggressive_revision=6' in log) or ('perf_layer=14' in log and 'cpu_aggressive_revision=8' in log) or ('perf_layer=15' in log and 'cpu_aggressive_revision=9' in log)) and 'correctness_revision=8272' in log,'V8.6/V8.8 revisions')
+need(('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log) or ('stage=perf-v8.10-extreme-cpu-resident-regions-2026-08-18' in log),'V8.6 lineage stage')
+need((('perf_layer=12' in log and 'cpu_aggressive_revision=6' in log) or ('perf_layer=14' in log and 'cpu_aggressive_revision=8' in log) or ('perf_layer=15' in log and 'cpu_aggressive_revision=9' in log) or ('perf_layer=16' in log and 'cpu_aggressive_revision=10' in log)) and 'correctness_revision=8272' in log,'V8.6/V8.8 revisions')
 for t in ('radio_atrac_identity_guard=1','atrac_direct_header_validation=1','atrac_identity_cache=1','atrac_header_only_producer_hint=1','vfpu_vtfm_ct=1','vfpu_vtfm_ct_sites=337','vfpu_vi2f_ct=1','vfpu_vi2f_ct_sites=164','vfpu_vcmp_default_fast=1','vfpu_vcmov_default_fast=1','vfpu_cross_default_fast=1'):
     need(t in log,'metadata '+t)
 for t in ('atrac_nonloop_resident=-2','atrac_loop_resident=-3','news_atrac_v825_guard=1','output2_late_catchup=0','save_exitdelete_semantics=1','save_partition_reuse=1','save_repro_default_enabled=0','aot_hard_fastmem=1','aot_branchless_mem=1','vfpu_default_fastlane=1'):

@@ -195,6 +195,7 @@ set(VCS_HOST_SOURCES
     host/vcs_profile.cpp
     host/vcs_native_fast_paths.cpp
     host/vcs_compact_leaves.cpp
+    host/vcs_resident_regions.cpp
     host/framebuffer_capture.cpp
     host/display_window.cpp
     host/savedata_utility_ui.cpp

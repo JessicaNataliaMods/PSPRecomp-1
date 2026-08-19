@@ -24,7 +24,7 @@ need(('stage=correctness-v8.2.7a-internal-save-repro-gate-2026-08-18' in log) or
      ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or
      ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or
      ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or
-     ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log),
+     ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log) or ('stage=perf-v8.10-extreme-cpu-resident-regions-2026-08-18' in log),
      'V8.2.7A correctness lineage runtime stage')
 need(('correctness_revision=8271' in log) or ('correctness_revision=8272' in log), 'V8.2.7A correctness revision')
 need('save_repro_internal_ini_gate=1' in log and 'save_repro_default_enabled=0' in log,

@@ -25,8 +25,8 @@ cmake = read('profiles/vcs/CMakeLists.txt')
 compact_cpp = read('profiles/vcs/host/vcs_compact_leaves.cpp')
 compact_h = read('profiles/vcs/host/vcs_compact_leaves.hpp')
 
-need(('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log), 'V8.8/V8.9 stage stamp')
-need(((('perf_layer=14' in log and 'cpu_aggressive_revision=8' in log) or ('perf_layer=15' in log and 'cpu_aggressive_revision=9' in log)) and 'correctness_revision=8272' in log),
+need(('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log) or ('stage=perf-v8.10-extreme-cpu-resident-regions-2026-08-18' in log), 'V8.8/V8.9 stage stamp')
+need(((('perf_layer=14' in log and 'cpu_aggressive_revision=8' in log) or ('perf_layer=15' in log and 'cpu_aggressive_revision=9' in log) or ('perf_layer=16' in log and 'cpu_aggressive_revision=10' in log)) and 'correctness_revision=8272' in log),
      'V8.8 revision metadata')
 for token in (
     'trusted_chain=1', 'trusted_chain_sites=45968', 'trusted_chain_poisonable_sites=3240',
@@ -83,7 +83,11 @@ for path in paths:
         pc = m.group(3)
         compact_counts[pc] = compact_counts.get(pc, 0) + 1
 
-need(trusted == 45968, f'trusted direct sites exact = 45968 (got {trusted})')
+is_v810='stage=perf-v8.10-extreme-cpu-resident-regions-2026-08-18' in log
+need(trusted == (34797 if is_v810 else 45968), f'trusted direct sites exact for lineage (got {trusted})')
+if is_v810:
+    resident_sites=sum(path.read_text(encoding='utf-8',errors='ignore').count('invoke_resident_generated_leaf<') for path in units)
+    need(trusted + resident_sites == 45968, 'V8.10 resident regions preserve V8.8 trusted-edge total')
 need(defensive == 3240, f'poisonable defensive sites exact = 3240 (got {defensive})')
 need(defensive_units <= poisonable, f'defensive generated units are only poisonable buckets {sorted(defensive_units)}')
 need(compact == 1885, f'compact leaf sites exact = 1885 (got {compact})')
@@ -94,7 +98,7 @@ expected_compact = {
     '0x08A931B8': 336,
 }
 need(compact_counts == expected_compact, f'compact target distribution exact {compact_counts}')
-need(trusted + compact == 47853, '47,853 statically safe edges bypass poisoned-unit checks/entry switches')
+need(trusted + compact + (resident_sites if is_v810 else 0) == 47853, '47,853 statically safe edges remain accelerated across V8.8/V8.10 lineage')
 
 trusted_manifest = json.loads((generated / 'v88_trusted_chain_manifest.json').read_text())
 compact_manifest = json.loads((generated / 'v88_compact_leaf_manifest.json').read_text())

@@ -12,6 +12,10 @@ WRAPPER_RE_TEMPLATE=r'\nvoid\s+{name}\(Runtime &rt, AllegrexContext &ctx\)\s*\{{
 # All generated chain helpers return bool and may mutate the full guest context.
 CHAIN_RE=re.compile(
     r'(rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\))')
+RESIDENT_RE=re.compile(
+    r'(rt\.invoke_resident_generated_leaf<&(?P<fn>[A-Za-z_]\w*),\s*'
+    r'(?P<unit>\d+)u,\s*(?P<entry>\d+)u,\s*(?P<pc>0x[0-9A-Fa-f]+)u>'
+    r'\(ctx, &aot_mem(?P<args>[^\)]*)\))')
 NATIVE_RE=re.compile(r'(rt\.invoke_native_fast_path\([^;\n]*?,\s*ctx\))')
 SIGNED_RE=re.compile(r'(ctx\.execute_signed_(?:add|sub)\([^\)]*\))')
 TIER2_CALL_RE=re.compile(r'(?m)^(\s*)(((?:[A-Za-z_]\w*::)*tier2_superblock_[A-Za-z0-9_]+)\(rt, ctx, aot_mem, [^;]+\);)')
@@ -21,6 +25,7 @@ RETURN_RE=re.compile(r'\breturn;')
 
 
 CHAIN_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); const bool aot_regcache_same_ = \((rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\))\); if \(aot_regcache_same_\) AOT_REGCACHE_SYNC_IN\(\); else aot_regcache_valid = false; return aot_regcache_same_; \}\(\)\)')
+RESIDENT_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ /\*PSPRECOMP_RESIDENT_SCHED_SAFE\*/ .*?return (?P<resident>rt\.invoke_resident_generated_leaf<[^;\n]+?>\(ctx, &aot_mem[^;\n]*\)); .*?return aot_regcache_same_; \}\(\)\)')
 NATIVE_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); (rt\.invoke_native_fast_path\([^;\n]+\)); AOT_REGCACHE_SYNC_IN\(\); \}\(\)\)')
 SIGNED_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); const bool aot_regcache_ok_ = (ctx\.execute_signed_(?:add|sub)\([^\)]*\)); AOT_REGCACHE_SYNC_IN\(\); return aot_regcache_ok_; \}\(\)\)')
 
@@ -37,6 +42,7 @@ def strip_transform(path:Path):
     fsel=[int(x) for x in meta.group(2).split(',') if x]
     text=text[:begin]+text[end:]
     text=text.replace('\n#undef AOT_REGCACHE_SYNC_IN\n#undef AOT_REGCACHE_SYNC_OUT\n','')
+    text=RESIDENT_WRAP_RE.sub(lambda m:m.group('resident'),text)
     text=CHAIN_WRAP_RE.sub(lambda m:m.group(1),text)
     text=NATIVE_WRAP_RE.sub(lambda m:m.group(1),text)
     text=SIGNED_WRAP_RE.sub(lambda m:m.group(1),text)
@@ -56,15 +62,21 @@ def strip_transform(path:Path):
     return True, {'file':path.name,'stripped':True,'gpr_regs':gsel,'fpr_regs':fsel}
 
 
-def choose_regs(body:str, kind:str, count:int):
+def choose_regs(body:str, kind:str, count:int, resident_weight:int=1):
     pat = r'ctx\.gpr\[(\d+)\]' if kind=='gpr' else r'ctx\.fpr\[(\d+)\]'
     c=collections.Counter(int(x) for x in re.findall(pat, body))
     if kind=='gpr': c.pop(0, None)
-    regs=[r for r,_ in c.most_common(count)]
+    score=c.copy()
+    if resident_weight > 1:
+        for call in re.findall(r'invoke_resident_generated_leaf<[^;\n]+?>\(ctx, &aot_mem([^\)]*)\)', body):
+            rc=collections.Counter(int(x) for x in re.findall(pat, call))
+            if kind=='gpr': rc.pop(0, None)
+            for reg, hits in rc.items(): score[reg] += (resident_weight - 1) * hits
+    regs=[r for r,_ in score.most_common(count)]
     return regs, c
 
 
-def transform(path:Path, gprs:int, fprs:int):
+def transform(path:Path, gprs:int, fprs:int, resident_weight:int=1):
     text=path.read_text(encoding='utf-8', errors='ignore')
     if BEGIN in text:
         mm=META_RE.search(text)
@@ -80,10 +92,23 @@ def transform(path:Path, gprs:int, fprs:int):
     if not wm: return False, {'file':path.name,'skipped':'no-wrapper'}
     body_end=body_start+wm.start()
     body=text[body_start:body_end]
-    gsel,gcnt=choose_regs(body,'gpr',gprs)
-    fsel,fcnt=choose_regs(body,'fpr',fprs)
+    gsel,gcnt=choose_regs(body,'gpr',gprs,resident_weight)
+    fsel,fcnt=choose_regs(body,'fpr',fprs,resident_weight)
     if not gsel and not fsel: return False, {'file':path.name,'skipped':'no-regs'}
 
+    # Resident regions keep register-file values native only between scheduler
+    # safe-points. If this logical dispatch can preempt, fall back to the
+    # ordinary V8.9 fully synchronized chain before PSP thread ownership changes.
+    def wrap_resident(mm):
+        expr=mm.group(1)
+        unit=int(mm.group('unit')); entry=int(mm.group('entry')); pc=int(mm.group('pc'),16)
+        fallback=(f'rt.invoke_resident_scheduler_fallback<&recomp_unit_{unit:04d}_entry, '
+                  f'{unit}u, {entry}u, 0x{pc:08X}u>(ctx, &aot_mem)')
+        return ('([&]() { /*PSPRECOMP_RESIDENT_SCHED_SAFE*/ '
+                'if (rt.resident_generated_leaf_fast_allowed()) return '+expr+'; '
+                'AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = ('+fallback+'); '
+                'if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; '
+                'return aot_regcache_same_; }())')
     # First wrap context-visible boundaries while expressions still use ctx.*.
     def wrap_chain(mm):
         expr=mm.group(1)
@@ -91,6 +116,9 @@ def transform(path:Path, gprs:int, fprs:int):
                 'if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; '
                 'return aot_regcache_same_; }())')
     body=CHAIN_RE.sub(wrap_chain, body)
+    # Apply resident safe-point wrappers after ordinary chains so the fallback
+    # chained call inserted here is not wrapped a second time.
+    body=RESIDENT_RE.sub(wrap_resident, body)
     def wrap_native(mm):
         expr=mm.group(1)
         return ('([&]() { AOT_REGCACHE_SYNC_OUT(); '+expr+'; AOT_REGCACHE_SYNC_IN(); }())')
@@ -138,12 +166,13 @@ def main():
     ap.add_argument('--gprs',type=int,default=6)
     ap.add_argument('--fprs',type=int,default=4)
     ap.add_argument('--stats',type=Path)
+    ap.add_argument('--resident-weight',type=int,default=1)
     ap.add_argument('--strip',action='store_true')
     ns=ap.parse_args()
     rows=[]; changed=0
     for p in sorted(ns.directory.glob('generated_unit_*.cpp')):
         if ns.strip: ch,st=strip_transform(p)
-        else: ch,st=transform(p,ns.gprs,ns.fprs)
+        else: ch,st=transform(p,ns.gprs,ns.fprs,ns.resident_weight)
         changed+=int(ch); rows.append(st)
     summary={
         'mode':'strip' if ns.strip else 'apply',
@@ -152,6 +181,7 @@ def main():
         'fpr_occurrences':sum(r.get('fpr_occurrences',0) for r in rows),
         'gpr_total':sum(r.get('gpr_total',0) for r in rows),
         'fpr_total':sum(r.get('fpr_total',0) for r in rows),
+        'resident_weight':ns.resident_weight,
         'units':rows,
     }
     if ns.stats:

@@ -1,0 +1,1631 @@
+{
+  "version": 1,
+  "stage": "perf-v8.10-extreme-cpu-resident-regions-2026-08-18",
+  "min_static_sites": 40,
+  "max_blocks": 40,
+  "poisonable_units": [
+    44,
+    197,
+    212,
+    216,
+    219
+  ],
+  "targets": 83,
+  "sites": 11171,
+  "generated_files_with_sites": 220,
+  "changed_files_this_run": 220,
+  "changed_sites_this_run": 11171,
+  "regions": [
+    {
+      "pc": "0x08806634",
+      "unit": 0,
+      "entry": 302,
+      "blocks": 1,
+      "sites": 71,
+      "gprs": [
+        2,
+        4,
+        5,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08806654",
+      "unit": 0,
+      "entry": 303,
+      "blocks": 7,
+      "sites": 70,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0880682C",
+      "unit": 0,
+      "entry": 322,
+      "blocks": 16,
+      "sites": 63,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08806888",
+      "unit": 0,
+      "entry": 324,
+      "blocks": 18,
+      "sites": 62,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0880692C",
+      "unit": 0,
+      "entry": 337,
+      "blocks": 18,
+      "sites": 45,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08806A88",
+      "unit": 0,
+      "entry": 360,
+      "blocks": 18,
+      "sites": 141,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08806AE0",
+      "unit": 0,
+      "entry": 368,
+      "blocks": 18,
+      "sites": 43,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08806DC0",
+      "unit": 0,
+      "entry": 425,
+      "blocks": 1,
+      "sites": 236,
+      "gprs": [
+        4,
+        5,
+        6,
+        31
+      ],
+      "fprs": [
+        12
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08807098",
+      "unit": 0,
+      "entry": 451,
+      "blocks": 1,
+      "sites": 105,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088073CC",
+      "unit": 0,
+      "entry": 483,
+      "blocks": 16,
+      "sites": 171,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0880A400",
+      "unit": 1,
+      "entry": 514,
+      "blocks": 1,
+      "sites": 131,
+      "gprs": [
+        2,
+        4,
+        5,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088305D8",
+      "unit": 11,
+      "entry": 79,
+      "blocks": 1,
+      "sites": 73,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [
+        12,
+        13,
+        14
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088305EC",
+      "unit": 11,
+      "entry": 80,
+      "blocks": 1,
+      "sites": 50,
+      "gprs": [
+        2,
+        4,
+        5,
+        31
+      ],
+      "fprs": [
+        12
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0883079C",
+      "unit": 11,
+      "entry": 102,
+      "blocks": 1,
+      "sites": 59,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088307E0",
+      "unit": 11,
+      "entry": 108,
+      "blocks": 1,
+      "sites": 42,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08830934",
+      "unit": 11,
+      "entry": 128,
+      "blocks": 1,
+      "sites": 42,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08830A20",
+      "unit": 11,
+      "entry": 136,
+      "blocks": 1,
+      "sites": 58,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08830A50",
+      "unit": 11,
+      "entry": 138,
+      "blocks": 1,
+      "sites": 47,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08830B10",
+      "unit": 11,
+      "entry": 148,
+      "blocks": 1,
+      "sites": 46,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08861668",
+      "unit": 23,
+      "entry": 203,
+      "blocks": 4,
+      "sites": 480,
+      "gprs": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08862890",
+      "unit": 23,
+      "entry": 431,
+      "blocks": 23,
+      "sites": 205,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0886D4BC",
+      "unit": 26,
+      "entry": 206,
+      "blocks": 5,
+      "sites": 74,
+      "gprs": [
+        2,
+        4,
+        5,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08873400",
+      "unit": 27,
+      "entry": 732,
+      "blocks": 1,
+      "sites": 75,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088905F0",
+      "unit": 35,
+      "entry": 95,
+      "blocks": 1,
+      "sites": 113,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088C95D8",
+      "unit": 49,
+      "entry": 283,
+      "blocks": 6,
+      "sites": 1318,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": true,
+      "uses_lo": true,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088C9640",
+      "unit": 49,
+      "entry": 289,
+      "blocks": 4,
+      "sites": 130,
+      "gprs": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x088C971C",
+      "unit": 49,
+      "entry": 302,
+      "blocks": 4,
+      "sites": 43,
+      "gprs": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08908E78",
+      "unit": 65,
+      "entry": 261,
+      "blocks": 1,
+      "sites": 50,
+      "gprs": [
+        4,
+        5,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08909B60",
+      "unit": 65,
+      "entry": 454,
+      "blocks": 14,
+      "sites": 41,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0890BE50",
+      "unit": 65,
+      "entry": 982,
+      "blocks": 1,
+      "sites": 171,
+      "gprs": [
+        4,
+        5,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0890D44C",
+      "unit": 66,
+      "entry": 315,
+      "blocks": 4,
+      "sites": 437,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0890F694",
+      "unit": 66,
+      "entry": 781,
+      "blocks": 3,
+      "sites": 160,
+      "gprs": [
+        4,
+        5,
+        6,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0890F6B4",
+      "unit": 66,
+      "entry": 784,
+      "blocks": 1,
+      "sites": 236,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0890FF64",
+      "unit": 66,
+      "entry": 887,
+      "blocks": 1,
+      "sites": 54,
+      "gprs": [
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x089101A4",
+      "unit": 67,
+      "entry": 27,
+      "blocks": 1,
+      "sites": 59,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0893685C",
+      "unit": 76,
+      "entry": 698,
+      "blocks": 1,
+      "sites": 73,
+      "gprs": [
+        2,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x089474C4",
+      "unit": 80,
+      "entry": 661,
+      "blocks": 4,
+      "sites": 59,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x0896918C",
+      "unit": 89,
+      "entry": 250,
+      "blocks": 1,
+      "sites": 48,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08969194",
+      "unit": 89,
+      "entry": 251,
+      "blocks": 7,
+      "sites": 48,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x089B7A84",
+      "unit": 108,
+      "entry": 690,
+      "blocks": 9,
+      "sites": 100,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": true,
+      "uses_lo": true,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x089D1B1C",
+      "unit": 115,
+      "entry": 292,
+      "blocks": 1,
+      "sites": 116,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x089F620C",
+      "unit": 124,
+      "entry": 402,
+      "blocks": 5,
+      "sites": 449,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08A28D00",
+      "unit": 137,
+      "entry": 232,
+      "blocks": 1,
+      "sites": 48,
+      "gprs": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        29,
+        31
+      ],
+      "fprs": [
+        20,
+        22,
+        24
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08A3550C",
+      "unit": 140,
+      "entry": 317,
+      "blocks": 1,
+      "sites": 225,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08A92F78",
+      "unit": 163,
+      "entry": 419,
+      "blocks": 11,
+      "sites": 144,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08A93004",
+      "unit": 163,
+      "entry": 430,
+      "blocks": 7,
+      "sites": 51,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ABE2C0",
+      "unit": 174,
+      "entry": 470,
+      "blocks": 10,
+      "sites": 306,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        16,
+        17,
+        18,
+        19,
+        20,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ABE2E4",
+      "unit": 174,
+      "entry": 472,
+      "blocks": 10,
+      "sites": 83,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        16,
+        17,
+        18,
+        19,
+        20,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ABE398",
+      "unit": 174,
+      "entry": 482,
+      "blocks": 10,
+      "sites": 338,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        16,
+        17,
+        18,
+        19,
+        20,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ABE8F4",
+      "unit": 174,
+      "entry": 556,
+      "blocks": 9,
+      "sites": 141,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        16,
+        17,
+        18,
+        19,
+        20,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AC7670",
+      "unit": 176,
+      "entry": 924,
+      "blocks": 1,
+      "sites": 43,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AC79D4",
+      "unit": 176,
+      "entry": 972,
+      "blocks": 1,
+      "sites": 44,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AC7C50",
+      "unit": 176,
+      "entry": 1020,
+      "blocks": 1,
+      "sites": 80,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AC7C58",
+      "unit": 176,
+      "entry": 1021,
+      "blocks": 1,
+      "sites": 63,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AC8054",
+      "unit": 177,
+      "entry": 7,
+      "blocks": 1,
+      "sites": 47,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ADC734",
+      "unit": 182,
+      "entry": 137,
+      "blocks": 1,
+      "sites": 85,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ADC754",
+      "unit": 182,
+      "entry": 141,
+      "blocks": 1,
+      "sites": 40,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08ADC784",
+      "unit": 182,
+      "entry": 147,
+      "blocks": 1,
+      "sites": 44,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AF42C4",
+      "unit": 188,
+      "entry": 30,
+      "blocks": 1,
+      "sites": 61,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AF42D0",
+      "unit": 188,
+      "entry": 31,
+      "blocks": 6,
+      "sites": 59,
+      "gprs": [
+        4,
+        5,
+        16,
+        17,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AF44E8",
+      "unit": 188,
+      "entry": 53,
+      "blocks": 4,
+      "sites": 56,
+      "gprs": [
+        4,
+        5,
+        16,
+        17,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AF80D8",
+      "unit": 189,
+      "entry": 15,
+      "blocks": 1,
+      "sites": 51,
+      "gprs": [
+        16,
+        17,
+        18,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08AFEDA8",
+      "unit": 190,
+      "entry": 642,
+      "blocks": 1,
+      "sites": 52,
+      "gprs": [
+        2,
+        4,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B01E00",
+      "unit": 191,
+      "entry": 504,
+      "blocks": 10,
+      "sites": 91,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0C05C",
+      "unit": 194,
+      "entry": 8,
+      "blocks": 2,
+      "sites": 48,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        16,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0C138",
+      "unit": 194,
+      "entry": 19,
+      "blocks": 2,
+      "sites": 222,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        16,
+        17,
+        18,
+        19,
+        20,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0C498",
+      "unit": 194,
+      "entry": 60,
+      "blocks": 1,
+      "sites": 56,
+      "gprs": [
+        4,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0C4A8",
+      "unit": 194,
+      "entry": 62,
+      "blocks": 1,
+      "sites": 68,
+      "gprs": [
+        4,
+        5,
+        6,
+        7,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0C604",
+      "unit": 194,
+      "entry": 82,
+      "blocks": 2,
+      "sites": 89,
+      "gprs": [
+        2,
+        4,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B0D88C",
+      "unit": 194,
+      "entry": 372,
+      "blocks": 1,
+      "sites": 54,
+      "gprs": [
+        2,
+        4,
+        5,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B1FD70",
+      "unit": 198,
+      "entry": 733,
+      "blocks": 4,
+      "sites": 153,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B20934",
+      "unit": 199,
+      "entry": 110,
+      "blocks": 3,
+      "sites": 498,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        28,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": true,
+      "uses_lo": true,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B20998",
+      "unit": 199,
+      "entry": 113,
+      "blocks": 4,
+      "sites": 470,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        28,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": true,
+      "uses_lo": true,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B58100",
+      "unit": 213,
+      "entry": 23,
+      "blocks": 5,
+      "sites": 65,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B5814C",
+      "unit": 213,
+      "entry": 28,
+      "blocks": 3,
+      "sites": 116,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B58974",
+      "unit": 213,
+      "entry": 150,
+      "blocks": 4,
+      "sites": 234,
+      "gprs": [
+        2,
+        4,
+        5,
+        6,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B60680",
+      "unit": 215,
+      "entry": 68,
+      "blocks": 10,
+      "sites": 206,
+      "gprs": [
+        1,
+        2,
+        4,
+        5,
+        16,
+        17,
+        18,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B60E5C",
+      "unit": 215,
+      "entry": 177,
+      "blocks": 1,
+      "sites": 220,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": true,
+      "uses_lo": true,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B61B60",
+      "unit": 215,
+      "entry": 341,
+      "blocks": 15,
+      "sites": 143,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        29,
+        31
+      ],
+      "fprs": [
+        12
+      ],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B61EF4",
+      "unit": 215,
+      "entry": 390,
+      "blocks": 15,
+      "sites": 40,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B61FD0",
+      "unit": 215,
+      "entry": 400,
+      "blocks": 15,
+      "sites": 115,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        16,
+        18,
+        19,
+        20,
+        21,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B6256C",
+      "unit": 215,
+      "entry": 478,
+      "blocks": 15,
+      "sites": 64,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        16,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    },
+    {
+      "pc": "0x08B627F0",
+      "unit": 215,
+      "entry": 515,
+      "blocks": 15,
+      "sites": 64,
+      "gprs": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        29,
+        31
+      ],
+      "fprs": [],
+      "uses_hi": false,
+      "uses_lo": false,
+      "uses_pc": true
+    }
+  ]
+}
