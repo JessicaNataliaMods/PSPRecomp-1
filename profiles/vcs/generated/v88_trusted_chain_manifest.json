@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "stage": "perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18",
+  "poisonable_units": [
+    44,
+    197,
+    212,
+    216,
+    219
+  ],
+  "generated_units": 234,
+  "trusted_sites": 45968,
+  "generated_trusted_sites": 45825,
+  "tier2_trusted_sites": 143,
+  "poisonable_sites_retained": 3240
+}

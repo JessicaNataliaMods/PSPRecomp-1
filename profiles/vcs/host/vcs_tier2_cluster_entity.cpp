@@ -1217,14 +1217,14 @@ SB_L_08A6ED10:
     tier2_gpr_4 = (tier2_gpr_17 | 0u);
     ctx.gpr[31] = (0x08A6ED20u);
     tier2_gpr_5 = (ctx.gpr[30] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0022_entry, 22u, 934u, 0x0885FE8Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED20u) goto SB_L_08A6ED20;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0022_entry, 22u, 934u, 0x0885FE8Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED20u) goto SB_L_08A6ED20;
     TIER2_SB_RETURN();
 
 SB_L_08A6ED20:
     tier2_gpr_4 = (ctx.gpr[30] | 0u);
     ctx.gpr[31] = (0x08A6ED2Cu);
     tier2_gpr_5 = (ctx.gpr[2] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 7u, 0x08860358u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED2Cu) goto SB_L_08A6ED2C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 7u, 0x08860358u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED2Cu) goto SB_L_08A6ED2C;
     TIER2_SB_RETURN();
 
 SB_L_08A6ED2C:
@@ -1315,7 +1315,7 @@ SB_L_08A6ED7C:
 SB_L_08A6ED88:
     ctx.gpr[31] = (0x08A6ED90u);
     tier2_gpr_4 = (tier2_mem.aot_load32(tier2_gpr_29 + static_cast<std::uint32_t>(128)));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0117_entry, 117u, 129u, 0x089D89E0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED90u) goto SB_L_08A6ED90;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0117_entry, 117u, 129u, 0x089D89E0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A6ED90u) goto SB_L_08A6ED90;
     TIER2_SB_RETURN();
 
 SB_L_08A6ED90:

@@ -973,7 +973,7 @@ SB_L_08A79AB4:
 SB_L_08A79AD4:
     tier2_gpr_31 = (0x08A79ADCu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0067_entry, 67u, 195u, 0x08910B38u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79ADCu) goto SB_L_08A79ADC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0067_entry, 67u, 195u, 0x08910B38u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79ADCu) goto SB_L_08A79ADC;
     TIER2_SB_RETURN();
 
 SB_L_08A79ADC:
@@ -1212,7 +1212,7 @@ SB_L_08A79F5C:
       tier2_mem.aot_store32_block(tier2_gpr_29 + static_cast<std::uint32_t>(0), tier2_words); }
     tier2_gpr_31 = (0x08A79F80u);
     ctx.gpr[19] = (0u | 1u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 47u, 0x08960424u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79F80u) goto SB_L_08A79F80;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08960424, 87u, 0x08960424u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79F80u) goto SB_L_08A79F80;
     TIER2_SB_RETURN();
 
 SB_L_08A79F80:
@@ -1227,7 +1227,7 @@ SB_L_08A79F80:
 SB_L_08A79F88:
     tier2_gpr_31 = (0x08A79F90u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 47u, 0x08960424u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79F90u) goto SB_L_08A79F90;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08960424, 87u, 0x08960424u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A79F90u) goto SB_L_08A79F90;
     TIER2_SB_RETURN();
 
 SB_L_08A79F90:
@@ -1305,7 +1305,7 @@ SB_L_08A79FF8:
 SB_L_08A7A00C:
     tier2_gpr_31 = (0x08A7A014u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0142_entry, 142u, 167u, 0x08A3CC80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A014u) goto SB_L_08A7A014;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0142_entry, 142u, 167u, 0x08A3CC80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A014u) goto SB_L_08A7A014;
     TIER2_SB_RETURN();
 
 SB_L_08A7A014:
@@ -1341,7 +1341,7 @@ SB_L_08A7A024:
 SB_L_08A7A038:
     tier2_gpr_31 = (0x08A7A040u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0142_entry, 142u, 167u, 0x08A3CC80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A040u) goto SB_L_08A7A040;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0142_entry, 142u, 167u, 0x08A3CC80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A040u) goto SB_L_08A7A040;
     TIER2_SB_RETURN();
 
 SB_L_08A7A040:
@@ -1382,7 +1382,7 @@ SB_L_08A7A068:
 SB_L_08A7A06C:
     tier2_gpr_31 = (0x08A7A074u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0084_entry, 84u, 221u, 0x08954F80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A074u) goto SB_L_08A7A074;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0084_entry, 84u, 221u, 0x08954F80u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A074u) goto SB_L_08A7A074;
     TIER2_SB_RETURN();
 
 SB_L_08A7A074:
@@ -1631,7 +1631,7 @@ SB_L_08A7A7C8:
         goto SB_L_08A7FAA4;
     }
     ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0158_entry, 158u, 666u, 0x08A7FAA4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A7E0u) goto SB_L_08A7A7E0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0158_entry, 158u, 666u, 0x08A7FAA4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A7E0u) goto SB_L_08A7A7E0;
     TIER2_SB_RETURN();
 
 SB_L_08A7A7E0:
@@ -1670,13 +1670,13 @@ SB_L_08A7A800:
 SB_L_08A7A808:
     tier2_gpr_31 = (0x08A7A810u);
     tier2_gpr_4 = (tier2_mem.aot_load32(tier2_gpr_16 + static_cast<std::uint32_t>(80)));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 192u, 0x08945314u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A810u) goto SB_L_08A7A810;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 192u, 0x08945314u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A810u) goto SB_L_08A7A810;
     TIER2_SB_RETURN();
 
 SB_L_08A7A810:
     tier2_gpr_31 = (0x08A7A818u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 125u, 0x08944F2Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A818u) goto SB_L_08A7A818;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 125u, 0x08944F2Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A818u) goto SB_L_08A7A818;
     TIER2_SB_RETURN();
 
 SB_L_08A7A818:
@@ -1743,17 +1743,7 @@ SB_L_08A7A880:
     tier2_gpr_4 = (ctx.gpr[20] | 0u);
     tier2_gpr_31 = (0x08A7A88Cu);
     tier2_gpr_5 = (ctx.gpr[21] | 0u);
-    // V87_TINY_LEAF_INLINE unit=0190 pc=0x08AFEF7C
-    if (rt.can_inline_generated_leaf<190u>()) {
-        tier2_gpr_4 = (tier2_gpr_4 + static_cast<std::uint32_t>(904));
-        tier2_gpr_5 = (tier2_gpr_5 << 2u);
-        tier2_gpr_4 = (tier2_gpr_4 + tier2_gpr_5);
-        ctx.gpr[2] = (tier2_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(0)));
-        ctx.pc = 0x08A7A88Cu;
-        if (!rt.account_inlined_generated_leaf(ctx)) TIER2_SB_RETURN();
-        goto SB_L_08A7A88C;
-    }
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0190_entry, 190u, 663u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A88Cu) goto SB_L_08A7A88C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08AFEF7C, 190u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A88Cu) goto SB_L_08A7A88C;
     TIER2_SB_RETURN();
 
 SB_L_08A7A88C:
@@ -1768,17 +1758,7 @@ SB_L_08A7A88C:
 SB_L_08A7A894:
     tier2_gpr_31 = (0x08A7A89Cu);
     tier2_gpr_5 = (ctx.gpr[21] | 0u);
-    // V87_TINY_LEAF_INLINE unit=0190 pc=0x08AFEF7C
-    if (rt.can_inline_generated_leaf<190u>()) {
-        tier2_gpr_4 = (tier2_gpr_4 + static_cast<std::uint32_t>(904));
-        tier2_gpr_5 = (tier2_gpr_5 << 2u);
-        tier2_gpr_4 = (tier2_gpr_4 + tier2_gpr_5);
-        ctx.gpr[2] = (tier2_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(0)));
-        ctx.pc = 0x08A7A89Cu;
-        if (!rt.account_inlined_generated_leaf(ctx)) TIER2_SB_RETURN();
-        goto SB_L_08A7A89C;
-    }
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0190_entry, 190u, 663u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A89Cu) goto SB_L_08A7A89C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08AFEF7C, 190u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A89Cu) goto SB_L_08A7A89C;
     TIER2_SB_RETURN();
 
 SB_L_08A7A89C:
@@ -1796,17 +1776,7 @@ SB_L_08A7A8AC:
     tier2_gpr_4 = (ctx.gpr[20] | 0u);
     tier2_gpr_31 = (0x08A7A8B8u);
     tier2_gpr_5 = (ctx.gpr[21] | 0u);
-    // V87_TINY_LEAF_INLINE unit=0190 pc=0x08AFEF7C
-    if (rt.can_inline_generated_leaf<190u>()) {
-        tier2_gpr_4 = (tier2_gpr_4 + static_cast<std::uint32_t>(904));
-        tier2_gpr_5 = (tier2_gpr_5 << 2u);
-        tier2_gpr_4 = (tier2_gpr_4 + tier2_gpr_5);
-        ctx.gpr[2] = (tier2_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(0)));
-        ctx.pc = 0x08A7A8B8u;
-        if (!rt.account_inlined_generated_leaf(ctx)) TIER2_SB_RETURN();
-        goto SB_L_08A7A8B8;
-    }
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0190_entry, 190u, 663u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A8B8u) goto SB_L_08A7A8B8;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08AFEF7C, 190u, 0x08AFEF7Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A8B8u) goto SB_L_08A7A8B8;
     TIER2_SB_RETURN();
 
 SB_L_08A7A8B8:
@@ -1857,7 +1827,7 @@ SB_L_08A7A8FC:
 SB_L_08A7A904:
     tier2_gpr_31 = (0x08A7A90Cu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 132u, 0x08944F98u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A90Cu) goto SB_L_08A7A90C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 132u, 0x08944F98u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7A90Cu) goto SB_L_08A7A90C;
     TIER2_SB_RETURN();
 
 SB_L_08A7A90C:
@@ -1963,19 +1933,19 @@ SB_L_08A7A94C:
     tier2_gpr_4 = (0u | 11u);
     tier2_gpr_31 = (0x08A7AA6Cu);
     tier2_gpr_5 = (0u | 1u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA6Cu) goto SB_L_08A7AA6C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA6Cu) goto SB_L_08A7AA6C;
     TIER2_SB_RETURN();
 
 SB_L_08A7AA6C:
     tier2_gpr_31 = (0x08A7AA74u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 129u, 0x08944F6Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA74u) goto SB_L_08A7AA74;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 129u, 0x08944F6Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA74u) goto SB_L_08A7AA74;
     TIER2_SB_RETURN();
 
 SB_L_08A7AA74:
     tier2_gpr_31 = (0x08A7AA7Cu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 127u, 0x08944F4Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA7Cu) goto SB_L_08A7AA7C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 127u, 0x08944F4Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AA7Cu) goto SB_L_08A7AA7C;
     TIER2_SB_RETURN();
 
 SB_L_08A7AA7C:
@@ -2029,7 +1999,7 @@ SB_L_08A7AAD0:
 SB_L_08A7AADC:
     tier2_gpr_31 = (0x08A7AAE4u);
     tier2_gpr_4 = (ctx.gpr[18] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AAE4u) goto SB_L_08A7AAE4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AAE4u) goto SB_L_08A7AAE4;
     TIER2_SB_RETURN();
 
 SB_L_08A7AAE4:
@@ -2217,7 +2187,7 @@ SB_L_08A7AC10:
 SB_L_08A7AC40:
     tier2_gpr_31 = (0x08A7AC48u);
     tier2_gpr_4 = (ctx.gpr[18] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC48u) goto SB_L_08A7AC48;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC48u) goto SB_L_08A7AC48;
     TIER2_SB_RETURN();
 
 SB_L_08A7AC48:
@@ -2232,7 +2202,7 @@ SB_L_08A7AC48:
 SB_L_08A7AC50:
     tier2_gpr_31 = (0x08A7AC58u);
     tier2_gpr_4 = (ctx.gpr[18] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC58u) goto SB_L_08A7AC58;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0134_entry, 134u, 56u, 0x08A1C658u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC58u) goto SB_L_08A7AC58;
     TIER2_SB_RETURN();
 
 SB_L_08A7AC58:
@@ -2247,7 +2217,7 @@ SB_L_08A7AC58:
 SB_L_08A7AC60:
     tier2_gpr_31 = (0x08A7AC68u);
     tier2_gpr_4 = (tier2_mem.aot_load32(tier2_gpr_16 + static_cast<std::uint32_t>(80)));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 191u, 0x0894530Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC68u) goto SB_L_08A7AC68;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 191u, 0x0894530Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AC68u) goto SB_L_08A7AC68;
     TIER2_SB_RETURN();
 
 SB_L_08A7AC68:
@@ -2346,7 +2316,7 @@ SB_L_08A7ACB8:
     ctx.fpr[12] = std::bit_cast<float>(tier2_gpr_4);
     tier2_gpr_31 = (0x08A7ACECu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7ACECu) goto SB_L_08A7ACEC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7ACECu) goto SB_L_08A7ACEC;
     TIER2_SB_RETURN();
 
 SB_L_08A7ACEC:
@@ -2379,13 +2349,13 @@ SB_L_08A7AD00:
 SB_L_08A7AD14:
     tier2_gpr_31 = (0x08A7AD1Cu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 142u, 0x08945050u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD1Cu) goto SB_L_08A7AD1C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 142u, 0x08945050u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD1Cu) goto SB_L_08A7AD1C;
     TIER2_SB_RETURN();
 
 SB_L_08A7AD1C:
     tier2_gpr_31 = (0x08A7AD24u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0126_entry, 126u, 361u, 0x089FD7E4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD24u) goto SB_L_08A7AD24;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0126_entry, 126u, 361u, 0x089FD7E4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD24u) goto SB_L_08A7AD24;
     TIER2_SB_RETURN();
 
 SB_L_08A7AD24:
@@ -2410,14 +2380,14 @@ SB_L_08A7AD3C:
 SB_L_08A7AD40:
     tier2_gpr_31 = (0x08A7AD48u);
     tier2_gpr_16 = (2236u << 16u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0000_entry, 0u, 199u, 0x08805630u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD48u) goto SB_L_08A7AD48;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0000_entry, 0u, 199u, 0x08805630u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD48u) goto SB_L_08A7AD48;
     TIER2_SB_RETURN();
 
 SB_L_08A7AD48:
     tier2_gpr_4 = (0u | 11u);
     tier2_gpr_31 = (0x08A7AD54u);
     tier2_gpr_5 = (0u | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD54u) goto SB_L_08A7AD54;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AD54u) goto SB_L_08A7AD54;
     TIER2_SB_RETURN();
 
 SB_L_08A7AD54:
@@ -2485,7 +2455,7 @@ SB_L_08A7AF74:
 SB_L_08A7AFB8:
     tier2_gpr_31 = (0x08A7AFC0u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0200_entry, 200u, 432u, 0x08B26030u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AFC0u) goto SB_L_08A7AFC0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0200_entry, 200u, 432u, 0x08B26030u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7AFC0u) goto SB_L_08A7AFC0;
     TIER2_SB_RETURN();
 
 SB_L_08A7AFC0:
@@ -2591,7 +2561,7 @@ SB_L_08A7B61C:
       tier2_mem.aot_store32_block(vfpu_address, tier2_vfpu_words); }
     tier2_gpr_31 = (0x08A7B630u);
     tier2_gpr_4 = (tier2_gpr_29 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0200_entry, 200u, 414u, 0x08B25E10u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7B630u) goto SB_L_08A7B630;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0200_entry, 200u, 414u, 0x08B25E10u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7B630u) goto SB_L_08A7B630;
     TIER2_SB_RETURN();
 
 SB_L_08A7B630:
@@ -2701,7 +2671,7 @@ SB_L_08A7CF28:
 SB_L_08A7CF44:
     tier2_gpr_31 = (0x08A7CF4Cu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 51u, 0x08AD0598u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7CF4Cu) goto SB_L_08A7CF4C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 51u, 0x08AD0598u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7CF4Cu) goto SB_L_08A7CF4C;
     TIER2_SB_RETURN();
 
 SB_L_08A7CF4C:
@@ -2842,7 +2812,7 @@ SB_L_08A7D020:
     tier2_gpr_5 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(tier2_mem.aot_load16(tier2_gpr_16 + static_cast<std::uint32_t>(86))))));
     tier2_gpr_31 = (0x08A7D02Cu);
     tier2_gpr_6 = (ctx.gpr[18] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0084_entry, 84u, 174u, 0x08954B84u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D02Cu) goto SB_L_08A7D02C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0084_entry, 84u, 174u, 0x08954B84u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D02Cu) goto SB_L_08A7D02C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D02C:
@@ -2872,7 +2842,7 @@ SB_L_08A7D038:
 SB_L_08A7D054:
     tier2_gpr_31 = (0x08A7D05Cu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D05Cu) goto SB_L_08A7D05C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D05Cu) goto SB_L_08A7D05C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D05C:
@@ -2935,7 +2905,7 @@ SB_L_08A7D094:
     tier2_gpr_5 = (ctx.gpr[18] | 0u);
     tier2_gpr_31 = (0x08A7D0A0u);
     tier2_gpr_6 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0084_entry, 84u, 191u, 0x08954C44u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D0A0u) goto SB_L_08A7D0A0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0084_entry, 84u, 191u, 0x08954C44u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D0A0u) goto SB_L_08A7D0A0;
     TIER2_SB_RETURN();
 
 SB_L_08A7D0A0:
@@ -2965,7 +2935,7 @@ SB_L_08A7D0B8:
     tier2_gpr_4 = (tier2_gpr_4 & 255u);
     tier2_gpr_31 = (0x08A7D0D0u);
     tier2_gpr_5 = (tier2_gpr_5 & 255u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0079_entry, 79u, 248u, 0x08941B38u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D0D0u) goto SB_L_08A7D0D0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0079_entry, 79u, 248u, 0x08941B38u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D0D0u) goto SB_L_08A7D0D0;
     TIER2_SB_RETURN();
 
 SB_L_08A7D0D0:
@@ -3164,7 +3134,7 @@ SB_L_08A7D1D0:
 SB_L_08A7D1EC:
     tier2_gpr_31 = (0x08A7D1F4u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D1F4u) goto SB_L_08A7D1F4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D1F4u) goto SB_L_08A7D1F4;
     TIER2_SB_RETURN();
 
 SB_L_08A7D1F4:
@@ -3326,7 +3296,7 @@ SB_L_08A7D2DC:
 SB_L_08A7D314:
     tier2_gpr_31 = (0x08A7D31Cu);
     ctx.gpr[17] = (tier2_mem.aot_load32(ctx.gpr[17] + static_cast<std::uint32_t>(116)));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D31Cu) goto SB_L_08A7D31C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D31Cu) goto SB_L_08A7D31C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D31C:
@@ -3343,7 +3313,7 @@ SB_L_08A7D31C:
 SB_L_08A7D32C:
     tier2_gpr_31 = (0x08A7D334u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D334u) goto SB_L_08A7D334;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D334u) goto SB_L_08A7D334;
     TIER2_SB_RETURN();
 
 SB_L_08A7D334:
@@ -3478,7 +3448,7 @@ SB_L_08A7D3D4:
 SB_L_08A7D3E8:
     tier2_gpr_31 = (0x08A7D3F0u);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D3F0u) goto SB_L_08A7D3F0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D3F0u) goto SB_L_08A7D3F0;
     TIER2_SB_RETURN();
 
 SB_L_08A7D3F0:
@@ -3562,7 +3532,7 @@ SB_L_08A7D45C:
 SB_L_08A7D464:
     tier2_gpr_31 = (0x08A7D46Cu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D46Cu) goto SB_L_08A7D46C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D46Cu) goto SB_L_08A7D46C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D46C:
@@ -3617,7 +3587,7 @@ SB_L_08A7D4AC:
 SB_L_08A7D4DC:
     tier2_gpr_31 = (0x08A7D4E4u);
     ctx.gpr[17] = (tier2_mem.aot_load32(ctx.gpr[17] + static_cast<std::uint32_t>(116)));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D4E4u) goto SB_L_08A7D4E4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D4E4u) goto SB_L_08A7D4E4;
     TIER2_SB_RETURN();
 
 SB_L_08A7D4E4:
@@ -3634,7 +3604,7 @@ SB_L_08A7D4E4:
 SB_L_08A7D4F4:
     tier2_gpr_31 = (0x08A7D4FCu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D4FCu) goto SB_L_08A7D4FC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 28u, 0x089602C8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D4FCu) goto SB_L_08A7D4FC;
     TIER2_SB_RETURN();
 
 SB_L_08A7D4FC:
@@ -3849,7 +3819,7 @@ SB_L_08A7D618:
 SB_L_08A7D62C:
     tier2_gpr_31 = (0x08A7D634u);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D634u) goto SB_L_08A7D634;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D634u) goto SB_L_08A7D634;
     TIER2_SB_RETURN();
 
 SB_L_08A7D634:
@@ -3864,7 +3834,7 @@ SB_L_08A7D634:
 SB_L_08A7D63C:
     tier2_gpr_31 = (0x08A7D644u);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D644u) goto SB_L_08A7D644;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D644u) goto SB_L_08A7D644;
     TIER2_SB_RETURN();
 
 SB_L_08A7D644:
@@ -3953,7 +3923,7 @@ SB_L_08A7D674:
     ctx.fpr[12] = std::bit_cast<float>(tier2_gpr_4);
     tier2_gpr_31 = (0x08A7D6ACu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D6ACu) goto SB_L_08A7D6AC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D6ACu) goto SB_L_08A7D6AC;
     TIER2_SB_RETURN();
 
 SB_L_08A7D6AC:
@@ -4005,7 +3975,7 @@ SB_L_08A7D6E0:
 SB_L_08A7D6F4:
     tier2_gpr_31 = (0x08A7D6FCu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D6FCu) goto SB_L_08A7D6FC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D6FCu) goto SB_L_08A7D6FC;
     TIER2_SB_RETURN();
 
 SB_L_08A7D6FC:
@@ -4020,7 +3990,7 @@ SB_L_08A7D6FC:
 SB_L_08A7D704:
     tier2_gpr_31 = (0x08A7D70Cu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D70Cu) goto SB_L_08A7D70C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D70Cu) goto SB_L_08A7D70C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D70C:
@@ -4109,7 +4079,7 @@ SB_L_08A7D73C:
     ctx.fpr[12] = std::bit_cast<float>(tier2_gpr_4);
     tier2_gpr_31 = (0x08A7D774u);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D774u) goto SB_L_08A7D774;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D774u) goto SB_L_08A7D774;
     TIER2_SB_RETURN();
 
 SB_L_08A7D774:
@@ -4142,7 +4112,7 @@ SB_L_08A7D78C:
     tier2_gpr_5 = (ctx.gpr[28] + static_cast<std::uint32_t>(10048));
     tier2_gpr_31 = (0x08A7D7A4u);
     tier2_gpr_4 = (tier2_gpr_29 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0163_entry, 163u, 464u, 0x08A931D0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7A4u) goto SB_L_08A7D7A4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0163_entry, 163u, 464u, 0x08A931D0u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7A4u) goto SB_L_08A7D7A4;
     TIER2_SB_RETURN();
 
 SB_L_08A7D7A4:
@@ -4173,7 +4143,7 @@ SB_L_08A7D7A4:
 SB_L_08A7D7D0:
     tier2_gpr_31 = (0x08A7D7D8u);
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7D8u) goto SB_L_08A7D7D8;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7D8u) goto SB_L_08A7D7D8;
     TIER2_SB_RETURN();
 
 SB_L_08A7D7D8:
@@ -4190,7 +4160,7 @@ SB_L_08A7D7D8:
 SB_L_08A7D7E8:
     tier2_gpr_31 = (0x08A7D7F0u);
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7F0u) goto SB_L_08A7D7F0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D7F0u) goto SB_L_08A7D7F0;
     TIER2_SB_RETURN();
 
 SB_L_08A7D7F0:
@@ -4252,7 +4222,7 @@ SB_L_08A7D84C:
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
     tier2_gpr_31 = (0x08A7D858u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 384u, 0x08AAE058u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D858u) goto SB_L_08A7D858;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 384u, 0x08AAE058u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D858u) goto SB_L_08A7D858;
     TIER2_SB_RETURN();
 
 SB_L_08A7D858:
@@ -4328,7 +4298,7 @@ SB_L_08A7D8C4:
     tier2_gpr_5 = (tier2_mem.aot_load32(ctx.gpr[19] + static_cast<std::uint32_t>(20)));
     tier2_gpr_31 = (0x08A7D8D0u);
     tier2_gpr_6 = (0u | 4u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0085_entry, 85u, 455u, 0x0895B470u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D8D0u) goto SB_L_08A7D8D0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0085_entry, 85u, 455u, 0x0895B470u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D8D0u) goto SB_L_08A7D8D0;
     TIER2_SB_RETURN();
 
 SB_L_08A7D8D0:
@@ -4382,7 +4352,7 @@ SB_L_08A7D900:
 SB_L_08A7D914:
     tier2_gpr_31 = (0x08A7D91Cu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D91Cu) goto SB_L_08A7D91C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D91Cu) goto SB_L_08A7D91C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D91C:
@@ -4397,7 +4367,7 @@ SB_L_08A7D91C:
 SB_L_08A7D924:
     tier2_gpr_31 = (0x08A7D92Cu);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D92Cu) goto SB_L_08A7D92C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D92Cu) goto SB_L_08A7D92C;
     TIER2_SB_RETURN();
 
 SB_L_08A7D92C:
@@ -4444,7 +4414,7 @@ SB_L_08A7D95C:
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
     tier2_gpr_31 = (0x08A7D968u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D968u) goto SB_L_08A7D968;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D968u) goto SB_L_08A7D968;
     TIER2_SB_RETURN();
 
 SB_L_08A7D968:
@@ -4493,7 +4463,7 @@ SB_L_08A7D9A0:
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
     tier2_gpr_31 = (0x08A7D9ACu);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D9ACu) goto SB_L_08A7D9AC;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7D9ACu) goto SB_L_08A7D9AC;
     TIER2_SB_RETURN();
 
 SB_L_08A7D9AC:
@@ -4557,7 +4527,7 @@ SB_L_08A7D9F8:
 SB_L_08A7DA04:
     tier2_gpr_31 = (0x08A7DA0Cu);
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DA0Cu) goto SB_L_08A7DA0C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DA0Cu) goto SB_L_08A7DA0C;
     TIER2_SB_RETURN();
 
 SB_L_08A7DA0C:
@@ -4598,7 +4568,7 @@ SB_L_08A7DA38:
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
     tier2_gpr_31 = (0x08A7DA4Cu);
     ctx.fpr[12] = ctx.fpr[20] - ctx.fpr[12];
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 401u, 0x08AAE140u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DA4Cu) goto SB_L_08A7DA4C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 401u, 0x08AAE140u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DA4Cu) goto SB_L_08A7DA4C;
     TIER2_SB_RETURN();
 
 SB_L_08A7DA4C:
@@ -4676,7 +4646,7 @@ SB_L_08A7DAB8:
     tier2_gpr_5 = (tier2_mem.aot_load32(ctx.gpr[19] + static_cast<std::uint32_t>(20)));
     tier2_gpr_31 = (0x08A7DAC4u);
     tier2_gpr_6 = (0u | 4u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0085_entry, 85u, 455u, 0x0895B470u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DAC4u) goto SB_L_08A7DAC4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0085_entry, 85u, 455u, 0x0895B470u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DAC4u) goto SB_L_08A7DAC4;
     TIER2_SB_RETURN();
 
 SB_L_08A7DAC4:
@@ -4730,7 +4700,7 @@ SB_L_08A7DAF4:
 SB_L_08A7DB08:
     tier2_gpr_31 = (0x08A7DB10u);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB10u) goto SB_L_08A7DB10;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0179_entry, 179u, 50u, 0x08AD0530u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB10u) goto SB_L_08A7DB10;
     TIER2_SB_RETURN();
 
 SB_L_08A7DB10:
@@ -4763,7 +4733,7 @@ SB_L_08A7DB20:
 SB_L_08A7DB28:
     tier2_gpr_31 = (0x08A7DB30u);
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB30u) goto SB_L_08A7DB30;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0195_entry, 195u, 375u, 0x08B11994u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB30u) goto SB_L_08A7DB30;
     TIER2_SB_RETURN();
 
 SB_L_08A7DB30:
@@ -4779,7 +4749,7 @@ SB_L_08A7DB38:
     tier2_gpr_4 = (tier2_gpr_16 | 0u);
     tier2_gpr_31 = (0x08A7DB44u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB44u) goto SB_L_08A7DB44;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0080_entry, 80u, 165u, 0x089451D8u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB44u) goto SB_L_08A7DB44;
     TIER2_SB_RETURN();
 
 SB_L_08A7DB44:
@@ -4810,7 +4780,7 @@ SB_L_08A7DB5C:
 SB_L_08A7DB64:
     tier2_gpr_31 = (0x08A7DB6Cu);
     tier2_gpr_4 = (ctx.gpr[17] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB6Cu) goto SB_L_08A7DB6C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0170_entry, 170u, 396u, 0x08AAE0ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x08A7DB6Cu) goto SB_L_08A7DB6C;
     TIER2_SB_RETURN();
 
 SB_L_08A7DB6C:

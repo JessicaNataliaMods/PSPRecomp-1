@@ -190,42 +190,42 @@ public:
     [[nodiscard]] bool invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index,
                                            GuestMemory::AotFastView *shared_aot_mem = nullptr);
 
-    // compile-time unit chain.  Automatic AOT knows both the target
-    // function symbol and bucket, so the normal path becomes a direct native
-    // call.  LTCG can optimize across that edge and the CPU no longer pays an
-    // indirect function-pointer branch on every fixed cross-unit jump/JAL.
-    //
-    // The one table equality check is intentional: if install_profile() later
-    // overlays an import/HLE/host replacement in that bucket, registration
-    // poisons generated_units_[UnitIndex].  We then fall back to the old exact
-    // path and unwind to outer dispatch instead of bypassing the replacement.
-    template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId = 0u,
-              std::uint32_t DirectTargetPc = 0u>
-    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_chained_direct(
+    // Compile-time direct chain shared implementation. V8.8 adds a trusted
+    // specialization for title profiles that can prove at build time that the
+    // target 16 KiB generated bucket contains no import/HLE/host replacement.
+    // Trusted chains keep every chain-depth, context-invalidation and scheduler
+    // safe point, but remove the per-edge generated-layout and poisoned-unit
+    // loads from the production hot path.
+    template <bool TrustedUnit, auto Function, std::uint32_t UnitIndex,
+              std::uint16_t DirectEntryId = 0u, std::uint32_t DirectTargetPc = 0u>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_chained_direct_impl(
         AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
-#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-        if (UnitIndex >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) {
-#else
-        if (g_runtime_chain_observers_active ||
-            UnitIndex >= kGeneratedUnitFastCapacity ||
-            !generated_unit_layout_valid_) {
-#endif
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        // Diagnostics/observers deliberately retain the canonical lookup path so
+        // instrumentation sees exactly the same boundaries as an untrusted call.
+        if (g_runtime_chain_observers_active) {
             if constexpr (DirectTargetPc != 0u) ctx.pc = DirectTargetPc;
             return invoke_chained_unit(ctx, UnitIndex, shared_aot_mem);
         }
-        if (generated_unit_disabled_[UnitIndex] != 0u) {
-            // A unit can be poisoned because it contains PSP import stubs while
-            // other exact entries in the same 16 KiB bucket remain ordinary AOT.
-            // codegen sends known import targets straight to outer
-            // dispatch, so for the remaining fixed targets use the exact per-PC
-            // chain table rather than pessimistically abandoning all chaining in
-            // the mixed bucket. Host/HLE overrides are still non-chainable there.
-            if constexpr (DirectTargetPc != 0u) {
-                ctx.pc = DirectTargetPc;
-                return invoke_chained_call(ctx, shared_aot_mem);
-            } else {
-                return false;
+#endif
+        if constexpr (!TrustedUnit) {
+            if (UnitIndex >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) {
+                if constexpr (DirectTargetPc != 0u) ctx.pc = DirectTargetPc;
+                return invoke_chained_unit(ctx, UnitIndex, shared_aot_mem);
             }
+            if (generated_unit_disabled_[UnitIndex] != 0u) {
+                // Mixed buckets can contain PSP import/HLE/host replacements.
+                // Exact per-PC chaining remains mandatory for those units.
+                if constexpr (DirectTargetPc != 0u) {
+                    ctx.pc = DirectTargetPc;
+                    return invoke_chained_call(ctx, shared_aot_mem);
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            static_assert(UnitIndex < kGeneratedUnitFastCapacity,
+                          "trusted generated unit index outside fast table");
         }
         if (chain_depth_ >= chain_depth_limit_) {
             // The caller removed the ordinary ctx.pc=target store from the hot
@@ -311,27 +311,72 @@ public:
         return run_starvation_boundary(ctx);
     }
 
-    // V8.7 tiny-leaf AOT lowering uses this guard before executing a statically
-    // proven no-call leaf directly in the caller. Keep every rare fallback
-    // condition identical to invoke_chained_direct; diagnostics and poisoned
-    // units therefore retain the original wrapper path. The leaf contains no
-    // nested generated/HLE/syscall edge, so chain depth only needs to be checked
-    // at entry rather than incremented for the duration of its straight-line body.
-    template <std::uint32_t UnitIndex>
-    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool can_inline_generated_leaf() const noexcept {
+    template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId = 0u,
+              std::uint32_t DirectTargetPc = 0u>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_chained_direct(
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
+        return invoke_chained_direct_impl<false, Function, UnitIndex, DirectEntryId, DirectTargetPc>(
+            ctx, shared_aot_mem);
+    }
+
+    template <auto Function, std::uint32_t UnitIndex, std::uint16_t DirectEntryId = 0u,
+              std::uint32_t DirectTargetPc = 0u>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_chained_trusted_direct(
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
+        return invoke_chained_direct_impl<true, Function, UnitIndex, DirectEntryId, DirectTargetPc>(
+            ctx, shared_aot_mem);
+    }
+
+    // Profile-selected compact generated leaves. Unlike V8.7 body inlining,
+    // the translated leaf exists once out-of-line and callers only bypass the
+    // giant generated-unit entry switch. Eligibility is intentionally external
+    // to the generic Runtime: a title optimizer may use this only for proven
+    // leaves containing no nested call/import/host boundary.
+    template <auto Function, std::uint32_t UnitIndex, std::uint32_t DirectTargetPc>
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool invoke_compact_generated_leaf(
+        AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem = nullptr) {
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
-        // Keep diagnostics/debug builds on the canonical wrapper so all observer,
-        // dispatch-counter and chain-depth instrumentation remains byte-for-byte
-        // equivalent to the pre-V8.7 runtime. Production VCS builds explicitly
-        // enable PSPRECOMP_AOT_PRODUCTION_FASTPATHS.
-        return false;
-#else
-        if (UnitIndex >= kGeneratedUnitFastCapacity || !generated_unit_layout_valid_) return false;
+        if (g_runtime_chain_observers_active) {
+            ctx.pc = DirectTargetPc;
+            return invoke_chained_unit(ctx, UnitIndex, shared_aot_mem);
+        }
+#endif
+        static_assert(UnitIndex < kGeneratedUnitFastCapacity,
+                      "compact generated leaf unit outside fast table");
+        if (chain_depth_ >= chain_depth_limit_) {
+            ctx.pc = DirectTargetPc;
+            return false;
+        }
+        struct DepthGuard {
+            std::uint32_t &depth;
+            explicit DepthGuard(std::uint32_t &value) : depth(value) { ++depth; }
+            ~DepthGuard() { --depth; }
+        } guard(chain_depth_);
+        if (shared_aot_mem != nullptr) {
+            Function(ctx, *shared_aot_mem);
+        } else {
+            auto local_aot_mem = memory_.aot_fast_view();
+            Function(ctx, local_aot_mem);
+        }
 #if defined(PSPRECOMP_RUNTIME_CHAIN_TELEMETRY)
-        if (g_unit_profile_enabled || g_guest_hotspot_profile_enabled) return false;
+        if (g_unit_profile_enabled && UnitIndex < kUnitProfileCapacity)
+            ++g_unit_profile_counts[UnitIndex];
 #endif
-        return generated_unit_disabled_[UnitIndex] == 0u && chain_depth_ < chain_depth_limit_;
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        if (track_dispatch_counters_) {
+            ++chained_dispatches_;
+            ++dispatch_work_count_;
+        }
 #endif
+        if (chain_context_invalidated_) {
+            const std::uint64_t interval = g_runtime_starvation_interval_fast;
+            if (interval != 0u) ++dispatches_since_import_;
+            return false;
+        }
+        const std::uint64_t starvation_interval = g_runtime_starvation_interval_fast;
+        if (starvation_interval == 0u) return true;
+        if (++dispatches_since_import_ < starvation_interval) return true;
+        return run_starvation_boundary(ctx);
     }
 
     // Tier-2 hot-leaf lowering keeps the scheduler accounting that an ordinary

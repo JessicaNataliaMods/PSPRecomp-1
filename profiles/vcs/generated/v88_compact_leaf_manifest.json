@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "stage": "perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18",
+  "targets": [
+    {
+      "pc": "0x08960424",
+      "unit": 87,
+      "function": "vcs_compact_leaf_08960424",
+      "sites": 785
+    },
+    {
+      "pc": "0x0898B428",
+      "unit": 97,
+      "function": "vcs_compact_leaf_0898B428",
+      "sites": 456
+    },
+    {
+      "pc": "0x08AFEF7C",
+      "unit": 190,
+      "function": "vcs_compact_leaf_08AFEF7C",
+      "sites": 308
+    },
+    {
+      "pc": "0x08A931B8",
+      "unit": 163,
+      "function": "vcs_compact_leaf_08A931B8",
+      "sites": 336
+    }
+  ],
+  "sites": 1885,
+  "changed_files_this_run": 0,
+  "changed_sites_this_run": 0
+}

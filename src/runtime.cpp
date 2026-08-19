@@ -848,6 +848,12 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
         const RuntimeStarvationHook starvation = g_starvation_hook;
         const std::uint64_t starvation_every = starvation != nullptr ? g_starvation_interval : 0u;
         std::uint64_t executed_dispatches = 0u;
+        // V8.8 outer-dispatch fast path: GuestMemory guarantees that AotFastView
+        // remains valid for the lifetime of the fixed PSP RAM/fastmem mapping.
+        // Reuse one view instead of rebuilding its RAM pointers/limits every
+        // time a generated unit returns to Runtime (notably the 256-transfer
+        // local-dispatch safety boundary).
+        auto outer_aot_mem = memory_.aot_fast_view();
         for (; executed_dispatches < max_dispatches && !stopped_; ++executed_dispatches) {
             const std::uint32_t before = cpu_.pc;
             chain_context_invalidated_ = false;
@@ -858,7 +864,21 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
             // cost a cache/TLB miss at every outer return.  Any unit containing
             // a host/import override is poisoned at registration and falls
             // back to exact per-PC dispatch automatically.
-            RecompiledFunction function = lookup_generated_unit(before);
+            RecompiledFunction function = nullptr;
+            RecompiledEntryFunction generated_entry = nullptr;
+            if (generated_unit_layout_valid_ && generated_unit_span_ != 0u) {
+                const std::uint32_t canonical_pc = memory_.canonical(before);
+                if (canonical_pc >= generated_unit_base_) {
+                    const std::uint32_t unit_delta = canonical_pc - generated_unit_base_;
+                    const std::size_t unit_index = generated_unit_span_ == 16384u
+                        ? static_cast<std::size_t>(unit_delta >> 14u)
+                        : static_cast<std::size_t>(unit_delta / generated_unit_span_);
+                    if (unit_index < kGeneratedUnitFastCapacity) {
+                        function = generated_units_[unit_index];
+                        if (function != nullptr) generated_entry = generated_unit_entries_[unit_index];
+                    }
+                }
+            }
             if (function == nullptr) function = lookup_function(before);
             if (function == nullptr) {
                 stop("No recompiled function registered at " + hex32(before));
@@ -869,7 +889,10 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
             if (g_pre_dispatch_hook != nullptr)
                 g_pre_dispatch_hook(*this, cpu_, before, dispatch_thread_uid);
             try {
-                function(*this, cpu_);
+                if (generated_entry != nullptr)
+                    generated_entry(*this, cpu_, 0u, outer_aot_mem);
+                else
+                    function(*this, cpu_);
             } catch (const Error &e) {
                 const FunctionEntry *function_entry = lookup_entry(before);
                 const std::string name = function_entry != nullptr ? function_entry->name : "unknown";

@@ -810,18 +810,54 @@ std::string generated_unit_cpp_entry_name(std::uint32_t unit) {
     return generated_unit_cpp_name(unit) + "_entry";
 }
 
+// V8.8 VCS profile proof: these five 16 KiB buckets contain exact host/import
+// replacements and therefore must retain the runtime poisoned-unit check. Every
+// other fixed generated bucket can use the generic trusted direct-chain API.
+bool vcs_generated_unit_is_trusted(std::uint32_t unit) {
+    switch (unit) {
+    case 44u:   // vcs_path_hash host override
+    case 197u:  // codec module host override
+    case 212u:  // vcs_sprintf host override
+    case 216u:  // raw deflate host override
+    case 219u:  // PSP import stubs
+        return false;
+    default:
+        return unit < 234u;
+    }
+}
+
+const char *vcs_compact_generated_leaf(std::uint32_t target) {
+    switch (target) {
+    case 0x08960424u: return "vcs_compact_leaf_08960424";
+    case 0x0898B428u: return "vcs_compact_leaf_0898B428";
+    case 0x08AFEF7Cu: return "vcs_compact_leaf_08AFEF7C";
+    case 0x08A931B8u: return "vcs_compact_leaf_08A931B8";
+    default: return nullptr;
+    }
+}
+
 std::string direct_unit_chain_expression(
     std::uint32_t unit, std::uint32_t target,
     const std::map<std::uint32_t, std::uint16_t> *direct_entry_ids) {
+    if (const char *compact = vcs_compact_generated_leaf(target)) {
+        return "rt.invoke_compact_generated_leaf<&" + std::string(compact) + ", " +
+            std::to_string(unit) + "u, " + psprecomp::hex32(target) + "u>(ctx, &aot_mem)";
+    }
     if (direct_entry_ids != nullptr) {
         const auto found = direct_entry_ids->find(target);
         if (found != direct_entry_ids->end() && found->second != 0u) {
-            return "rt.invoke_chained_direct<&" + generated_unit_cpp_entry_name(unit) + ", " +
+            const char *invoke = vcs_generated_unit_is_trusted(unit)
+                ? "rt.invoke_chained_trusted_direct<&"
+                : "rt.invoke_chained_direct<&";
+            return std::string(invoke) + generated_unit_cpp_entry_name(unit) + ", " +
                 std::to_string(unit) + "u, " + std::to_string(found->second) + "u, " +
                 psprecomp::hex32(target) + "u>(ctx, &aot_mem)";
         }
     }
-    return "rt.invoke_chained_direct<&" + generated_unit_cpp_name(unit) + ", " +
+    const char *invoke = vcs_generated_unit_is_trusted(unit)
+        ? "rt.invoke_chained_trusted_direct<&"
+        : "rt.invoke_chained_direct<&";
+    return std::string(invoke) + generated_unit_cpp_name(unit) + ", " +
         std::to_string(unit) + "u>(ctx, &aot_mem)";
 }
 
@@ -1672,7 +1708,7 @@ int generate_auto(const std::filesystem::path &elf_path,
     // instead of forcing every known edge through a function-pointer branch.
     const auto units_header_path = output_dir / "generated_units.hpp";
     std::ostringstream units_header;
-    units_header << "#pragma once\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n#include \"vcs_draw_distance_patch.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\n";
+    units_header << "#pragma once\n#include \"../host/vcs_compact_leaves.hpp\"\n\n#include <cstdint>\n#include \"psprecomp/guest_memory.hpp\"\n#include \"vcs_draw_distance_patch.hpp\"\n\nnamespace psprecomp {\nclass Runtime;\nstruct AllegrexContext;\n";
     for (const auto &unit : units) {
         units_header << "void " << generated_unit_cpp_name(unit.bucket)
                      << "(Runtime &, AllegrexContext &);\n";

@@ -545,7 +545,7 @@ SB_L_0895C118:
     tier2_gpr_4 = (ctx.gpr[19] | 0u);
     ctx.gpr[31] = (0x0895C1B4u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C1B4u) goto SB_L_0895C1B4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C1B4u) goto SB_L_0895C1B4;
     TIER2_SB_RETURN();
 
 SB_L_0895C1B4:
@@ -567,7 +567,7 @@ SB_L_0895C1D4:
     tier2_gpr_4 = (ctx.gpr[19] | 0u);
     ctx.gpr[31] = (0x0895C1E0u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C1E0u) goto SB_L_0895C1E0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C1E0u) goto SB_L_0895C1E0;
     TIER2_SB_RETURN();
 
 SB_L_0895C1E0:
@@ -592,7 +592,7 @@ SB_L_0895C208:
     tier2_gpr_4 = (tier2_gpr_7 | 0u);
     ctx.gpr[31] = (0x0895C214u);
     tier2_gpr_5 = (ctx.gpr[19] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0129_entry, 129u, 246u, 0x08A09B2Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C214u) goto SB_L_0895C214;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0129_entry, 129u, 246u, 0x08A09B2Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C214u) goto SB_L_0895C214;
     TIER2_SB_RETURN();
 
 SB_L_0895C214:
@@ -700,7 +700,7 @@ SB_L_0895C318:
     tier2_gpr_4 = (0u | 11u);
     ctx.gpr[31] = (0x0895C324u);
     tier2_gpr_5 = (0u | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 179u, 0x088614B4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C324u) goto SB_L_0895C324;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 179u, 0x088614B4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C324u) goto SB_L_0895C324;
     TIER2_SB_RETURN();
 
 SB_L_0895C324:
@@ -712,7 +712,7 @@ SB_L_0895C324:
     tier2_gpr_4 = (0u | 11u);
     ctx.gpr[31] = (0x0895C34Cu);
     tier2_gpr_5 = (0u | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C34Cu) goto SB_L_0895C34C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C34Cu) goto SB_L_0895C34C;
     TIER2_SB_RETURN();
 
 SB_L_0895C34C:
@@ -986,7 +986,7 @@ SB_L_0895C6FC:
     tier2_gpr_4 = (tier2_mem.aot_load32(tier2_gpr_4 + static_cast<std::uint32_t>(0)));
     ctx.gpr[31] = (0x0895C708u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C708u) goto SB_L_0895C708;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C708u) goto SB_L_0895C708;
     TIER2_SB_RETURN();
 
 SB_L_0895C708:
@@ -1134,13 +1134,13 @@ SB_L_0895C878:
     tier2_gpr_4 = (0u | 0u);
     ctx.gpr[31] = (0x0895C884u);
     ctx.fpr[12] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C884u) goto SB_L_0895C884;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0199_entry, 199u, 283u, 0x08B217D4u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C884u) goto SB_L_0895C884;
     TIER2_SB_RETURN();
 
 SB_L_0895C884:
     ctx.gpr[31] = (0x0895C88Cu);
     // nop
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 200u, 0x088615BCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C88Cu) goto SB_L_0895C88C;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 200u, 0x088615BCu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C88Cu) goto SB_L_0895C88C;
     TIER2_SB_RETURN();
 
 SB_L_0895C88C:
@@ -1154,7 +1154,7 @@ SB_L_0895C88C:
     tier2_gpr_5 = (tier2_mem.aot_load8(tier2_gpr_29 + static_cast<std::uint32_t>(129)));
     ctx.gpr[31] = (0x0895C8C4u);
     tier2_gpr_4 = (0u | 11u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C8C4u) goto SB_L_0895C8C4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 203u, 0x08861668u>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x0895C8C4u) goto SB_L_0895C8C4;
     TIER2_SB_RETURN();
 
 SB_L_0895C8C4:

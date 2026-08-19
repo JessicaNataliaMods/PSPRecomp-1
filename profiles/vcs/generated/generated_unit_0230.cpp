@@ -131,6 +131,15 @@ static const std::uint16_t kEntryIds_recomp_unit_0230[3898] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40,
 };
 void recomp_unit_0230_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
+// PSPRECOMP_AOT_REGCACHE_BEGIN
+// PSPRECOMP_AOT_REGCACHE_META gprs=25,12,1 fprs= gpr_occ=5 fpr_occ=0 gpr_total=5 fpr_total=0
+    std::uint32_t aot_gpr_25 = ctx.gpr[25];
+    std::uint32_t aot_gpr_12 = ctx.gpr[12];
+    std::uint32_t aot_gpr_1 = ctx.gpr[1];
+    bool aot_regcache_valid = true;
+#define AOT_REGCACHE_SYNC_OUT() do { if (aot_regcache_valid) { ctx.gpr[25] = aot_gpr_25; ctx.gpr[12] = aot_gpr_12; ctx.gpr[1] = aot_gpr_1; } } while (false)
+#define AOT_REGCACHE_SYNC_IN() do { if (aot_regcache_valid) { aot_gpr_25 = ctx.gpr[25]; aot_gpr_12 = ctx.gpr[12]; aot_gpr_1 = ctx.gpr[1]; } } while (false)
+// PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -185,7 +194,7 @@ LOCAL_DISPATCH:
     default:
         if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, "invalid internal function entry");
         else ctx.pc = local_pc;
-        return;
+        AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
 L_08B9C000:
@@ -1813,37 +1822,43 @@ L_08B9D824:
     // nop
     goto L_08B9D8D0;
 L_08B9D8D0:
-    rt.unsupported(0x08B9D8D0u, 0x6B6F6D73u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9D8D0u, 0x6B6F6D73u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9D99C:
-    rt.unsupported(0x08B9D99Cu, 0x00003630u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9D99Cu, 0x00003630u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DAE4:
     // nop
     (void)(0u >> 0u);
     (void)(0u >> (0u & 31u));
     // nop
-    ctx.gpr[12] = (52429u << 16u);
-    ctx.gpr[25] = (39322u << 16u);
+    aot_gpr_12 = (52429u << 16u);
+    aot_gpr_25 = (39322u << 16u);
     // nop
-    rt.unsupported(0x08B9DB00u, 0x00000001u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DB00u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DB1C:
     // nop
     // nop
     // PSP CACHE is a no-op in coherent host memory.
     (void)(0u << 16u);
     // nop
-    rt.unsupported(0x08B9DB30u, 0x00000001u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DB30u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DBB0:
     // nop
-    ctx.gpr[25] = (39322u << 16u);
-    ctx.gpr[25] = (39322u << 16u);
+    aot_gpr_25 = (39322u << 16u);
+    aot_gpr_25 = (39322u << 16u);
     // nop
     if (0u == 0u) (void)(0u);
-    rt.unsupported(0x08B9DBC4u, 0x00000005u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DBC4u, 0x00000005u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DBD8:
     (void)(0u < 0u ? 1u : 0u);
     (void)(static_cast<std::int32_t>(0u) > static_cast<std::int32_t>(0u) ? 0u : 0u);
     (void)(static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(0u) ? 0u : 0u);
-    rt.unsupported(0x08B9DBE4u, 0x000000EEu, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DBE4u, 0x000000EEu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DC1C:
     if (0u != 0u) (void)(0u);
     (void)(static_cast<std::int32_t>(0u) < static_cast<std::int32_t>(0u) ? 0u : 0u);
@@ -1851,16 +1866,19 @@ L_08B9DC1C:
     goto L_08B9DC28;
 L_08B9DC28:
     // nop
-    rt.unsupported(0x08B9DC30u, 0x08BAD118u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DC30u, 0x08BAD118u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DC48:
     // nop
     // nop
     goto L_08B9DC50;
 L_08B9DC50:
-    rt.unsupported(0x08B9DC50u, 0x00000001u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DC50u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DC70:
-    (void)(ctx.gpr[1] << 0u);
-    rt.unsupported(0x08B9DC74u, 0x00020001u, "special? not lowered yet"); return;
+    (void)(aot_gpr_1 << 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B9DC74u, 0x00020001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B9DCF0:
     // nop
     // nop
@@ -4126,8 +4144,11 @@ L_08B9FCE4:
     // nop
     // nop
     // nop
-    ctx.pc = 0x08BA0000u; return;
+    ctx.pc = 0x08BA0000u; AOT_REGCACHE_SYNC_OUT(); return;
 }
+
+#undef AOT_REGCACHE_SYNC_IN
+#undef AOT_REGCACHE_SYNC_OUT
 
 void recomp_unit_0230(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();

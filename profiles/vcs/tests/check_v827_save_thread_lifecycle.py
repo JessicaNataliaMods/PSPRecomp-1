@@ -23,7 +23,8 @@ need(('stage=correctness-v8.2.7-save-thread-lifecycle-fix-2026-08-18' in log) or
      ('stage=perf-v8.4-aggressive-cpu-direct-2026-08-18' in log) or
      ('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or
      ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or
-     ('stage=perf-v8.7-extreme-cpu-tiny-leaf-2026-08-18' in log),
+     ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or
+     ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log),
      'V8.2.7 correctness lineage runtime stage')
 need(('correctness_revision=827 ' in log) or ('correctness_revision=8271 ' in log) or ('correctness_revision=8272 ' in log), 'V8.2.7/V8.2.7A correctness revision')
 need('save_exitdelete_semantics=1' in log and 'save_repro_legacy_exitdelete_repair=1' in log and 'save_partition_reuse=1' in log,

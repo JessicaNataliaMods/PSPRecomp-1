@@ -137,6 +137,18 @@ static const std::uint16_t kEntryIds_recomp_unit_0232[4091] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 264,
 };
 void recomp_unit_0232_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
+// PSPRECOMP_AOT_REGCACHE_BEGIN
+// PSPRECOMP_AOT_REGCACHE_META gprs=16,1,25,12,31,18 fprs= gpr_occ=32 fpr_occ=0 gpr_total=56 fpr_total=0
+    std::uint32_t aot_gpr_16 = ctx.gpr[16];
+    std::uint32_t aot_gpr_1 = ctx.gpr[1];
+    std::uint32_t aot_gpr_25 = ctx.gpr[25];
+    std::uint32_t aot_gpr_12 = ctx.gpr[12];
+    std::uint32_t aot_gpr_31 = ctx.gpr[31];
+    std::uint32_t aot_gpr_18 = ctx.gpr[18];
+    bool aot_regcache_valid = true;
+#define AOT_REGCACHE_SYNC_OUT() do { if (aot_regcache_valid) { ctx.gpr[16] = aot_gpr_16; ctx.gpr[1] = aot_gpr_1; ctx.gpr[25] = aot_gpr_25; ctx.gpr[12] = aot_gpr_12; ctx.gpr[31] = aot_gpr_31; ctx.gpr[18] = aot_gpr_18; } } while (false)
+#define AOT_REGCACHE_SYNC_IN() do { if (aot_regcache_valid) { aot_gpr_16 = ctx.gpr[16]; aot_gpr_1 = ctx.gpr[1]; aot_gpr_25 = ctx.gpr[25]; aot_gpr_12 = ctx.gpr[12]; aot_gpr_31 = ctx.gpr[31]; aot_gpr_18 = ctx.gpr[18]; } } while (false)
+// PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -415,7 +427,7 @@ LOCAL_DISPATCH:
     default:
         if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, "invalid internal function entry");
         else ctx.pc = local_pc;
-        return;
+        AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
 L_08BA4000:
@@ -436,38 +448,46 @@ L_08BA4000:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08BA4044u, 0x40000000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4044u, 0x40000000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4078:
-    ctx.gpr[18] = (ctx.gpr[25] & 12592u);
-    ctx.gpr[22] = (ctx.gpr[25] | 13620u);
-    rt.unsupported(0x08BA4080u, 0x62613938u, "vfpu0 not lowered yet"); return;
+    aot_gpr_18 = (aot_gpr_25 & 12592u);
+    ctx.gpr[22] = (aot_gpr_25 | 13620u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4080u, 0x62613938u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA40D0:
-    rt.unsupported(0x08BA40D0u, 0x20202020u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA40D0u, 0x20202020u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA40D8:
-    rt.unsupported(0x08BA40D8u, 0x20202020u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA40D8u, 0x20202020u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA40E0:
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
     // nop
     // nop
     // nop
-    rt.unsupported(0x08BA40FCu, 0xC0100000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA40FCu, 0xC0100000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4128:
-    rt.unsupported(0x08BA4128u, 0x20202020u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4128u, 0x20202020u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4138:
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
-    ctx.gpr[16] = (ctx.gpr[1] & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
+    aot_gpr_16 = (aot_gpr_1 & 12336u);
     // nop
     // nop
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> (0u & 31u)));
     // nop
-    rt.unsupported(0x08BA4158u, 0x00000030u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4158u, 0x00000030u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4174:
-    rt.unsupported(0x08BA4178u, 0x08B89C6Cu, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4178u, 0x08B89C6Cu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA41B8:
     // nop
     // nop
@@ -475,19 +495,20 @@ L_08BA41B8:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(0u + static_cast<std::uint32_t>(0))))));
     ctx.eat_vfpu_prefixes(); // VFPU sync/no-op consumes prefixes
     ctx.gpr[6] = (11842u << 16u);
-    ctx.gpr[25] = (ctx.gpr[11] | 15478u);
+    aot_gpr_25 = (ctx.gpr[11] | 15478u);
     ctx.gpr[10] = (14831u << 16u);
     // nop
-    rt.unsupported(0x08BA41DCu, 0x43500000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA41DCu, 0x43500000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA41E8:
-    ctx.gpr[23] = (aot_mem.aot_direct_load_word_right(ctx.gpr[12] + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
-    ctx.gpr[25] = (39321u << 16u);
-    ctx.gpr[2] = (aot_mem.aot_direct_load16(ctx.gpr[1] + static_cast<std::uint32_t>(-27815)));
-    ctx.gpr[18] = (18724u << 16u);
-    { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[12]) > 0;
-    ctx.gpr[12] = (29125u << 16u);
+    ctx.gpr[23] = (aot_mem.aot_direct_load_word_right(aot_gpr_12 + static_cast<std::uint32_t>(-1532), ctx.gpr[23]));
+    aot_gpr_25 = (39321u << 16u);
+    ctx.gpr[2] = (aot_mem.aot_direct_load16(aot_gpr_1 + static_cast<std::uint32_t>(-27815)));
+    aot_gpr_18 = (18724u << 16u);
+    { const bool branch_taken = static_cast<std::int32_t>(aot_gpr_12) > 0;
+    aot_gpr_12 = (29125u << 16u);
       if (branch_taken) {
-          ctx.pc = 0x08BC24B8u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+          ctx.pc = 0x08BC24B8u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
       }
       goto L_08BA4200;
     }
@@ -506,313 +527,449 @@ L_08BA4200:
     { const bool branch_taken = ctx.gpr[9] != ctx.gpr[6];
     ctx.gpr[27] = (52091u << 16u);
       if (branch_taken) {
-          (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 17u, 0x08B9D65Cu>(ctx, &aot_mem); return;
+          (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0230_entry, 230u, 17u, 0x08B9D65Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
       }
       goto L_08BA4228;
     }
 L_08BA4228:
-    if (ctx.gpr[4] == ctx.gpr[31]) {
+    if (ctx.gpr[4] == aot_gpr_31) {
     ctx.gpr[19] = (17427u << 16u);
-        ctx.pc = 0x08BBC22Cu; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+        ctx.pc = 0x08BBC22Cu; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08BA4230;
 L_08BA4230:
     { const bool branch_taken = ctx.gpr[15] == ctx.gpr[17];
-    ctx.gpr[25] = (65267u << 16u);
+    aot_gpr_25 = (65267u << 16u);
       if (branch_taken) {
-          ctx.pc = 0x08BAEF0Cu; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+          ctx.pc = 0x08BAEF0Cu; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
       }
       goto L_08BA4238;
     }
 L_08BA4238:
     // nop
-    ctx.gpr[16] = ((ctx.gpr[31] >> 0u) & 0x00000001u);
+    aot_gpr_16 = ((aot_gpr_31 >> 0u) & 0x00000001u);
     // nop
-    rt.unsupported(0x08BA4244u, 0xC3500000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4244u, 0xC3500000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4250:
     // nop
     (void)(0u << 16u);
     // nop
-    rt.unsupported(0x08BA425Cu, 0x40000000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA425Cu, 0x40000000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4260:
     // nop
-    ctx.gpr[16] = (0u << 16u);
+    aot_gpr_16 = (0u << 16u);
     // nop
-    rt.unsupported(0x08BA426Cu, 0x40240000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA426Cu, 0x40240000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA42D4:
-    rt.unsupported(0x08BA42D4u, 0x42D6BCC4u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA42D4u, 0x42D6BCC4u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA42D8:
     ctx.gpr[20] = (ctx.gpr[17] + static_cast<std::uint32_t>(0));
-    rt.unsupported(0x08BA42DCu, 0x430C6BF5u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA42DCu, 0x430C6BF5u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4328:
-    (void)(ctx.gpr[31] | 32768u);
-    rt.unsupported(0x08BA432Cu, 0x4341C379u, "unknown not lowered yet"); return;
+    (void)(aot_gpr_31 | 32768u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA432Cu, 0x4341C379u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA434C:
-    rt.unsupported(0x08BA434Cu, 0x75154FDDu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA434Cu, 0x75154FDDu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4350:
     ctx.gpr[24] = (aot_mem.aot_direct_load16(ctx.gpr[30] + static_cast<std::uint32_t>(-30276)));
     ctx.gpr[28] = (53938u << 16u);
-    rt.unsupported(0x08BA4358u, 0xD5A8A733u, "vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4358u, 0xD5A8A733u, "vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4378:
-    rt.unsupported(0x08BA4378u, 0x00000005u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4378u, 0x00000005u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4388:
     // nop
     // nop
     goto L_08BA4390;
 L_08BA4390:
-    rt.unsupported(0x08BA4394u, 0x08BA4388u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4394u, 0x08BA4388u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4398:
-    rt.unsupported(0x08BA439Cu, 0x08BA4390u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA439Cu, 0x08BA4390u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43A0:
-    rt.unsupported(0x08BA43A4u, 0x08BA4398u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43A4u, 0x08BA4398u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43A8:
-    rt.unsupported(0x08BA43ACu, 0x08BA43A0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43ACu, 0x08BA43A0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43B0:
-    rt.unsupported(0x08BA43B4u, 0x08BA43A8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43B4u, 0x08BA43A8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43B8:
-    rt.unsupported(0x08BA43BCu, 0x08BA43B0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43BCu, 0x08BA43B0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43C0:
-    rt.unsupported(0x08BA43C4u, 0x08BA43B8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43C4u, 0x08BA43B8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43C8:
-    rt.unsupported(0x08BA43CCu, 0x08BA43C0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43CCu, 0x08BA43C0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43D0:
-    rt.unsupported(0x08BA43D4u, 0x08BA43C8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43D4u, 0x08BA43C8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43D8:
-    rt.unsupported(0x08BA43DCu, 0x08BA43D0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43DCu, 0x08BA43D0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43E0:
-    rt.unsupported(0x08BA43E4u, 0x08BA43D8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43E4u, 0x08BA43D8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43E8:
-    rt.unsupported(0x08BA43ECu, 0x08BA43E0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43ECu, 0x08BA43E0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43F0:
-    rt.unsupported(0x08BA43F4u, 0x08BA43E8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43F4u, 0x08BA43E8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA43F8:
-    rt.unsupported(0x08BA43FCu, 0x08BA43F0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA43FCu, 0x08BA43F0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4400:
-    rt.unsupported(0x08BA4404u, 0x08BA43F8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4404u, 0x08BA43F8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4408:
-    rt.unsupported(0x08BA440Cu, 0x08BA4400u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA440Cu, 0x08BA4400u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4410:
-    rt.unsupported(0x08BA4414u, 0x08BA4408u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4414u, 0x08BA4408u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4418:
-    rt.unsupported(0x08BA441Cu, 0x08BA4410u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA441Cu, 0x08BA4410u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4420:
-    rt.unsupported(0x08BA4424u, 0x08BA4418u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4424u, 0x08BA4418u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4428:
-    rt.unsupported(0x08BA442Cu, 0x08BA4420u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA442Cu, 0x08BA4420u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4430:
-    rt.unsupported(0x08BA4434u, 0x08BA4428u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4434u, 0x08BA4428u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4438:
-    rt.unsupported(0x08BA443Cu, 0x08BA4430u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA443Cu, 0x08BA4430u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4440:
-    rt.unsupported(0x08BA4444u, 0x08BA4438u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4444u, 0x08BA4438u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4448:
-    rt.unsupported(0x08BA444Cu, 0x08BA4440u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA444Cu, 0x08BA4440u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4450:
-    rt.unsupported(0x08BA4454u, 0x08BA4448u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4454u, 0x08BA4448u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4458:
-    rt.unsupported(0x08BA445Cu, 0x08BA4450u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA445Cu, 0x08BA4450u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4460:
-    rt.unsupported(0x08BA4464u, 0x08BA4458u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4464u, 0x08BA4458u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4468:
-    rt.unsupported(0x08BA446Cu, 0x08BA4460u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA446Cu, 0x08BA4460u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4470:
-    rt.unsupported(0x08BA4474u, 0x08BA4468u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4474u, 0x08BA4468u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4478:
-    rt.unsupported(0x08BA447Cu, 0x08BA4470u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA447Cu, 0x08BA4470u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4480:
-    rt.unsupported(0x08BA4484u, 0x08BA4478u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4484u, 0x08BA4478u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4488:
-    rt.unsupported(0x08BA448Cu, 0x08BA4480u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA448Cu, 0x08BA4480u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4490:
-    rt.unsupported(0x08BA4494u, 0x08BA4488u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4494u, 0x08BA4488u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4498:
-    rt.unsupported(0x08BA449Cu, 0x08BA4490u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA449Cu, 0x08BA4490u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44A0:
-    rt.unsupported(0x08BA44A4u, 0x08BA4498u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44A4u, 0x08BA4498u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44A8:
-    rt.unsupported(0x08BA44ACu, 0x08BA44A0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44ACu, 0x08BA44A0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44B0:
-    rt.unsupported(0x08BA44B4u, 0x08BA44A8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44B4u, 0x08BA44A8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44B8:
-    rt.unsupported(0x08BA44BCu, 0x08BA44B0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44BCu, 0x08BA44B0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44C0:
-    rt.unsupported(0x08BA44C4u, 0x08BA44B8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44C4u, 0x08BA44B8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44C8:
-    rt.unsupported(0x08BA44CCu, 0x08BA44C0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44CCu, 0x08BA44C0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44D0:
-    rt.unsupported(0x08BA44D4u, 0x08BA44C8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44D4u, 0x08BA44C8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44D8:
-    rt.unsupported(0x08BA44DCu, 0x08BA44D0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44DCu, 0x08BA44D0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44E0:
-    rt.unsupported(0x08BA44E4u, 0x08BA44D8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44E4u, 0x08BA44D8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44E8:
-    rt.unsupported(0x08BA44ECu, 0x08BA44E0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44ECu, 0x08BA44E0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44F0:
-    rt.unsupported(0x08BA44F4u, 0x08BA44E8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44F4u, 0x08BA44E8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA44F8:
-    rt.unsupported(0x08BA44FCu, 0x08BA44F0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA44FCu, 0x08BA44F0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4500:
-    rt.unsupported(0x08BA4504u, 0x08BA44F8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4504u, 0x08BA44F8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4508:
-    rt.unsupported(0x08BA450Cu, 0x08BA4500u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA450Cu, 0x08BA4500u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4510:
-    rt.unsupported(0x08BA4514u, 0x08BA4508u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4514u, 0x08BA4508u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4518:
-    rt.unsupported(0x08BA451Cu, 0x08BA4510u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA451Cu, 0x08BA4510u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4520:
-    rt.unsupported(0x08BA4524u, 0x08BA4518u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4524u, 0x08BA4518u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4528:
-    rt.unsupported(0x08BA452Cu, 0x08BA4520u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA452Cu, 0x08BA4520u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4530:
-    rt.unsupported(0x08BA4534u, 0x08BA4528u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4534u, 0x08BA4528u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4538:
-    rt.unsupported(0x08BA453Cu, 0x08BA4530u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA453Cu, 0x08BA4530u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4540:
-    rt.unsupported(0x08BA4544u, 0x08BA4538u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4544u, 0x08BA4538u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4548:
-    rt.unsupported(0x08BA454Cu, 0x08BA4540u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA454Cu, 0x08BA4540u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4550:
-    rt.unsupported(0x08BA4554u, 0x08BA4548u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4554u, 0x08BA4548u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4558:
-    rt.unsupported(0x08BA455Cu, 0x08BA4550u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA455Cu, 0x08BA4550u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4560:
-    rt.unsupported(0x08BA4564u, 0x08BA4558u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4564u, 0x08BA4558u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4568:
-    rt.unsupported(0x08BA456Cu, 0x08BA4560u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA456Cu, 0x08BA4560u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4570:
-    rt.unsupported(0x08BA4574u, 0x08BA4568u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4574u, 0x08BA4568u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4578:
-    rt.unsupported(0x08BA457Cu, 0x08BA4570u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA457Cu, 0x08BA4570u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4580:
-    rt.unsupported(0x08BA4584u, 0x08BA4578u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4584u, 0x08BA4578u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4588:
-    rt.unsupported(0x08BA458Cu, 0x08BA4580u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA458Cu, 0x08BA4580u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4590:
-    rt.unsupported(0x08BA4594u, 0x08BA4588u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4594u, 0x08BA4588u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4598:
-    rt.unsupported(0x08BA459Cu, 0x08BA4590u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA459Cu, 0x08BA4590u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45A0:
-    rt.unsupported(0x08BA45A4u, 0x08BA4598u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45A4u, 0x08BA4598u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45A8:
-    rt.unsupported(0x08BA45ACu, 0x08BA45A0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45ACu, 0x08BA45A0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45B0:
-    rt.unsupported(0x08BA45B4u, 0x08BA45A8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45B4u, 0x08BA45A8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45B8:
-    rt.unsupported(0x08BA45BCu, 0x08BA45B0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45BCu, 0x08BA45B0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45C0:
-    rt.unsupported(0x08BA45C4u, 0x08BA45B8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45C4u, 0x08BA45B8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45C8:
-    rt.unsupported(0x08BA45CCu, 0x08BA45C0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45CCu, 0x08BA45C0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45D0:
-    rt.unsupported(0x08BA45D4u, 0x08BA45C8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45D4u, 0x08BA45C8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45D8:
-    rt.unsupported(0x08BA45DCu, 0x08BA45D0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45DCu, 0x08BA45D0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45E0:
-    rt.unsupported(0x08BA45E4u, 0x08BA45D8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45E4u, 0x08BA45D8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45E8:
-    rt.unsupported(0x08BA45ECu, 0x08BA45E0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45ECu, 0x08BA45E0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45F0:
-    rt.unsupported(0x08BA45F4u, 0x08BA45E8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45F4u, 0x08BA45E8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA45F8:
-    rt.unsupported(0x08BA45FCu, 0x08BA45F0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA45FCu, 0x08BA45F0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4600:
-    rt.unsupported(0x08BA4604u, 0x08BA45F8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4604u, 0x08BA45F8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4608:
-    rt.unsupported(0x08BA460Cu, 0x08BA4600u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA460Cu, 0x08BA4600u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4610:
-    rt.unsupported(0x08BA4614u, 0x08BA4608u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4614u, 0x08BA4608u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4618:
-    rt.unsupported(0x08BA461Cu, 0x08BA4610u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA461Cu, 0x08BA4610u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4620:
-    rt.unsupported(0x08BA4624u, 0x08BA4618u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4624u, 0x08BA4618u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4628:
-    rt.unsupported(0x08BA462Cu, 0x08BA4620u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA462Cu, 0x08BA4620u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4630:
-    rt.unsupported(0x08BA4634u, 0x08BA4628u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4634u, 0x08BA4628u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4638:
-    rt.unsupported(0x08BA463Cu, 0x08BA4630u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA463Cu, 0x08BA4630u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4640:
-    rt.unsupported(0x08BA4644u, 0x08BA4638u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4644u, 0x08BA4638u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4648:
-    rt.unsupported(0x08BA464Cu, 0x08BA4640u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA464Cu, 0x08BA4640u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4650:
-    rt.unsupported(0x08BA4654u, 0x08BA4648u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4654u, 0x08BA4648u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4658:
-    rt.unsupported(0x08BA465Cu, 0x08BA4650u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA465Cu, 0x08BA4650u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4660:
-    rt.unsupported(0x08BA4664u, 0x08BA4658u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4664u, 0x08BA4658u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4668:
-    rt.unsupported(0x08BA466Cu, 0x08BA4660u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA466Cu, 0x08BA4660u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4670:
-    rt.unsupported(0x08BA4674u, 0x08BA4668u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4674u, 0x08BA4668u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4678:
-    rt.unsupported(0x08BA467Cu, 0x08BA4670u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA467Cu, 0x08BA4670u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4680:
-    rt.unsupported(0x08BA4684u, 0x08BA4678u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4684u, 0x08BA4678u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4688:
-    rt.unsupported(0x08BA468Cu, 0x08BA4680u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA468Cu, 0x08BA4680u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4690:
-    rt.unsupported(0x08BA4694u, 0x08BA4688u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4694u, 0x08BA4688u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4698:
-    rt.unsupported(0x08BA469Cu, 0x08BA4690u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA469Cu, 0x08BA4690u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46A0:
-    rt.unsupported(0x08BA46A4u, 0x08BA4698u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46A4u, 0x08BA4698u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46A8:
-    rt.unsupported(0x08BA46ACu, 0x08BA46A0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46ACu, 0x08BA46A0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46B0:
-    rt.unsupported(0x08BA46B4u, 0x08BA46A8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46B4u, 0x08BA46A8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46B8:
-    rt.unsupported(0x08BA46BCu, 0x08BA46B0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46BCu, 0x08BA46B0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46C0:
-    rt.unsupported(0x08BA46C4u, 0x08BA46B8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46C4u, 0x08BA46B8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46C8:
-    rt.unsupported(0x08BA46CCu, 0x08BA46C0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46CCu, 0x08BA46C0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46D0:
-    rt.unsupported(0x08BA46D4u, 0x08BA46C8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46D4u, 0x08BA46C8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46D8:
-    rt.unsupported(0x08BA46DCu, 0x08BA46D0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46DCu, 0x08BA46D0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46E0:
-    rt.unsupported(0x08BA46E4u, 0x08BA46D8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46E4u, 0x08BA46D8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46E8:
-    rt.unsupported(0x08BA46ECu, 0x08BA46E0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46ECu, 0x08BA46E0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46F0:
-    rt.unsupported(0x08BA46F4u, 0x08BA46E8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46F4u, 0x08BA46E8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA46F8:
-    rt.unsupported(0x08BA46FCu, 0x08BA46F0u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA46FCu, 0x08BA46F0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4700:
-    rt.unsupported(0x08BA4704u, 0x08BA46F8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4704u, 0x08BA46F8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4708:
-    rt.unsupported(0x08BA470Cu, 0x08BA4700u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA470Cu, 0x08BA4700u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4710:
-    rt.unsupported(0x08BA4714u, 0x08BA4708u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4714u, 0x08BA4708u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4718:
-    rt.unsupported(0x08BA471Cu, 0x08BA4710u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA471Cu, 0x08BA4710u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4720:
-    rt.unsupported(0x08BA4724u, 0x08BA4718u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4724u, 0x08BA4718u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4728:
-    rt.unsupported(0x08BA472Cu, 0x08BA4720u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA472Cu, 0x08BA4720u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4730:
-    rt.unsupported(0x08BA4734u, 0x08BA4728u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4734u, 0x08BA4728u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4738:
-    rt.unsupported(0x08BA473Cu, 0x08BA4730u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA473Cu, 0x08BA4730u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4740:
-    rt.unsupported(0x08BA4744u, 0x08BA4738u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4744u, 0x08BA4738u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4748:
-    rt.unsupported(0x08BA474Cu, 0x08BA4740u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA474Cu, 0x08BA4740u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4750:
-    rt.unsupported(0x08BA4754u, 0x08BA4748u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4754u, 0x08BA4748u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4758:
-    rt.unsupported(0x08BA475Cu, 0x08BA4750u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA475Cu, 0x08BA4750u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4760:
-    rt.unsupported(0x08BA4764u, 0x08BA4758u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4764u, 0x08BA4758u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4768:
-    rt.unsupported(0x08BA476Cu, 0x08BA4760u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA476Cu, 0x08BA4760u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4770:
-    rt.unsupported(0x08BA4774u, 0x08BA4768u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4774u, 0x08BA4768u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4778:
-    rt.unsupported(0x08BA477Cu, 0x08BA4770u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA477Cu, 0x08BA4770u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4780:
-    rt.unsupported(0x08BA4784u, 0x08BA4778u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA4784u, 0x08BA4778u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4814:
     // nop
     // nop
@@ -829,126 +986,127 @@ L_08BA4838:
     // nop
     // nop
     // nop
-    ctx.pc = 0x02AC02D0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02AC02D0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4870:
     // nop
     // nop
-    ctx.pc = 0x02B3EE70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3EE70u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4884:
     // nop
-    ctx.pc = 0x02B3FF40u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3FF40u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4894:
     // nop
-    ctx.pc = 0x02B418F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B418F0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA48F0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4904:
     // nop
-    ctx.pc = 0x02997DE0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02997DE0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4930:
     // nop
     // nop
-    ctx.pc = 0x02B3F2E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3F2E0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA49C8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0206BD60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0206BD60u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4A88:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D81FF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02D81FF0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4AD0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0208DC70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0208DC70u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4B78:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4C50:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02096F10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02096F10u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4D10:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0209C8C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0209C8C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4D38:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4D70:
     // nop
     // nop
-    ctx.pc = 0x02B3EE70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3EE70u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4E10:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D9B040u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02D9B040u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4E20:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4FD8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02132130u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02132130u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA4FE8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0213A590u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0213A590u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5060:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02D9B860u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02D9B860u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA50C0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x021AED00u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x021AED00u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5180:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5258:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5338:
-    rt.unsupported(0x08BA5338u, 0x00000035u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA5338u, 0x00000035u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5394:
     { const bool branch_taken = static_cast<std::int32_t>(0u) <= 0;
     (void)(0u & 89u);
@@ -959,7 +1117,8 @@ L_08BA5394:
     }
 L_08BA539C:
     ctx.execute_vfpu_vec3_ct<5u, 0u, 0u, 1u, 0u>();
-    rt.unsupported(0x08BA53A0u, 0xC0000001u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08BA53A0u, 0xC0000001u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA53A8:
     // nop
     goto L_08BA53AC;
@@ -967,7 +1126,7 @@ L_08BA53AC:
     // nop
     // nop
     // nop
-    ctx.pc = 0x0221DAF0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0221DAF0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA53E0:
     // nop
     // nop
@@ -975,486 +1134,489 @@ L_08BA53E0:
     goto L_08BA53EC;
 L_08BA53EC:
     // nop
-    ctx.pc = 0x0221EA40u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0221EA40u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5418:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x022394A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x022394A0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA54C8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA55A0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02279D10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02279D10u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA55B0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5608:
     // nop
     // nop
-    ctx.pc = 0x0228CB90u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0228CB90u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5758:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x022E2570u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x022E2570u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA57D0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x022EAED0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x022EAED0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5800:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02316640u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02316640u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5810:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0237DBB0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0237DBB0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5870:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x023E0800u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x023E0800u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA58E0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DA8EC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DA8EC0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5900:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x023E6D10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x023E6D10u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5930:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x023E8E40u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x023E8E40u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5960:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0240CF60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0240CF60u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA59C0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x024106E0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x024106E0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5A38:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5B40:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5C48:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DAF340u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DAF340u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5C58:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02594DB0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02594DB0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5CF0:
     // nop
     // nop
-    ctx.pc = 0x02A6E690u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02A6E690u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5D08:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5EAC:
     // nop
-    ctx.pc = 0x02993780u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02993780u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5ED0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5F00:
     // nop
     // nop
-    ctx.pc = 0x02B3E9C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3E9C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA5FA8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x025C7B50u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x025C7B50u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6020:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x025ED2F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x025ED2F0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6098:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02601A50u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02601A50u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA60E8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02610F10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02610F10u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6118:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02613290u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02613290u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6148:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02614850u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02614850u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6178:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x026150F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x026150F0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA61A8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02615CD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02615CD0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA61D8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x026E7350u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x026E7350u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6250:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02718EC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02718EC0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6260:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6338:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027387A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x027387A0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA63F8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02749D20u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02749D20u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA64A8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6580:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6748:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6850:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0279FD50u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0279FD50u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6900:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027AECA0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x027AECA0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6910:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6AD8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6BB0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x027DC800u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x027DC800u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6C70:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB64B0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DB64B0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6CD0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6E78:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02801680u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02801680u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6E88:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6ED0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6F18:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6F60:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6FA8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028099F0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028099F0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA6FF0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7038:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028060C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028060C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7080:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02827E10u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02827E10u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7118:
     // nop
     // nop
-    ctx.pc = 0x02A6E690u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02A6E690u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7128:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B44E30u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B44E30u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA71E8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA72C0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA73C8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028E6DD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028E6DD0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7410:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02B44E30u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B44E30u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA74D0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x028FACD0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x028FACD0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7578:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x0294AE90u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x0294AE90u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7588:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7740:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7818:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DB7300u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DB7300u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7828:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029FEAC0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029FEAC0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA78E8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7924:
     // nop
-    ctx.pc = 0x02B3EE70u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3EE70u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7958:
     // nop
     // nop
-    ctx.pc = 0x02B41950u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B41950u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7978:
     // nop
     // nop
-    ctx.pc = 0x029EE8A0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029EE8A0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA79C0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02A69B60u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02A69B60u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7A68:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DC1510u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DC1510u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7AC8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7BA0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02A92630u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02A92630u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7C60:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7C90:
     // nop
     // nop
-    ctx.pc = 0x02B3E9C0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02B3E9C0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7D38:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02AB29B0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02AB29B0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7DF8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x029A3390u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x029A3390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7ED0:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02DA8C40u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02DA8C40u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7F30:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02AC02D0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02AC02D0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA7FE8:
     // nop
     // nop
     // nop
     // nop
-    ctx.pc = 0x02ACD090u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    ctx.pc = 0x02ACD090u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 }
+
+#undef AOT_REGCACHE_SYNC_IN
+#undef AOT_REGCACHE_SYNC_OUT
 
 void recomp_unit_0232(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();

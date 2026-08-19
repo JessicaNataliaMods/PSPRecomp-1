@@ -427,7 +427,7 @@ SB_L_088B4830:
     ctx.gpr[4] = (ctx.gpr[30] | 0u);
     ctx.gpr[31] = (0x088B483Cu);
     ctx.gpr[5] = (ctx.gpr[23] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 138u, 0x088B0E34u>(ctx, &aot_mem) && ctx.pc == 0x088B483Cu) goto SB_L_088B483C;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 138u, 0x088B0E34u>(ctx, &aot_mem) && ctx.pc == 0x088B483Cu) goto SB_L_088B483C;
     TIER2_SB_RETURN();
 
 SB_L_088B483C:
@@ -446,7 +446,7 @@ SB_L_088B4850:
     tier2_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(288), ctx.gpr[18]);
     ctx.gpr[31] = (0x088B485Cu);
     ctx.gpr[4] = (ctx.gpr[30] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 135u, 0x088B0DD4u>(ctx, &aot_mem) && ctx.pc == 0x088B485Cu) goto SB_L_088B485C;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 135u, 0x088B0DD4u>(ctx, &aot_mem) && ctx.pc == 0x088B485Cu) goto SB_L_088B485C;
     TIER2_SB_RETURN();
 
 SB_L_088B485C:
@@ -454,14 +454,14 @@ SB_L_088B485C:
     ctx.gpr[4] = (ctx.gpr[23] | 0u);
     ctx.gpr[31] = (0x088B486Cu);
     ctx.gpr[5] = (ctx.gpr[30] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 145u, 0x088B0EE0u>(ctx, &aot_mem) && ctx.pc == 0x088B486Cu) goto SB_L_088B486C;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 145u, 0x088B0EE0u>(ctx, &aot_mem) && ctx.pc == 0x088B486Cu) goto SB_L_088B486C;
     TIER2_SB_RETURN();
 
 SB_L_088B486C:
     ctx.gpr[19] = (ctx.gpr[2] | 0u);
     ctx.gpr[31] = (0x088B4878u);
     ctx.gpr[4] = (ctx.gpr[23] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 152u, 0x088B0FA4u>(ctx, &aot_mem) && ctx.pc == 0x088B4878u) goto SB_L_088B4878;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 152u, 0x088B0FA4u>(ctx, &aot_mem) && ctx.pc == 0x088B4878u) goto SB_L_088B4878;
     TIER2_SB_RETURN();
 
 SB_L_088B4878:
@@ -565,7 +565,7 @@ SB_L_088B48F4:
     tier2_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(0), ctx.gpr[2]);
     ctx.gpr[31] = (0x088B4948u);
     tier2_mem.aot_store32(ctx.gpr[29] + static_cast<std::uint32_t>(4), ctx.gpr[17]);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 75u, 0x088B08ACu>(ctx, &aot_mem) && ctx.pc == 0x088B4948u) goto SB_L_088B4948;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 75u, 0x088B08ACu>(ctx, &aot_mem) && ctx.pc == 0x088B4948u) goto SB_L_088B4948;
     TIER2_SB_RETURN();
 
 SB_L_088B4948:
@@ -736,7 +736,7 @@ SB_L_088B4B1C:
     ctx.gpr[6] = (ctx.gpr[19] | 0u);
     ctx.gpr[31] = (0x088B4B3Cu);
     ctx.gpr[7] = (ctx.gpr[20] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 159u, 0x088B1028u>(ctx, &aot_mem) && ctx.pc == 0x088B4B3Cu) goto SB_L_088B4B3C;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 159u, 0x088B1028u>(ctx, &aot_mem) && ctx.pc == 0x088B4B3Cu) goto SB_L_088B4B3C;
     TIER2_SB_RETURN();
 
 SB_L_088B4B3C:
@@ -790,7 +790,7 @@ SB_L_088B4B70:
     ctx.gpr[6] = (ctx.gpr[19] | 0u);
     ctx.gpr[31] = (0x088B4B98u);
     ctx.gpr[7] = (ctx.gpr[20] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 239u, 0x088B1C50u>(ctx, &aot_mem) && ctx.pc == 0x088B4B98u) goto SB_L_088B4B98;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 239u, 0x088B1C50u>(ctx, &aot_mem) && ctx.pc == 0x088B4B98u) goto SB_L_088B4B98;
     TIER2_SB_RETURN();
 
 SB_L_088B4B98:
@@ -907,7 +907,7 @@ SB_L_088B4C54:
     ctx.gpr[5] = (ctx.gpr[20] | 0u);
     ctx.gpr[31] = (0x088B4C7Cu);
     ctx.gpr[6] = (ctx.gpr[19] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 73u, 0x088B086Cu>(ctx, &aot_mem) && ctx.pc == 0x088B4C7Cu) goto SB_L_088B4C7C;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 73u, 0x088B086Cu>(ctx, &aot_mem) && ctx.pc == 0x088B4C7Cu) goto SB_L_088B4C7C;
     TIER2_SB_RETURN();
 
 SB_L_088B4C7C:
@@ -1132,7 +1132,7 @@ SB_L_088B4E0C:
     ctx.gpr[6] = (ctx.gpr[19] | 0u);
     ctx.gpr[31] = (0x088B4E34u);
     ctx.gpr[7] = (ctx.gpr[20] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 382u, 0x088B3060u>(ctx, &aot_mem) && ctx.pc == 0x088B4E34u) goto SB_L_088B4E34;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 382u, 0x088B3060u>(ctx, &aot_mem) && ctx.pc == 0x088B4E34u) goto SB_L_088B4E34;
     TIER2_SB_RETURN();
 
 SB_L_088B4E34:
@@ -1224,7 +1224,7 @@ SB_L_088B4EBC:
     ctx.gpr[5] = (ctx.gpr[20] | 0u);
     ctx.gpr[31] = (0x088B4EE4u);
     ctx.gpr[6] = (ctx.gpr[19] | 0u);
-    if (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 73u, 0x088B086Cu>(ctx, &aot_mem) && ctx.pc == 0x088B4EE4u) goto SB_L_088B4EE4;
+    if (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 73u, 0x088B086Cu>(ctx, &aot_mem) && ctx.pc == 0x088B4EE4u) goto SB_L_088B4EE4;
     TIER2_SB_RETURN();
 
 SB_L_088B4EE4:

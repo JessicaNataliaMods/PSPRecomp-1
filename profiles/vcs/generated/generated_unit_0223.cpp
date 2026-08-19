@@ -137,6 +137,18 @@ static const std::uint16_t kEntryIds_recomp_unit_0223[4094] = {
     0, 353, 0, 0, 0, 0, 0, 0, 354, 0, 355, 0, 356, 0, 357, 0, 358, 0, 0, 359, 0, 360, 0, 0, 0, 361, 0, 362, 0, 363,
 };
 void recomp_unit_0223_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
+// PSPRECOMP_AOT_REGCACHE_BEGIN
+// PSPRECOMP_AOT_REGCACHE_META gprs=26,15,20,17,23,25 fprs= gpr_occ=198 fpr_occ=0 gpr_total=302 fpr_total=0
+    std::uint32_t aot_gpr_26 = ctx.gpr[26];
+    std::uint32_t aot_gpr_15 = ctx.gpr[15];
+    std::uint32_t aot_gpr_20 = ctx.gpr[20];
+    std::uint32_t aot_gpr_17 = ctx.gpr[17];
+    std::uint32_t aot_gpr_23 = ctx.gpr[23];
+    std::uint32_t aot_gpr_25 = ctx.gpr[25];
+    bool aot_regcache_valid = true;
+#define AOT_REGCACHE_SYNC_OUT() do { if (aot_regcache_valid) { ctx.gpr[26] = aot_gpr_26; ctx.gpr[15] = aot_gpr_15; ctx.gpr[20] = aot_gpr_20; ctx.gpr[17] = aot_gpr_17; ctx.gpr[23] = aot_gpr_23; ctx.gpr[25] = aot_gpr_25; } } while (false)
+#define AOT_REGCACHE_SYNC_IN() do { if (aot_regcache_valid) { aot_gpr_26 = ctx.gpr[26]; aot_gpr_15 = ctx.gpr[15]; aot_gpr_20 = ctx.gpr[20]; aot_gpr_17 = ctx.gpr[17]; aot_gpr_23 = ctx.gpr[23]; aot_gpr_25 = ctx.gpr[25]; } } while (false)
+// PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -514,25 +526,28 @@ LOCAL_DISPATCH:
     default:
         if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, "invalid internal function entry");
         else ctx.pc = local_pc;
-        return;
+        AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
 L_08B80000:
     // nop
     // nop
-    rt.unsupported(0x08B80008u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80008u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80014:
-    rt.unsupported(0x08B80014u, 0x45544157u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80014u, 0x45544157u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80020:
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80030u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80030u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8003C:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 60u, 0x08B9254Cu>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 60u, 0x08B9254Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80044;
 L_08B80044:
@@ -541,11 +556,12 @@ L_08B80044:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80058u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80058u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80064:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 61u, 0x08B92574u>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 61u, 0x08B92574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8006C;
 L_08B8006C:
@@ -554,11 +570,12 @@ L_08B8006C:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80080u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80080u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8008C:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 62u, 0x08B9259Cu>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 62u, 0x08B9259Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80094;
 L_08B80094:
@@ -567,11 +584,12 @@ L_08B80094:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B800A8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B800A8u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B800B4:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 63u, 0x08B925C4u>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 63u, 0x08B925C4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B800BC;
 L_08B800BC:
@@ -580,11 +598,12 @@ L_08B800BC:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B800D0u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B800D0u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B800DC:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 64u, 0x08B925ECu>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 64u, 0x08B925ECu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B800E4;
 L_08B800E4:
@@ -593,11 +612,12 @@ L_08B800E4:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B800F8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B800F8u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80104:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 66u, 0x08B92614u>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 66u, 0x08B92614u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8010C;
 L_08B8010C:
@@ -606,47 +626,61 @@ L_08B8010C:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80120u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80120u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8012C:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
-    rt.unsupported(0x08B80130u, 0x454B4942u, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 97u, 0x08B93634u>(ctx, &aot_mem); return;
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80130u, 0x454B4942u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 97u, 0x08B93634u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80134;
 L_08B80134:
-    rt.unsupported(0x08B80134u, 0x41425F52u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80134u, 0x41425F52u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80140:
     // nop
     // nop
-    rt.unsupported(0x08B80148u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80148u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80154:
-    if (ctx.gpr[26] == ctx.gpr[14]) {
-    rt.unsupported(0x08B80158u, 0x43555254u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 99u, 0x08B93E64u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[14]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80158u, 0x43555254u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 99u, 0x08B93E64u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8015C;
 L_08B8015C:
-    rt.unsupported(0x08B8015Cu, 0x4E4F4954u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8015Cu, 0x4E4F4954u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8017C:
-    rt.unsupported(0x08B8017Cu, 0x4C494850u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8017Cu, 0x4C494850u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B801A4:
-    rt.unsupported(0x08B801A4u, 0x4C4C414Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B801A4u, 0x4C4C414Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B801CC:
-    rt.unsupported(0x08B801CCu, 0x4C4C414Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B801CCu, 0x4C4C414Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B801F4:
-    rt.unsupported(0x08B801F4u, 0x4C4C414Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B801F4u, 0x4C4C414Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8021C:
-    rt.unsupported(0x08B8021Cu, 0x4C4C414Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8021Cu, 0x4C4C414Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80244:
-    rt.unsupported(0x08B80244u, 0x4C4C414Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80244u, 0x4C4C414Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8026C:
-    rt.unsupported(0x08B80270u, 0x54412E44u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80270u, 0x54412E44u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80274:
-    rt.unsupported(0x08B80274u, 0x00000033u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80274u, 0x00000033u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80294:
     if (static_cast<std::int32_t>(ctx.gpr[10]) <= 0) {
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 72u, 0x08B927A4u>(ctx, &aot_mem); return;
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 72u, 0x08B927A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8029C;
 L_08B8029C:
@@ -655,482 +689,580 @@ L_08B8029C:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B802B0u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B802B0u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B802BC:
-    rt.unsupported(0x08B802BCu, 0x494C4F50u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B802BCu, 0x494C4F50u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B802E4:
-    rt.unsupported(0x08B802E4u, 0x49584154u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B802E4u, 0x49584154u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8030C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80310u, 0x412E315Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 16u, 0x08B91848u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80310u, 0x412E315Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 16u, 0x08B91848u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80314;
 L_08B80314:
-    rt.unsupported(0x08B80314u, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80314u, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80334:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80338u, 0x412E325Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 17u, 0x08B91870u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80338u, 0x412E325Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 17u, 0x08B91870u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8033C;
 L_08B8033C:
-    rt.unsupported(0x08B8033Cu, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8033Cu, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8035C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80360u, 0x412E335Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 18u, 0x08B91898u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80360u, 0x412E335Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 18u, 0x08B91898u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80364;
 L_08B80364:
-    rt.unsupported(0x08B80364u, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80364u, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80384:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80388u, 0x412E345Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 19u, 0x08B918C0u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80388u, 0x412E345Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 19u, 0x08B918C0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8038C;
 L_08B8038C:
-    rt.unsupported(0x08B8038Cu, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8038Cu, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B803AC:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B803B0u, 0x412E355Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 20u, 0x08B918E8u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B803B0u, 0x412E355Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 20u, 0x08B918E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B803B4;
 L_08B803B4:
-    rt.unsupported(0x08B803B4u, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B803B4u, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B803D4:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B803D8u, 0x412E365Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 21u, 0x08B91910u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B803D8u, 0x412E365Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 21u, 0x08B91910u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B803DC;
 L_08B803DC:
-    rt.unsupported(0x08B803DCu, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B803DCu, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B803FC:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80400u, 0x412E375Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 22u, 0x08B91938u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80400u, 0x412E375Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 22u, 0x08B91938u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80404;
 L_08B80404:
-    rt.unsupported(0x08B80404u, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80404u, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80424:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80428u, 0x412E385Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 23u, 0x08B91960u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80428u, 0x412E385Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 23u, 0x08B91960u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8042C;
 L_08B8042C:
-    rt.unsupported(0x08B8042Cu, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8042Cu, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8044C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    rt.unsupported(0x08B80450u, 0x412E395Fu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 24u, 0x08B91988u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80450u, 0x412E395Fu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 24u, 0x08B91988u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80454;
 L_08B80454:
-    rt.unsupported(0x08B80454u, 0x00003354u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80454u, 0x00003354u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80474:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[16] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 25u, 0x08B919B0u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[16] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 25u, 0x08B919B0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8047C;
 L_08B8047C:
-    rt.unsupported(0x08B8047Cu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8047Cu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8049C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[17] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 26u, 0x08B919D8u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    aot_gpr_17 = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 26u, 0x08B919D8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B804A4;
 L_08B804A4:
-    rt.unsupported(0x08B804A4u, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B804A4u, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B804C4:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[18] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 27u, 0x08B91A00u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[18] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 27u, 0x08B91A00u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B804CC;
 L_08B804CC:
-    rt.unsupported(0x08B804CCu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B804CCu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B804EC:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[19] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 28u, 0x08B91A28u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[19] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 28u, 0x08B91A28u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B804F4;
 L_08B804F4:
-    rt.unsupported(0x08B804F4u, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B804F4u, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80514:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[20] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 29u, 0x08B91A50u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    aot_gpr_20 = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 29u, 0x08B91A50u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8051C;
 L_08B8051C:
-    rt.unsupported(0x08B8051Cu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8051Cu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8053C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[21] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 30u, 0x08B91A78u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[21] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 30u, 0x08B91A78u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80544;
 L_08B80544:
-    rt.unsupported(0x08B80544u, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80544u, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80564:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[22] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 31u, 0x08B91AA0u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[22] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 31u, 0x08B91AA0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8056C;
 L_08B8056C:
-    rt.unsupported(0x08B8056Cu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8056Cu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8058C:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[23] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 32u, 0x08B91AC8u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    aot_gpr_23 = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 32u, 0x08B91AC8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80594;
 L_08B80594:
-    rt.unsupported(0x08B80594u, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80594u, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B805B4:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[24] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 33u, 0x08B91AF0u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[24] = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 33u, 0x08B91AF0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B805BC;
 L_08B805BC:
-    rt.unsupported(0x08B805BCu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B805BCu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B805DC:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[25] = (ctx.gpr[17] < static_cast<std::uint32_t>(12639) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 34u, 0x08B91B18u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    aot_gpr_25 = (aot_gpr_17 < static_cast<std::uint32_t>(12639) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 34u, 0x08B91B18u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B805E4;
 L_08B805E4:
-    rt.unsupported(0x08B805E4u, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B805E4u, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80604:
-    if (ctx.gpr[26] == ctx.gpr[23]) {
-    ctx.gpr[16] = (ctx.gpr[17] < static_cast<std::uint32_t>(12895) ? 1u : 0u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 35u, 0x08B91B40u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == aot_gpr_23) {
+    ctx.gpr[16] = (aot_gpr_17 < static_cast<std::uint32_t>(12895) ? 1u : 0u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 35u, 0x08B91B40u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8060C;
 L_08B8060C:
-    rt.unsupported(0x08B8060Cu, 0x00335441u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8060Cu, 0x00335441u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8062C:
-    rt.unsupported(0x08B8062Cu, 0x492F454Eu, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8062Cu, 0x492F454Eu, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80654:
-    rt.unsupported(0x08B80654u, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80654u, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8067C:
-    rt.unsupported(0x08B8067Cu, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8067Cu, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B806A4:
-    rt.unsupported(0x08B806A4u, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B806A4u, 0x4A2F454Eu, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B806CC:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
+    if (ctx.gpr[1] == aot_gpr_15) {
     ctx.gpr[1] = (ctx.gpr[10] & 18760u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 36u, 0x08B91C08u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 36u, 0x08B91C08u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B806D4;
 L_08B806D4:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B806E8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B806E8u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B806F4:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
+    if (ctx.gpr[1] == aot_gpr_15) {
     ctx.gpr[1] = (ctx.gpr[18] & 18760u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 37u, 0x08B91C30u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 37u, 0x08B91C30u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B806FC;
 L_08B806FC:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80710u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80710u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8071C:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
-    ctx.gpr[1] = (ctx.gpr[26] & 18760u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 38u, 0x08B91C58u>(ctx, &aot_mem); return;
+    if (ctx.gpr[1] == aot_gpr_15) {
+    ctx.gpr[1] = (aot_gpr_26 & 18760u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 38u, 0x08B91C58u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80724;
 L_08B80724:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80738u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80738u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80744:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
+    if (ctx.gpr[1] == aot_gpr_15) {
     ctx.gpr[1] = (ctx.gpr[2] | 18760u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 39u, 0x08B91C80u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 39u, 0x08B91C80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8074C;
 L_08B8074C:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80760u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80760u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8076C:
-    rt.unsupported(0x08B8076Cu, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8076Cu, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80794:
-    rt.unsupported(0x08B80794u, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80794u, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B807BC:
-    rt.unsupported(0x08B807BCu, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B807BCu, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B807E4:
-    rt.unsupported(0x08B807E4u, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B807E4u, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8080C:
-    rt.unsupported(0x08B8080Cu, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8080Cu, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80834:
-    rt.unsupported(0x08B80834u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80834u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8085C:
-    rt.unsupported(0x08B8085Cu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8085Cu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80884:
-    rt.unsupported(0x08B80884u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80884u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B808AC:
-    rt.unsupported(0x08B808ACu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B808ACu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B808D4:
-    rt.unsupported(0x08B808D4u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B808D4u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B808FC:
-    rt.unsupported(0x08B808FCu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B808FCu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80924:
-    rt.unsupported(0x08B80924u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80924u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8094C:
-    rt.unsupported(0x08B8094Cu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8094Cu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80974:
-    if (ctx.gpr[9] != ctx.gpr[15]) {
+    if (ctx.gpr[9] != aot_gpr_15) {
     ctx.gpr[2] = (ctx.gpr[10] & 16973u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 44u, 0x08B91EB0u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 44u, 0x08B91EB0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8097C;
 L_08B8097C:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80990u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80990u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8099C:
-    if (ctx.gpr[9] != ctx.gpr[15]) {
+    if (ctx.gpr[9] != aot_gpr_15) {
     ctx.gpr[2] = (ctx.gpr[18] & 16973u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 45u, 0x08B91ED8u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 45u, 0x08B91ED8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B809A4;
 L_08B809A4:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B809B8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B809B8u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B809C4:
-    if (ctx.gpr[9] != ctx.gpr[15]) {
-    ctx.gpr[2] = (ctx.gpr[26] & 16973u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 46u, 0x08B91F00u>(ctx, &aot_mem); return;
+    if (ctx.gpr[9] != aot_gpr_15) {
+    ctx.gpr[2] = (aot_gpr_26 & 16973u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 46u, 0x08B91F00u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B809CC;
 L_08B809CC:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B809E0u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B809E0u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B809EC:
-    if (ctx.gpr[9] != ctx.gpr[15]) {
+    if (ctx.gpr[9] != aot_gpr_15) {
     ctx.gpr[2] = (ctx.gpr[2] | 16973u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 47u, 0x08B91F28u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 47u, 0x08B91F28u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B809F4;
 L_08B809F4:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80A08u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80A08u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80A14:
-    rt.unsupported(0x08B80A14u, 0x422F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80A14u, 0x422F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80A3C:
-    rt.unsupported(0x08B80A3Cu, 0x422F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80A3Cu, 0x422F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80A64:
-    rt.unsupported(0x08B80A64u, 0x422F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80A64u, 0x422F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80A8C:
-    rt.unsupported(0x08B80A8Cu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80A8Cu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80AB4:
-    rt.unsupported(0x08B80AB4u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80AB4u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80ADC:
-    rt.unsupported(0x08B80ADCu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80ADCu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80B04:
-    rt.unsupported(0x08B80B04u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80B04u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80B2C:
-    rt.unsupported(0x08B80B2Cu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80B2Cu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80B54:
-    rt.unsupported(0x08B80B54u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80B54u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80B7C:
-    rt.unsupported(0x08B80B7Cu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80B7Cu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80BA4:
-    rt.unsupported(0x08B80BA4u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80BA4u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80BCC:
-    rt.unsupported(0x08B80BCCu, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80BCCu, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80BF4:
-    rt.unsupported(0x08B80BF4u, 0x4C2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80BF4u, 0x4C2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80C1C:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
+    if (aot_gpr_17 == aot_gpr_15) {
     ctx.gpr[3] = (ctx.gpr[10] & 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 50u, 0x08B92158u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 50u, 0x08B92158u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80C24;
 L_08B80C24:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80C38u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80C38u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80C44:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
+    if (aot_gpr_17 == aot_gpr_15) {
     ctx.gpr[3] = (ctx.gpr[18] & 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 51u, 0x08B92180u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 51u, 0x08B92180u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80C4C;
 L_08B80C4C:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80C60u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80C60u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80C6C:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
-    ctx.gpr[3] = (ctx.gpr[26] & 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 52u, 0x08B921A8u>(ctx, &aot_mem); return;
+    if (aot_gpr_17 == aot_gpr_15) {
+    ctx.gpr[3] = (aot_gpr_26 & 20037u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 52u, 0x08B921A8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80C74;
 L_08B80C74:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80C88u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80C88u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80C94:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
+    if (aot_gpr_17 == aot_gpr_15) {
     ctx.gpr[3] = (ctx.gpr[2] | 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 53u, 0x08B921D0u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 53u, 0x08B921D0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80C9C;
 L_08B80C9C:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80CB0u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80CB0u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80CBC:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
+    if (aot_gpr_17 == aot_gpr_15) {
     ctx.gpr[3] = (ctx.gpr[10] | 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 54u, 0x08B921F8u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 54u, 0x08B921F8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80CC4;
 L_08B80CC4:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80CD8u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80CD8u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80CE4:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
+    if (aot_gpr_17 == aot_gpr_15) {
     ctx.gpr[3] = (ctx.gpr[18] | 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 55u, 0x08B92220u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 55u, 0x08B92220u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80CEC;
 L_08B80CEC:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80D00u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80D00u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80D0C:
-    if (ctx.gpr[17] == ctx.gpr[15]) {
-    ctx.gpr[3] = (ctx.gpr[26] | 20037u);
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 56u, 0x08B92248u>(ctx, &aot_mem); return;
+    if (aot_gpr_17 == aot_gpr_15) {
+    ctx.gpr[3] = (aot_gpr_26 | 20037u);
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 56u, 0x08B92248u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B80D14;
 L_08B80D14:
-    ctx.gpr[20] = (ctx.gpr[26] & 16686u);
+    aot_gpr_20 = (aot_gpr_26 & 16686u);
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80D28u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80D28u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80D34:
-    rt.unsupported(0x08B80D34u, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80D34u, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80D5C:
-    rt.unsupported(0x08B80D5Cu, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80D5Cu, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80D84:
-    rt.unsupported(0x08B80D84u, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80D84u, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80DAC:
-    rt.unsupported(0x08B80DACu, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80DACu, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80DD4:
-    rt.unsupported(0x08B80DD4u, 0x4D2F454Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80DD4u, 0x4D2F454Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80DFC:
-    rt.unsupported(0x08B80DFCu, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80DFCu, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80E24:
-    rt.unsupported(0x08B80E24u, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80E24u, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80E4C:
-    rt.unsupported(0x08B80E4Cu, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80E4Cu, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80E74:
-    rt.unsupported(0x08B80E74u, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80E74u, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80E9C:
-    rt.unsupported(0x08B80E9Cu, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80E9Cu, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80EC4:
-    rt.unsupported(0x08B80EC4u, 0x442F454Eu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80EC4u, 0x442F454Eu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80ED4:
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80EE0u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80EE0u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80EEC:
-    rt.unsupported(0x08B80EECu, 0x4D454854u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80EECu, 0x4D454854u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80EF8:
     // nop
     // nop
     // nop
     // nop
-    rt.unsupported(0x08B80F08u, 0x49445541u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F08u, 0x49445541u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80F14:
-    rt.unsupported(0x08B80F14u, 0x4353494Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F14u, 0x4353494Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80F3C:
-    rt.unsupported(0x08B80F3Cu, 0x4353494Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F3Cu, 0x4353494Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80F60:
     ctx.execute_vfpu_vscl_ct<99u, 111u, 114u, 1u>();
     ctx.gpr[2] = (ctx.gpr[19] ^ 26956u);
     ctx.execute_vfpu_vminmax_ct<67u, 111u, 109u, 1u, false>();
-    rt.unsupported(0x08B80F6Cu, 0x61746E65u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F6Cu, 0x61746E65u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80F80:
-    ctx.gpr[12] = (ctx.gpr[26] + static_cast<std::uint32_t>(20291));
-    rt.unsupported(0x08B80F84u, 0x00000029u, "special? not lowered yet"); return;
+    ctx.gpr[12] = (aot_gpr_26 + static_cast<std::uint32_t>(20291));
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F84u, 0x00000029u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B80F88:
-    rt.unsupported(0x08B80F88u, 0x45574F50u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B80F88u, 0x45574F50u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81218:
     (void)(ctx.hi);
     (void)(ctx.hi);
     (void)(0u << 2u);
-    rt.unsupported(0x08B81224u, 0x00000081u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81224u, 0x00000081u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81498:
-    rt.unsupported(0x08B81498u, 0x70736964u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81498u, 0x70736964u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B814A4:
     ctx.execute_vfpu_vminmax_ct<95u, 115u, 101u, 1u, false>();
     (void)(0u + 0u);
@@ -1139,648 +1271,855 @@ L_08B814A4:
 L_08B814B0:
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    rt.unsupported(0x08B814B8u, 0xC04CCCCDu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B814B8u, 0xC04CCCCDu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B814C4:
-    rt.unsupported(0x08B814C4u, 0x40000000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B814C4u, 0x40000000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B814D8:
-    rt.unsupported(0x08B814D8u, 0x40C00000u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B814D8u, 0x40C00000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81728:
-    rt.unsupported(0x08B8172Cu, 0x08A35098u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8172Cu, 0x08A35098u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81760:
-    rt.unsupported(0x08B81760u, 0x43524F46u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81760u, 0x43524F46u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81774:
-    if (ctx.gpr[18] != ctx.gpr[20]) {
-    rt.unsupported(0x08B81778u, 0x43494845u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 87u, 0x08B92CC4u>(ctx, &aot_mem); return;
+    if (ctx.gpr[18] != aot_gpr_20) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81778u, 0x43494845u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 87u, 0x08B92CC4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B8177C;
 L_08B8177C:
-    rt.unsupported(0x08B8177Cu, 0x4D45454Cu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8177Cu, 0x4D45454Cu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81794:
-    rt.unsupported(0x08B81794u, 0x43544553u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81794u, 0x43544553u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817A8:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
-    rt.unsupported(0x08B817ACu, 0x49544E45u, "cop2/vfpu not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 58u, 0x08B924B0u>(ctx, &aot_mem); return;
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817ACu, 0x49544E45u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 58u, 0x08B924B0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B817B0;
 L_08B817B0:
-    rt.unsupported(0x08B817B0u, 0x435F5954u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817B0u, 0x435F5954u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817BC:
-    rt.unsupported(0x08B817C0u, 0x5F544553u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817C0u, 0x5F544553u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817C4:
-    rt.unsupported(0x08B817C4u, 0x49484556u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817C4u, 0x49484556u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817D0:
-    rt.unsupported(0x08B817D0u, 0x4E4F4954u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817D0u, 0x4E4F4954u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817D8:
-    rt.unsupported(0x08B817DCu, 0x574F4C42u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817DCu, 0x574F4C42u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817E0:
     if (ctx.gpr[18] != ctx.gpr[31]) {
-    rt.unsupported(0x08B817E4u, 0x43494845u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 22u, 0x08B95938u>(ctx, &aot_mem); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817E4u, 0x43494845u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 22u, 0x08B95938u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B817E8;
 L_08B817E8:
-    rt.unsupported(0x08B817E8u, 0x0000454Cu, "syscall not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817E8u, 0x0000454Cu, "syscall not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817EC:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
-    rt.unsupported(0x08B817F0u, 0x49484556u, "cop2/vfpu not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 89u, 0x08B92D3Cu>(ctx, &aot_mem); return;
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817F0u, 0x49484556u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 89u, 0x08B92D3Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B817F4;
 L_08B817F4:
-    rt.unsupported(0x08B817F8u, 0x54414548u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B817F8u, 0x54414548u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B817FC:
-    rt.unsupported(0x08B81800u, 0x56544553u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81800u, 0x56544553u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81800:
-    if (ctx.gpr[18] != ctx.gpr[20]) {
-    rt.unsupported(0x08B81804u, 0x43494845u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 90u, 0x08B92D50u>(ctx, &aot_mem); return;
+    if (ctx.gpr[18] != aot_gpr_20) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81804u, 0x43494845u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 90u, 0x08B92D50u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81808;
 L_08B81808:
-    rt.unsupported(0x08B81808u, 0x4E49454Cu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81808u, 0x4E49454Cu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81818:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
-    rt.unsupported(0x08B8181Cu, 0x41455243u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 49u, 0x08B96550u>(ctx, &aot_mem); return;
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8181Cu, 0x41455243u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 49u, 0x08B96550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81820;
 L_08B81820:
     if (ctx.gpr[10] != ctx.gpr[12]) {
-    rt.unsupported(0x08B81824u, 0x4A424F41u, "cop2/vfpu not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 91u, 0x08B92D74u>(ctx, &aot_mem); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81824u, 0x4A424F41u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 91u, 0x08B92D74u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81828;
 L_08B81828:
-    rt.unsupported(0x08B81828u, 0x00544345u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81828u, 0x00544345u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8182C:
-    rt.unsupported(0x08B81830u, 0x56524553u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81830u, 0x56524553u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81834:
-    rt.unsupported(0x08B81838u, 0x59444145u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81838u, 0x59444145u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8183C:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
     ctx.gpr[9] = (static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> (0u & 31u)));
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 67u, 0x08B969BCu>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 67u, 0x08B969BCu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81844;
 L_08B81844:
     // nop
-    rt.unsupported(0x08B8184Cu, 0x08A3A890u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8184Cu, 0x08A3A890u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B818A8:
-    rt.unsupported(0x08B818A8u, 0x4F4D4552u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B818A8u, 0x4F4D4552u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B818BC:
     // nop
-    rt.unsupported(0x08B818C4u, 0x08A41804u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B818C4u, 0x08A41804u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81B88:
-    rt.unsupported(0x08B81B88u, 0x43534944u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81B88u, 0x43534944u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81B94:
-    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
-    rt.unsupported(0x08B81B98u, 0x44525355u, "unsupported CFC1 control register"); return;
-    if (ctx.gpr[17] == ctx.gpr[15]) {
-    rt.unsupported(0x08B81BA0u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 40u, 0x08B964C4u>(ctx, &aot_mem); return;
+    ctx.gpr[5] = (aot_gpr_26 < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81B98u, 0x44525355u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
+    if (aot_gpr_17 == aot_gpr_15) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81BA0u, 0x41444E55u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 40u, 0x08B964C4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81BA4;
 L_08B81BA4:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
-    rt.unsupported(0x08B81BA8u, 0x472F5053u, "cop1? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 49u, 0x08B920F8u>(ctx, &aot_mem); return;
+    if (ctx.gpr[1] == aot_gpr_15) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81BA8u, 0x472F5053u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 49u, 0x08B920F8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81BAC;
 L_08B81BAC:
     ctx.gpr[5] = (ctx.gpr[18] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
-    ctx.gpr[10] = (ctx.gpr[26] << (ctx.gpr[2] & 31u));
+    ctx.gpr[10] = (aot_gpr_26 << (ctx.gpr[2] & 31u));
     // nop
     goto L_08B81BB8;
 L_08B81BB8:
     ctx.execute_vfpu_vec3_ct<76u, 111u, 97u, 1u, 2u>();
-    rt.unsupported(0x08B81BBCu, 0x746C754Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81BBCu, 0x746C754Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81BD0:
     ctx.execute_vfpu_vscl_ct<87u, 105u, 114u, 1u>();
-    rt.unsupported(0x08B81BD4u, 0x7373656Cu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81BD4u, 0x7373656Cu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81BF8:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
-    rt.unsupported(0x08B81BFCu, 0x6E692072u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81BFCu, 0x6E692072u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81C1C:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
-    rt.unsupported(0x08B81C20u, 0x72632072u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81C20u, 0x72632072u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81C44:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81C48u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81C48u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81C64:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81C68u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81C68u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81C84:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81C88u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81C88u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81CA4:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81CA8u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81CA8u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81CC0:
-    rt.unsupported(0x08B81CC0u, 0x6B726F77u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81CC0u, 0x6B726F77u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81CC8:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81CCCu, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81CCCu, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81CE4:
-    rt.unsupported(0x08B81CE4u, 0x6E20636Fu, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81CE4u, 0x6E20636Fu, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81CF4:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81CF8u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81CF8u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D10:
-    rt.unsupported(0x08B81D10u, 0x6E20636Fu, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D10u, 0x6E20636Fu, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D30:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81D34u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D34u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D4C:
-    rt.unsupported(0x08B81D4Cu, 0x20636F68u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D4Cu, 0x20636F68u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D68:
     ctx.execute_vfpu_compare3_ct<65u, 100u, 104u, 1u, 6u>();
-    rt.unsupported(0x08B81D6Cu, 0x6E6F4363u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D6Cu, 0x6E6F4363u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D7C:
-    rt.unsupported(0x08B81D7Cu, 0x4B656373u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D7Cu, 0x4B656373u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D90:
-    rt.unsupported(0x08B81D90u, 0x61662029u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81D90u, 0x61662029u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81D9C:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_compare3_ct<114u, 32u, 99u, 1u, 6u>();
-    rt.unsupported(0x08B81DA4u, 0x63656E6Eu, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81DA4u, 0x63656E6Eu, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81DB8:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81DBCu, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81DBCu, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81DD4:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81DD8u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81DD8u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81DF8:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_compare3_ct<114u, 32u, 99u, 1u, 6u>();
-    rt.unsupported(0x08B81E00u, 0x63656E6Eu, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E00u, 0x63656E6Eu, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81E14:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_compare3_ct<114u, 32u, 99u, 1u, 6u>();
-    rt.unsupported(0x08B81E1Cu, 0x63656E6Eu, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E1Cu, 0x63656E6Eu, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81E34:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
-    rt.unsupported(0x08B81E38u, 0x63732072u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E38u, 0x63732072u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81E54:
     ctx.execute_vfpu_vscl_ct<84u, 105u, 109u, 1u>();
-    rt.unsupported(0x08B81E58u, 0x756F2064u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E58u, 0x756F2064u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81E78:
     ctx.execute_vfpu_compare3_ct<69u, 114u, 114u, 1u, 6u>();
     ctx.execute_vfpu_compare3_ct<114u, 32u, 106u, 1u, 6u>();
-    rt.unsupported(0x08B81E80u, 0x6E696E69u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E80u, 0x6E696E69u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81E94:
     ctx.execute_vfpu_vcmp_ct<97u, 105u, 1u, 6u>();
-    rt.unsupported(0x08B81E98u, 0x74206465u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81E98u, 0x74206465u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F00:
-    rt.unsupported(0x08B81F04u, 0x08A575ACu, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F04u, 0x08A575ACu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F20:
     if (ctx.gpr[27] != ctx.gpr[19]) {
     ctx.execute_vfpu_compare3_ct<97u, 121u, 112u, 1u, 6u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 56u, 0x08B9A444u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0229_entry, 229u, 56u, 0x08B9A444u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B81F28;
 L_08B81F28:
-    rt.unsupported(0x08B81F28u, 0x42746E69u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F28u, 0x42746E69u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F34:
     ctx.execute_vfpu_vscl_ct<82u, 97u, 99u, 1u>();
     ctx.execute_vfpu_compare3_ct<65u, 114u, 114u, 1u, 6u>();
-    rt.unsupported(0x08B81F3Cu, 0x73695677u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F3Cu, 0x73695677u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F48:
-    rt.unsupported(0x08B81F48u, 0x61656C43u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F48u, 0x61656C43u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F5C:
-    rt.unsupported(0x08B81F60u, 0x08A57300u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F60u, 0x08A57300u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B81F94:
-    rt.unsupported(0x08B81F98u, 0x08A57860u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B81F98u, 0x08A57860u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B820F0:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 1u));
-    rt.unsupported(0x08B820F4u, 0x0000005Eu, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B820F4u, 0x0000005Eu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82118:
-    rt.unsupported(0x08B82118u, 0x0000003Fu, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82118u, 0x0000003Fu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82324:
-    rt.unsupported(0x08B82324u, 0x203D2078u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82324u, 0x203D2078u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82340:
-    rt.unsupported(0x08B82344u, 0x08A8F124u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82344u, 0x08A8F124u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82380:
     ctx.execute_vfpu_vscl_ct<105u, 110u, 116u, 1u>();
     ctx.execute_vfpu_vcmp_ct<118u, 97u, 1u, 2u>();
-    rt.unsupported(0x08B82388u, 0x20736920u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82388u, 0x20736920u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82394:
-    rt.unsupported(0x08B82394u, 0x6E6F7277u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82394u, 0x6E6F7277u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B824D0:
-    rt.unsupported(0x08B824D0u, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B824D0u, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B824E8:
     ctx.execute_vfpu_vcmp_ct<97u, 98u, 1u, 4u>();
-    rt.unsupported(0x08B824ECu, 0x6E692065u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B824ECu, 0x6E692065u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B824FC:
     ctx.execute_vfpu_vcmp_ct<97u, 98u, 1u, 4u>();
-    rt.unsupported(0x08B82500u, 0x6E692065u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82500u, 0x6E692065u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82510:
     ctx.execute_vfpu_vec3_ct<104u, 101u, 97u, 1u, 2u>();
-    rt.unsupported(0x08B82514u, 0x6867696Cu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82514u, 0x6867696Cu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82560:
     ctx.execute_vfpu_compare3_ct<109u, 101u, 109u, 1u, 6u>();
-    rt.unsupported(0x08B82564u, 0x61207972u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82564u, 0x61207972u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82588:
-    rt.unsupported(0x08B8258Cu, 0x08AA0908u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8258Cu, 0x08AA0908u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B825D0:
     ctx.execute_vfpu_vcmp_ct<97u, 98u, 1u, 4u>();
     ctx.execute_vfpu_compare3_ct<101u, 32u, 99u, 1u, 6u>();
-    rt.unsupported(0x08B825D8u, 0x6961746Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B825D8u, 0x6961746Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B825EC:
-    rt.unsupported(0x08B825ECu, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B825ECu, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82610:
-    rt.unsupported(0x08B82610u, 0x706D7562u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82610u, 0x706D7562u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82624:
     ctx.execute_vfpu_vec3_ct<119u, 105u, 110u, 1u, 2u>();
     ctx.execute_vfpu_vscl_ct<115u, 99u, 114u, 1u>();
     ctx.execute_vfpu_vec3_ct<101u, 110u, 95u, 1u, 2u>();
-    rt.unsupported(0x08B82630u, 0x796D6D75u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82630u, 0x796D6D75u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82638:
-    rt.unsupported(0x08B82638u, 0x74616F62u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82638u, 0x74616F62u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8264C:
-    rt.unsupported(0x08B8264Cu, 0x74616F62u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8264Cu, 0x74616F62u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82660:
-    rt.unsupported(0x08B82660u, 0x726F6F64u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82660u, 0x726F6F64u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82674:
-    rt.unsupported(0x08B82674u, 0x706D6172u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82674u, 0x706D6172u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82688:
-    rt.unsupported(0x08B82688u, 0x79646F62u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82688u, 0x79646F62u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8269C:
-    rt.unsupported(0x08B8269Cu, 0x68655643u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8269Cu, 0x68655643u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B826B8:
-    rt.unsupported(0x08B826B8u, 0x6E756F53u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B826B8u, 0x6E756F53u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B826CC:
-    rt.unsupported(0x08B826CCu, 0x2078696Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B826CCu, 0x2078696Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B826E0:
     ctx.execute_vfpu_vminmax_ct<67u, 83u, 105u, 1u, false>();
-    rt.unsupported(0x08B826E4u, 0x4D656C70u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B826E4u, 0x4D656C70u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B826F8:
     ctx.execute_vfpu_compare3_ct<100u, 101u, 99u, 1u, 6u>();
-    rt.unsupported(0x08B826FCu, 0x735F6564u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B826FCu, 0x735F6564u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B827D0:
     ctx.gpr[16] = (ctx.gpr[3] & 26946u);
-    rt.unsupported(0x08B827D4u, 0x20522031u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B827D4u, 0x20522031u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B827E4:
     ctx.gpr[16] = (ctx.gpr[3] & 26946u);
-    rt.unsupported(0x08B827E8u, 0x204C2031u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B827E8u, 0x204C2031u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82918:
-    rt.unsupported(0x08B8291Cu, 0x08AB10D8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8291Cu, 0x08AB10D8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82980:
-    rt.unsupported(0x08B82980u, 0x62616E75u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82980u, 0x62616E75u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B829A0:
-    rt.unsupported(0x08B829A0u, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B829A0u, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B829B8:
-    rt.unsupported(0x08B829B8u, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B829B8u, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B829D0:
     ctx.execute_vfpu_vhdp_ct<109u, 97u, 108u, 1u>();
     ctx.execute_vfpu_vscl_ct<111u, 114u, 109u, 1u>();
-    rt.unsupported(0x08B829D8u, 0x61702064u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B829D8u, 0x61702064u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B829F4:
     ctx.execute_vfpu_vhdp_ct<109u, 97u, 108u, 1u>();
     ctx.execute_vfpu_vscl_ct<111u, 114u, 109u, 1u>();
-    rt.unsupported(0x08B829FCu, 0x61702064u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B829FCu, 0x61702064u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A14:
-    rt.unsupported(0x08B82A14u, 0x61626E75u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A14u, 0x61626E75u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A28:
-    rt.unsupported(0x08B82A28u, 0x206F6F74u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A28u, 0x206F6F74u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A3C:
-    rt.unsupported(0x08B82A3Cu, 0x69666E75u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A3Cu, 0x69666E75u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A50:
-    rt.unsupported(0x08B82A50u, 0x69727473u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A50u, 0x69727473u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A6C:
-    rt.unsupported(0x08B82A6Cu, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A6Cu, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82A9C:
-    rt.unsupported(0x08B82A9Cu, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82A9Cu, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82AB8:
-    rt.unsupported(0x08B82AB8u, 0x7373696Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82AB8u, 0x7373696Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82ADC:
     ctx.execute_vfpu_compare3_ct<111u, 98u, 115u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<108u, 101u, 116u, 1u>();
-    rt.unsupported(0x08B82AE4u, 0x74706F20u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82AE4u, 0x74706F20u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82B00:
-    rt.unsupported(0x08B82B00u, 0x61766E69u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82B00u, 0x61766E69u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82D58:
     ctx.execute_vfpu_vscl_ct<85u, 110u, 100u, 1u>();
     ctx.execute_vfpu_vscl_ct<102u, 105u, 110u, 1u>();
-    rt.unsupported(0x08B82D60u, 0x72632064u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82D60u, 0x72632064u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E18:
-    rt.unsupported(0x08B82E18u, 0x434D454Du, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E18u, 0x434D454Du, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E24:
-    rt.unsupported(0x08B82E24u, 0x4741505Fu, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E24u, 0x4741505Fu, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E2C:
-    ctx.gpr[16] = (ctx.gpr[17] ^ 29549u);
-    ctx.gpr[16] = (ctx.gpr[26] < static_cast<std::uint32_t>(21328) ? 1u : 0u);
-    rt.unsupported(0x08B82E34u, 0x45564153u, "cop1? not lowered yet"); return;
+    ctx.gpr[16] = (aot_gpr_17 ^ 29549u);
+    ctx.gpr[16] = (aot_gpr_26 < static_cast<std::uint32_t>(21328) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E34u, 0x45564153u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E40:
     ctx.gpr[10] = (ctx.gpr[8] + static_cast<std::uint32_t>(29477));
-    rt.unsupported(0x08B82E44u, 0x73252073u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E44u, 0x73252073u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E60:
     ctx.gpr[10] = (ctx.gpr[8] + static_cast<std::uint32_t>(29477));
-    rt.unsupported(0x08B82E64u, 0x73252073u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E64u, 0x73252073u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E80:
     ctx.gpr[1] = (ctx.gpr[18] ^ 21575u);
-    rt.unsupported(0x08B82E84u, 0x63695620u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E84u, 0x63695620u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82E94:
     ctx.gpr[14] = (0u | 0u);
     goto L_08B82E98;
 L_08B82E98:
-    rt.unsupported(0x08B82E98u, 0x63736964u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82E98u, 0x63736964u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82EA4:
-    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
-    rt.unsupported(0x08B82EA8u, 0x44525355u, "unsupported CFC1 control register"); return;
-    if (ctx.gpr[17] == ctx.gpr[15]) {
-    rt.unsupported(0x08B82EB0u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 76u, 0x08B977D4u>(ctx, &aot_mem); return;
+    ctx.gpr[5] = (aot_gpr_26 < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EA8u, 0x44525355u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
+    if (aot_gpr_17 == aot_gpr_15) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EB0u, 0x41444E55u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 76u, 0x08B977D4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B82EB4;
 L_08B82EB4:
-    if (ctx.gpr[1] == ctx.gpr[15]) {
-    rt.unsupported(0x08B82EB8u, 0x492F5053u, "cop2/vfpu not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0227_entry, 227u, 94u, 0x08B93408u>(ctx, &aot_mem); return;
+    if (ctx.gpr[1] == aot_gpr_15) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EB8u, 0x492F5053u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0227_entry, 227u, 94u, 0x08B93408u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B82EBC;
 L_08B82EBC:
-    if (ctx.gpr[26] == ctx.gpr[14]) {
-    rt.unsupported(0x08B82EC0u, 0x0000002Fu, "special? not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 69u, 0x08B96BCCu>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[14]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EC0u, 0x0000002Fu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 69u, 0x08B96BCCu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B82EC4;
 L_08B82EC4:
-    rt.unsupported(0x08B82EC4u, 0x74736F68u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EC4u, 0x74736F68u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82ED0:
-    if (ctx.gpr[26] == ctx.gpr[16]) {
-    rt.unsupported(0x08B82ED4u, 0x43492F50u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0226_entry, 226u, 116u, 0x08B8EBD8u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[16]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82ED4u, 0x43492F50u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0226_entry, 226u, 116u, 0x08B8EBD8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B82ED8;
 L_08B82ED8:
-    ctx.gpr[19] = (ctx.gpr[26] < static_cast<std::uint32_t>(20047) ? 1u : 0u);
-    rt.unsupported(0x08B82EDCu, 0x45564153u, "cop1? not lowered yet"); return;
+    ctx.gpr[19] = (aot_gpr_26 < static_cast<std::uint32_t>(20047) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82EDCu, 0x45564153u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82FC0:
-    rt.unsupported(0x08B82FC0u, 0x746E6F63u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82FC0u, 0x746E6F63u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B82FDC:
-    rt.unsupported(0x08B82FDCu, 0x636E7566u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B82FDCu, 0x636E7566u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83000:
-    rt.unsupported(0x08B83000u, 0x736E6F63u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83000u, 0x736E6F63u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83018:
-    rt.unsupported(0x08B83018u, 0x00000015u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83018u, 0x00000015u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83030:
     ctx.execute_vfpu_vscl_ct<99u, 111u, 100u, 1u>();
-    rt.unsupported(0x08B83034u, 0x7A697320u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83034u, 0x7A697320u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B830C8:
-    rt.unsupported(0x08B830C8u, 0x6E69614Du, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B830C8u, 0x6E69614Du, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B830DC:
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    ctx.gpr[15] = (ctx.gpr[25] < static_cast<std::uint32_t>(12079) ? 1u : 0u);
-    rt.unsupported(0x08B83124u, 0x00002F2Fu, "special? not lowered yet"); return;
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    aot_gpr_15 = (aot_gpr_25 < static_cast<std::uint32_t>(12079) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83124u, 0x00002F2Fu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83128:
-    rt.unsupported(0x08B83128u, 0x70616548u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83128u, 0x70616548u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8313C:
-    rt.unsupported(0x08B8313Cu, 0x70616548u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8313Cu, 0x70616548u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83150:
-    rt.unsupported(0x08B83150u, 0x70616548u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83150u, 0x70616548u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83164:
-    rt.unsupported(0x08B83164u, 0x74736157u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83164u, 0x74736157u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83178:
     ctx.execute_vfpu_vcmp_ct<111u, 111u, 1u, 0u>();
-    rt.unsupported(0x08B8317Cu, 0x69382520u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8317Cu, 0x69382520u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83200:
     if (ctx.gpr[3] == ctx.gpr[7]) {
-    rt.unsupported(0x08B83204u, 0x746E6972u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 83u, 0x08B9BB14u>(ctx, &aot_mem); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83204u, 0x746E6972u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0229_entry, 229u, 83u, 0x08B9BB14u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83208;
 L_08B83208:
-    rt.unsupported(0x08B83208u, 0x4F6C6C41u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83208u, 0x4F6C6C41u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83214:
     ctx.execute_vfpu_vec3_ct<73u, 115u, 65u, 1u, 2u>();
-    rt.unsupported(0x08B83218u, 0x43636F68u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83218u, 0x43636F68u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83228:
-    rt.unsupported(0x08B83228u, 0x496D754Eu, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83228u, 0x496D754Eu, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83240:
-    rt.unsupported(0x08B83240u, 0x75466F4Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83240u, 0x75466F4Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83254:
-    rt.unsupported(0x08B83254u, 0x776F6853u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83254u, 0x776F6853u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83268:
     ctx.execute_vfpu_vec3_ct<70u, 105u, 110u, 1u, 2u>();
-    rt.unsupported(0x08B8326Cu, 0x756F7247u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8326Cu, 0x756F7247u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83280:
     ctx.execute_vfpu_vec3_ct<82u, 101u, 110u, 1u, 2u>();
-    rt.unsupported(0x08B83284u, 0x61507265u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83284u, 0x61507265u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83290:
-    rt.unsupported(0x08B83290u, 0x7574536Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83290u, 0x7574536Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83298:
     ctx.execute_vfpu_vec3_ct<82u, 101u, 110u, 1u, 2u>();
-    rt.unsupported(0x08B8329Cu, 0x61507265u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8329Cu, 0x61507265u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B832A8:
-    rt.unsupported(0x08B832A8u, 0x7574536Eu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B832A8u, 0x7574536Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B832B4:
-    rt.unsupported(0x08B832B4u, 0x61736944u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B832B4u, 0x61736944u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B832C0:
     ctx.execute_vfpu_vscl_ct<83u, 99u, 114u, 1u>();
-    rt.unsupported(0x08B832C4u, 0x61426E65u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B832C4u, 0x61426E65u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B832D8:
-    if (ctx.gpr[3] == ctx.gpr[20]) {
+    if (ctx.gpr[3] == aot_gpr_20) {
     ctx.execute_vfpu_vscl_ct<97u, 117u, 115u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 7u, 0x08B9C828u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0230_entry, 230u, 7u, 0x08B9C828u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B832E0;
 L_08B832E0:
     ctx.execute_vfpu_vscl_ct<83u, 99u, 114u, 1u>();
     ctx.execute_vfpu_vscl_ct<101u, 110u, 83u, 1u>();
-    rt.unsupported(0x08B832E8u, 0x7463656Cu, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B832E8u, 0x7463656Cu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B832F0:
-    rt.unsupported(0x08B832F0u, 0x45746547u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B832F0u, 0x45746547u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83308:
-    rt.unsupported(0x08B83308u, 0x00007372u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83308u, 0x00007372u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8330C:
     ctx.execute_vfpu_vminmax_ct<84u, 101u, 97u, 1u, false>();
     ctx.execute_vfpu_vscl_ct<71u, 97u, 109u, 1u>();
-    rt.unsupported(0x08B83314u, 0x72657645u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83314u, 0x72657645u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83320:
     if (ctx.gpr[3] == ctx.gpr[19]) {
     ctx.execute_vfpu_vscl_ct<108u, 97u, 121u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 80u, 0x08B9B844u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0229_entry, 229u, 80u, 0x08B9B844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83328;
 L_08B83324:
     ctx.execute_vfpu_vscl_ct<108u, 97u, 121u, 1u>();
     goto L_08B83328;
 L_08B83328:
-    rt.unsupported(0x08B83328u, 0x746E4572u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83328u, 0x746E4572u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83338:
     if (ctx.gpr[27] == ctx.gpr[5]) {
-    rt.unsupported(0x08B8333Cu, 0x72657075u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0231_entry, 231u, 4u, 0x08BA0090u>(ctx, &aot_mem); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8333Cu, 0x72657075u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0231_entry, 231u, 4u, 0x08BA0090u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83340;
 L_08B83340:
-    rt.unsupported(0x08B83340u, 0x6B617242u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83340u, 0x6B617242u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8334C:
     // nop
     goto L_08B83350;
 L_08B83350:
-    if (ctx.gpr[19] == ctx.gpr[20]) {
+    if (ctx.gpr[19] == aot_gpr_20) {
     ctx.execute_vfpu_vscl_ct<101u, 100u, 84u, 1u>();
-        (void)rt.invoke_chained_direct<&recomp_unit_0230_entry, 230u, 8u, 0x08B9C870u>(ctx, &aot_mem); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0230_entry, 230u, 8u, 0x08B9C870u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83358;
 L_08B83358:
     ctx.execute_vfpu_vscl_ct<97u, 109u, 80u, 1u>();
-    rt.unsupported(0x08B8335Cu, 0x72477265u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8335Cu, 0x72477265u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83368:
-    rt.unsupported(0x08B83368u, 0x42746547u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83368u, 0x42746547u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83374:
-    rt.unsupported(0x08B83374u, 0x47726565u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83374u, 0x47726565u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83380:
-    rt.unsupported(0x08B83380u, 0x45746547u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83380u, 0x45746547u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83384:
-    rt.unsupported(0x08B83384u, 0x79726576u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83384u, 0x79726576u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83390:
-    rt.unsupported(0x08B83390u, 0x70756F72u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83390u, 0x70756F72u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83398:
-    rt.unsupported(0x08B83398u, 0x6E697250u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83398u, 0x6E697250u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8339C:
     ctx.execute_vfpu_vcmp_ct<65u, 108u, 1u, 4u>();
-    rt.unsupported(0x08B833A0u, 0x72656550u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B833A0u, 0x72656550u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B833AC:
-    rt.unsupported(0x08B833ACu, 0x61657243u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B833ACu, 0x61657243u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B833C4:
-    rt.unsupported(0x08B833C4u, 0x61657243u, "vfpu0 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B833C4u, 0x61657243u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B833EC:
-    rt.unsupported(0x08B833ECu, 0x45746553u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B833ECu, 0x45746553u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83400:
-    rt.unsupported(0x08B83400u, 0x45746553u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83400u, 0x45746553u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83414:
-    rt.unsupported(0x08B83414u, 0x74736544u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83414u, 0x74736544u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83428:
-    rt.unsupported(0x08B8342Cu, 0x08AC05B8u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8342Cu, 0x08AC05B8u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83670:
-    rt.unsupported(0x08B83670u, 0x43534944u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83670u, 0x43534944u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8367C:
-    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
-    rt.unsupported(0x08B83680u, 0x44525355u, "unsupported CFC1 control register"); return;
-    rt.unsupported(0x08B83688u, 0x5F47534Du, "control flow in delay slot"); return;
+    ctx.gpr[5] = (aot_gpr_26 < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83680u, 0x44525355u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83688u, 0x5F47534Du, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83688:
-    if (static_cast<std::int32_t>(ctx.gpr[26]) > 0) {
-    rt.unsupported(0x08B8368Cu, 0x44414552u, "unsupported CFC1 control register"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 10u, 0x08B983C0u>(ctx, &aot_mem); return;
+    if (static_cast<std::int32_t>(aot_gpr_26) > 0) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8368Cu, 0x44414552u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0229_entry, 229u, 10u, 0x08B983C0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83690;
 L_08B8368C:
-    rt.unsupported(0x08B8368Cu, 0x44414552u, "unsupported CFC1 control register"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8368Cu, 0x44414552u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
     goto L_08B83690;
 L_08B83690:
-    rt.unsupported(0x08B83694u, 0x53545543u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83694u, 0x53545543u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83698:
-    rt.unsupported(0x08B83698u, 0x454E4543u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83698u, 0x454E4543u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B836A0:
     ctx.execute_vfpu_vec3_ct<76u, 111u, 97u, 1u, 2u>();
-    rt.unsupported(0x08B836A4u, 0x20676E69u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B836A4u, 0x20676E69u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B836B4:
-    rt.unsupported(0x08B836B4u, 0x75746553u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B836B4u, 0x75746553u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B836CC:
-    rt.unsupported(0x08B836CCu, 0x75746553u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B836CCu, 0x75746553u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B836E4:
-    rt.unsupported(0x08B836E4u, 0x69736F50u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B836E4u, 0x69736F50u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83700:
-    rt.unsupported(0x08B83700u, 0x74696E49u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83700u, 0x74696E49u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8371C:
     ctx.execute_vfpu_vscl_ct<67u, 84u, 104u, 1u>();
-    rt.unsupported(0x08B83720u, 0x69726353u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83720u, 0x69726353u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83734:
-    rt.unsupported(0x08B83734u, 0x43656854u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83734u, 0x43656854u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83748:
-    rt.unsupported(0x08B83748u, 0x72745343u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83748u, 0x72745343u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83770:
     ctx.gpr[14] = (static_cast<std::int32_t>(ctx.gpr[3]) < 28521 ? 1u : 0u);
-    rt.unsupported(0x08B83774u, 0x00002929u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83774u, 0x00002929u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83778:
-    rt.unsupported(0x08B83778u, 0x6E6B6E55u, "vfpu3 not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83778u, 0x6E6B6E55u, "vfpu3 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B837E0:
-    rt.unsupported(0x08B837E0u, 0x705C6961u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B837E0u, 0x705C6961u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B837EC:
-    rt.unsupported(0x08B837ECu, 0x76697463u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B837ECu, 0x76697463u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83F58:
-    rt.unsupported(0x08B83F58u, 0x43534944u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83F58u, 0x43534944u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83F64:
-    ctx.gpr[5] = (ctx.gpr[26] < static_cast<std::uint32_t>(19777) ? 1u : 0u);
-    rt.unsupported(0x08B83F68u, 0x44525355u, "unsupported CFC1 control register"); return;
-    if (ctx.gpr[17] == ctx.gpr[15]) {
-    rt.unsupported(0x08B83F70u, 0x41444E55u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0229_entry, 229u, 25u, 0x08B98894u>(ctx, &aot_mem); return;
+    ctx.gpr[5] = (aot_gpr_26 < static_cast<std::uint32_t>(19777) ? 1u : 0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83F68u, 0x44525355u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
+    if (aot_gpr_17 == aot_gpr_15) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83F70u, 0x41444E55u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0229_entry, 229u, 25u, 0x08B98894u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83F74;
 L_08B83F74:
-    rt.unsupported(0x08B83F74u, 0x472F4154u, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83F74u, 0x472F4154u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83F84:
-    rt.unsupported(0x08B83F84u, 0x4F4C4E55u, "unknown not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83F84u, 0x4F4C4E55u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83FA0:
-    if (ctx.gpr[2] != ctx.gpr[20]) {
-    rt.unsupported(0x08B83FA4u, 0x20474E49u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 15u, 0x08B954F0u>(ctx, &aot_mem); return;
+    if (ctx.gpr[2] != aot_gpr_20) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FA4u, 0x20474E49u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 15u, 0x08B954F0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FA8;
 L_08B83FA8:
-    if (ctx.gpr[26] == ctx.gpr[19]) {
-    rt.unsupported(0x08B83FACu, 0x204E4F49u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 42u, 0x08B964E0u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[19]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FACu, 0x204E4F49u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 42u, 0x08B964E0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FB0;
 L_08B83FB0:
-    if (ctx.gpr[26] == ctx.gpr[5]) {
-    rt.unsupported(0x08B83FB4u, 0x2054274Eu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 89u, 0x08B97CC4u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[5]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FB4u, 0x2054274Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 89u, 0x08B97CC4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FB8;
 L_08B83FB8:
-    if (ctx.gpr[10] != ctx.gpr[17]) {
-    rt.unsupported(0x08B83FBCu, 0x20455249u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 16u, 0x08B95504u>(ctx, &aot_mem); return;
+    if (ctx.gpr[10] != aot_gpr_17) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FBCu, 0x20455249u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 16u, 0x08B95504u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FC0;
 L_08B83FC0:
-    rt.unsupported(0x08B83FC0u, 0x45444F4Du, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FC0u, 0x45444F4Du, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83FCC:
-    if (ctx.gpr[2] != ctx.gpr[20]) {
-    rt.unsupported(0x08B83FD0u, 0x20474E49u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 17u, 0x08B9551Cu>(ctx, &aot_mem); return;
+    if (ctx.gpr[2] != aot_gpr_20) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FD0u, 0x20474E49u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 17u, 0x08B9551Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FD4;
 L_08B83FD4:
-    rt.unsupported(0x08B83FD4u, 0x49424D41u, "cop2/vfpu not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FD4u, 0x49424D41u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B83FE4:
-    if (ctx.gpr[26] == ctx.gpr[5]) {
-    rt.unsupported(0x08B83FE8u, 0x2054274Eu, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 90u, 0x08B97CF8u>(ctx, &aot_mem); return;
+    if (aot_gpr_26 == ctx.gpr[5]) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FE8u, 0x2054274Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 90u, 0x08B97CF8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FEC;
 L_08B83FEC:
-    if (ctx.gpr[10] != ctx.gpr[17]) {
-    rt.unsupported(0x08B83FF0u, 0x20455249u, "unknown not lowered yet"); return;
-        (void)rt.invoke_chained_direct<&recomp_unit_0228_entry, 228u, 18u, 0x08B95538u>(ctx, &aot_mem); return;
+    if (ctx.gpr[10] != aot_gpr_17) {
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FF0u, 0x20455249u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+        (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0228_entry, 228u, 18u, 0x08B95538u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08B83FF4;
 L_08B83FF4:
-    rt.unsupported(0x08B83FF4u, 0x45444F4Du, "cop1? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B83FF4u, 0x45444F4Du, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 }
+
+#undef AOT_REGCACHE_SYNC_IN
+#undef AOT_REGCACHE_SYNC_OUT
 
 void recomp_unit_0223(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();

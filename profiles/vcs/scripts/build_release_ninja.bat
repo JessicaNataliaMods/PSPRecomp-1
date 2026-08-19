@@ -117,7 +117,8 @@ set "CORRECTNESS_V827A_SAVE_REPRO_GATE_STAMP=%BUILD%\.vcs_correctness_v827a_save
 set "PERF_V84_AGGRESSIVE_CPU_STAMP=%BUILD%\.vcs_perf_v84_aggressive_cpu_direct_20260818"
 set "PERF_V85_VFPU_FASTLANE_STAMP=%BUILD%\.vcs_perf_v85_aggressive_vfpu_fastlane_20260818"
 set "PERF_V86_RADIO_VFPU_CT2_STAMP=%BUILD%\.vcs_perf_v86_radio_identity_vfpu_ct2_20260818"
-set "PERF_V87_TINY_LEAF_STAMP=%BUILD%\.vcs_perf_v87_extreme_cpu_tiny_leaf_20260818"
+set "PERF_V88_TRUSTED_DISPATCH_STAMP=%BUILD%\.vcs_perf_v88_extreme_cpu_trusted_dispatch_20260818"
+set "PERF_V89_REGCACHE_STAMP=%BUILD%\.vcs_perf_v89_extreme_cpu_register_residency_20260818"
 if not defined PSPRECOMP_TIER2_DEEP_TELEMETRY set "PSPRECOMP_TIER2_DEEP_TELEMETRY=OFF"
 if not defined PSPRECOMP_RUNTIME_CHAIN_TELEMETRY set "PSPRECOMP_RUNTIME_CHAIN_TELEMETRY=OFF"
 if /I "%PSPRECOMP_TIER2_DEEP_TELEMETRY%"=="1" set "PSPRECOMP_TIER2_DEEP_TELEMETRY=ON"
@@ -135,20 +136,15 @@ echo CMake:            %CMAKE_EXE%
 echo Ninja:            %NINJA_EXE%
 echo Ninja workers:    %JOBS%
 echo cl.exe /MP:       OFF ^(Ninja owns compile parallelism^)
-echo Generated AOT:    O3; V8.4 direct-memory + V8.5 fast lanes + V8.6 VFPU CT2 + V8.7 tiny-leaf inline
-echo Correctness:      V8.6 radio identity + V8.2.7A SAVE + V8.2.5 NEWS protected
-echo Buildfix:         V8.7.1D canonical Tier2 CMake source set
+echo Generated AOT:    O3; V8.8 trusted dispatch + V8.9 register residency
+echo Correctness:      V8.9 CPU over V8.6 radio + V8.2.7A SAVE + V8.2.5 NEWS
 echo Host/core LTCG:   ON
 echo AVX2/fast paths:  ON
 echo Tier2 deep diag:  %PSPRECOMP_TIER2_DEEP_TELEMETRY%
 echo Chain telemetry:   %PSPRECOMP_RUNTIME_CHAIN_TELEMETRY%
 echo ================================================================
 echo.
-echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms disabled)...
-call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
-if errorlevel 1 goto :FAIL
-
-echo [0b2/7] Building V8.7 EXTREME CPU TINY LEAF over V8.6 baseline...
+echo [0b2/7] Building V8.9 EXTREME CPU REGISTER RESIDENCY over V8.8 baseline...
 set "PYTHON3_CMD="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)" >nul 2>&1
 if not errorlevel 1 set "PYTHON3_CMD=py -3"
@@ -158,17 +154,25 @@ if not defined PYTHON3_CMD (
 )
 if not defined PYTHON3_CMD goto :NO_PYTHON3
 echo   Python 3:        %PYTHON3_CMD%
+echo [0b-regcanon/7] Restoring canonical architectural register file before Tier-2/AOT passes...
+%PYTHON3_CMD% "%REPO%\tools\optimize_generated_register_residency.py" "%PROFILE%\generated" --strip
+if errorlevel 1 goto :FAIL
+
+echo [0b/7] Reapplying BOOTFIX-safe Tier-2 transforms (OPT1 semantic transforms disabled)...
+call "%PROFILE%\APPLY_TIER2_EXTREME.bat"
+if errorlevel 1 goto :FAIL
+
 %PYTHON3_CMD% "%PROFILE%\tools\build_tier2_superblocks.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v84_cpu.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v85_vfpu.py" "%PROFILE%"
 if errorlevel 1 goto :FAIL
-%PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v87_tiny_leaves.py" "%PROFILE%"
+%PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v88_compact_leaves.py"
 if errorlevel 1 goto :FAIL
-rem V8.7 buildfix: a second V8.4 pass folds scalar store runs newly exposed inside
-rem guarded tiny-leaf bodies. This makes FULL/OVERLAY/incremental checkouts converge.
-%PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v84_cpu.py" "%PROFILE%"
+%PYTHON3_CMD% "%PROFILE%\tools\optimize_generated_v88_trusted_chain.py"
+if errorlevel 1 goto :FAIL
+%PYTHON3_CMD% "%REPO%\tools\optimize_generated_register_residency.py" "%PROFILE%\generated" --gprs 6 --fprs 4
 if errorlevel 1 goto :FAIL
 rem V8.2.7 checker includes the protected V8.2 CPU/Geometry, V8.2.5 NEWS,
 rem V8.2.6 passive checkpoint contract and the corrected PSP ExitDelete lifecycle.
@@ -183,9 +187,9 @@ if errorlevel 1 goto :FAIL
 if errorlevel 1 goto :FAIL
 %PYTHON3_CMD% "%PROFILE%\tests\check_v86_radio_vfpu_ct2.py"
 if errorlevel 1 goto :FAIL
-%PYTHON3_CMD% "%PROFILE%\tests\check_v87_extreme_cpu_tiny_leaf.py"
+%PYTHON3_CMD% "%PROFILE%\tests\check_v88_extreme_cpu_trusted_dispatch.py"
 if errorlevel 1 goto :FAIL
-%PYTHON3_CMD% "%PROFILE%\tests\check_v871d_cmake_sources.py"
+%PYTHON3_CMD% "%PROFILE%\tests\check_v89_register_residency.py"
 if errorlevel 1 goto :FAIL
 
 if exist "%BUILD%" if not exist "%SUPERBLOCK_STAMP%" (
@@ -459,13 +463,27 @@ if exist "%BUILD%" if not exist "%PERF_V86_RADIO_VFPU_CT2_STAMP%" (
   del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
 )
 
-if exist "%BUILD%" if not exist "%PERF_V87_TINY_LEAF_STAMP%" (
+if exist "%BUILD%" if not exist "%PERF_V88_TRUSTED_DISPATCH_STAMP%" (
   echo.
-  echo [0c-v87/7] V8.7 EXTREME CPU TINY LEAF - rebuilding generated AOT/runtime once...
-  rem 2017 static JAL wrappers across 122 generated units now have guarded straight-line leaf bodies.
-  rem Keep DX12, audio, savedata and scheduler objects cached; runtime.hpp forces affected AOT recompilation.
+  echo [0c-v88/7] V8.8 EXTREME CPU TRUSTED DISPATCH - rebuilding AOT/core/Tier2 once...
+  rem V8.8 changes nearly every static chain edge, Runtime outer dispatch and four compact leaves.
+  rem Force one deterministic rebuild so an existing V8.7 checkout cannot retain stale objects.
+  del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_tier2_cluster_*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_compact_leaves*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*runtime*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*vcs_codegen_main*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
+)
+
+if exist "%BUILD%" if not exist "%PERF_V89_REGCACHE_STAMP%" (
+  echo.
+  echo [0c-v89/7] V8.9 EXTREME CPU REGISTER RESIDENCY - rebuilding generated AOT once...
+  rem V8.9 changes register ownership in 230 generated units. Force those objects
+  rem plus the runtime log to rebuild while keeping DX12/media/profile objects cached.
   del /s /q "%BUILD%\*generated_unit_*.obj" >nul 2>&1
   del /s /q "%BUILD%\*vcs_runtime_log*.obj" >nul 2>&1
+  del /s /q "%BUILD%\*codegen_main*.obj" >nul 2>&1
 )
 
 if exist "%BUILD%" if not exist "%BOOTFIX_STAMP%" (
@@ -529,7 +547,8 @@ if errorlevel 1 goto :FAIL
 >"%PERF_V84_AGGRESSIVE_CPU_STAMP%" echo VCS PERF V8.4 AGGRESSIVE CPU DIRECT 2026-08-18
 >"%PERF_V85_VFPU_FASTLANE_STAMP%" echo VCS PERF V8.5 AGGRESSIVE VFPU FASTLANE 2026-08-18
 >"%PERF_V86_RADIO_VFPU_CT2_STAMP%" echo VCS PERF V8.6 RADIO IDENTITY VFPU CT2 2026-08-18
->"%PERF_V87_TINY_LEAF_STAMP%" echo VCS PERF V8.7 EXTREME CPU TINY LEAF 2026-08-18
+>"%PERF_V88_TRUSTED_DISPATCH_STAMP%" echo VCS PERF V8.8 EXTREME CPU TRUSTED DISPATCH 2026-08-18
+>"%PERF_V89_REGCACHE_STAMP%" echo VCS PERF V8.9 EXTREME CPU REGISTER RESIDENCY 2026-08-18
 
 echo.
 echo [2b/7] Building tests and DX12 probes...

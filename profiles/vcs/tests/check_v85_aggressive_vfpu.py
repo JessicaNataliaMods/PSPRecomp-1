@@ -21,9 +21,8 @@ build = read('profiles/vcs/scripts/build_release_ninja.bat')
 opt = read('profiles/vcs/tools/optimize_generated_v85_vfpu.py')
 ini = read('profiles/vcs/config/VCSNative.ini')
 
-need(('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or
-     ('stage=perf-v8.7-extreme-cpu-tiny-leaf-2026-08-18' in log), 'V8.5 lineage stage stamp')
-need((('perf_layer=11' in log and 'cpu_aggressive_revision=5' in log) or ('perf_layer=12' in log and 'cpu_aggressive_revision=6' in log) or ('perf_layer=13' in log and 'cpu_aggressive_revision=7' in log)), 'V8.5/V8.6 performance revision metadata')
+need(('stage=perf-v8.5-aggressive-vfpu-fastlane-2026-08-18' in log) or ('stage=perf-v8.6-radio-identity-vfpu-ct2-2026-08-18' in log) or ('stage=perf-v8.8-extreme-cpu-trusted-dispatch-2026-08-18' in log) or ('stage=perf-v8.9-extreme-cpu-register-residency-2026-08-18' in log), 'V8.5 lineage stage stamp')
+need((('perf_layer=11' in log and 'cpu_aggressive_revision=5' in log) or ('perf_layer=12' in log and 'cpu_aggressive_revision=6' in log) or ('perf_layer=14' in log and 'cpu_aggressive_revision=8' in log) or ('perf_layer=15' in log and 'cpu_aggressive_revision=9' in log)), 'V8.5/V8.6 performance revision metadata')
 for token in (
     'aot_hard_fastmem=1', 'aot_branchless_mem=1', 'aot_vfpu_block32=19455',
     'aot_scalar_run_blocks=10665', 'aot_scalar_run_words=53173',

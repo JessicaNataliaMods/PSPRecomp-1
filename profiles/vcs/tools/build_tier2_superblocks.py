@@ -46,6 +46,62 @@ LOCAL_DISPATCH_SEQUENCE_RE = re.compile(
     r'(?P=indent)return;')
 
 
+# V8.8 canonical call specialization is applied to generated Tier-2 text before
+# writing it. This keeps repeated build runs byte-idempotent: the Tier-2 builder
+# no longer writes canonical direct calls only for the post-pass optimizers to
+# rewrite them again on every invocation. The same five buckets remain defensive
+# because exact host/import replacements may poison their generated entry.
+V88_POISONABLE_UNITS = frozenset({44, 197, 212, 216, 219})
+V88_COMPACT_LEAF_TARGETS = {
+    0x08960424: (87, 'vcs_compact_leaf_08960424'),
+    0x0898B428: (97, 'vcs_compact_leaf_0898B428'),
+    0x08AFEF7C: (190, 'vcs_compact_leaf_08AFEF7C'),
+    0x08A931B8: (163, 'vcs_compact_leaf_08A931B8'),
+}
+V88_CHAIN_CALL_RE = re.compile(
+    r'rt\.invoke_chained_direct<(&recomp_unit_(\d{4})(?:_entry)?),\s*'
+    r'(\d+)u(?:,\s*\d+u)?,\s*(0x[0-9A-Fa-f]+)u>\(ctx,\s*&aot_mem\)'
+)
+V88_TRUSTED_CALL_RE = re.compile(
+    r'rt\.invoke_chained_direct<(&recomp_unit_(\d{4})(?:_entry)?),\s*(\d+)u'
+)
+
+def specialize_v88_cluster_calls(text: str) -> tuple[str, int, int]:
+    compact_sites = 0
+    trusted_sites = 0
+
+    def compact_repl(match: re.Match[str]) -> str:
+        nonlocal compact_sites
+        pc = int(match.group(4), 16)
+        target = V88_COMPACT_LEAF_TARGETS.get(pc)
+        if target is None:
+            return match.group(0)
+        symbol_unit = int(match.group(2))
+        arg_unit = int(match.group(3))
+        expected_unit, function = target
+        if symbol_unit != arg_unit or arg_unit != expected_unit:
+            raise RuntimeError(f'V8.8 Tier2 compact target/unit mismatch at 0x{pc:08X}')
+        compact_sites += 1
+        return (f'rt.invoke_compact_generated_leaf<&{function}, {expected_unit}u, '
+                f'0x{pc:08X}u>(ctx, &aot_mem)')
+
+    text = V88_CHAIN_CALL_RE.sub(compact_repl, text)
+
+    def trusted_repl(match: re.Match[str]) -> str:
+        nonlocal trusted_sites
+        symbol_unit = int(match.group(2))
+        arg_unit = int(match.group(3))
+        if symbol_unit != arg_unit:
+            raise RuntimeError(f'V8.8 Tier2 direct-chain symbol/unit mismatch: {symbol_unit}!={arg_unit}')
+        if arg_unit in V88_POISONABLE_UNITS:
+            return match.group(0)
+        trusted_sites += 1
+        return match.group(0).replace('invoke_chained_direct', 'invoke_chained_trusted_direct', 1)
+
+    text = V88_TRUSTED_CALL_RE.sub(trusted_repl, text)
+    return text, trusted_sites, compact_sites
+
+
 # Tiny leaf accessors used repeatedly by the 0155 entity-link maintenance loop.
 # V6 emits their exact architectural bodies directly into 0155, eliminating
 # C++ return-stack/chain-depth plumbing while keeping scheduler accounting at
@@ -514,6 +570,23 @@ def strip_hooks(text: str) -> str:
 
 def parse_unit(path: pathlib.Path, unit: int) -> UnitSource:
     raw = strip_hooks(path.read_text(encoding='utf-8'))
+    # V8.8 profile optimizers specialize static call edges after Tier-2 is built.
+    # Normalize those spellings only in this in-memory extraction view so the
+    # protected V8.6 Tier-2 closure/fusion decisions remain byte-for-byte based
+    # on the canonical generated call graph. Checked-in AOT stays optimized.
+    raw = raw.replace('invoke_chained_trusted_direct', 'invoke_chained_direct')
+    compact_to_direct = {
+        'rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08960424, 87u, 0x08960424u>(ctx, &aot_mem)':
+            'rt.invoke_chained_direct<&recomp_unit_0087_entry, 87u, 47u, 0x08960424u>(ctx, &aot_mem)',
+        'rt.invoke_compact_generated_leaf<&vcs_compact_leaf_0898B428, 97u, 0x0898B428u>(ctx, &aot_mem)':
+            'rt.invoke_chained_direct<&recomp_unit_0097_entry, 97u, 828u, 0x0898B428u>(ctx, &aot_mem)',
+        'rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08AFEF7C, 190u, 0x08AFEF7Cu>(ctx, &aot_mem)':
+            'rt.invoke_chained_direct<&recomp_unit_0190_entry, 190u, 663u, 0x08AFEF7Cu>(ctx, &aot_mem)',
+        'rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08A931B8, 163u, 0x08A931B8u>(ctx, &aot_mem)':
+            'rt.invoke_chained_direct<&recomp_unit_0163_entry, 163u, 463u, 0x08A931B8u>(ctx, &aot_mem)',
+    }
+    for optimized, canonical in compact_to_direct.items():
+        raw = raw.replace(optimized, canonical)
     # V8.4 automatic AOT is branchless/direct-fastmem. Tier-2 extraction keeps
     # its own pointer-only memory view, so normalize the direct accessor spelling
     # back to the canonical AOT form before applying the existing semantic
@@ -1018,6 +1091,9 @@ TIER2_ENTRY_DISPATCH:
     cpp, gpr_stats = optimize_tier2_gpr_shadow(cpp, cluster.key)
     stats['gpr_shadow_occurrences'] = int(gpr_stats['occurrences'])
     stats['gpr_shadow_registers'] = len(gpr_stats['registers'])
+    cpp, v88_trusted_sites, v88_compact_sites = specialize_v88_cluster_calls(cpp)
+    stats['v88_trusted_sites'] = v88_trusted_sites
+    stats['v88_compact_sites'] = v88_compact_sites
 
     path = host / f'vcs_tier2_cluster_{cluster.key}.cpp'
     old = path.read_text(encoding='utf-8') if path.exists() else None

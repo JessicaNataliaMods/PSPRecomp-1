@@ -1,4 +1,5 @@
 #pragma once
+#include "../host/vcs_compact_leaves.hpp"
 
 #include <cstdint>
 #include "psprecomp/guest_memory.hpp"

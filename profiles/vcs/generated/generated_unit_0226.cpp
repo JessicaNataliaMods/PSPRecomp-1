@@ -121,6 +121,18 @@ static const std::uint16_t kEntryIds_recomp_unit_0226[3582] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 126,
 };
 void recomp_unit_0226_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
+// PSPRECOMP_AOT_REGCACHE_BEGIN
+// PSPRECOMP_AOT_REGCACHE_META gprs=24,7,23,4,2,10 fprs= gpr_occ=50 fpr_occ=0 gpr_total=54 fpr_total=0
+    std::uint32_t aot_gpr_24 = ctx.gpr[24];
+    std::uint32_t aot_gpr_7 = ctx.gpr[7];
+    std::uint32_t aot_gpr_23 = ctx.gpr[23];
+    std::uint32_t aot_gpr_4 = ctx.gpr[4];
+    std::uint32_t aot_gpr_2 = ctx.gpr[2];
+    std::uint32_t aot_gpr_10 = ctx.gpr[10];
+    bool aot_regcache_valid = true;
+#define AOT_REGCACHE_SYNC_OUT() do { if (aot_regcache_valid) { ctx.gpr[24] = aot_gpr_24; ctx.gpr[7] = aot_gpr_7; ctx.gpr[23] = aot_gpr_23; ctx.gpr[4] = aot_gpr_4; ctx.gpr[2] = aot_gpr_2; ctx.gpr[10] = aot_gpr_10; } } while (false)
+#define AOT_REGCACHE_SYNC_IN() do { if (aot_regcache_valid) { aot_gpr_24 = ctx.gpr[24]; aot_gpr_7 = ctx.gpr[7]; aot_gpr_23 = ctx.gpr[23]; aot_gpr_4 = ctx.gpr[4]; aot_gpr_2 = ctx.gpr[2]; aot_gpr_10 = ctx.gpr[10]; } } while (false)
+// PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
     std::uint32_t local_pc = ctx.pc;
@@ -261,7 +273,7 @@ LOCAL_DISPATCH:
     default:
         if (local_transfers == 0u) rt.unsupported(ctx.pc, 0u, "invalid internal function entry");
         else ctx.pc = local_pc;
-        return;
+        AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
 L_08B8C000:
@@ -3294,63 +3306,69 @@ L_08B8EA70:
     goto L_08B8EBC0;
 L_08B8EBC0:
     (void)(ctx.gpr[1] << 0u);
-    rt.unsupported(0x08B8EBC4u, 0x00010001u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8EBC4u, 0x00010001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8EBD8:
-    rt.unsupported(0x08B8EBDCu, 0x00080008u, "control flow in delay slot"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8EBDCu, 0x00080008u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8EC10:
     (void)(ctx.gpr[1] << 0u);
-    rt.unsupported(0x08B8EC14u, 0x00010001u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8EC14u, 0x00010001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8EC60:
-    (void)(ctx.gpr[10] << 0u);
-    if (ctx.gpr[10] == 0u) (void)(0u);
-    if (ctx.gpr[10] == 0u) (void)(0u);
-    if (ctx.gpr[10] == 0u) (void)(0u);
-    if (ctx.gpr[10] == 0u) (void)(0u);
-    if (ctx.gpr[10] == 0u) (void)(0u);
-    rt.unsupported(0x08B8EC78u, 0x03E80168u, "special? not lowered yet"); return;
+    (void)(aot_gpr_10 << 0u);
+    if (aot_gpr_10 == 0u) (void)(0u);
+    if (aot_gpr_10 == 0u) (void)(0u);
+    if (aot_gpr_10 == 0u) (void)(0u);
+    if (aot_gpr_10 == 0u) (void)(0u);
+    if (aot_gpr_10 == 0u) (void)(0u);
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8EC78u, 0x03E80168u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8ECB4:
     ctx.gpr[16] = (0u << 2u);
     (void)(0u << 16u);
     ctx.gpr[16] = (0u << 2u);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    ctx.gpr[24] = (ctx.gpr[7] + ctx.gpr[23]);
+    aot_gpr_24 = (aot_gpr_7 + aot_gpr_23);
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    { const std::uint32_t dividend = ctx.gpr[4]; const std::uint32_t divisor = ctx.gpr[2]; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
+    { const std::uint32_t dividend = aot_gpr_4; const std::uint32_t divisor = aot_gpr_2; if (divisor == 0u) { ctx.lo = 0xFFFFFFFFu; ctx.hi = dividend; } else { ctx.lo = dividend / divisor; ctx.hi = dividend % divisor; } }
     (void)(0u << 16u);
-    rt.unsupported(0x08B8ED4Cu, 0x0018C295u, "special? not lowered yet"); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8ED4Cu, 0x0018C295u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8EE30:
-    rt.unsupported(0x08B8EE34u, 0x00000005u, "special? not lowered yet"); return;
-    ctx.pc = 0x02EB0FE0u; (void)rt.invoke_chained_call(ctx, &aot_mem); return;
+    AOT_REGCACHE_SYNC_OUT();
+    rt.unsupported(0x08B8EE34u, 0x00000005u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
+    ctx.pc = 0x02EB0FE0u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8EE70:
     // nop
     // nop
@@ -4486,8 +4504,11 @@ L_08B8F7F4:
     // nop
     // nop
     // nop
-    ctx.pc = 0x08B90000u; return;
+    ctx.pc = 0x08B90000u; AOT_REGCACHE_SYNC_OUT(); return;
 }
+
+#undef AOT_REGCACHE_SYNC_IN
+#undef AOT_REGCACHE_SYNC_OUT
 
 void recomp_unit_0226(Runtime &rt, AllegrexContext &ctx) {
     auto aot_mem = rt.memory().aot_fast_view();

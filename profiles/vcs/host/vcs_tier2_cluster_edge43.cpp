@@ -316,7 +316,7 @@ SB_L_088B18EC:
     ctx.gpr[7] = (ctx.gpr[22] | 0u);
     ctx.gpr[31] = (0x088B1940u);
     ctx.gpr[8] = (ctx.gpr[23] | 0u);
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0163_entry, 163u, 44u, 0x08A9061Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B1940u) goto SB_L_088B1940;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0163_entry, 163u, 44u, 0x08A9061Cu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B1940u) goto SB_L_088B1940;
     TIER2_SB_RETURN();
 
 SB_L_088B1940:
@@ -602,7 +602,7 @@ SB_L_088B40C4:
         goto SB_L_088B18EC;
     }
     ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 210u, 0x088B18ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B40E0u) goto SB_L_088B40E0;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 210u, 0x088B18ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B40E0u) goto SB_L_088B40E0;
     TIER2_SB_RETURN();
 
 SB_L_088B40E0:
@@ -753,7 +753,7 @@ SB_L_088B41D8:
         goto SB_L_088B18EC;
     }
     ++tier2_stats.fallbacks;
-    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_direct<&recomp_unit_0043_entry, 43u, 210u, 0x088B18ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B41F4u) goto SB_L_088B41F4;
+    if (([&]() { TIER2_GPR_SYNC_OUT(); const bool tier2_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0043_entry, 43u, 210u, 0x088B18ECu>(ctx, &aot_mem)); if (tier2_same_) TIER2_GPR_SYNC_IN(); else tier2_gpr_shadow_valid = false; return tier2_same_; }()) && ctx.pc == 0x088B41F4u) goto SB_L_088B41F4;
     TIER2_SB_RETURN();
 
 SB_L_088B41F4:
