@@ -15,7 +15,7 @@ if not exist "%BUILD%" (
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command ^
   "$build=[IO.Path]::GetFullPath('%BUILD%');" ^
   "$names=@('vcs_profile.cpp.obj');" ^
-  "$found=Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue ^| Where-Object { $names -contains $_.Name };" ^
+  "$found=@(Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue); $found=@($found.Where({$names -contains $_.Name}));" ^
   "Write-Host ('[V9.6] stale objects found: ' + $found.Count);" ^
   "foreach($f in $found){Write-Host ('  deleting: ' + $f.FullName); Remove-Item -LiteralPath $f.FullName -Force -ErrorAction Stop};" ^
   "$src='%REPO%\profiles\vcs\host\vcs_profile.cpp';" ^

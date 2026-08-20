@@ -1,6 +1,5 @@
 #include "vcs_project2dfx.hpp"
 #include "vcs_project2dfx_lights.hpp"
-#include "vcs_draw_distance_patch.hpp"
 #include "ge_gpu_backend.hpp"
 #include "psprecomp/runtime.hpp"
 
@@ -580,10 +579,6 @@ void install_project2dfx(psprecomp::Runtime &runtime,
                          std::uint32_t guest_scratch_base){
     g_runtime=&runtime;g_projection_scratch=guest_scratch_base;
     g_ini_path=ini_path;g_cfg=read_config(ini_path);g_camera_candidates.clear();g_hot_camera=nullptr;g_hot_camera_revision=0u;g_hot_camera_target=0u;g_last_rendered_vblank=std::numeric_limits<std::uint64_t>::max();
-    // O draw distance tem [DrawDistance] Enabled proprio e nao faz parte do
-    // Project2DFX original, entao instala antes do return abaixo. Estava depois
-    // dele, o que amarrava um recurso independente ao outro sem dizer nada.
-    install_draw_distance_patch(runtime,ini_path);
     if(!g_cfg.enabled){std::cerr<<"[Project2DFX] disabled\n";return;}
     if(g_cfg.performance_log){
 #ifdef _WIN32

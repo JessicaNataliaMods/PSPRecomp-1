@@ -14,10 +14,18 @@ enum class GeGpuBackendKind : std::uint8_t {
     DirectX12,
 };
 
+enum class GeShaderPipe : std::uint8_t {
+    Native = 0,
+    Building = 1,
+    Skin = 2,
+    Vehicle = 3,
+};
+
 struct GeGpuDrawDescriptor {
     std::uint32_t primitive{};
     std::uint32_t vertex_count{};
     std::uint32_t vertex_type{};
+    GeShaderPipe shader_pipe{GeShaderPipe::Native};
     // GE render target for this draw. Stage 33 uses it to exclude prelight,
     // reflection and other offscreen passes from the presented framebuffer.
     std::uint32_t framebuffer_address{};
@@ -122,6 +130,9 @@ struct GeGpuDrawDescriptor {
 // triangles. The backend folds viewport/composition into model_to_clip once per
 // draw and pushes the final constants to the vertex shader.
 struct GeGpuHardwareTransform {
+    // Kept separately from model_to_clip for private material/shadow passes.
+    // Lit geometry that has already been transformed to world space stores identity.
+    std::array<float, 16> model_to_world{};
     std::array<float, 16> model_to_clip{};
     std::array<float, 4> model_to_view_z{};
     float viewport_scale_x{};
@@ -430,7 +441,7 @@ void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &draw) noexcept;
 // The matrices are observed with the draw, before the GE state advances.
 void ge_gpu_backend_observe_camera(const std::array<float, 12> &view,
                                    const std::array<float, 16> &projection,
-                                   const std::array<float, 6> &viewport,
+                                   const std::array<float, 8> &viewport,
                                    const std::array<float, 3> &camera_position,
                                    const GeGpuDrawDescriptor &draw,
                                    std::uint32_t vertex_weight) noexcept;

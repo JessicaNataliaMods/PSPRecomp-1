@@ -1,7 +1,8 @@
 #include "ge_gpu_backend.hpp"
 #include "ge_cloud_camera_math.hpp"
-#include "ge_cloudworks_present_shader.hpp"
+#include "propershaders/ProperShadersBridge.hpp"
 #include "vcs_config.hpp"
+#include "vcs_draw_distance_patch.hpp"
 #include "vcs_runtime_log.hpp"
 
 #include <algorithm>
@@ -10,9 +11,11 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <cstdlib>
 #include <limits>
+#include <iomanip>
 #include <iterator>
 #include <iostream>
 #include <span>
@@ -150,10 +153,10 @@ static_assert(sizeof(Dx12IndirectDrawIndexedCommand) == 200u);
 struct CloudCameraCandidate {
     std::array<float, 12> view{};
     std::array<float, 16> projection{};
-    // scale X/Y, center X/Y and offset X/Y from the GE viewport. Keeping this
-    // with the exact draw camera lets the present shader reconstruct the same
-    // rays that the native geometry path rasterized.
-    std::array<float, 6> viewport{};
+    // scale X/Y/Z, center X/Y/Z and offset X/Y from the GE viewport. Keeping
+    // this with the exact draw camera lets private full-screen effects rebuild
+    // the same effective projection/depth range used by native geometry.
+    std::array<float, 8> viewport{};
     std::array<float, 3> camera_position{};
     std::uint32_t target{};
     std::uint64_t weight{};
@@ -231,8 +234,15 @@ struct Dx12FramebufferTarget {
     std::uint32_t dsv_index{};
     std::uint32_t srv_index{};
     std::uint32_t feedback_srv_index{};
+    // Optional shader-readable view of the native world depth buffer. Two
+    // contiguous descriptors are reserved because the shared fullscreen root
+    // signature exposes t0..t1.  Only the private realtime-shadow module uses
+    // them; public builds keep this at zero and pay no descriptor/resource
+    // state cost beyond the normal DSV.
+    std::uint32_t depth_srv_base{};
     D3D12_RESOURCE_STATES color_state{D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE};
     D3D12_RESOURCE_STATES msaa_state{D3D12_RESOURCE_STATE_RENDER_TARGET};
+    D3D12_RESOURCE_STATES depth_state{D3D12_RESOURCE_STATE_DEPTH_WRITE};
     D3D12_RESOURCE_STATES feedback_state{D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE};
     std::uint64_t last_render_epoch{};
 };
@@ -249,6 +259,15 @@ struct CloudRenderTarget {
     std::uint32_t width{};
     std::uint32_t height{};
     D3D12_RESOURCE_STATES state{D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE};
+};
+
+struct ShadowMapTarget {
+    ComPtr<ID3D12Resource> depth;
+    std::uint32_t dsv_index{};
+    std::uint32_t srv_index{};
+    std::uint32_t resolution{};
+    std::uint32_t caster_draws{};
+    D3D12_RESOURCE_STATES state{D3D12_RESOURCE_STATE_DEPTH_WRITE};
 };
 
 struct Dx12GeState {
@@ -309,11 +328,25 @@ struct Dx12GeState {
     UINT64 next_fence{1u};
     ComPtr<ID3D12RootSignature> root_signature;
     ComPtr<ID3D12RootSignature> cloud_root_signature;
+    ComPtr<ID3D12RootSignature> realtime_shadow_caster_root_signature;
+    ComPtr<ID3D12RootSignature> realtime_shadow_composite_root_signature;
     ComPtr<ID3D12CommandSignature> indirect_draw_signature;
     ComPtr<ID3D12CommandSignature> indirect_draw_indexed_signature;
     ComPtr<ID3DBlob> vertex_shader;
     ComPtr<ID3DBlob> packed_0115_vertex_shader;
     ComPtr<ID3DBlob> pixel_shader;
+    ComPtr<ID3DBlob> building_vertex_shader;
+    ComPtr<ID3DBlob> building_packed_0115_vertex_shader;
+    ComPtr<ID3DBlob> building_pixel_shader;
+    ComPtr<ID3DBlob> skin_vertex_shader;
+    ComPtr<ID3DBlob> skin_packed_0115_vertex_shader;
+    ComPtr<ID3DBlob> skin_pixel_shader;
+    ComPtr<ID3DBlob> vehicle_vertex_shader;
+    ComPtr<ID3DBlob> vehicle_packed_0115_vertex_shader;
+    ComPtr<ID3DBlob> vehicle_pixel_shader;
+    ComPtr<ID3DBlob> realtime_shadow_caster_vertex_shader;
+    ComPtr<ID3DBlob> realtime_shadow_caster_packed_vertex_shader;
+    ComPtr<ID3DBlob> realtime_shadow_pixel_shader;
     std::unordered_map<std::uint64_t, ComPtr<ID3D12PipelineState>> pipelines;
     std::unordered_map<std::uint64_t, Dx12Texture> textures;
     // Hot draw streams reuse the same texture for long runs. Avoid repeating an
@@ -341,6 +374,9 @@ struct Dx12GeState {
     ComPtr<ID3D12PipelineState> cloud_target_pipeline;
     ComPtr<ID3D12PipelineState> cloud_resolve_pipeline;
     ComPtr<ID3D12PipelineState> cloud_composite_pipeline;
+    ComPtr<ID3D12PipelineState> realtime_shadow_caster_pipeline;
+    ComPtr<ID3D12PipelineState> realtime_shadow_caster_packed_pipeline;
+    ComPtr<ID3D12PipelineState> realtime_shadow_pipeline;
     ComPtr<ID3DBlob> present_vertex_shader;
     ComPtr<ID3DBlob> present_pixel_shader;
     ComPtr<ID3DBlob> cloud_target_pixel_shader;
@@ -348,6 +384,10 @@ struct Dx12GeState {
     ComPtr<ID3DBlob> cloud_composite_pixel_shader;
     std::array<CloudRenderTarget, 2> cloud_history;
     CloudRenderTarget cloud_march;
+    ShadowMapTarget realtime_shadow_map;
+    // Optional private effects must never decide whether the native GE backend
+    // itself lives. This latch becomes true only after shadow HLSL compiled.
+    bool realtime_shadows_available{};
     std::array<std::uint32_t, 2> cloud_resolve_srv_base{};
     std::uint32_t cloud_history_index{};
     std::uint32_t cloud_temporal_frame{};
@@ -760,6 +800,30 @@ DXGI_FORMAT requested_depth_format(std::uint32_t bits) noexcept {
     return DXGI_FORMAT_D32_FLOAT;
 }
 
+DXGI_FORMAT typeless_depth_resource_format(DXGI_FORMAT dsv_format) noexcept {
+    switch (dsv_format) {
+    case DXGI_FORMAT_D16_UNORM: return DXGI_FORMAT_R16_TYPELESS;
+    case DXGI_FORMAT_D24_UNORM_S8_UINT: return DXGI_FORMAT_R24G8_TYPELESS;
+    case DXGI_FORMAT_D32_FLOAT: return DXGI_FORMAT_R32_TYPELESS;
+    default: return dsv_format;
+    }
+}
+
+DXGI_FORMAT depth_srv_format(DXGI_FORMAT dsv_format) noexcept {
+    switch (dsv_format) {
+    case DXGI_FORMAT_D16_UNORM: return DXGI_FORMAT_R16_UNORM;
+    case DXGI_FORMAT_D24_UNORM_S8_UINT: return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    case DXGI_FORMAT_D32_FLOAT: return DXGI_FORMAT_R32_FLOAT;
+    default: return DXGI_FORMAT_UNKNOWN;
+    }
+}
+
+bool realtime_shadows_requested() noexcept {
+    const auto &proper = vcs_configuration().proper_shaders;
+    return proper.enabled && proper.realtime_shadows.enabled &&
+           proper_shaders_private_available();
+}
+
 bool format_supports_depth(ID3D12Device *device, DXGI_FORMAT format) noexcept {
     if (device == nullptr) return false;
     D3D12_FEATURE_DATA_FORMAT_SUPPORT support{};
@@ -1097,17 +1161,20 @@ std::uint64_t pipeline_key(const GeGpuDrawDescriptor &draw) noexcept {
     key |= static_cast<std::uint64_t>(static_cast<std::uint32_t>(blend.op_alpha) & 0x7u) << 30u;
     key |= static_cast<std::uint64_t>(color_write_mask(draw) & 0xFu) << 33u;
     key |= static_cast<std::uint64_t>(blend.uses_constant ? 1u : 0u) << 37u;
+    key |= static_cast<std::uint64_t>(static_cast<std::uint8_t>(draw.shader_pipe) & 3u) << 38u;
     return key;
 }
 
 bool hardware_transform_equal(const GeGpuHardwareTransform &a,
                               const GeGpuHardwareTransform &b) noexcept {
-    // Only fields consumed by make_transform_constants() participate.  The
-    // trailing accounting counters deliberately do not: two adjacent PRIMs can
+    // Fields consumed by the native draw constants *or* the private shadow
+    // caster participate. The trailing accounting counters deliberately do not:
+    // two adjacent PRIMs can
     // have different logical batching statistics while still sharing identical
     // shader constants.  Explicit field comparison avoids relying on struct
     // padding with memcmp.
-    return a.model_to_clip == b.model_to_clip &&
+    return a.model_to_world == b.model_to_world &&
+           a.model_to_clip == b.model_to_clip &&
            a.model_to_view_z == b.model_to_view_z &&
            a.viewport_scale_x == b.viewport_scale_x &&
            a.viewport_scale_y == b.viewport_scale_y &&
@@ -1312,6 +1379,105 @@ bool append_or_merge_batch(Dx12GeState &s, Dx12Batch batch) {
     return false;
 }
 
+
+void promote_vehicle_batch_groups(Dx12GeState &s) noexcept {
+    const auto &proper = vcs_configuration().proper_shaders;
+    if (!proper.enabled || !proper.vehicle_pipe.enabled ||
+        !proper_shaders_private_available() || s.batches.empty())
+        return;
+
+    // The palette classifier gives us high-confidence anchor materials, but a
+    // RenderWare vehicle is an atomic/group with wheels, glass, lights and trim
+    // that often use non-paletted textures. Promote the *contiguous entity run*
+    // around each anchor. Spatial/model-transform checks keep static world
+    // batches from being swallowed by a nearby car.
+    std::vector<std::size_t> anchors;
+    anchors.reserve(32u);
+    for (std::size_t i = 0u; i < s.batches.size(); ++i) {
+        if (s.batches[i].draw.shader_pipe == GeShaderPipe::Vehicle)
+            anchors.push_back(i);
+    }
+    if (anchors.empty()) return;
+
+    const auto origin = [](const Dx12Batch &batch) {
+        return std::array<float, 3>{batch.transform.model_to_world[12],
+                                    batch.transform.model_to_world[13],
+                                    batch.transform.model_to_world[14]};
+    };
+    const auto finite_origin = [](const std::array<float, 3> &v) {
+        return std::isfinite(v[0]) && std::isfinite(v[1]) && std::isfinite(v[2]);
+    };
+    const auto distance2 = [](const std::array<float, 3> &a,
+                              const std::array<float, 3> &b) {
+        const float x = a[0] - b[0], y = a[1] - b[1], z = a[2] - b[2];
+        return x * x + y * y + z * z;
+    };
+    const auto approximately_identity_origin = [](const std::array<float, 3> &v) {
+        return std::fabs(v[0]) < 1.0e-4f && std::fabs(v[1]) < 1.0e-4f &&
+               std::fabs(v[2]) < 1.0e-4f;
+    };
+
+    std::uint32_t promoted = 0u;
+    constexpr std::size_t kMaxNeighbourDraws = 18u;
+    constexpr float kMaxVehiclePartDistance2 = 14.0f * 14.0f;
+    for (const std::size_t anchor_index : anchors) {
+        if (anchor_index >= s.batches.size()) continue;
+        const Dx12Batch &anchor = s.batches[anchor_index];
+        if (!anchor.hardware_transform) continue;
+        const std::uint32_t target = anchor.draw.framebuffer_address & 0x001FFFF0u;
+        const auto anchor_origin = origin(anchor);
+        const bool anchor_origin_valid = finite_origin(anchor_origin);
+        const bool anchor_identity_origin = approximately_identity_origin(anchor_origin);
+
+        const auto candidate_matches = [&](const Dx12Batch &candidate,
+                                           std::size_t distance_in_draws) {
+            if (!candidate.hardware_transform || candidate.draw.clear_mode ||
+                candidate.framebuffer_feedback || candidate.draw.through)
+                return false;
+            if ((candidate.draw.framebuffer_address & 0x001FFFF0u) != target)
+                return false;
+            if (candidate.draw.shader_pipe == GeShaderPipe::Skin ||
+                candidate.draw.shader_pipe == GeShaderPipe::Native)
+                return false;
+            if (candidate.draw.depth_test_enabled != anchor.draw.depth_test_enabled ||
+                candidate.draw.depth_write_enabled != anchor.draw.depth_write_enabled)
+                return false;
+            const auto candidate_origin = origin(candidate);
+            if (!anchor_origin_valid || !finite_origin(candidate_origin)) return false;
+            const bool candidate_identity = approximately_identity_origin(candidate_origin);
+            if (!anchor_identity_origin || !candidate_identity)
+                return distance2(anchor_origin, candidate_origin) <= kMaxVehiclePartDistance2;
+            // Some VCS entity draws arrive pretransformed in world space and
+            // therefore carry identity model_to_world. In that case spatial
+            // origin cannot distinguish them; keep promotion intentionally
+            // narrow and contiguous around the high-confidence palette anchor.
+            return distance_in_draws <= 12u;
+        };
+
+        for (int direction : {-1, 1}) {
+            for (std::size_t step = 1u; step <= kMaxNeighbourDraws; ++step) {
+                const std::int64_t signed_index = static_cast<std::int64_t>(anchor_index) +
+                    static_cast<std::int64_t>(direction) * static_cast<std::int64_t>(step);
+                if (signed_index < 0 ||
+                    signed_index >= static_cast<std::int64_t>(s.batches.size()))
+                    break;
+                Dx12Batch &candidate = s.batches[static_cast<std::size_t>(signed_index)];
+                if (!candidate_matches(candidate, step)) break;
+                if (candidate.draw.shader_pipe == GeShaderPipe::Building) {
+                    candidate.draw.shader_pipe = GeShaderPipe::Vehicle;
+                    ++promoted;
+                }
+            }
+        }
+    }
+
+    if (promoted != 0u && (s.frame_epoch < 8u || (s.frame_epoch % 120u) == 0u)) {
+        runtime_log_line("ProperShaders vehicle entity promotion anchors=" +
+                         std::to_string(anchors.size()) + " promoted_parts=" +
+                         std::to_string(promoted));
+    }
+}
+
 bool compile_shaders(Dx12GeState &s, std::string &error) noexcept {
     const char *shader = R"HLSL(
 Texture2D<float4> SourceTexture : register(t0);
@@ -1334,16 +1500,17 @@ cbuffer DrawPixelState : register(b1) {
     uint TextureEnvPacked;
     uint FogControlPacked;
     uint FramebufferFormat;
-    float3 CloudRight;
-    float CloudInvProjectionX;
-    float3 CloudUp;
-    float CloudInvProjectionY;
-    float3 CloudCameraPosition;
-    float CloudTime;
-    float CloudCoverage;
-    float CloudOpacity;
-    float CloudMarchSteps;
-    float CloudEnabled;
+    // The remaining 16 DWORDs are private-material scratch constants. Their
+    // scalar/float3 packing deliberately starts at c1.y so all 21 root DWORDs
+    // remain densely addressable without cbuffer alignment holes.
+    float3 ProperShadowRow0XYZ;
+    float ProperShadowRow0W;
+    float3 ProperShadowRow1XYZ;
+    float ProperShadowRow1W;
+    float3 ProperShadowRow2XYZ;
+    float ProperShadowRow2W;
+    float3 ProperShadowRow3XYZ;
+    float ProperShadowRow3W;
 };
 struct VSIn {
     float4 position : POSITION;
@@ -1553,7 +1720,102 @@ float4 PSMain(VSOut input) : SV_TARGET {
         return false;
     }
 
-    const char *present = kCloudWorksPresentShaderHlsl;
+    if (proper_shaders_private_available() && vcs_configuration().proper_shaders.enabled) {
+        const auto compile_pipe = [&](GeShaderPipe pipe,
+                                      bool material_shadows,
+                                      ComPtr<ID3DBlob> &vs_blob,
+                                      ComPtr<ID3DBlob> &packed_vs_blob,
+                                      ComPtr<ID3DBlob> &ps_blob,
+                                      const char *name) -> bool {
+            const std::string source = proper_shaders_make_pipe_hlsl(pipe, shader, material_shadows);
+            // Private material variants are optional. Do not turn conservative FXC
+            // warnings into a hard pipe shutdown; the native GE shader keeps the
+            // stricter warning policy above.
+            constexpr UINT pipe_flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+            errors.Reset();
+            HRESULT pipe_hr = D3DCompile(source.data(), source.size(), name, nullptr, nullptr,
+                                         "VSMain", "vs_5_1", pipe_flags, 0u, &vs_blob, &errors);
+            if (FAILED(pipe_hr)) {
+                error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()), errors->GetBufferSize())
+                               : hr_text(pipe_hr, name);
+                return false;
+            }
+            errors.Reset();
+            pipe_hr = D3DCompile(source.data(), source.size(), name, nullptr, nullptr,
+                                 "VSMainPacked0115", "vs_5_1", pipe_flags, 0u,
+                                 &packed_vs_blob, &errors);
+            if (FAILED(pipe_hr)) {
+                error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()), errors->GetBufferSize())
+                               : hr_text(pipe_hr, name);
+                return false;
+            }
+            errors.Reset();
+            pipe_hr = D3DCompile(source.data(), source.size(), name, nullptr, nullptr,
+                                 "PSMain", "ps_5_1", pipe_flags, 0u, &ps_blob, &errors);
+            if (FAILED(pipe_hr)) {
+                error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()), errors->GetBufferSize())
+                               : hr_text(pipe_hr, name);
+                return false;
+            }
+            return true;
+        };
+        const auto compile_optional_pipe = [&](GeShaderPipe pipe,
+                                               ComPtr<ID3DBlob> &vs_blob,
+                                               ComPtr<ID3DBlob> &packed_vs_blob,
+                                               ComPtr<ID3DBlob> &ps_blob,
+                                               const char *name) {
+            std::string shadow_error;
+            if (compile_pipe(pipe, true, vs_blob, packed_vs_blob, ps_blob, name)) {
+                runtime_log_line(std::string("ProperShaders pipe compiled: ") + name +
+                                 " shadow_receiver=1");
+                return;
+            }
+            shadow_error = error;
+            error.clear();
+            vs_blob.Reset(); packed_vs_blob.Reset(); ps_blob.Reset();
+
+            // A shadow receiver must never be allowed to kill a working material
+            // pipe. Retry the same Building/Skin/Vehicle debug/custom shader with
+            // the shadow extension completely absent. This reproduces the last
+            // known-good pipe architecture if the receiver integration regresses.
+            if (compile_pipe(pipe, false, vs_blob, packed_vs_blob, ps_blob, name)) {
+                runtime_log_error(std::string("ProperShaders shadow receiver disabled; pipe recovered: ") + name,
+                                  shadow_error);
+                runtime_log_line(std::string("ProperShaders pipe compiled fallback: ") + name +
+                                 " shadow_receiver=0");
+                return;
+            }
+            const std::string fallback_error = error;
+            error.clear();
+            vs_blob.Reset(); packed_vs_blob.Reset(); ps_blob.Reset();
+            runtime_log_error(std::string("optional ProperShaders pipe disabled after shadow-free retry: ") + name,
+                              fallback_error);
+        };
+        compile_optional_pipe(GeShaderPipe::Building,
+                              s.building_vertex_shader, s.building_packed_0115_vertex_shader,
+                              s.building_pixel_shader, "VCSBuildingPipe");
+        compile_optional_pipe(GeShaderPipe::Skin,
+                              s.skin_vertex_shader, s.skin_packed_0115_vertex_shader,
+                              s.skin_pixel_shader, "VCSSkinPipe");
+        compile_optional_pipe(GeShaderPipe::Vehicle,
+                              s.vehicle_vertex_shader, s.vehicle_packed_0115_vertex_shader,
+                              s.vehicle_pixel_shader, "VCSVehiclePipe");
+    }
+
+    const char *present = proper_shaders_volumetric_clouds_hlsl();
+    if (present == nullptr) {
+        // Public build: keep the native fullscreen copy shader self-contained.
+        present = R"HLSL(
+Texture2D<float4> CloudTexture0 : register(t0);
+SamplerState CloudSampler : register(s0);
+struct PresentVertexOutput { float4 position : SV_POSITION; float2 uv : TEXCOORD0; };
+PresentVertexOutput PresentVS(uint id : SV_VertexID) { PresentVertexOutput o; if(id==0){o.position=float4(-1,-1,0,1);o.uv=float2(0,1);} else if(id==1){o.position=float4(-1,3,0,1);o.uv=float2(0,-1);} else{o.position=float4(3,-1,0,1);o.uv=float2(2,1);} return o; }
+float4 PresentPS(PresentVertexOutput i):SV_TARGET { return CloudTexture0.SampleLevel(CloudSampler,i.uv,0.0); }
+float4 CloudMarchPS(PresentVertexOutput i):SV_TARGET { return float4(0,0,0,1); }
+float4 CloudTemporalResolvePS(PresentVertexOutput i):SV_TARGET { return float4(0,0,0,1); }
+float4 CloudCompositePS(PresentVertexOutput i):SV_TARGET { return float4(0,0,0,0); }
+)HLSL";
+    }
     errors.Reset();
     hr = D3DCompile(present, std::strlen(present), "VCSNativeDX12GEPresent", nullptr, nullptr,
                     "PresentVS", "vs_5_1", flags, 0u, &s.present_vertex_shader, &errors);
@@ -1606,6 +1868,52 @@ float4 PSMain(VSOut input) : SV_TARGET {
                        : hr_text(hr, "D3DCompile(DX12 GE cloud composite PS)");
         return false;
     }
+    s.realtime_shadows_available = false;
+    if (realtime_shadows_requested()) {
+        const char *shadow = proper_shaders_realtime_shadows_hlsl();
+        if (shadow != nullptr) {
+            // This is an optional effect. FXC warnings in the private shader
+            // must not demote the entire native GE to the software backend.
+            const UINT shadow_flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+            std::string shadow_error;
+            bool shadow_ok = true;
+            errors.Reset();
+            hr = D3DCompile(shadow, std::strlen(shadow), "VCSNativeDX12GEShadowCaster",
+                            nullptr, nullptr, "ShadowCasterVS", "vs_5_1", shadow_flags, 0u,
+                            &s.realtime_shadow_caster_vertex_shader, &errors);
+            if (FAILED(hr)) {
+                shadow_error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                                     errors->GetBufferSize())
+                                      : hr_text(hr, "D3DCompile(DX12 GE shadow caster VS)");
+                shadow_ok = false;
+            }
+            if (shadow_ok) {
+                errors.Reset();
+                hr = D3DCompile(shadow, std::strlen(shadow), "VCSNativeDX12GEShadowCasterPacked",
+                                nullptr, nullptr, "ShadowCasterPackedVS", "vs_5_1", shadow_flags, 0u,
+                                &s.realtime_shadow_caster_packed_vertex_shader, &errors);
+                if (FAILED(hr)) {
+                    shadow_error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                                         errors->GetBufferSize())
+                                          : hr_text(hr, "D3DCompile(DX12 GE packed shadow caster VS)");
+                    shadow_ok = false;
+                }
+            }
+            // The old fullscreen ShadowPS/contact-composite path is deliberately
+            // not compiled. Realtime shadows now consist of a depth-only caster
+            // pass plus PCF sampling inside the actual material shaders.
+            s.realtime_shadow_pixel_shader.Reset();
+            if (shadow_ok) {
+                s.realtime_shadows_available = true;
+                runtime_log_line("ProperShaders realtime shadow HLSL compiled");
+            } else {
+                s.realtime_shadow_caster_vertex_shader.Reset();
+                s.realtime_shadow_caster_packed_vertex_shader.Reset();
+                s.realtime_shadow_pixel_shader.Reset();
+                runtime_log_error("optional ProperShaders realtime shadows disabled", shadow_error);
+            }
+        }
+    }
     return true;
 }
 
@@ -1622,7 +1930,13 @@ bool create_root_signature(Dx12GeState &s, std::string &error) noexcept {
     sampler_range.BaseShaderRegister = 0u;
     sampler_range.RegisterSpace = 0u;
     sampler_range.OffsetInDescriptorsFromTableStart = 0u;
-    std::array<D3D12_ROOT_PARAMETER, 4> parameters{};
+    D3D12_DESCRIPTOR_RANGE shadow_srv_range{};
+    shadow_srv_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    shadow_srv_range.NumDescriptors = 1u;
+    shadow_srv_range.BaseShaderRegister = 1u;
+    shadow_srv_range.RegisterSpace = 0u;
+    shadow_srv_range.OffsetInDescriptorsFromTableStart = 0u;
+    std::array<D3D12_ROOT_PARAMETER, 5> parameters{};
     parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     parameters[0].DescriptorTable.NumDescriptorRanges = 1u;
     parameters[0].DescriptorTable.pDescriptorRanges = &srv_range;
@@ -1642,11 +1956,18 @@ bool create_root_signature(Dx12GeState &s, std::string &error) noexcept {
     parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
     parameters[3].Constants.ShaderRegister = 1u;
     parameters[3].Constants.RegisterSpace = 0u;
-    // 5 draw-state DWORDs plus 16 cloud-present DWORDs. Together with the
-    // 40-DWORD vertex transform and two descriptor tables this uses 63 of the
-    // D3D12 root signature's 64 DWORD budget.
+    // 5 draw-state DWORDs plus 16 private material DWORDs (used by the
+    // model->light matrix when realtime shadows are enabled). Visibility ALL
+    // lets the pipe VS consume those rows while the stock PS still sees the
+    // original first five values.
     parameters[3].Constants.Num32BitValues = 21u;
-    parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    // t1 is a dedicated material-shadow SRV. A descriptor table costs one root
+    // DWORD, bringing this root signature to exactly the D3D12 64-DWORD limit.
+    parameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    parameters[4].DescriptorTable.NumDescriptorRanges = 1u;
+    parameters[4].DescriptorTable.pDescriptorRanges = &shadow_srv_range;
+    parameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     D3D12_ROOT_SIGNATURE_DESC desc{};
     desc.NumParameters = static_cast<UINT>(parameters.size());
     desc.pParameters = parameters.data();
@@ -1755,6 +2076,70 @@ bool create_targets(Dx12GeState &s, std::string &error) noexcept {
     default_sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
     s.device->CreateSampler(&default_sampler, sampler_cpu(s, 0u));
 
+    if (s.realtime_shadows_available) {
+        if (s.next_dsv >= kFramebufferTargetCapacity || s.next_srv >= kSrvCapacity) {
+            runtime_log_error("optional ProperShaders shadow map disabled",
+                              "DX12 GE descriptor capacity exhausted");
+            s.realtime_shadows_available = false;
+        } else {
+            const auto &shadow_config = vcs_configuration().proper_shaders.realtime_shadows;
+            ShadowMapTarget shadow{};
+            shadow.resolution = std::clamp<std::uint32_t>(shadow_config.map_resolution, 512u, 4096u);
+            shadow.dsv_index = s.next_dsv++;
+            shadow.srv_index = s.next_srv++;
+
+            D3D12_RESOURCE_DESC shadow_desc{};
+            shadow_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            shadow_desc.Width = shadow.resolution;
+            shadow_desc.Height = shadow.resolution;
+            shadow_desc.DepthOrArraySize = 1u;
+            shadow_desc.MipLevels = 1u;
+            shadow_desc.Format = DXGI_FORMAT_R32_TYPELESS;
+            shadow_desc.SampleDesc.Count = 1u;
+            shadow_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+            shadow_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+            D3D12_HEAP_PROPERTIES heap{};
+            heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+            D3D12_CLEAR_VALUE clear{};
+            clear.Format = DXGI_FORMAT_D32_FLOAT;
+            clear.DepthStencil.Depth = 1.0f;
+            clear.DepthStencil.Stencil = 0u;
+            hr = s.device->CreateCommittedResource(
+                &heap, D3D12_HEAP_FLAG_NONE, &shadow_desc,
+                D3D12_RESOURCE_STATE_DEPTH_WRITE, &clear, IID_PPV_ARGS(&shadow.depth));
+            if (FAILED(hr)) {
+                runtime_log_error("optional ProperShaders shadow map disabled",
+                                  hr_text(hr, "CreateCommittedResource(DX12 GE realtime shadow map)"));
+                s.realtime_shadows_available = false;
+            } else {
+                D3D12_DEPTH_STENCIL_VIEW_DESC shadow_dsv{};
+                shadow_dsv.Format = DXGI_FORMAT_D32_FLOAT;
+                shadow_dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+                s.device->CreateDepthStencilView(shadow.depth.Get(), &shadow_dsv,
+                                                 dsv_cpu(s, shadow.dsv_index));
+                D3D12_SHADER_RESOURCE_VIEW_DESC shadow_srv{};
+                // Map the single R32 depth component to RGB as well. Material
+                // shaders still read it as Texture2D<float>, while DebugMode=1
+                // can present the exact raw shadow map as grayscale without a
+                // second debug-only pixel shader.
+                shadow_srv.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
+                shadow_srv.Format = DXGI_FORMAT_R32_FLOAT;
+                shadow_srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+                shadow_srv.Texture2D.MipLevels = 1u;
+                s.device->CreateShaderResourceView(shadow.depth.Get(), &shadow_srv,
+                                                   srv_cpu(s, shadow.srv_index));
+                s.realtime_shadow_map = std::move(shadow);
+                runtime_log_line("ProperShaders directional shadow map created " +
+                                 std::to_string(s.realtime_shadow_map.resolution) + "x" +
+                                 std::to_string(s.realtime_shadow_map.resolution));
+            }
+        }
+    }
+
     // Readback exists only for the validation probe / explicit diagnostics.
     // Normal gameplay goes render-target -> SRV -> swapchain entirely on GPU.
     if (s.readback_enabled) {
@@ -1791,9 +2176,11 @@ bool create_targets(Dx12GeState &s, std::string &error) noexcept {
         s.readback_bytes = 0u;
     }
 
-    if (vcs_configuration().volumetric_clouds.enabled) {
+    if (proper_shaders_private_available() &&
+        vcs_configuration().proper_shaders.enabled &&
+        vcs_configuration().proper_shaders.volumetric_clouds.enabled) {
         const std::uint32_t divisor = std::clamp<std::uint32_t>(
-            vcs_configuration().volumetric_clouds.downscale_div, 1u, 8u);
+            vcs_configuration().proper_shaders.volumetric_clouds.downscale_div, 1u, 8u);
         std::uint32_t cloud_width = std::max(2u, (s.target_width + divisor - 1u) / divisor);
         std::uint32_t cloud_height = std::max(2u, (s.target_height + divisor - 1u) / divisor);
         cloud_width = (cloud_width + 1u) & ~1u;
@@ -1903,9 +2290,11 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
         ++s.report.dx12_framebuffer_target_hits;
         return existing->color != nullptr;
     }
+    const bool shadow_depth_srv = s.realtime_shadows_available;
+    const std::uint32_t required_srvs = shadow_depth_srv ? 3u : 1u;
     if (!s.device || !s.rtv_heap || !s.dsv_heap || !s.srv_heap ||
         s.next_rtv >= kFramebufferTargetCapacity || s.next_dsv >= kFramebufferTargetCapacity ||
-        s.next_srv >= kSrvCapacity) {
+        s.next_srv > kSrvCapacity - required_srvs) {
         error = "DX12 framebuffer target/descriptor capacity exhausted";
         return false;
     }
@@ -1915,6 +2304,10 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
     target.rtv_index = s.next_rtv++;
     target.dsv_index = s.next_dsv++;
     target.srv_index = s.next_srv++;
+    if (shadow_depth_srv) {
+        target.depth_srv_base = s.next_srv;
+        s.next_srv += 2u;
+    }
 
     D3D12_HEAP_PROPERTIES default_heap{};
     default_heap.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -1971,7 +2364,8 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
     depth.Height = s.target_height;
     depth.DepthOrArraySize = 1u;
     depth.MipLevels = 1u;
-    depth.Format = s.depth_format;
+    depth.Format = shadow_depth_srv ? typeless_depth_resource_format(s.depth_format)
+                                    : s.depth_format;
     depth.SampleDesc.Count = s.sample_count;
     depth.SampleDesc.Quality = s.sample_quality;
     depth.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -1989,6 +2383,25 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
     dsv.ViewDimension = s.sample_count > 1u ? D3D12_DSV_DIMENSION_TEXTURE2DMS
                                             : D3D12_DSV_DIMENSION_TEXTURE2D;
     s.device->CreateDepthStencilView(target.depth.Get(), &dsv, dsv_cpu(s, target.dsv_index));
+    if (shadow_depth_srv) {
+        D3D12_SHADER_RESOURCE_VIEW_DESC depth_srv{};
+        depth_srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        depth_srv.Format = depth_srv_format(s.depth_format);
+        depth_srv.ViewDimension = s.sample_count > 1u
+            ? D3D12_SRV_DIMENSION_TEXTURE2DMS
+            : D3D12_SRV_DIMENSION_TEXTURE2D;
+        if (s.sample_count == 1u) depth_srv.Texture2D.MipLevels = 1u;
+        s.device->CreateShaderResourceView(target.depth.Get(), &depth_srv,
+                                           srv_cpu(s, target.depth_srv_base));
+        // t1 is the private stable directional shadow map. Copy its descriptor
+        // beside scene depth so one descriptor table binds both resources.
+        if (s.realtime_shadow_map.depth) {
+            s.device->CopyDescriptorsSimple(
+                1u, srv_cpu(s, target.depth_srv_base + 1u),
+                srv_cpu(s, s.realtime_shadow_map.srv_index),
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        }
+    }
 
     target.color_state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     s.frame_targets.emplace(address, std::move(target));
@@ -2003,7 +2416,9 @@ bool ensure_framebuffer_target(Dx12GeState &s, std::uint32_t address,
         log << "dx12 framebuffer target created address=0x" << std::hex << address
             << std::dec << " size=" << s.target_width << 'x' << s.target_height
             << " msaa=" << s.sample_count << " depth=" << s.depth_bits
-            << " srv=" << (created != s.frame_targets.end() ? created->second.srv_index : 0u);
+            << " srv=" << (created != s.frame_targets.end() ? created->second.srv_index : 0u)
+            << " depth_srv=" << (created != s.frame_targets.end()
+                ? created->second.depth_srv_base : 0u);
         runtime_log_line(log.str());
     }
     return true;
@@ -2074,8 +2489,24 @@ ComPtr<ID3D12PipelineState> create_pipeline(Dx12GeState &s,
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
     pso.pRootSignature = s.root_signature.Get();
     ID3DBlob *vs = packed_0115 ? s.packed_0115_vertex_shader.Get() : s.vertex_shader.Get();
+    ID3DBlob *ps = s.pixel_shader.Get();
+    if (proper_shaders_private_available()) {
+        if (draw.shader_pipe == GeShaderPipe::Building && s.building_pixel_shader) {
+            vs = packed_0115 ? s.building_packed_0115_vertex_shader.Get()
+                             : s.building_vertex_shader.Get();
+            ps = s.building_pixel_shader.Get();
+        } else if (draw.shader_pipe == GeShaderPipe::Skin && s.skin_pixel_shader) {
+            vs = packed_0115 ? s.skin_packed_0115_vertex_shader.Get()
+                             : s.skin_vertex_shader.Get();
+            ps = s.skin_pixel_shader.Get();
+        } else if (draw.shader_pipe == GeShaderPipe::Vehicle && s.vehicle_pixel_shader) {
+            vs = packed_0115 ? s.vehicle_packed_0115_vertex_shader.Get()
+                             : s.vehicle_vertex_shader.Get();
+            ps = s.vehicle_pixel_shader.Get();
+        }
+    }
     pso.VS = {vs->GetBufferPointer(), vs->GetBufferSize()};
-    pso.PS = {s.pixel_shader->GetBufferPointer(), s.pixel_shader->GetBufferSize()};
+    pso.PS = {ps->GetBufferPointer(), ps->GetBufferSize()};
     pso.InputLayout = packed_0115
         ? D3D12_INPUT_LAYOUT_DESC{packed_layout, static_cast<UINT>(std::size(packed_layout))}
         : D3D12_INPUT_LAYOUT_DESC{layout, static_cast<UINT>(std::size(layout))};
@@ -2322,6 +2753,15 @@ std::uint32_t cloud_linear_sampler(Dx12GeState &s) noexcept {
     return ensure_sampler(s, draw);
 }
 
+std::uint32_t shadow_point_sampler(Dx12GeState &s) noexcept {
+    GeGpuDrawDescriptor draw{};
+    draw.texture_min_linear = false;
+    draw.texture_mag_linear = false;
+    draw.texture_clamp_u = true;
+    draw.texture_clamp_v = true;
+    return ensure_sampler(s, draw);
+}
+
 bool create_cloud_root_signature(Dx12GeState &s, std::string &error) noexcept {
     D3D12_DESCRIPTOR_RANGE srv_range{};
     srv_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -2367,6 +2807,45 @@ bool create_cloud_root_signature(Dx12GeState &s, std::string &error) noexcept {
         error = hr_text(hr, "CreateRootSignature(DX12 GE clouds)");
         return false;
     }
+    return true;
+}
+
+bool create_realtime_shadow_root_signatures(Dx12GeState &s, std::string &error) noexcept {
+    if (!s.realtime_shadows_available) return true;
+
+    // Caster root: one per-draw light MVP (16 floats) visible only to the VS.
+    D3D12_ROOT_PARAMETER caster_parameter{};
+    caster_parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    caster_parameter.Constants.ShaderRegister = 1u;
+    caster_parameter.Constants.Num32BitValues = 16u;
+    caster_parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+    D3D12_ROOT_SIGNATURE_DESC caster_desc{};
+    caster_desc.NumParameters = 1u;
+    caster_desc.pParameters = &caster_parameter;
+    caster_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+                        D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+                        D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+                        D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+                        D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+    ComPtr<ID3DBlob> blob, errors;
+    HRESULT hr = D3D12SerializeRootSignature(&caster_desc, D3D_ROOT_SIGNATURE_VERSION_1,
+                                              &blob, &errors);
+    if (FAILED(hr)) {
+        error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                     errors->GetBufferSize())
+                       : hr_text(hr, "D3D12SerializeRootSignature(shadow caster)");
+        return false;
+    }
+    hr = s.device->CreateRootSignature(0u, blob->GetBufferPointer(), blob->GetBufferSize(),
+                                       IID_PPV_ARGS(&s.realtime_shadow_caster_root_signature));
+    if (FAILED(hr)) {
+        error = hr_text(hr, "CreateRootSignature(shadow caster)");
+        return false;
+    }
+
+    // No fullscreen/composite root signature is created. The completed
+    // directional depth map is bound as t1 on the normal GE material root.
+    s.realtime_shadow_composite_root_signature.Reset();
     return true;
 }
 
@@ -2417,6 +2896,210 @@ bool invert_cloud_matrix(const std::array<float, 16> &matrix,
     }
     inverse = result;
     return true;
+}
+
+std::array<float, 16> shadow_affine_4x3_to_mat4(
+    const std::array<float, 12> &m) noexcept {
+    return {m[0], m[1], m[2], 0.0f,
+            m[3], m[4], m[5], 0.0f,
+            m[6], m[7], m[8], 0.0f,
+            m[9], m[10], m[11], 1.0f};
+}
+
+std::array<float, 16> shadow_multiply_mat4(const std::array<float, 16> &a,
+                                           const std::array<float, 16> &b) noexcept {
+    std::array<float, 16> result{};
+    for (std::size_t column = 0u; column < 4u; ++column) {
+        for (std::size_t row = 0u; row < 4u; ++row) {
+            float sum = 0.0f;
+            for (std::size_t k = 0u; k < 4u; ++k)
+                sum += a[k * 4u + row] * b[column * 4u + k];
+            result[column * 4u + row] = sum;
+        }
+    }
+    return result;
+}
+
+void shadow_matrix_rows(const std::array<float, 16> &matrix,
+                        float *destination) noexcept {
+    for (std::size_t row = 0u; row < 4u; ++row) {
+        for (std::size_t column = 0u; column < 4u; ++column)
+            destination[row * 4u + column] = matrix[column * 4u + row];
+    }
+}
+
+bool shadow_effective_camera_vp(const CloudCameraCandidate &camera,
+                                const Dx12FramebufferTarget &target,
+                                std::array<float, 16> &view_projection,
+                                std::array<float, 16> &inverse_view_projection) noexcept {
+    const float logical_width = static_cast<float>(
+        std::max<std::uint32_t>(1u, target.logical_width));
+    const float logical_height = static_cast<float>(
+        std::max<std::uint32_t>(1u, target.logical_height));
+    const float x_a = camera.viewport[0] * (2.0f / logical_width);
+    const float y_a = camera.viewport[1] * (2.0f / logical_height);
+    const float z_a = camera.viewport[2] * (1.0f / 65535.0f);
+    const float x_b = (camera.viewport[3] - camera.viewport[6]) *
+                          (2.0f / logical_width) - 1.0f;
+    const float y_b = (camera.viewport[4] - camera.viewport[7]) *
+                          (2.0f / logical_height) - 1.0f;
+    const float z_b = camera.viewport[5] * (1.0f / 65535.0f);
+    if (!std::isfinite(x_a) || !std::isfinite(y_a) || !std::isfinite(z_a) ||
+        !std::isfinite(x_b) || !std::isfinite(y_b) || !std::isfinite(z_b) ||
+        std::abs(x_a) < 1.0e-7f || std::abs(y_a) < 1.0e-7f ||
+        std::abs(z_a) < 1.0e-9f)
+        return false;
+
+    // Match make_transform_constants(): fold GE viewport X/Y and the PSP
+    // 0..65535 depth range into the guest projection before multiplying view.
+    std::array<float, 16> effective_projection{};
+    for (std::size_t column = 0u; column < 4u; ++column) {
+        const std::size_t base = column * 4u;
+        const float w = camera.projection[base + 3u];
+        effective_projection[base + 0u] =
+            x_a * camera.projection[base + 0u] + x_b * w;
+        effective_projection[base + 1u] =
+            -y_a * camera.projection[base + 1u] - y_b * w;
+        effective_projection[base + 2u] =
+            z_a * camera.projection[base + 2u] + z_b * w;
+        effective_projection[base + 3u] = w;
+    }
+    view_projection = shadow_multiply_mat4(
+        effective_projection, shadow_affine_4x3_to_mat4(camera.view));
+    std::array<double, 16> inverse{};
+    if (!invert_cloud_matrix(view_projection, inverse)) return false;
+    for (std::size_t i = 0u; i < inverse.size(); ++i) {
+        if (!std::isfinite(inverse[i]) ||
+            std::abs(inverse[i]) > static_cast<double>(std::numeric_limits<float>::max()))
+            return false;
+        inverse_view_projection[i] = static_cast<float>(inverse[i]);
+    }
+    return true;
+}
+
+// World-space eye position, taken from the GE view matrix this frame's draws
+// actually used. No guest address is involved.
+//
+// The two sources tried before this both put the box in empty space. VCS has no
+// documented memory map, and CloudCameraCandidate::camera_position comes from
+// the hardcoded kVcsCameraPosition in ge_renderer.cpp: measured against the
+// caster geometry it was ~1490 world units off, so the 2*WorldRadius box landed
+// where nothing is drawn (DebugMode=1 white, DebugMode=3 red). Unprojecting the
+// effective view-projection was no better, because the GE folds the PSP 0..65535
+// depth range into the matrix and NDC z=0 is not the near plane.
+//
+// camera.view is the affine 4x3 GE view in the layout affine_4x3_to_mat4()
+// expects: m[0..2], m[3..5], m[6..8] are the rotation basis columns and
+// m[9..11] the translation. world->view is v = R*p + t, so the eye is -R^T * t
+// whenever R is orthonormal. Reflection and camera-relative passes do not
+// satisfy that, which is why orthonormality is verified instead of assumed.
+bool shadow_view_eye_position(const CloudCameraCandidate &camera,
+                              std::array<float, 3> &eye) noexcept {
+    const std::array<float, 12> &m = camera.view;
+    if (!std::all_of(m.begin(), m.end(),
+                     [](float value) { return std::isfinite(value); }))
+        return false;
+    for (std::size_t column = 0u; column < 3u; ++column) {
+        const double length2 =
+            static_cast<double>(m[column * 3u + 0u]) * m[column * 3u + 0u] +
+            static_cast<double>(m[column * 3u + 1u]) * m[column * 3u + 1u] +
+            static_cast<double>(m[column * 3u + 2u]) * m[column * 3u + 2u];
+        if (!(length2 > 0.99 && length2 < 1.01)) return false;
+    }
+    const std::array<float, 3> translation{m[9], m[10], m[11]};
+    std::array<float, 3> candidate{};
+    for (std::size_t axis = 0u; axis < 3u; ++axis) {
+        candidate[axis] = -(m[axis * 3u + 0u] * translation[0] +
+                            m[axis * 3u + 1u] * translation[1] +
+                            m[axis * 3u + 2u] * translation[2]);
+    }
+    if (!std::all_of(candidate.begin(), candidate.end(),
+                     [](float value) { return std::isfinite(value); }))
+        return false;
+    eye = candidate;
+    return true;
+}
+
+bool shadow_directional_light_vp(const CloudCameraCandidate &camera,
+                                 const Dx12FramebufferTarget &target,
+                                 std::array<float, 16> &light_view_projection) noexcept {
+    const auto &proper = vcs_configuration().proper_shaders;
+    const auto &shadow = proper.realtime_shadows;
+    const auto &cloud = proper.volumetric_clouds;
+    std::array<float, 3> sun = shadow.use_cloud_sun_direction
+        ? std::array<float, 3>{cloud.sun_direction_x, cloud.sun_direction_y,
+                               cloud.sun_direction_z}
+        : std::array<float, 3>{shadow.light_direction_x, shadow.light_direction_y,
+                               shadow.light_direction_z};
+    const auto normalize = [](std::array<float, 3> v,
+                              const std::array<float, 3> &fallback) {
+        const double length2 = static_cast<double>(v[0]) * v[0] +
+                               static_cast<double>(v[1]) * v[1] +
+                               static_cast<double>(v[2]) * v[2];
+        if (!std::isfinite(length2) || length2 < 1.0e-12) return fallback;
+        const float inv_length = static_cast<float>(1.0 / std::sqrt(length2));
+        for (float &value : v) value *= inv_length;
+        return v;
+    };
+    const auto cross = [](const std::array<float, 3> &a,
+                          const std::array<float, 3> &b) {
+        return std::array<float, 3>{a[1] * b[2] - a[2] * b[1],
+                                    a[2] * b[0] - a[0] * b[2],
+                                    a[0] * b[1] - a[1] * b[0]};
+    };
+    const auto dot = [](const std::array<float, 3> &a,
+                        const std::array<float, 3> &b) {
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    };
+
+    sun = normalize(sun, {0.38f, -0.28f, 0.88f});
+    // lightZ follows the rays from the sun toward the scene. With conventional
+    // LESS depth, casters nearer the sun then have smaller depth than receivers.
+    const std::array<float, 3> light_z{-sun[0], -sun[1], -sun[2]};
+    const std::array<float, 3> up_seed = std::abs(light_z[2]) < 0.92f
+        ? std::array<float, 3>{0.0f, 0.0f, 1.0f}
+        : std::array<float, 3>{0.0f, 1.0f, 0.0f};
+    const std::array<float, 3> light_x =
+        normalize(cross(up_seed, light_z), {1.0f, 0.0f, 0.0f});
+    const std::array<float, 3> light_y =
+        normalize(cross(light_z, light_x), {0.0f, 1.0f, 0.0f});
+
+    const float radius = std::max(20.0f, shadow.world_radius);
+    const float depth_range = std::max(40.0f, shadow.depth_range);
+    const float resolution = static_cast<float>(std::clamp<std::uint32_t>(
+        shadow.map_resolution, 512u, 4096u));
+    const float texel_world = (radius * 2.0f) / resolution;
+    std::array<float, 3> center{};
+    const bool center_from_view = shadow_view_eye_position(camera, center);
+    if (!center_from_view) center = camera.camera_position;
+    static bool center_logged = false;
+    if (!center_logged) {
+        center_logged = true;
+        std::ostringstream line;
+        line << std::fixed << std::setprecision(3)
+             << "ProperShaders shadow box centre source="
+             << (center_from_view ? "ge-view-matrix" : "guest-camera-position")
+             << " centre=(" << center[0] << ',' << center[1] << ',' << center[2] << ')'
+             << " guest_camera=(" << camera.camera_position[0] << ','
+             << camera.camera_position[1] << ',' << camera.camera_position[2] << ')'
+             << " radius=" << radius << " depth_range=" << depth_range
+             << " sun=(" << sun[0] << ',' << sun[1] << ',' << sun[2] << ')';
+        runtime_log_line(line.str());
+    }
+    const float center_x = std::round(dot(light_x, center) / texel_world) * texel_world;
+    const float center_y = std::round(dot(light_y, center) / texel_world) * texel_world;
+    const float center_z = dot(light_z, center);
+
+    // Column-major matrix, D3D x/y in [-1,1] and depth in [0,1]. Snapping the
+    // light-space X/Y origin to one shadow texel prevents camera shimmer.
+    light_view_projection = {
+        light_x[0] / radius, light_y[0] / radius, light_z[0] / depth_range, 0.0f,
+        light_x[1] / radius, light_y[1] / radius, light_z[1] / depth_range, 0.0f,
+        light_x[2] / radius, light_y[2] / radius, light_z[2] / depth_range, 0.0f,
+        -center_x / radius, -center_y / radius,
+        0.5f - center_z / depth_range, 1.0f};
+    return std::all_of(light_view_projection.begin(), light_view_projection.end(),
+                       [](float value) { return std::isfinite(value); });
 }
 
 bool create_cloud_target_pipeline(Dx12GeState &s, std::string &error) noexcept {
@@ -2518,6 +3201,69 @@ bool create_cloud_composite_pipeline(Dx12GeState &s, std::string &error) noexcep
     return true;
 }
 
+bool create_realtime_shadow_pipeline(Dx12GeState &s, std::string &error) noexcept {
+    if (!s.realtime_shadows_available) return true;
+    if (!s.realtime_shadow_caster_root_signature ||
+        !s.realtime_shadow_caster_vertex_shader ||
+        !s.realtime_shadow_caster_packed_vertex_shader) {
+        error = "ProperShaders directional shadow caster shaders/root signature are incomplete";
+        return false;
+    }
+
+    static const D3D12_INPUT_ELEMENT_DESC caster_layout[] = {
+        {"POSITION", 0u, DXGI_FORMAT_R32G32B32A32_FLOAT, 0u,
+         static_cast<UINT>(offsetof(Dx12UploadVertex, x)),
+         D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
+    };
+    static const D3D12_INPUT_ELEMENT_DESC packed_caster_layout[] = {
+        {"POSITION", 1u, DXGI_FORMAT_R16G16_SINT, 0u, 4u,
+         D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
+        {"POSITION", 2u, DXGI_FORMAT_R16_SINT, 0u, 8u,
+         D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
+    };
+    const auto create_caster = [&](bool packed, ID3D12PipelineState **output) -> bool {
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
+        pso.pRootSignature = s.realtime_shadow_caster_root_signature.Get();
+        ID3DBlob *vs = packed ? s.realtime_shadow_caster_packed_vertex_shader.Get()
+                              : s.realtime_shadow_caster_vertex_shader.Get();
+        pso.VS = {vs->GetBufferPointer(), vs->GetBufferSize()};
+        pso.InputLayout = packed
+            ? D3D12_INPUT_LAYOUT_DESC{packed_caster_layout,
+                                      static_cast<UINT>(std::size(packed_caster_layout))}
+            : D3D12_INPUT_LAYOUT_DESC{caster_layout,
+                                      static_cast<UINT>(std::size(caster_layout))};
+        pso.SampleMask = UINT_MAX;
+        pso.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+        // Private casters deliberately render two-sided. It is more robust for
+        // GTA-era thin geometry and avoids inheriting PSP winding differences.
+        pso.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+        pso.RasterizerState.DepthClipEnable = TRUE;
+        pso.DepthStencilState.DepthEnable = TRUE;
+        pso.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+        pso.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        pso.DepthStencilState.StencilEnable = FALSE;
+        pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        pso.NumRenderTargets = 0u;
+        pso.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        pso.SampleDesc.Count = 1u;
+        const HRESULT hr = s.device->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(output));
+        if (FAILED(hr)) {
+            error = hr_text(hr, packed
+                ? "CreateGraphicsPipelineState(DX12 GE packed shadow caster)"
+                : "CreateGraphicsPipelineState(DX12 GE shadow caster)");
+            return false;
+        }
+        return true;
+    };
+    if (!create_caster(false, s.realtime_shadow_caster_pipeline.ReleaseAndGetAddressOf()) ||
+        !create_caster(true, s.realtime_shadow_caster_packed_pipeline.ReleaseAndGetAddressOf()))
+        return false;
+
+    s.realtime_shadow_pipeline.Reset();
+    runtime_log_line("ProperShaders realtime shadows active (directional shadow map + per-material PCF receivers; fullscreen contact pass removed)");
+    return true;
+}
+
 const CloudCameraCandidate *select_cloud_camera(const Dx12GeState &s) noexcept {
     if (s.display_framebuffer == 0u) return nullptr;
     std::vector<std::uint32_t> ancestors;
@@ -2566,8 +3312,10 @@ const CloudCameraCandidate *select_cloud_camera(const Dx12GeState &s) noexcept {
 
 CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
     CloudShaderConstants out{};
-    const auto &config = vcs_configuration().volumetric_clouds;
-    if (!config.enabled || s.cloud_cameras.empty()) return out;
+    const auto &config = vcs_configuration().proper_shaders.volumetric_clouds;
+    if (!proper_shaders_private_available() ||
+        !vcs_configuration().proper_shaders.enabled ||
+        !config.enabled || s.cloud_cameras.empty()) return out;
     const CloudCameraCandidate *camera = select_cloud_camera(s);
     if (camera == nullptr) return out;
 
@@ -2580,9 +3328,9 @@ CloudShaderConstants cloud_present_constants(const Dx12GeState &s) noexcept {
         1u, target != nullptr ? target->logical_height : kReferenceHeight));
     const float x_a = camera->viewport[0] * (2.0f / logical_width);
     const float y_a = camera->viewport[1] * (2.0f / logical_height);
-    const float x_b = (camera->viewport[2] - camera->viewport[4]) *
+    const float x_b = (camera->viewport[3] - camera->viewport[6]) *
                           (2.0f / logical_width) - 1.0f;
-    const float y_b = (camera->viewport[3] - camera->viewport[5]) *
+    const float y_b = (camera->viewport[4] - camera->viewport[7]) *
                           (2.0f / logical_height) - 1.0f;
     if (!std::isfinite(x_a) || !std::isfinite(y_a) ||
         std::abs(x_a) < 1.0e-6f || std::abs(y_a) < 1.0e-6f)
@@ -2683,7 +3431,7 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     const std::uint32_t current_index = 1u - previous_index;
     CloudRenderTarget &previous = s.cloud_history[previous_index];
     CloudRenderTarget &current = s.cloud_history[current_index];
-    const auto &config = vcs_configuration().volumetric_clouds;
+    const auto &config = vcs_configuration().proper_shaders.volumetric_clouds;
 
     float camera_delta_squared = 0.0f;
     if (s.cloud_history_valid) {
@@ -2830,6 +3578,217 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     s.list->DrawInstanced(3u, 1u, 0u, 0u);
 }
 
+bool record_directional_shadow_map(
+    Dx12GeState &s, Dx12FramebufferTarget &target,
+    const CloudCameraCandidate &camera,
+    const D3D12_VERTEX_BUFFER_VIEW &regular_vb,
+    const D3D12_VERTEX_BUFFER_VIEW &packed_vb,
+    const D3D12_INDEX_BUFFER_VIEW *index_buffer,
+    std::array<float, 16> &light_vp_out) noexcept {
+    const auto &proper = vcs_configuration().proper_shaders;
+    const auto &shadow = proper.realtime_shadows;
+    if (!proper.enabled || !shadow.enabled || !proper_shaders_private_available() ||
+        !s.realtime_shadows_available || !s.realtime_shadow_map.depth ||
+        !s.realtime_shadow_caster_pipeline ||
+        !s.realtime_shadow_caster_packed_pipeline ||
+        !s.realtime_shadow_caster_root_signature)
+        return false;
+
+    s.realtime_shadow_map.caster_draws = 0u;
+    if (!shadow_directional_light_vp(camera, target, light_vp_out)) return false;
+
+    // Real shadow-map prepass. This happens before the normal world replay, so
+    // Building/Skin/Vehicle material shaders can sample the completed map while
+    // drawing their own surfaces. No fullscreen/contact-shadow composite is
+    // involved: receivers are shaded in their actual material PS.
+    transition(s.list.Get(), s.realtime_shadow_map.depth.Get(),
+               s.realtime_shadow_map.state, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+    s.realtime_shadow_map.state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+    const D3D12_CPU_DESCRIPTOR_HANDLE shadow_dsv =
+        dsv_cpu(s, s.realtime_shadow_map.dsv_index);
+    s.list->OMSetRenderTargets(0u, nullptr, FALSE, &shadow_dsv);
+    s.list->ClearDepthStencilView(shadow_dsv, D3D12_CLEAR_FLAG_DEPTH,
+                                  1.0f, 0u, 0u, nullptr);
+    const float map_size = static_cast<float>(s.realtime_shadow_map.resolution);
+    const D3D12_VIEWPORT shadow_viewport{0.0f, 0.0f, map_size, map_size, 0.0f, 1.0f};
+    const D3D12_RECT shadow_scissor{0, 0,
+        static_cast<LONG>(s.realtime_shadow_map.resolution),
+        static_cast<LONG>(s.realtime_shadow_map.resolution)};
+    s.list->RSSetViewports(1u, &shadow_viewport);
+    s.list->RSSetScissorRects(1u, &shadow_scissor);
+    s.list->SetGraphicsRootSignature(s.realtime_shadow_caster_root_signature.Get());
+    if (index_buffer != nullptr) s.list->IASetIndexBuffer(index_buffer);
+
+    // One-shot coverage probe. caster_draws counts draw *calls*, which is why
+    // the pass could report 101 casters while the depth map stayed at its 1.0
+    // clear: the calls were issued with a light matrix that put every triangle
+    // outside the box, and DepthClipEnable threw them away. This samples the
+    // same vertices the IA sees and reports how many actually land in the map.
+    static bool coverage_logged = false;
+    const bool probe_coverage = !coverage_logged;
+    std::array<double, 3> ndc_min{std::numeric_limits<double>::max(),
+                                  std::numeric_limits<double>::max(),
+                                  std::numeric_limits<double>::max()};
+    std::array<double, 3> ndc_max{std::numeric_limits<double>::lowest(),
+                                  std::numeric_limits<double>::lowest(),
+                                  std::numeric_limits<double>::lowest()};
+    std::uint32_t probed_vertices = 0u;
+    std::uint32_t probed_inside = 0u;
+    // World-space bounds of the same samples. This is the ground truth the box
+    // has to enclose, and it depends on no camera source at all.
+    std::array<double, 3> world_min{std::numeric_limits<double>::max(),
+                                    std::numeric_limits<double>::max(),
+                                    std::numeric_limits<double>::max()};
+    std::array<double, 3> world_max{std::numeric_limits<double>::lowest(),
+                                    std::numeric_limits<double>::lowest(),
+                                    std::numeric_limits<double>::lowest()};
+    std::array<double, 3> world_sum{};
+
+    bool bound_packed = false;
+    bool vertex_view_valid = false;
+    ID3D12PipelineState *caster_pipeline = nullptr;
+    D3D12_PRIMITIVE_TOPOLOGY caster_topology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+    const std::uint32_t world_target = target.address & 0x001FFFF0u;
+    std::uint32_t caster_draws = 0u;
+    for (const Dx12Batch &batch : s.batches) {
+        if ((batch.draw.framebuffer_address & 0x001FFFF0u) != world_target ||
+            batch.draw.clear_mode || !batch.hardware_transform)
+            continue;
+        const std::uint32_t primitive = batch.transform.primitive;
+        if (primitive < 3u || primitive > 5u) continue;
+        const bool semantic_caster = batch.draw.shader_pipe == GeShaderPipe::Building ||
+                                     batch.draw.shader_pipe == GeShaderPipe::Skin ||
+                                     batch.draw.shader_pipe == GeShaderPipe::Vehicle;
+        if (!semantic_caster) continue;
+        // Opaque/depth-writing world is always useful. Dynamic skin/vehicle
+        // draws are allowed even when their normal pass disables depth writes.
+        if (!batch.draw.depth_write_enabled &&
+            batch.draw.shader_pipe == GeShaderPipe::Building)
+            continue;
+
+        ID3D12PipelineState *wanted_pipeline = batch.packed_0115
+            ? s.realtime_shadow_caster_packed_pipeline.Get()
+            : s.realtime_shadow_caster_pipeline.Get();
+        if (wanted_pipeline != caster_pipeline) {
+            s.list->SetPipelineState(wanted_pipeline);
+            caster_pipeline = wanted_pipeline;
+        }
+        if (!vertex_view_valid || bound_packed != batch.packed_0115) {
+            const D3D12_VERTEX_BUFFER_VIEW &active_vb =
+                batch.packed_0115 ? packed_vb : regular_vb;
+            s.list->IASetVertexBuffers(0u, 1u, &active_vb);
+            bound_packed = batch.packed_0115;
+            vertex_view_valid = true;
+        }
+        const D3D12_PRIMITIVE_TOPOLOGY topology = batch_topology(batch);
+        if (topology != caster_topology) {
+            s.list->IASetPrimitiveTopology(topology);
+            caster_topology = topology;
+        }
+
+        const std::array<float, 16> caster_mvp = shadow_multiply_mat4(
+            light_vp_out, batch.transform.model_to_world);
+        std::array<float, 16> caster_rows{};
+        shadow_matrix_rows(caster_mvp, caster_rows.data());
+        s.list->SetGraphicsRoot32BitConstants(0u, 16u, caster_rows.data(), 0u);
+        if (probe_coverage && batch.vertex_count != 0u && probed_vertices < 4096u) {
+            const std::uint32_t step = std::max<std::uint32_t>(1u, batch.vertex_count / 32u);
+            for (std::uint32_t v = 0u; v < batch.vertex_count; v += step) {
+                std::array<float, 4> model{};
+                if (batch.packed_0115) {
+                    const std::size_t stride = s.packed_0115_gpu_stride;
+                    const std::size_t base =
+                        (static_cast<std::size_t>(batch.first_vertex) + v) * stride;
+                    if (base + kPacked0115GuestStride > s.packed_0115_vertices.size()) break;
+                    const std::byte *source = s.packed_0115_vertices.data() + base;
+                    std::array<std::int16_t, 3> raw{};
+                    std::memcpy(raw.data(), source + 4u, 6u);
+                    model = {static_cast<float>(raw[0]) * (1.0f / 32768.0f),
+                             static_cast<float>(raw[1]) * (1.0f / 32768.0f),
+                             static_cast<float>(raw[2]) * (1.0f / 32768.0f), 1.0f};
+                } else {
+                    const std::size_t index =
+                        static_cast<std::size_t>(batch.first_vertex) + v;
+                    if (index >= s.vertices.size()) break;
+                    const Dx12UploadVertex &source = s.vertices[index];
+                    model = {source.x, source.y, source.z, source.w};
+                }
+                std::array<double, 4> clip{};
+                for (std::size_t row = 0u; row < 4u; ++row) {
+                    clip[row] = static_cast<double>(caster_mvp[row]) * model[0] +
+                                static_cast<double>(caster_mvp[4u + row]) * model[1] +
+                                static_cast<double>(caster_mvp[8u + row]) * model[2] +
+                                static_cast<double>(caster_mvp[12u + row]) * model[3];
+                }
+                if (!std::isfinite(clip[3]) || std::abs(clip[3]) < 1.0e-9) continue;
+                const std::array<double, 3> ndc{clip[0] / clip[3], clip[1] / clip[3],
+                                                clip[2] / clip[3]};
+                if (!std::all_of(ndc.begin(), ndc.end(),
+                                 [](double value) { return std::isfinite(value); }))
+                    continue;
+                for (std::size_t axis = 0u; axis < 3u; ++axis) {
+                    ndc_min[axis] = std::min(ndc_min[axis], ndc[axis]);
+                    ndc_max[axis] = std::max(ndc_max[axis], ndc[axis]);
+                }
+                ++probed_vertices;
+                if (ndc[0] >= -1.0 && ndc[0] <= 1.0 && ndc[1] >= -1.0 && ndc[1] <= 1.0 &&
+                    ndc[2] >= 0.0 && ndc[2] <= 1.0)
+                    ++probed_inside;
+                const std::array<float, 16> &w2 = batch.transform.model_to_world;
+                for (std::size_t axis = 0u; axis < 3u; ++axis) {
+                    const double world = static_cast<double>(w2[axis]) * model[0] +
+                                         static_cast<double>(w2[4u + axis]) * model[1] +
+                                         static_cast<double>(w2[8u + axis]) * model[2] +
+                                         static_cast<double>(w2[12u + axis]) * model[3];
+                    if (!std::isfinite(world)) continue;
+                    world_min[axis] = std::min(world_min[axis], world);
+                    world_max[axis] = std::max(world_max[axis], world);
+                    world_sum[axis] += world;
+                }
+            }
+        }
+        if (batch.indexed && index_buffer != nullptr) {
+            s.list->DrawIndexedInstanced(batch.index_count, 1u, batch.first_index,
+                                         static_cast<INT>(batch.first_vertex), 0u);
+        } else {
+            s.list->DrawInstanced(batch.vertex_count, 1u, batch.first_vertex, 0u);
+        }
+        ++caster_draws;
+    }
+    transition(s.list.Get(), s.realtime_shadow_map.depth.Get(),
+               s.realtime_shadow_map.state, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    s.realtime_shadow_map.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+    s.realtime_shadow_map.caster_draws = caster_draws;
+    if (probe_coverage && probed_vertices != 0u) {
+        coverage_logged = true;
+        std::ostringstream line;
+        line << std::fixed << std::setprecision(3)
+             << "ProperShaders shadow caster coverage draws=" << caster_draws
+             << " probed_vertices=" << probed_vertices
+             << " inside_box=" << probed_inside
+             << " ndc_x=[" << ndc_min[0] << ',' << ndc_max[0] << ']'
+             << " ndc_y=[" << ndc_min[1] << ',' << ndc_max[1] << ']'
+             << " ndc_z=[" << ndc_min[2] << ',' << ndc_max[2] << ']';
+        const double inv = 1.0 / static_cast<double>(probed_vertices);
+        line << " world_min=(" << world_min[0] << ',' << world_min[1] << ','
+             << world_min[2] << ')'
+             << " world_max=(" << world_max[0] << ',' << world_max[1] << ','
+             << world_max[2] << ')'
+             << " world_centroid=(" << world_sum[0] * inv << ','
+             << world_sum[1] * inv << ',' << world_sum[2] * inv << ')';
+        runtime_log_line(line.str());
+    }
+    static bool logged = false;
+    if (!logged) {
+        logged = true;
+        runtime_log_line("ProperShaders material shadow map populated casters=" +
+                         std::to_string(caster_draws) +
+                         " receivers=Building/Skin/Vehicle (no fullscreen contact composite)");
+    }
+    return caster_draws != 0u;
+}
+
 bool record_direct_present(Dx12GeState &s, Dx12FramebufferTarget &source,
                            std::string &error) noexcept {
     if (!ensure_swapchain(s, error)) return false;
@@ -2856,8 +3815,27 @@ bool record_direct_present(Dx12GeState &s, Dx12FramebufferTarget &source,
     s.list->SetGraphicsRootSignature(s.root_signature.Get());
     ID3D12DescriptorHeap *heaps[]{s.srv_heap.Get(), s.sampler_heap.Get()};
     s.list->SetDescriptorHeaps(2u, heaps);
-    s.list->SetGraphicsRootDescriptorTable(0u, srv_gpu(s, source.srv_index));
+    const auto &shadow_debug = vcs_configuration().proper_shaders.realtime_shadows;
+    const bool raw_shadow_debug = vcs_configuration().proper_shaders.enabled &&
+        shadow_debug.enabled && shadow_debug.debug_mode == 1u &&
+        proper_shaders_private_available() && s.realtime_shadows_available &&
+        s.realtime_shadow_map.depth &&
+        s.realtime_shadow_map.state == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    const std::uint32_t present_srv = raw_shadow_debug
+        ? s.realtime_shadow_map.srv_index : source.srv_index;
+    s.list->SetGraphicsRootDescriptorTable(0u, srv_gpu(s, present_srv));
     s.list->SetGraphicsRootDescriptorTable(1u, sampler_gpu(s, present_sampler(s)));
+    if (raw_shadow_debug) {
+        static bool shadow_debug_logged = false;
+        if (!shadow_debug_logged) {
+            shadow_debug_logged = true;
+            runtime_log_line("ProperShaders shadow DebugMode=1 presenting raw map " +
+                             std::to_string(s.realtime_shadow_map.resolution) + "x" +
+                             std::to_string(s.realtime_shadow_map.resolution) +
+                             " caster_draws=" +
+                             std::to_string(s.realtime_shadow_map.caster_draws));
+        }
+    }
     // Clouds are rendered into the selected 3D world target before VCS samples
     // it for composition. Applying them here would mix world-camera rays with
     // final-display pixels and make the layer follow the screen.
@@ -3233,7 +4211,17 @@ Dx12TransformConstants make_transform_constants(const Dx12Batch &batch,
     constants.row3 = clip_w;
     constants.view_z = hw.model_to_view_z;
     constants.uv = {hw.uv_scale_u, hw.uv_scale_v, hw.uv_offset_u, hw.uv_offset_v};
-    constants.fog = {hw.fog_end, hw.fog_slope, 0.0f, 0.0f};
+    // Extending world LOD/far clip without stretching the PSP fog range can make
+    // the extra submitted geometry mathematically present but visually identical:
+    // it is already fully blended into the fog colour at the stock distance. Scale
+    // the hardware fog curve in the same distance domain as DrawDistance.World.
+    // For factor = (viewZ + end) * slope, end*=m and slope/=m moves both fog
+    // start and end outward by m while preserving the original curve shape.
+    float fog_distance_scale = g_draw_distance_runtime_scales.world;
+    if (!std::isfinite(fog_distance_scale) || fog_distance_scale < 1.0f)
+        fog_distance_scale = 1.0f;
+    constants.fog = {hw.fog_end * fog_distance_scale,
+                     hw.fog_slope / fog_distance_scale, 0.0f, 0.0f};
     constants.control = {1u, hw.depth_clip_enabled ? 1u : 0u,
                          hw.vertex_color_affine ? 1u : 0u, 0u};
     constants.color_mul = hw.vertex_color_mul;
@@ -3393,11 +4381,31 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
         }
     }
     if (!create_cloud_root_signature(s, error)) return false;
+    if (s.realtime_shadows_available) {
+        std::string shadow_error;
+        if (!create_realtime_shadow_root_signatures(s, shadow_error)) {
+            runtime_log_error("optional ProperShaders shadow root signature disabled", shadow_error);
+            s.realtime_shadows_available = false;
+            s.realtime_shadow_caster_root_signature.Reset();
+            s.realtime_shadow_composite_root_signature.Reset();
+        }
+    }
     if (!create_targets(s, error)) return false;
     if (!create_present_pipeline(s, error)) return false;
     if (!create_cloud_target_pipeline(s, error)) return false;
     if (!create_cloud_resolve_pipeline(s, error)) return false;
     if (!create_cloud_composite_pipeline(s, error)) return false;
+    if (s.realtime_shadows_available) {
+        std::string shadow_error;
+        if (!create_realtime_shadow_pipeline(s, shadow_error)) {
+            runtime_log_error("optional ProperShaders shadow PSO disabled", shadow_error);
+            s.realtime_shadows_available = false;
+            s.realtime_shadow_caster_pipeline.Reset();
+            s.realtime_shadow_caster_packed_pipeline.Reset();
+            s.realtime_shadow_pipeline.Reset();
+            s.realtime_shadow_map = {};
+        }
+    }
     s.vertices.reserve(262144u);
     s.packed_0115_vertices.reserve(2621440u);
     s.indices.reserve(524288u);
@@ -3445,6 +4453,10 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.cloud_target_pipeline.Reset();
     s.cloud_resolve_pipeline.Reset();
     s.cloud_composite_pipeline.Reset();
+    s.realtime_shadow_caster_pipeline.Reset();
+    s.realtime_shadow_caster_packed_pipeline.Reset();
+    s.realtime_shadow_pipeline.Reset();
+    s.realtime_shadow_map = {};
     s.cloud_target_pixel_shader.Reset();
     s.cloud_resolve_pixel_shader.Reset();
     s.cloud_composite_pixel_shader.Reset();
@@ -3467,12 +4479,26 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.known_frame_targets.clear();
     s.last_registered_framebuffer_target = 0xFFFFFFFFu;
     s.pixel_shader.Reset();
+    s.building_vertex_shader.Reset();
+    s.building_packed_0115_vertex_shader.Reset();
+    s.building_pixel_shader.Reset();
+    s.skin_vertex_shader.Reset();
+    s.skin_packed_0115_vertex_shader.Reset();
+    s.skin_pixel_shader.Reset();
+    s.vehicle_vertex_shader.Reset();
+    s.vehicle_packed_0115_vertex_shader.Reset();
+    s.vehicle_pixel_shader.Reset();
+    s.realtime_shadow_caster_vertex_shader.Reset();
+    s.realtime_shadow_caster_packed_vertex_shader.Reset();
+    s.realtime_shadow_pixel_shader.Reset();
     s.packed_0115_vertex_shader.Reset();
     s.vertex_shader.Reset();
     s.indirect_draw_signature.Reset();
     s.indirect_draw_indexed_signature.Reset();
     s.root_signature.Reset();
     s.cloud_root_signature.Reset();
+    s.realtime_shadow_caster_root_signature.Reset();
+    s.realtime_shadow_composite_root_signature.Reset();
     s.readback_buffer.Reset();
     s.frame_targets.clear();
     s.sampler_heap.Reset();
@@ -3687,12 +4713,15 @@ void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &draw) noexcept {
 
 void ge_gpu_backend_observe_camera(const std::array<float, 12> &view,
                                    const std::array<float, 16> &projection,
-                                   const std::array<float, 6> &viewport,
+                                   const std::array<float, 8> &viewport,
                                    const std::array<float, 3> &camera_position,
                                    const GeGpuDrawDescriptor &draw,
                                    std::uint32_t vertex_weight) noexcept {
     Dx12GeState &s = state();
-    if (!s.enabled || !vcs_configuration().volumetric_clouds.enabled ||
+    const auto &proper = vcs_configuration().proper_shaders;
+    const bool observer_needed = proper_shaders_private_available() && proper.enabled &&
+        (proper.volumetric_clouds.enabled || proper.realtime_shadows.enabled);
+    if (!s.enabled || !observer_needed ||
         vertex_weight == 0u || !draw.depth_test_enabled) return;
     if (!std::all_of(view.begin(), view.end(), [](float value) { return std::isfinite(value); }) ||
         !std::all_of(projection.begin(), projection.end(), [](float value) { return std::isfinite(value); }) ||
@@ -4204,6 +5233,11 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
         return false;
     }
 
+    // Final semantic pass: once all draws for the frame are known, expand each
+    // high-confidence vehicle material anchor to the complete contiguous vehicle
+    // entity run (wheels/glass/trim included).
+    promote_vehicle_batch_groups(s);
+
     const std::size_t vertex_bytes = s.vertices.size() * sizeof(Dx12UploadVertex);
     const std::size_t packed_offset = (vertex_bytes + 3u) & ~std::size_t{3u};
     const std::size_t packed_bytes = s.packed_0115_vertices.size();
@@ -4223,7 +5257,11 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     Dx12FramebufferTarget *display_target = find_framebuffer_target(s, s.display_framebuffer);
 
     Dx12FrameResources &frame = s.frames[s.frame_cursor];
+    const auto &proper_config = vcs_configuration().proper_shaders;
+    const bool material_shadow_requested = proper_config.enabled &&
+        proper_config.realtime_shadows.enabled && proper_shaders_private_available();
     const bool indirect_enabled = dx12_execute_indirect_enabled() &&
+        !material_shadow_requested &&
         !s.amd_uma_safe_mode &&
         s.indirect_draw_signature && s.indirect_draw_indexed_signature &&
         frame.indirect_upload_buffer && frame.mapped_indirect_upload != nullptr;
@@ -4304,6 +5342,8 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     bool active_transform_valid = false;
     Dx12PixelConstants active_pixel{};
     bool active_pixel_valid = false;
+    std::array<float, 16> active_shadow_rows{};
+    bool active_shadow_rows_valid = false;
     D3D12_RECT active_scissor{};
     bool active_scissor_valid = false;
     std::uint32_t active_blend_fix = std::numeric_limits<std::uint32_t>::max();
@@ -4315,6 +5355,29 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
     const CloudShaderConstants clouds = cloud_present_constants(s);
     const std::uint32_t cloud_target_address = cloud_camera != nullptr
         ? cloud_camera->target : 0u;
+
+    std::array<float, 16> material_shadow_light_vp{};
+    bool material_shadow_ready = false;
+    if (cloud_camera != nullptr) {
+        if (Dx12FramebufferTarget *shadow_target =
+                find_framebuffer_target(s, cloud_target_address);
+            shadow_target != nullptr && shadow_target->color && shadow_target->depth) {
+            material_shadow_ready = record_directional_shadow_map(
+                s, *shadow_target, *cloud_camera, vb, packed_vb,
+                index_bytes != 0u ? &ib : nullptr, material_shadow_light_vp);
+        }
+    }
+    // Shadow-map generation uses its own depth-only root signature/viewport.
+    // Restore the material GE state before replaying the actual frame. t1 is
+    // always bound (null descriptor when unavailable), so every private pipe
+    // has a defined resource binding.
+    s.list->SetGraphicsRootSignature(s.root_signature.Get());
+    s.list->SetDescriptorHeaps(2u, descriptor_heaps);
+    s.list->SetGraphicsRootDescriptorTable(4u, srv_gpu(
+        s, material_shadow_ready ? s.realtime_shadow_map.srv_index : 0u));
+    s.list->RSSetViewports(1u, &viewport);
+    if (index_bytes != 0u) s.list->IASetIndexBuffer(&ib);
+
     bool clouds_injected = false;
     bool cloud_depth_writing_world_seen = false;
     static bool cloud_trace_done = false;
@@ -4368,10 +5431,13 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                 if (current_target != nullptr && current_target != cloud_target)
                     resolve_target_for_sampling(s, *current_target, false);
                 record_clouds_into_world_target(s, *cloud_target, clouds);
-                // The cloud passes use their own 62-DWORD root layout. Restore
-                // the GE layout before recording the first FadingEntities draw;
+                // Private shadow/cloud passes use root layouts different from the GE
+                // material path. Restore the GE layout before FadingEntities;
                 // all cached bindings below are invalidated and repopulated.
                 s.list->SetGraphicsRootSignature(s.root_signature.Get());
+                s.list->SetDescriptorHeaps(2u, descriptor_heaps);
+                s.list->SetGraphicsRootDescriptorTable(4u, srv_gpu(
+                    s, material_shadow_ready ? s.realtime_shadow_map.srv_index : 0u));
                 current_target = cloud_target;
                 current_address = cloud_target_address;
                 clouds_injected = true;
@@ -4380,6 +5446,7 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                 bound_srv = bound_sampler = std::numeric_limits<std::uint32_t>::max();
                 active_transform_valid = false;
                 active_pixel_valid = false;
+                active_shadow_rows_valid = false;
                 active_scissor_valid = false;
                 active_blend_fix = std::numeric_limits<std::uint32_t>::max();
                 active_vertex_layout_valid = false;
@@ -4544,6 +5611,13 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
             const Dx12TransformConstants draw_transform =
                 make_transform_constants(batch, logical_width, logical_height);
             const Dx12PixelConstants pixel_state = make_pixel_constants(batch.draw, srv_index != 0u);
+            std::array<float, 16> shadow_rows{};
+            if (material_shadow_ready && batch.hardware_transform &&
+                batch.draw.shader_pipe != GeShaderPipe::Native) {
+                const std::array<float, 16> model_to_light = shadow_multiply_mat4(
+                    material_shadow_light_vp, batch.transform.model_to_world);
+                shadow_matrix_rows(model_to_light, shadow_rows.data());
+            }
             if (!active_transform_valid ||
                 std::memcmp(&draw_transform, &active_transform, sizeof(draw_transform)) != 0) {
                 s.list->SetGraphicsRoot32BitConstants(2u, 40u, &draw_transform, 0u);
@@ -4555,6 +5629,11 @@ bool ge_gpu_backend_finish_color_frame(std::uint64_t vblank) noexcept {
                 s.list->SetGraphicsRoot32BitConstants(3u, 5u, &pixel_state, 0u);
                 active_pixel = pixel_state;
                 active_pixel_valid = true;
+            }
+            if (!active_shadow_rows_valid || shadow_rows != active_shadow_rows) {
+                s.list->SetGraphicsRoot32BitConstants(3u, 16u, shadow_rows.data(), 5u);
+                active_shadow_rows = shadow_rows;
+                active_shadow_rows_valid = true;
             }
         }
 
@@ -4861,7 +5940,7 @@ bool ge_gpu_backend_graphics_ready() noexcept { return false; }
 void ge_gpu_backend_record_draw(const GeGpuDrawDescriptor &) noexcept {}
 void ge_gpu_backend_observe_camera(const std::array<float, 12> &,
                                    const std::array<float, 16> &,
-                                   const std::array<float, 6> &,
+                                   const std::array<float, 8> &,
                                    const std::array<float, 3> &,
                                    const GeGpuDrawDescriptor &,
                                    std::uint32_t) noexcept {}

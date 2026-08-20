@@ -139,7 +139,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0186[4093] = {
 };
 void recomp_unit_0186_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
-// PSPRECOMP_AOT_REGCACHE_META gprs=4,5,6,31,29,16 fprs=12,14,13,20 gpr_occ=3869 fpr_occ=363 gpr_total=5970 fpr_total=507
+// PSPRECOMP_AOT_REGCACHE_META gprs=4,5,6,31,29,16 fprs=12,14,13,20 gpr_occ=3869 fpr_occ=363 gpr_total=5971 fpr_total=507
     std::uint32_t aot_gpr_4 = ctx.gpr[4];
     std::uint32_t aot_gpr_5 = ctx.gpr[5];
     std::uint32_t aot_gpr_6 = ctx.gpr[6];
@@ -2252,6 +2252,7 @@ L_08AEC904:
       goto L_08AEC918;
     }
 L_08AEC918:
+    vcs::draw_distance_world_table_ready(rt, ctx.gpr[28]);
     { std::uint32_t aot_run_words[4]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_run_words);
       aot_gpr_16 = aot_run_words[0];

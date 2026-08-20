@@ -1,5 +1,6 @@
 #include "ge_renderer.hpp"
 #include "ge_gpu_backend.hpp"
+#include "propershaders/ProperShadersBridge.hpp"
 #include "vcs_config.hpp"
 #include "vcs_project2dfx.hpp"
 #include "vcs_fps_overlay.hpp"
@@ -1008,6 +1009,7 @@ GeGpuHardwareTransform build_gpu_hardware_transform(
                                 0.0f, 0.0f, 1.0f, 0.0f,
                                 0.0f, 0.0f, 0.0f, 1.0f}
         : affine_4x3_to_mat4(transform.world);
+    hw.model_to_world = world;
     const auto view = affine_4x3_to_mat4(transform.view);
     const auto model_to_view = multiply_mat4(view, world);
     // No widescreen correction on this matrix: transform.projection was already
@@ -4209,14 +4211,21 @@ bool render_ge_primitive(psprecomp::GuestMemory &memory,
             }
             gpu_draw.texture_content_signature = any_signature ? signature : 0u;
         }
+        // Semantic pipe tag is resolved only after the mutable CLUT checksum is
+        // known. Skin is exact from the PSP weight format; vehicle recognition
+        // can learn the palette mutation VCS uses for recolourable cars.
+        gpu_draw.shader_pipe = proper_shaders_classify_draw(
+            gpu_draw, layout.weight_type != 0u);
         ge_gpu_backend_record_draw(gpu_draw);
         if (!gpu_draw.through && !gpu_draw.clear_mode &&
             primitive >= 3u && primitive <= 5u) {
-            const std::array<float, 6> cloud_viewport{
+            const std::array<float, 8> cloud_viewport{
                 decode_float24(data24(commands[0x42u])),
                 decode_float24(data24(commands[0x43u])),
+                decode_float24(data24(commands[0x44u])),
                 decode_float24(data24(commands[0x45u])),
                 decode_float24(data24(commands[0x46u])),
+                decode_float24(data24(commands[0x47u])),
                 static_cast<float>(data24(commands[0x4Cu]) & 0xFFFFu) / 16.0f,
                 static_cast<float>(data24(commands[0x4Du]) & 0xFFFFu) / 16.0f};
             // VCS' authoritative camera origin. The affine GE view used by

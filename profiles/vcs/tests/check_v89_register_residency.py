@@ -20,7 +20,7 @@ for token in (
     'aot_register_residency=1','aot_register_residency_units=230',
     'aot_gpr_resident_slots=6','aot_fpr_resident_slots=4',
     ('aot_gpr_resident_occurrences=914095' if is_v810 else 'aot_gpr_resident_occurrences=876226'),
-    ('aot_fpr_resident_occurrences=146809' if is_v810 else 'aot_fpr_resident_occurrences=145774'),
+    ('aot_fpr_resident_occurrences=146813' if is_v810 else 'aot_fpr_resident_occurrences=145774'),
     'trusted_chain=1','outer_aot_view_reuse=1','radio_atrac_identity_guard=1',
     'ge_async_default=0','parallel_vertex_decode_default=0'):
     need(token in log,'metadata '+token)
@@ -38,8 +38,8 @@ need('PSPRECOMP_AOT_REGCACHE_BEGIN' in tool and 'AOT_REGCACHE_SYNC_OUT' in tool 
 need('vcs' not in tool.lower() and '0x088' not in tool and '0x089' not in tool and '0x08a' not in tool.lower(),'generic optimizer has no VCS/address coupling')
 need(manifest['files']==234,'manifest corpus contains 234 units')
 if is_v810:
-    need(manifest['gpr_occurrences']==914095 and manifest['gpr_total']==1266110 and manifest.get('resident_weight')==6,'V8.10 manifest GPR coverage/region weight exact')
-    need(manifest['fpr_occurrences']==146809 and manifest['fpr_total']==198361,'V8.10 manifest FPR coverage exact')
+    need(manifest['gpr_occurrences']==914095 and manifest['gpr_total']==1266111 and manifest.get('resident_weight')==6,'V8.10 manifest GPR coverage/region weight exact')
+    need(manifest['fpr_occurrences']==146813 and manifest['fpr_total']==198365,'V8.10 manifest FPR coverage exact')
 else:
     need(manifest['gpr_occurrences']==876226 and manifest['gpr_total']==1188249,'manifest GPR coverage exact')
     need(manifest['fpr_occurrences']==145774 and manifest['fpr_total']==196805,'manifest FPR coverage exact')

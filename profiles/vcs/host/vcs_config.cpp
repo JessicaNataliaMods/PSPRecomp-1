@@ -126,102 +126,6 @@ void warning(VcsConfiguration &config, std::size_t line, const std::string &mess
     config.warnings.push_back(stream.str());
 }
 
-void load_proper_shaders_configuration(VcsConfiguration &config,
-                                       const std::filesystem::path &path) {
-    std::ifstream input(path);
-    if (!input) return;
-    std::string section;
-    std::string raw_line;
-    std::size_t line_number = 0u;
-    while (std::getline(input, raw_line)) {
-        ++line_number;
-        std::string line = trim_copy(raw_line);
-        if (line.empty() || line[0] == ';' || line[0] == '#') continue;
-        if (line.front() == '[' && line.back() == ']') {
-            section = lowercase_copy(trim_copy(line.substr(1u, line.size() - 2u)));
-            continue;
-        }
-        if (section != "volumetricclouds" && section != "volumetric clouds") continue;
-        const std::size_t separator = line.find('=');
-        if (separator == std::string::npos) {
-            warning(config, line_number, "ProperShaders.ini: expected key=value");
-            continue;
-        }
-        const std::string key = lowercase_copy(trim_copy(line.substr(0u, separator)));
-        const std::string value = strip_inline_comment(line.substr(separator + 1u));
-        auto bad_float = [&](const char *name) {
-            warning(config, line_number, std::string("ProperShaders.ini: invalid ") + name);
-        };
-        if (key == "enabled") {
-            if (!parse_bool(value, config.volumetric_clouds.enabled))
-                warning(config, line_number, "ProperShaders.ini: Enabled expects true/false");
-        } else if (key == "downscalediv") {
-            if (!parse_u32(value, 1u, 8u, config.volumetric_clouds.downscale_div))
-                warning(config, line_number, "ProperShaders.ini: DownscaleDiv must be between 1 and 8");
-        } else if (key == "layers") {
-            if (!parse_u32(value, 1u, 3u, config.volumetric_clouds.layers))
-                warning(config, line_number, "ProperShaders.ini: Layers must be between 1 and 3");
-        } else if (key == "shadowsteps") {
-            if (!parse_u32(value, 2u, 8u, config.volumetric_clouds.shadow_steps))
-                warning(config, line_number, "ProperShaders.ini: ShadowSteps must be between 2 and 8");
-        } else if (key == "coveragelow") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_low)) bad_float("CoverageLow");
-        } else if (key == "coveragemid") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_mid)) bad_float("CoverageMid");
-        } else if (key == "coveragehigh") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.coverage_high)) bad_float("CoverageHigh");
-        } else if (key == "opacity") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.opacity)) bad_float("Opacity");
-        } else if (key == "speed") {
-            if (!parse_float(value, 0.0f, 1000.0f, config.volumetric_clouds.speed)) bad_float("Speed");
-        } else if (key == "brightness") {
-            if (!parse_float(value, 0.0f, 8.0f, config.volumetric_clouds.brightness)) bad_float("Brightness");
-        } else if (key == "randomseed") {
-            if (!parse_float(value, 0.0f, 6.2831855f, config.volumetric_clouds.random_seed)) bad_float("RandomSeed");
-        } else if (key == "sundirectionx") {
-            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_x)) bad_float("SunDirectionX");
-        } else if (key == "sundirectiony") {
-            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_y)) bad_float("SunDirectionY");
-        } else if (key == "sundirectionz") {
-            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.sun_direction_z)) bad_float("SunDirectionZ");
-        } else if (key == "suncolorr") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_r)) bad_float("SunColorR");
-        } else if (key == "suncolorg") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_g)) bad_float("SunColorG");
-        } else if (key == "suncolorb") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.sun_color_b)) bad_float("SunColorB");
-        } else if (key == "cloudbasecolorr") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_r)) bad_float("CloudBaseColorR");
-        } else if (key == "cloudbasecolorg") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_g)) bad_float("CloudBaseColorG");
-        } else if (key == "cloudbasecolorb") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.cloud_base_color_b)) bad_float("CloudBaseColorB");
-        } else if (key == "atmospheredensity") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.atmosphere_density)) bad_float("AtmosphereDensity");
-        } else if (key == "mist") {
-            if (!parse_float(value, 0.0f, 1.0f, config.volumetric_clouds.mist)) bad_float("Mist");
-        } else if (key == "fogcolorr") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_r)) bad_float("FogColorR");
-        } else if (key == "fogcolorg") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_g)) bad_float("FogColorG");
-        } else if (key == "fogcolorb") {
-            if (!parse_float(value, 0.0f, 4.0f, config.volumetric_clouds.fog_color_b)) bad_float("FogColorB");
-        } else if (key == "fogstart") {
-            if (!parse_float(value, 1.0f, 100000.0f, config.volumetric_clouds.fog_start)) bad_float("FogStart");
-        } else if (key == "dayprogression") {
-            if (!parse_float(value, -1.0f, 1.0f, config.volumetric_clouds.day_progression)) bad_float("DayProgression");
-        } else if (key == "temporalblend") {
-            if (!parse_float(value, 0.0f, 0.95f, config.volumetric_clouds.temporal_blend)) bad_float("TemporalBlend");
-        } else if (key == "temporaldenoise") {
-            if (!parse_float(value, 0.0f, 16.0f, config.volumetric_clouds.temporal_denoise)) bad_float("TemporalDenoise");
-        } else if (key == "temporalclamp") {
-            if (!parse_float(value, 0.0f, 16.0f, config.volumetric_clouds.temporal_clamp)) bad_float("TemporalClamp");
-        } else {
-            warning(config, line_number, "ProperShaders.ini: unknown [VolumetricClouds] key '" + key + "'");
-        }
-    }
-}
-
 void apply_display_key(VcsConfiguration &config, const std::string &key,
                        const std::string &value, std::size_t line) {
     if (key == "enabled") {
@@ -780,10 +684,11 @@ VcsConfiguration load_vcs_configuration(const std::filesystem::path &path) {
             apply_frontend_key(config, key, value, line_number);
         else if (section == "textures" || section == "texturereplacement")
             apply_textures_key(config, key, value, line_number);
-        // These sections belong to the optional Project2DFX module, which
-        // deliberately owns its parser so it can be compiled independently of
-        // the core display/input configuration. They are nevertheless valid
-        // VCSNative.ini sections and must not be reported as unknown here.
+        // Optional modules deliberately own these parsers so the core
+        // display/input configuration stays game-neutral. DrawDistance is now
+        // installed independently of Project2DFX; SimulateHDR is accepted only
+        // as a legacy VCSNative.ini section (new shader settings live in
+        // ProperShaders.ini).
         else if (section == "project2dfx" || section == "project 2dfx" ||
                  section == "lodlights" || section == "lod lights" ||
                  section == "trafficlights" || section == "traffic lights" ||
@@ -792,7 +697,8 @@ VcsConfiguration load_vcs_configuration(const std::filesystem::path &path) {
                  section == "heli height" || section == "drawdistance" ||
                  section == "draw distance" || section == "simulatehdr" ||
                  section == "simulate hdr") {
-            // Parsed by install_project2dfx() or hdr_post_configure().
+            // Parsed by install_project2dfx(), install_draw_distance_patch(),
+            // or retained for legacy configuration compatibility.
         }
         else if (section.empty())
             warning(config, line_number, "key outside a section");
@@ -812,7 +718,7 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
     }
 
     VcsConfiguration loaded = load_vcs_configuration(path);
-    load_proper_shaders_configuration(loaded, executable_directory / "ProperShaders.ini");
+    load_proper_shaders_configuration(loaded.proper_shaders, executable_directory / "ProperShaders.ini", loaded.warnings);
     // SAVE_REPRO is intentionally off in the shipped INI. The internal restore
     // script/environment is an explicit developer opt-in and may enable it for
     // that process without requiring the user's normal configuration to change.

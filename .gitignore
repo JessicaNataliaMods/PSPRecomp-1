@@ -50,3 +50,4 @@ SAVEDATA/
 # Python
 __pycache__/
 *.pyc
+/profiles/vcs/host/propershaders/private

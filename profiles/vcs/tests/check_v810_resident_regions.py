@@ -24,7 +24,7 @@ for token in (
     'resident_region_sync_in_removed=11171','resident_region_resident_args=53234',
     'resident_region_ctx_args=26183','resident_region_scheduler_guard=1',
     'resident_region_scheduler_fallback_sites=11171','aot_resident_region_weight=6',
-    'aot_gpr_resident_occurrences=914095','aot_fpr_resident_occurrences=146809',
+    'aot_gpr_resident_occurrences=914095','aot_fpr_resident_occurrences=146813',
     'radio_atrac_identity_guard=1','save_exitdelete_semantics=1','ge_async_default=0',
     'parallel_vertex_decode_default=0'):
     need(token in log,'metadata '+token)

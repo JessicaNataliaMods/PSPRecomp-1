@@ -15,7 +15,7 @@ if not exist "%BUILD%" (
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command ^
   "$build=[IO.Path]::GetFullPath('%BUILD%');" ^
   "$names=@('vcs_profile.cpp.obj','savedata_utility_ui.cpp.obj','ge_renderer.cpp.obj','display_window.cpp.obj','main.cpp.obj','vcs_config.cpp.obj','generated_unit_0127.cpp.obj','generated_unit_0172.cpp.obj');" ^
-  "$found=Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue ^| Where-Object { $names -contains $_.Name };" ^
+  "$found=@(Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue); $found=@($found.Where({$names -contains $_.Name}));" ^
   "Write-Host ('[V9.3] stale objects found: ' + $found.Count);" ^
   "foreach($f in $found){Write-Host ('  deleting: ' + $f.FullName); Remove-Item -LiteralPath $f.FullName -Force -ErrorAction Stop};" ^
   "$src=@('%REPO%\profiles\vcs\host\vcs_profile.cpp','%REPO%\profiles\vcs\host\savedata_utility_ui.cpp','%REPO%\profiles\vcs\host\ge_renderer.cpp','%REPO%\profiles\vcs\host\display_window.cpp','%REPO%\profiles\vcs\host\main.cpp','%REPO%\profiles\vcs\host\vcs_config.cpp','%REPO%\profiles\vcs\generated\generated_unit_0127.cpp','%REPO%\profiles\vcs\generated\generated_unit_0172.cpp');" ^

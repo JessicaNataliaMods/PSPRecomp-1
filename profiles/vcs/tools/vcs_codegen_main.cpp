@@ -1000,22 +1000,40 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                 break;
             }
 
-            // VCS draw-distance local-label patches. These addresses are valid
-            // AOT entries, but normal gameplay reaches them through local gotos,
-            // which bypasses Runtime::register_function replacements. Keep the
-            // exact original path at scale 1.0 and only short-circuit when the
-            // user explicitly enables extended draw distance.
+            // VCS world far-clip extender. 0x08A1AD6C is the actual
+            // CDraw::SetFarClipZ-style store into gp+7796. Multiply the value
+            // immediately before the guest store so every camera mode observes
+            // the configured world distance without vblank double-scaling.
+            if (pc == 0x08A1AD6Cu) {
+                body << "    if (vcs::g_draw_distance_runtime_scales.world > 1.0f) {\n"
+                     << "        ++vcs::g_draw_distance_runtime_telemetry.far_clip_set_hits;\n"
+                     << "        ctx.fpr[12] *= vcs::g_draw_distance_runtime_scales.world;\n"
+                     << "    }\n";
+            }
+
+            // VCS actor LOD extender. The established PSP VCS WidescreenFix
+            // replaces the call at the 0x08A24128 site: it writes s0+0x7A0 from
+            // s0+0x7A8 * multiplier and returns multiplier in f0. Reproduce that
+            // exact semantic before the original call; 1.0 keeps stock behavior.
             if (pc == 0x08A24128u) {
                 body << "    if (vcs::g_draw_distance_runtime_scales.entity > 1.0f) {\n"
-                     << "        const float dd_base = std::bit_cast<float>(aot_mem.aot_load32(ctx.gpr[16] + static_cast<std::uint32_t>(1960)));\n"
+                     << "        ++vcs::g_draw_distance_runtime_telemetry.actor_lod_hits;\n"
                      << "        const float dd_scale = vcs::g_draw_distance_runtime_scales.entity;\n"
-                     << "        aot_mem.aot_store32(ctx.gpr[16] + static_cast<std::uint32_t>(1952), std::bit_cast<std::uint32_t>(dd_base * dd_scale));\n"
+                     << "        const float dd_base = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_16 + static_cast<std::uint32_t>(1960)));\n"
+                     << "        aot_mem.aot_direct_store32(aot_gpr_16 + static_cast<std::uint32_t>(1952), std::bit_cast<std::uint32_t>(dd_base * dd_scale));\n"
                      << "        ctx.fpr[0] = dd_scale;\n"
                      << "        goto L_08A24138;\n"
                      << "    }\n";
             }
+            // The model-info pointer table has just finished its initializer at
+            // this local label. Patch world/timed-object LOD fields here, while
+            // the guest GP and table are authoritative, instead of guessing at vblank.
+            if (pc == 0x08AEC918u) {
+                body << "    vcs::draw_distance_world_table_ready(rt, ctx.gpr[28]);\n";
+            }
             if (pc == 0x089CB38Cu) {
                 body << "    if (vcs::g_draw_distance_runtime_scales.npcs > 1.0f) {\n"
+                     << "        ++vcs::g_draw_distance_runtime_telemetry.npc_constant_hits;\n"
                      << "        const float dd_scale = vcs::g_draw_distance_runtime_scales.npcs;\n"
                      << "        ctx.gpr[19] = ctx.gpr[29] + static_cast<std::uint32_t>(64);\n"
                      << "        ctx.gpr[30] = ctx.gpr[29] + static_cast<std::uint32_t>(16);\n"
@@ -1031,8 +1049,19 @@ std::string emit_function_source(const GeneratedFunctionInput &function,
                      << "        goto L_089CB3C8;\n"
                      << "    }\n";
             }
+            // The common vehicle path branches unconditionally from AB8 to AC8
+            // after its delay-slot multiply, so patching only AC0 misses most cars.
+            // Scale f12 immediately before that branch; the original delay-slot
+            // multiply still runs and preserves the game's dynamic term.
+            if (pc == 0x08B45AB8u) {
+                body << "    if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {\n"
+                     << "        ++vcs::g_draw_distance_runtime_telemetry.vehicle_dynamic_hits;\n"
+                     << "        ctx.fpr[12] *= vcs::g_draw_distance_runtime_scales.vehicles;\n"
+                     << "    }\n";
+            }
             if (pc == 0x08B45AC0u) {
                 body << "    if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {\n"
+                     << "        ++vcs::g_draw_distance_runtime_telemetry.vehicle_fallback_hits;\n"
                      << "        ctx.fpr[12] = 60.0f * vcs::g_draw_distance_runtime_scales.vehicles;\n"
                      << "        goto L_08B45AC8;\n"
                      << "    }\n";

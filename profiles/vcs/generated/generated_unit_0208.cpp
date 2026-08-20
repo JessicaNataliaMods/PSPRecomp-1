@@ -139,7 +139,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0208[4093] = {
 };
 void recomp_unit_0208_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
-// PSPRECOMP_AOT_REGCACHE_META gprs=4,5,6,29,31,16 fprs=12,13,20,22 gpr_occ=3954 fpr_occ=758 gpr_total=5152 fpr_total=1078
+// PSPRECOMP_AOT_REGCACHE_META gprs=4,5,6,29,31,16 fprs=12,13,20,22 gpr_occ=3954 fpr_occ=759 gpr_total=5152 fpr_total=1079
     std::uint32_t aot_gpr_4 = ctx.gpr[4];
     std::uint32_t aot_gpr_5 = ctx.gpr[5];
     std::uint32_t aot_gpr_6 = ctx.gpr[6];
@@ -4534,6 +4534,13 @@ L_08B45AA4:
     aot_fpr_13 = std::bit_cast<float>(aot_gpr_4);
     { const bool branch_taken = 0u == 0u;
     { const float fs = aot_fpr_12; const float ft = aot_fpr_13; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) aot_fpr_12 = std::bit_cast<float>(0x7FC00000u); else aot_fpr_12 = fs * ft; }
+    // This is the dominant vehicle-distance path.  The old experiment only
+    // modified L_08B45AC0 below; this unconditional branch normally jumps
+    // straight to AC8, so most vehicles never saw the configured multiplier.
+    if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {
+        ++vcs::g_draw_distance_runtime_telemetry.vehicle_dynamic_hits;
+        aot_fpr_12 *= vcs::g_draw_distance_runtime_scales.vehicles;
+    }
       if (branch_taken) {
           goto L_08B45AC8;
       }
@@ -4541,6 +4548,7 @@ L_08B45AA4:
     }
 L_08B45AC0:
     if (vcs::g_draw_distance_runtime_scales.vehicles > 1.0f) {
+        ++vcs::g_draw_distance_runtime_telemetry.vehicle_fallback_hits;
         aot_fpr_12 = 60.0f * vcs::g_draw_distance_runtime_scales.vehicles;
         goto L_08B45AC8;
     }

@@ -189,6 +189,41 @@ endif()
 
 set(VCS_GPU_BACKEND_SOURCE host/ge_gpu_backend_dx12.cpp)
 set(VCS_HDR_POST_SOURCE host/vcs_hdr_post_dx12_stub.cpp)
+
+# ProperShaders is an optional private extension layer. The public repository can
+# omit host/propershaders/private entirely and still build a stock VCS renderer.
+set(VCS_PROPER_SHADERS_SOURCES
+    host/propershaders/ProperShadersConfig.cpp
+    host/propershaders/ProperShadersBridge.cpp
+)
+set(VCS_PRIVATE_SHADER_DIR "${VCS_PROFILE_DIR}/host/propershaders/private")
+set(VCS_PRIVATE_SHADER_REQUIRED
+    "${VCS_PRIVATE_SHADER_DIR}/PipeSources.hpp"
+    "${VCS_PRIVATE_SHADER_DIR}/PrivateShaders.cpp"
+    "${VCS_PRIVATE_SHADER_DIR}/BuildingPipe.cpp"
+    "${VCS_PRIVATE_SHADER_DIR}/SkinPipe.cpp"
+    "${VCS_PRIVATE_SHADER_DIR}/VehiclePipe.cpp"
+    "${VCS_PRIVATE_SHADER_DIR}/RealtimeShadows.cpp"
+    "${VCS_PRIVATE_SHADER_DIR}/VolumetricClouds.cpp")
+set(VCS_PRIVATE_SHADER_COMPLETE TRUE)
+foreach(VCS_PRIVATE_SHADER_FILE IN LISTS VCS_PRIVATE_SHADER_REQUIRED)
+    if(NOT EXISTS "${VCS_PRIVATE_SHADER_FILE}")
+        set(VCS_PRIVATE_SHADER_COMPLETE FALSE)
+    endif()
+endforeach()
+if(VCS_PRIVATE_SHADER_COMPLETE)
+    message(STATUS "VCS ProperShaders: private shader pack present")
+    list(APPEND VCS_PROPER_SHADERS_SOURCES
+        host/propershaders/private/PrivateShaders.cpp
+        host/propershaders/private/BuildingPipe.cpp
+        host/propershaders/private/SkinPipe.cpp
+        host/propershaders/private/VehiclePipe.cpp
+        host/propershaders/private/RealtimeShadows.cpp
+        host/propershaders/private/VolumetricClouds.cpp)
+else()
+    message(STATUS "VCS ProperShaders: private shader pack absent; building stock-renderer stubs")
+    list(APPEND VCS_PROPER_SHADERS_SOURCES host/propershaders/PrivateShaderStubs.cpp)
+endif()
 set(VCS_HOST_SOURCES
     host/vcs_tier2_superblocks.cpp
     host/vcs_bootstrap_paths.cpp
@@ -210,6 +245,7 @@ set(VCS_HOST_SOURCES
     host/vcs_project2dfx_lights.cpp
     host/vcs_draw_distance_patch.cpp
     host/vcs_runtime_log.cpp
+    ${VCS_PROPER_SHADERS_SOURCES}
     ${VCS_HDR_POST_SOURCE}
     host/ge_renderer.cpp
     ${VCS_GPU_BACKEND_SOURCE}
@@ -337,6 +373,7 @@ if(PSPRECOMP_BUILD_PROFILE_TESTS)
     add_executable(vcs_config_tests
         tests/vcs_config_tests.cpp
         host/vcs_config.cpp
+        host/propershaders/ProperShadersConfig.cpp
         host/vcs_camera_input.cpp
         host/vcs_vehicle_input.cpp)
     target_include_directories(vcs_config_tests PRIVATE host)
@@ -374,6 +411,7 @@ if(WIN32)
         host/dx12_presenter.cpp
         host/vcs_runtime_log.cpp
         host/vcs_config.cpp
+        host/propershaders/ProperShadersConfig.cpp
         host/vcs_camera_input.cpp
         host/vcs_vehicle_input.cpp)
     target_include_directories(vcs_dx12_probe PRIVATE host "${PROJECT_SOURCE_DIR}/include")
@@ -385,6 +423,7 @@ if(WIN32)
         host/ge_gpu_backend_dx12.cpp
         host/vcs_runtime_log.cpp
         host/vcs_config.cpp
+        ${VCS_PROPER_SHADERS_SOURCES}
         host/vcs_camera_input.cpp
         host/vcs_vehicle_input.cpp)
     target_include_directories(vcs_dx12_ge_probe PRIVATE host "${PROJECT_SOURCE_DIR}/include")

@@ -8769,6 +8769,7 @@ L_089CB33C:
     }
 L_089CB38C:
     if (vcs::g_draw_distance_runtime_scales.npcs > 1.0f) {
+        ++vcs::g_draw_distance_runtime_telemetry.npc_constant_hits;
         const float dd_scale = vcs::g_draw_distance_runtime_scales.npcs;
         ctx.gpr[19] = ctx.gpr[29] + static_cast<std::uint32_t>(64);
         ctx.gpr[30] = ctx.gpr[29] + static_cast<std::uint32_t>(16);

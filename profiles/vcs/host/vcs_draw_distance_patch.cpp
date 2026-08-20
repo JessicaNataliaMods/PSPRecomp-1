@@ -5,12 +5,12 @@
 //
 // [DrawDistance]
 // Enabled = 1
-// World = 1.50
+// Objects = 1.50
 // Vehicles = 1.50
 // NPCs = 1.50
 //
 // 1.0 = original PSP distance. Values below 1.0 are clamped to 1.0.
-// World is allowed up to 8.0; Vehicles/NPCs up to 4.0.
+// Objects/World/Vehicles/NPCs are allowed up to 8.0 for explicit testing.
 // For mission compatibility, keep Vehicles/NPCs <= 2.0 unless tested.
 //
 // Integration (no header required):
@@ -28,6 +28,7 @@
 #include "vcs_draw_distance_patch.hpp"
 #include "psprecomp/runtime.hpp"
 #include "psprecomp/common.hpp"   // hex32, para o relatorio de hooks vivos/mortos
+#include "vcs_runtime_log.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -39,6 +40,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -46,6 +48,7 @@
 namespace vcs {
 
 DrawDistanceRuntimeScales g_draw_distance_runtime_scales{};
+DrawDistanceRuntimeTelemetry g_draw_distance_runtime_telemetry{};
 
 namespace {
 
@@ -83,10 +86,6 @@ struct OriginalWorldModel {
 };
 
 std::unordered_map<std::uint32_t, OriginalWorldModel> g_original_world_models;
-bool g_far_clip_seen{};
-float g_far_clip_last_raw{};
-float g_far_clip_last_scaled{};
-
 std::string trim_copy(std::string value) {
     auto is_space = [](unsigned char c) { return std::isspace(c) != 0; };
     while (!value.empty() && is_space(static_cast<unsigned char>(value.front())))
@@ -171,7 +170,9 @@ DrawDistanceConfig load_config(const std::filesystem::path &path) {
 
         if (key == "enabled") {
             parse_bool(value, cfg.enabled);
-        } else if (key == "world" || key == "worldmultiplier") {
+        } else if (key == "world" || key == "worldmultiplier" ||
+                   key == "objects" || key == "buildings" ||
+                   key == "objectmultiplier" || key == "buildingmultiplier") {
             parse_float(value, cfg.world);
         } else if (key == "vehicles" || key == "cars" || key == "vehiclemultiplier") {
             parse_float(value, cfg.vehicles);
@@ -181,8 +182,8 @@ DrawDistanceConfig load_config(const std::filesystem::path &path) {
     }
 
     cfg.world = std::clamp(cfg.world, 1.0f, 8.0f);
-    cfg.vehicles = std::clamp(cfg.vehicles, 1.0f, 4.0f);
-    cfg.npcs = std::clamp(cfg.npcs, 1.0f, 4.0f);
+    cfg.vehicles = std::clamp(cfg.vehicles, 1.0f, 8.0f);
+    cfg.npcs = std::clamp(cfg.npcs, 1.0f, 8.0f);
     return cfg;
 }
 
@@ -309,6 +310,10 @@ bool patch_world_model_table(psprecomp::Runtime &runtime, std::uint32_t gp) {
         std::cerr << "  [dd-verifica] passada=" << verifications
                   << " intactos=" << intact << " revertidos=" << reverted << "\n";
     }
+    if (patched != 0u) {
+        ++g_draw_distance_runtime_telemetry.world_table_patch_hits;
+        g_draw_distance_runtime_telemetry.world_models_patched += patched;
+    }
     return patched != 0u;
 }
 
@@ -318,12 +323,11 @@ void install_draw_distance_patch(psprecomp::Runtime &runtime,
                                  const std::filesystem::path &ini_path) {
     g_config = load_config(ini_path);
     g_original_world_models.clear();
-    g_far_clip_seen = false;
-    g_far_clip_last_raw = 0.0f;
-    g_far_clip_last_scaled = 0.0f;
     g_draw_distance_runtime_scales = {};
+    g_draw_distance_runtime_telemetry = {};
     if (g_config.enabled) {
-        g_draw_distance_runtime_scales.entity = std::max(g_config.vehicles, g_config.npcs);
+        g_draw_distance_runtime_scales.world = g_config.world;
+        g_draw_distance_runtime_scales.entity = std::max({g_config.world, g_config.vehicles, g_config.npcs});
         g_draw_distance_runtime_scales.vehicles = g_config.vehicles;
         g_draw_distance_runtime_scales.npcs = g_config.npcs;
     }
@@ -333,17 +337,15 @@ void install_draw_distance_patch(psprecomp::Runtime &runtime,
         return;
     }
 
-    // World is maintained at vblank. Entity/vehicle/NPC constants are
-    // patched directly at their generated local labels, because gameplay reaches
+    // Far clip and entity/vehicle/NPC constants are patched directly at
+    // their generated local labels, because gameplay reaches
     // those labels with intra-unit gotos that cannot be intercepted by the runtime
     // function registry.
 
     if (g_config.world > 1.0f) {
-        // World distance is maintained from the display-vblank boundary. Both
-        // historical entry hooks can be reached as local labels inside an AOT
-        // unit and therefore bypass Runtime::register_function entirely. Keeping
-        // them registered also poisons direct chaining for no reliable benefit.
-        std::cerr << "[draw-distance] world path=vblank (no fragile far_clip/IDE AOT hooks)\n";
+        // Far clip is scaled at the exact gp+7796 setter. Model-info LODs are
+        // patched at IDE completion and refreshed at vblank if streaming rebuilds them.
+        std::cerr << "[draw-distance] world path=exact far-clip setter + IDE model table\n";
     }
 
     if (g_config.vehicles > 1.0f || g_config.npcs > 1.0f) {
@@ -351,51 +353,86 @@ void install_draw_distance_patch(psprecomp::Runtime &runtime,
         // generated units. Runtime::register_function cannot intercept those
         // paths. The generated corpus now reads g_draw_distance_runtime_scales
         // at the exact labels instead, so do not install misleading dead hooks.
-        std::cerr << "[draw-distance] entity/vehicle/NPC path=generated-local-label" << "\n";
+        std::cerr << "[draw-distance] entity path=verified WidescreenFix semantic + vehicle/NPC local constants" << "\n";
     }
     std::cerr << "[draw-distance] enabled"
               << " world=" << g_config.world
               << " vehicles=" << g_config.vehicles
               << " npcs=" << g_config.npcs
-              << " entity_lod=" << std::max(g_config.vehicles, g_config.npcs)
+              << " entity_lod=" << std::max({g_config.world, g_config.vehicles, g_config.npcs})
               << "\n";
+    {
+        std::ostringstream line;
+        line << "draw-distance config enabled=1"
+             << " world=" << g_config.world
+             << " vehicles=" << g_config.vehicles
+             << " npcs=" << g_config.npcs
+             << " common_lod=" << std::max({g_config.world, g_config.vehicles, g_config.npcs});
+        runtime_log_line(line.str());
+    }
+}
+
+void draw_distance_world_table_ready(psprecomp::Runtime &runtime,
+                                     std::uint32_t guest_gp) noexcept {
+    if (!g_config.enabled || g_config.world <= 1.0f || guest_gp == 0u) return;
+    try {
+        if (patch_world_model_table(runtime, guest_gp)) {
+            std::cerr << "[draw-distance] world table patched at authoritative IDE init"
+                      << " gp=" << psprecomp::hex32(guest_gp) << "\n";
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "[draw-distance] world IDE init patch skipped: " << e.what() << "\n";
+    } catch (...) {
+        std::cerr << "[draw-distance] world IDE init patch skipped: unknown exception\n";
+    }
 }
 
 void draw_distance_vblank_tick(psprecomp::Runtime &runtime,
                                std::uint32_t guest_gp,
                                std::uint64_t vblank_index) noexcept {
-    if (!g_config.enabled || g_config.world <= 1.0f || guest_gp == 0u) return;
+    if (!g_config.enabled || guest_gp == 0u) return;
     try {
-        const std::uint32_t far_address = guest_gp + kGpFarClipOffset;
-        if (runtime.memory().contains(far_address, sizeof(std::uint32_t))) {
-            const float current = load_float(runtime, far_address);
-            if (std::isfinite(current) && current > 0.0f) {
-                // Never multiply our own value again. If the game writes a new
-                // dynamic far clip (weather/interior/etc.), treat that new value
-                // as the next raw baseline and scale it exactly once.
-                if (!g_far_clip_seen ||
-                    (!nearly_equal(current, g_far_clip_last_scaled) &&
-                     !nearly_equal(current, g_far_clip_last_raw))) {
-                    g_far_clip_seen = true;
-                    g_far_clip_last_raw = current;
-                    g_far_clip_last_scaled = current * g_config.world;
-                }
-                if (g_far_clip_seen && !nearly_equal(current, g_far_clip_last_scaled))
-                    store_float(runtime, far_address, g_far_clip_last_scaled);
-            }
-        }
-
-        // The model-info table can appear after the first gameplay vblanks and
-        // can be repopulated by streaming. Retry aggressively at startup, then
-        // refresh twice a second-ish without touching generated guest code.
-        if (vblank_index < 240u || (vblank_index % 120u) == 0u)
+        // Far clip is now multiplied at the actual CDraw::SetFarClipZ AOT
+        // setter (0x08A1AD6C), so vblank must never multiply it a second time.
+        // World model-info is still refreshed here because streaming may rebuild
+        // entries after the original IDE load.
+        if (g_config.world > 1.0f &&
+            (vblank_index < 240u || (vblank_index % 120u) == 0u))
             (void)patch_world_model_table(runtime, guest_gp);
+
+        if ((vblank_index % 120u) == 0u) {
+            const std::uint32_t count = runtime.memory().contains(
+                guest_gp + kGpIdeCountOffset, sizeof(std::uint32_t))
+                ? runtime.memory().load32(guest_gp + kGpIdeCountOffset) : 0u;
+            const std::uint32_t table = runtime.memory().contains(
+                guest_gp + kGpIdeTableOffset, sizeof(std::uint32_t))
+                ? runtime.memory().load32(guest_gp + kGpIdeTableOffset) : 0u;
+            float far_clip = 0.0f;
+            if (runtime.memory().contains(guest_gp + kGpFarClipOffset,
+                                          sizeof(std::uint32_t)))
+                far_clip = load_float(runtime, guest_gp + kGpFarClipOffset);
+            std::ostringstream line;
+            line << "draw-distance telemetry vblank=" << vblank_index
+                 << " gp=" << psprecomp::hex32(guest_gp)
+                 << " far_clip=" << far_clip
+                 << " model_count=" << count
+                 << " model_table=" << psprecomp::hex32(table)
+                 << " far_set_hits=" << g_draw_distance_runtime_telemetry.far_clip_set_hits
+                 << " actor_hits=" << g_draw_distance_runtime_telemetry.actor_lod_hits
+                 << " npc_hits=" << g_draw_distance_runtime_telemetry.npc_constant_hits
+                 << " veh_dynamic_hits=" << g_draw_distance_runtime_telemetry.vehicle_dynamic_hits
+                 << " veh_fallback_hits=" << g_draw_distance_runtime_telemetry.vehicle_fallback_hits
+                 << " table_patch_hits=" << g_draw_distance_runtime_telemetry.world_table_patch_hits
+                 << " world_models_written=" << g_draw_distance_runtime_telemetry.world_models_patched;
+            runtime_log_line(line.str());
+        }
     } catch (const std::exception &error) {
         static bool logged = false;
         if (!logged) {
             logged = true;
             std::cerr << "[draw-distance] vblank maintenance disabled after error: "
                       << error.what() << "\n";
+            runtime_log_error("draw-distance telemetry", error.what());
         }
     }
 }

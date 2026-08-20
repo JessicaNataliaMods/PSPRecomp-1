@@ -172,7 +172,36 @@ int main() {
                 "SAVE_REPRO must be disabled by default");
         {
             std::ofstream proper(root / "ProperShaders.ini", std::ios::trunc);
-            proper << "[VolumetricClouds]\n"
+            proper << "[ProperShaders]\n"
+                   << "Enabled=true\n"
+                   << "[BuildingPipe]\n"
+                   << "Enabled=true\n"
+                   << "[SkinPipe]\n"
+                   << "Enabled=false\n"
+                   << "[VehiclePipe]\n"
+                   << "Enabled=true\n"
+                   << "PaletteClassifier=false\n"
+                   << "[RealtimeShadows]\n"
+                   << "Enabled=true\n"
+                   << "MapResolution=3072\n"
+                   << "WorldRadius=220\n"
+                   << "DepthRange=600\n"
+                   << "MapBias=0.002\n"
+                   << "PcfRadius=2\n"
+                   << "UseCloudSunDirection=false\n"
+                   << "LightDirectionX=0.2\n"
+                   << "LightDirectionY=-0.4\n"
+                   << "LightDirectionZ=0.9\n"
+                   << "Strength=0.55\n"
+                   << "DebugMode=6\n"
+                   << "ContactShadows=false\n"
+                   << "ContactStrength=0.31\n"
+                   << "Steps=18\n"
+                   << "MaxDistancePixels=64\n"
+                   << "Thickness=0.003\n"
+                   << "LightScreenX=-0.4\n"
+                   << "LightScreenY=0.8\n"
+                   << "[VolumetricClouds]\n"
                    << "Enabled=true\n"
                    << "DownscaleDiv=4\n"
                    << "Layers=3\n"
@@ -192,7 +221,31 @@ int main() {
                 "DirectX12 sync-recovery must force legacy GE async off");
         require(parallel_decode_default != nullptr && std::string(parallel_decode_default) == "0",
                 "DirectX12 stable recovery must force parallel vertex decode off");
-        const auto &clouds = vcs::vcs_configuration().volumetric_clouds;
+        const auto &proper = vcs::vcs_configuration().proper_shaders;
+        require(proper.enabled && proper.building_pipe.enabled && !proper.skin_pipe.enabled &&
+                proper.vehicle_pipe.enabled && !proper.vehicle_pipe.palette_classifier,
+                "ProperShaders material-pipe controls were not parsed");
+        require(proper.realtime_shadows.enabled &&
+                proper.realtime_shadows.map_resolution == 3072u &&
+                std::abs(proper.realtime_shadows.world_radius - 220.0f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.depth_range - 600.0f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.map_bias - 0.002f) < 0.0001f &&
+                proper.realtime_shadows.pcf_radius == 2u &&
+                !proper.realtime_shadows.use_cloud_sun_direction &&
+                std::abs(proper.realtime_shadows.light_direction_x - 0.2f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.light_direction_y + 0.4f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.light_direction_z - 0.9f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.strength - 0.55f) < 0.0001f &&
+                proper.realtime_shadows.debug_mode == 6u &&
+                !proper.realtime_shadows.contact_shadows &&
+                std::abs(proper.realtime_shadows.contact_strength - 0.31f) < 0.0001f &&
+                proper.realtime_shadows.steps == 18u &&
+                std::abs(proper.realtime_shadows.max_distance_pixels - 64.0f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.thickness - 0.003f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.light_screen_x + 0.4f) < 0.0001f &&
+                std::abs(proper.realtime_shadows.light_screen_y - 0.8f) < 0.0001f,
+                "ProperShaders realtime-shadow controls were not parsed");
+        const auto &clouds = proper.volumetric_clouds;
         require(clouds.enabled, "ProperShaders.ini VolumetricClouds.Enabled was not parsed");
         require(clouds.downscale_div == 4u && clouds.layers == 3u &&
                 clouds.shadow_steps == 6u,

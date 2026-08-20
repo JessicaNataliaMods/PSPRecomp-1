@@ -10,6 +10,7 @@
 #include "vcs_texture_replacement.hpp"
 #include "vcs_bootstrap_paths.hpp"
 #include "vcs_project2dfx.hpp"
+#include "vcs_draw_distance_patch.hpp"
 #include "vcs_hdr_post.hpp"
 #include "vcs_runtime_log.hpp"
 
@@ -215,10 +216,11 @@ int main(int argc, char **argv) {
         const std::uint32_t user_arena_start =
             static_cast<std::uint32_t>((image_end + 0xFFu) & ~0xFFull);
         psprecomp::register_generated_functions(runtime);
+        vcs::install_draw_distance_patch(runtime, configuration.source_path);
         vcs::install_project2dfx(runtime, configuration.source_path, 0u);
-        // Reads [SimulateHDR] out of the same ini. The effect itself is built
-        // lazily on the first frame the Vulkan backend records.
-        vcs::hdr_post_configure(configuration.source_path);
+        // Legacy HDR configuration, if re-enabled later, belongs with the
+        // optional shader layer rather than core VCSNative.ini.
+        vcs::hdr_post_configure(executable_directory / "ProperShaders.ini");
         vcs::install_profile(runtime, user_arena_start);
 
         std::string gpu_backend_error;

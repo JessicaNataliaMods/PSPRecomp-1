@@ -3,9 +3,9 @@
   "files": 234,
   "changed": 230,
   "gpr_occurrences": 914095,
-  "fpr_occurrences": 146809,
-  "gpr_total": 1266110,
-  "fpr_total": 198361,
+  "fpr_occurrences": 146813,
+  "gpr_total": 1266111,
+  "fpr_total": 198365,
   "resident_weight": 6,
   "units": [
     {
@@ -2805,9 +2805,9 @@
         15
       ],
       "gpr_occurrences": 3817,
-      "fpr_occurrences": 847,
+      "fpr_occurrences": 848,
       "gpr_total": 5332,
-      "fpr_total": 1295
+      "fpr_total": 1296
     },
     {
       "file": "generated_unit_0134.cpp",
@@ -2868,9 +2868,9 @@
         24
       ],
       "gpr_occurrences": 3036,
-      "fpr_occurrences": 858,
+      "fpr_occurrences": 860,
       "gpr_total": 4359,
-      "fpr_total": 1266
+      "fpr_total": 1268
     },
     {
       "file": "generated_unit_0137.cpp",
@@ -3915,7 +3915,7 @@
       ],
       "gpr_occurrences": 3869,
       "fpr_occurrences": 363,
-      "gpr_total": 5970,
+      "gpr_total": 5971,
       "fpr_total": 507
     },
     {
@@ -4376,9 +4376,9 @@
         22
       ],
       "gpr_occurrences": 3954,
-      "fpr_occurrences": 758,
+      "fpr_occurrences": 759,
       "gpr_total": 5152,
-      "fpr_total": 1078
+      "fpr_total": 1079
     },
     {
       "file": "generated_unit_0209.cpp",

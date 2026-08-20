@@ -139,7 +139,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0133[4093] = {
 };
 void recomp_unit_0133_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
-// PSPRECOMP_AOT_REGCACHE_META gprs=4,29,5,31,16,6 fprs=12,13,14,15 gpr_occ=3817 fpr_occ=847 gpr_total=5332 fpr_total=1295
+// PSPRECOMP_AOT_REGCACHE_META gprs=4,29,5,31,16,6 fprs=12,13,14,15 gpr_occ=3817 fpr_occ=848 gpr_total=5332 fpr_total=1296
     std::uint32_t aot_gpr_4 = ctx.gpr[4];
     std::uint32_t aot_gpr_29 = ctx.gpr[29];
     std::uint32_t aot_gpr_5 = ctx.gpr[5];
@@ -6514,6 +6514,10 @@ L_08A1AD64:
     ctx.pc = jump_target;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08A1AD6C:
+    if (vcs::g_draw_distance_runtime_scales.world > 1.0f) {
+        ++vcs::g_draw_distance_runtime_telemetry.far_clip_set_hits;
+        aot_fpr_12 *= vcs::g_draw_distance_runtime_scales.world;
+    }
     jump_target = aot_gpr_31;
     aot_mem.aot_direct_store32(ctx.gpr[28] + static_cast<std::uint32_t>(7796), std::bit_cast<std::uint32_t>(aot_fpr_12));
     local_pc = jump_target;

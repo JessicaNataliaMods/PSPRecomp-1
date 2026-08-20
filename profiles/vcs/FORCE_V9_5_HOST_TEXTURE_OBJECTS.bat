@@ -15,7 +15,7 @@ if not exist "%BUILD%" (
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command ^
   "$build=[IO.Path]::GetFullPath('%BUILD%');" ^
   "$names=@('ge_gpu_backend_dx12.cpp.obj','savedata_utility_ui.cpp.obj');" ^
-  "$found=Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue ^| Where-Object { $names -contains $_.Name };" ^
+  "$found=@(Get-ChildItem -LiteralPath $build -Recurse -File -Filter '*.obj' -ErrorAction SilentlyContinue); $found=@($found.Where({$names -contains $_.Name}));" ^
   "Write-Host ('[V9.5] stale objects found: ' + $found.Count);" ^
   "foreach($f in $found){Write-Host ('  deleting: ' + $f.FullName); Remove-Item -LiteralPath $f.FullName -Force -ErrorAction Stop};" ^
   "$src=@('%REPO%\profiles\vcs\host\ge_gpu_backend_dx12.cpp','%REPO%\profiles\vcs\host\savedata_utility_ui.cpp');" ^

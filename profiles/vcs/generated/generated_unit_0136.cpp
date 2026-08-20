@@ -139,7 +139,7 @@ static const std::uint16_t kEntryIds_recomp_unit_0136[4092] = {
 };
 void recomp_unit_0136_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
-// PSPRECOMP_AOT_REGCACHE_META gprs=4,29,31,16,17,18 fprs=12,20,22,24 gpr_occ=3036 fpr_occ=858 gpr_total=4359 fpr_total=1266
+// PSPRECOMP_AOT_REGCACHE_META gprs=4,29,31,16,17,18 fprs=12,20,22,24 gpr_occ=3036 fpr_occ=860 gpr_total=4359 fpr_total=1268
     std::uint32_t aot_gpr_4 = ctx.gpr[4];
     std::uint32_t aot_gpr_29 = ctx.gpr[29];
     std::uint32_t aot_gpr_31 = ctx.gpr[31];
@@ -1109,11 +1109,16 @@ L_08A24120:
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0133_entry, 133u, 449u, 0x08A1AD6Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08A24128u) goto L_08A24128;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08A24128:
+    // Proven VCS actor-LOD path: the PSP WidescreenFix replaces the call that
+    // normally follows this store. It writes s0+0x7A0 from s0+0x7A8 times the
+    // requested multiplier and returns that multiplier in f0; the caller then
+    // applies f0 to s0+0x7A8. Do the same directly in the recomp AOT path.
     if (vcs::g_draw_distance_runtime_scales.entity > 1.0f) {
-        const float dd_base = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_16 + static_cast<std::uint32_t>(1960)));
+        ++vcs::g_draw_distance_runtime_telemetry.actor_lod_hits;
         const float dd_scale = vcs::g_draw_distance_runtime_scales.entity;
+        aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_16 + static_cast<std::uint32_t>(1960)));
         aot_mem.aot_direct_store32(aot_gpr_16 + static_cast<std::uint32_t>(1952),
-                            std::bit_cast<std::uint32_t>(dd_base * dd_scale));
+            std::bit_cast<std::uint32_t>(aot_fpr_12 * dd_scale));
         ctx.fpr[0] = dd_scale;
         goto L_08A24138;
     }
