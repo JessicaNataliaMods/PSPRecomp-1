@@ -76,7 +76,16 @@ void load_proper_shaders_configuration(ProperShadersConfiguration &cfg,
         else if(section=="realtimeshadows"||section=="realtime shadows") {
             auto &c=cfg.realtime_shadows;
             if(key=="enabled") b(c.enabled,"Enabled");
-            else if(key=="mapresolution") u(c.map_resolution,512u,4096u,"MapResolution");
+            else if(key=="mapresolution") u(c.map_resolution,512u,8192u,"MapResolution");
+            else if(key=="depthbiasconstant") u(c.depth_bias_constant,0u,100000u,"DepthBiasConstant");
+            else if(key=="depthbiasslope") f(c.depth_bias_slope,0.0f,64.0f,"DepthBiasSlope");
+            else if(key=="alphatestcasters") b(c.alpha_test_casters,"AlphaTestCasters");
+            else if(key=="pcss") b(c.pcss,"Pcss");
+            else if(key=="pcsssuntan") f(c.pcss_sun_tan,0.0001f,0.5f,"PcssSunTan");
+            else if(key=="pcsssearchtexels") f(c.pcss_search_texels,1.0f,64.0f,"PcssSearchTexels");
+            else if(key=="pcssmaxradiustexels") f(c.pcss_max_radius_texels,1.0f,64.0f,"PcssMaxRadiusTexels");
+            else if(key=="normalbiasscale") f(c.normal_bias_scale,0.0f,32.0f,"NormalBiasScale");
+            else if(key=="autoorientnormals") b(c.auto_orient_normals,"AutoOrientNormals");
             else if(key=="worldradius") f(c.world_radius,20.0f,1000.0f,"WorldRadius");
             else if(key=="depthrange") f(c.depth_range,40.0f,2000.0f,"DepthRange");
             else if(key=="mapbias") f(c.map_bias,0.000001f,0.05f,"MapBias");
@@ -86,7 +95,7 @@ void load_proper_shaders_configuration(ProperShadersConfiguration &cfg,
             else if(key=="lightdirectiony") f(c.light_direction_y,-1.0f,1.0f,"LightDirectionY");
             else if(key=="lightdirectionz") f(c.light_direction_z,-1.0f,1.0f,"LightDirectionZ");
             else if(key=="strength") f(c.strength,0.0f,1.0f,"Strength");
-            else if(key=="debugmode") u(c.debug_mode,0u,6u,"DebugMode");
+            else if(key=="debugmode") u(c.debug_mode,0u,7u,"DebugMode");
             else if(key=="contactshadows") b(c.contact_shadows,"ContactShadows");
             else if(key=="steps") u(c.steps,2u,32u,"Steps");
             else if(key=="maxdistancepixels") f(c.max_distance_pixels,1.0f,256.0f,"MaxDistancePixels");

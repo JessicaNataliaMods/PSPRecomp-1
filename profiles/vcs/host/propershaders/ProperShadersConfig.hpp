@@ -35,6 +35,33 @@ struct RealtimeShadowsConfiguration {
     float depth_range{420.0f};
     float map_bias{0.0015f};
     std::uint32_t pcf_radius{1u};
+
+    // Hardware depth bias on the caster pass. This is the coarse term; the
+    // receiver-side normal-offset bias below is what actually fixes banding on
+    // walls the sun grazes.
+    std::uint32_t depth_bias_constant{500u};
+    float depth_bias_slope{4.0f};
+
+    // Alpha-tested casters. Without this, fences and foliage cast solid blocks
+    // because a depth-only caster pass has no pixel shader to test the cutout.
+    bool alpha_test_casters{true};
+
+    // PCSS: blocker search then a penumbra-sized PCF, so contact stays sharp and
+    // distant projections soften. Replaces the fixed pcf_radius filter.
+    bool pcss{true};
+    // tan of the sun's angular radius. The physical sun is ~0.00465; larger
+    // reads better at this map resolution.
+    float pcss_sun_tan{0.0105f};
+    float pcss_search_texels{12.0f};
+    float pcss_max_radius_texels{16.0f};
+
+    // Generated normals. The PSP vertex stream has none, so the receiver
+    // reconstructs a face normal from screen-space derivatives, the same way
+    // the Vice City ProperShaders does in LitPrelight.fx. This is what drives
+    // the normal-offset bias; normal_bias_scale is the equivalent of that
+    // project's NormalBiasMult master knob.
+    float normal_bias_scale{1.5f};
+    bool auto_orient_normals{true};
     bool use_cloud_sun_direction{true};
     float light_direction_x{0.38f};
     float light_direction_y{-0.28f};

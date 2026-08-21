@@ -346,6 +346,7 @@ struct Dx12GeState {
     ComPtr<ID3DBlob> vehicle_pixel_shader;
     ComPtr<ID3DBlob> realtime_shadow_caster_vertex_shader;
     ComPtr<ID3DBlob> realtime_shadow_caster_packed_vertex_shader;
+    ComPtr<ID3DBlob> realtime_shadow_caster_alpha_pixel_shader;
     ComPtr<ID3DBlob> realtime_shadow_pixel_shader;
     std::unordered_map<std::uint64_t, ComPtr<ID3D12PipelineState>> pipelines;
     std::unordered_map<std::uint64_t, Dx12Texture> textures;
@@ -376,6 +377,9 @@ struct Dx12GeState {
     ComPtr<ID3D12PipelineState> cloud_composite_pipeline;
     ComPtr<ID3D12PipelineState> realtime_shadow_caster_pipeline;
     ComPtr<ID3D12PipelineState> realtime_shadow_caster_packed_pipeline;
+    // Alpha-tested variants, used only by draws with GE alpha test enabled.
+    ComPtr<ID3D12PipelineState> realtime_shadow_caster_alpha_pipeline;
+    ComPtr<ID3D12PipelineState> realtime_shadow_caster_packed_alpha_pipeline;
     ComPtr<ID3D12PipelineState> realtime_shadow_pipeline;
     ComPtr<ID3DBlob> present_vertex_shader;
     ComPtr<ID3DBlob> present_pixel_shader;
@@ -1899,6 +1903,18 @@ float4 CloudCompositePS(PresentVertexOutput i):SV_TARGET { return float4(0,0,0,0
                     shadow_ok = false;
                 }
             }
+            if (shadow_ok) {
+                errors.Reset();
+                hr = D3DCompile(shadow, std::strlen(shadow), "VCSNativeDX12GEShadowCasterAlpha",
+                                nullptr, nullptr, "ShadowCasterAlphaPS", "ps_5_1", shadow_flags, 0u,
+                                &s.realtime_shadow_caster_alpha_pixel_shader, &errors);
+                if (FAILED(hr)) {
+                    shadow_error = errors ? std::string(static_cast<const char *>(errors->GetBufferPointer()),
+                                                        errors->GetBufferSize())
+                                          : hr_text(hr, "D3DCompile(DX12 GE alpha-tested shadow caster PS)");
+                    shadow_ok = false;
+                }
+            }
             // The old fullscreen ShadowPS/contact-composite path is deliberately
             // not compiled. Realtime shadows now consist of a depth-only caster
             // pass plus PCF sampling inside the actual material shaders.
@@ -1909,6 +1925,7 @@ float4 CloudCompositePS(PresentVertexOutput i):SV_TARGET { return float4(0,0,0,0
             } else {
                 s.realtime_shadow_caster_vertex_shader.Reset();
                 s.realtime_shadow_caster_packed_vertex_shader.Reset();
+                s.realtime_shadow_caster_alpha_pixel_shader.Reset();
                 s.realtime_shadow_pixel_shader.Reset();
                 runtime_log_error("optional ProperShaders realtime shadows disabled", shadow_error);
             }
@@ -2084,7 +2101,7 @@ bool create_targets(Dx12GeState &s, std::string &error) noexcept {
         } else {
             const auto &shadow_config = vcs_configuration().proper_shaders.realtime_shadows;
             ShadowMapTarget shadow{};
-            shadow.resolution = std::clamp<std::uint32_t>(shadow_config.map_resolution, 512u, 4096u);
+            shadow.resolution = std::clamp<std::uint32_t>(shadow_config.map_resolution, 512u, 8192u);
             shadow.dsv_index = s.next_dsv++;
             shadow.srv_index = s.next_srv++;
 
@@ -2813,20 +2830,48 @@ bool create_cloud_root_signature(Dx12GeState &s, std::string &error) noexcept {
 bool create_realtime_shadow_root_signatures(Dx12GeState &s, std::string &error) noexcept {
     if (!s.realtime_shadows_available) return true;
 
-    // Caster root: one per-draw light MVP (16 floats) visible only to the VS.
-    D3D12_ROOT_PARAMETER caster_parameter{};
-    caster_parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-    caster_parameter.Constants.ShaderRegister = 1u;
-    caster_parameter.Constants.Num32BitValues = 16u;
-    caster_parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+    // Caster root: per-draw light MVP plus GE uv scale/offset (20 floats) for
+    // the VS, and the alpha-test state / cutout texture for the optional PS.
+    // Parameter 0 keeps its index so the depth-only path is unchanged.
+    D3D12_DESCRIPTOR_RANGE caster_srv_range{};
+    caster_srv_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    caster_srv_range.NumDescriptors = 1u;
+    caster_srv_range.BaseShaderRegister = 0u;
+    caster_srv_range.RegisterSpace = 0u;
+    caster_srv_range.OffsetInDescriptorsFromTableStart = 0u;
+    D3D12_DESCRIPTOR_RANGE caster_sampler_range{};
+    caster_sampler_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+    caster_sampler_range.NumDescriptors = 1u;
+    caster_sampler_range.BaseShaderRegister = 0u;
+    caster_sampler_range.RegisterSpace = 0u;
+    caster_sampler_range.OffsetInDescriptorsFromTableStart = 0u;
+    std::array<D3D12_ROOT_PARAMETER, 4> caster_parameters{};
+    caster_parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    caster_parameters[0].Constants.ShaderRegister = 1u;
+    caster_parameters[0].Constants.Num32BitValues = 20u;
+    caster_parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+    caster_parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    caster_parameters[1].Constants.ShaderRegister = 0u;
+    caster_parameters[1].Constants.Num32BitValues = 1u;
+    caster_parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    caster_parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    caster_parameters[2].DescriptorTable.NumDescriptorRanges = 1u;
+    caster_parameters[2].DescriptorTable.pDescriptorRanges = &caster_srv_range;
+    caster_parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    caster_parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    caster_parameters[3].DescriptorTable.NumDescriptorRanges = 1u;
+    caster_parameters[3].DescriptorTable.pDescriptorRanges = &caster_sampler_range;
+    caster_parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     D3D12_ROOT_SIGNATURE_DESC caster_desc{};
-    caster_desc.NumParameters = 1u;
-    caster_desc.pParameters = &caster_parameter;
+    caster_desc.NumParameters = static_cast<UINT>(caster_parameters.size());
+    caster_desc.pParameters = caster_parameters.data();
     caster_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
                         D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
                         D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-                        D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-                        D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+                        D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+    // DENY_PIXEL_SHADER_ROOT_ACCESS used to live here, from when this pass was
+    // strictly depth-only. It makes every PSO carrying the alpha-test caster PS
+    // fail with E_INVALIDARG, which is what silently disabled cutout shadows.
     ComPtr<ID3DBlob> blob, errors;
     HRESULT hr = D3D12SerializeRootSignature(&caster_desc, D3D_ROOT_SIGNATURE_VERSION_1,
                                               &blob, &errors);
@@ -3067,7 +3112,7 @@ bool shadow_directional_light_vp(const CloudCameraCandidate &camera,
     const float radius = std::max(20.0f, shadow.world_radius);
     const float depth_range = std::max(40.0f, shadow.depth_range);
     const float resolution = static_cast<float>(std::clamp<std::uint32_t>(
-        shadow.map_resolution, 512u, 4096u));
+        shadow.map_resolution, 512u, 8192u));
     const float texel_world = (radius * 2.0f) / resolution;
     std::array<float, 3> center{};
     const bool center_from_view = shadow_view_eye_position(camera, center);
@@ -3214,19 +3259,30 @@ bool create_realtime_shadow_pipeline(Dx12GeState &s, std::string &error) noexcep
         {"POSITION", 0u, DXGI_FORMAT_R32G32B32A32_FLOAT, 0u,
          static_cast<UINT>(offsetof(Dx12UploadVertex, x)),
          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
+        {"TEXCOORD", 0u, DXGI_FORMAT_R32G32_FLOAT, 0u,
+         static_cast<UINT>(offsetof(Dx12UploadVertex, u)),
+         D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
     };
     static const D3D12_INPUT_ELEMENT_DESC packed_caster_layout[] = {
+        {"TEXCOORD", 2u, DXGI_FORMAT_R8G8_UINT, 0u, 0u,
+         D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
         {"POSITION", 1u, DXGI_FORMAT_R16G16_SINT, 0u, 4u,
          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
         {"POSITION", 2u, DXGI_FORMAT_R16_SINT, 0u, 8u,
          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0u},
     };
-    const auto create_caster = [&](bool packed, ID3D12PipelineState **output) -> bool {
+    const auto &shadow_cfg = vcs_configuration().proper_shaders.realtime_shadows;
+    const auto create_caster = [&](bool packed, bool alpha_tested,
+                                   ID3D12PipelineState **output) -> bool {
         D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
         pso.pRootSignature = s.realtime_shadow_caster_root_signature.Get();
         ID3DBlob *vs = packed ? s.realtime_shadow_caster_packed_vertex_shader.Get()
                               : s.realtime_shadow_caster_vertex_shader.Get();
         pso.VS = {vs->GetBufferPointer(), vs->GetBufferSize()};
+        if (alpha_tested && s.realtime_shadow_caster_alpha_pixel_shader) {
+            pso.PS = {s.realtime_shadow_caster_alpha_pixel_shader->GetBufferPointer(),
+                      s.realtime_shadow_caster_alpha_pixel_shader->GetBufferSize()};
+        }
         pso.InputLayout = packed
             ? D3D12_INPUT_LAYOUT_DESC{packed_caster_layout,
                                       static_cast<UINT>(std::size(packed_caster_layout))}
@@ -3238,6 +3294,14 @@ bool create_realtime_shadow_pipeline(Dx12GeState &s, std::string &error) noexcep
         // GTA-era thin geometry and avoids inheriting PSP winding differences.
         pso.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
         pso.RasterizerState.DepthClipEnable = TRUE;
+        // Slope-scaled bias stands in for the normal-offset bias the desktop
+        // ProperShaders applies: this vertex stream has no normals, and a
+        // constant bias alone cannot cover a wall lit at a grazing angle, which
+        // is where the diagonal acne banding came from.
+        pso.RasterizerState.DepthBias = static_cast<INT>(
+            std::min<std::uint32_t>(shadow_cfg.depth_bias_constant, 100000u));
+        pso.RasterizerState.SlopeScaledDepthBias = shadow_cfg.depth_bias_slope;
+        pso.RasterizerState.DepthBiasClamp = 0.0f;
         pso.DepthStencilState.DepthEnable = TRUE;
         pso.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
         pso.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
@@ -3255,9 +3319,28 @@ bool create_realtime_shadow_pipeline(Dx12GeState &s, std::string &error) noexcep
         }
         return true;
     };
-    if (!create_caster(false, s.realtime_shadow_caster_pipeline.ReleaseAndGetAddressOf()) ||
-        !create_caster(true, s.realtime_shadow_caster_packed_pipeline.ReleaseAndGetAddressOf()))
+    if (!create_caster(false, false, s.realtime_shadow_caster_pipeline.ReleaseAndGetAddressOf()) ||
+        !create_caster(true, false, s.realtime_shadow_caster_packed_pipeline.ReleaseAndGetAddressOf()))
         return false;
+    // A failed alpha variant must not take the whole shadow system down: the
+    // depth-only pipelines above are already valid and render correct shadows
+    // for everything except cutout materials.
+    if (s.realtime_shadow_caster_alpha_pixel_shader) {
+        std::string alpha_error;
+        const auto create_alpha = [&](bool packed, ID3D12PipelineState **output) {
+            std::string &target_error = error;
+            const bool ok = create_caster(packed, true, output);
+            if (!ok) { alpha_error = target_error; target_error.clear(); }
+            return ok;
+        };
+        if (!create_alpha(false, s.realtime_shadow_caster_alpha_pipeline.ReleaseAndGetAddressOf()) ||
+            !create_alpha(true, s.realtime_shadow_caster_packed_alpha_pipeline.ReleaseAndGetAddressOf())) {
+            s.realtime_shadow_caster_alpha_pipeline.Reset();
+            s.realtime_shadow_caster_packed_alpha_pipeline.Reset();
+            runtime_log_error("optional ProperShaders alpha-tested shadow casters disabled",
+                              alpha_error);
+        }
+    }
 
     s.realtime_shadow_pipeline.Reset();
     runtime_log_line("ProperShaders realtime shadows active (directional shadow map + per-material PCF receivers; fullscreen contact pass removed)");
@@ -3578,6 +3661,10 @@ void record_clouds_into_world_target(Dx12GeState &s, Dx12FramebufferTarget &targ
     s.list->DrawInstanced(3u, 1u, 0u, 0u);
 }
 
+// Defined below, next to the rest of the texture cache. The caster pass needs
+// it for alpha-tested cutouts.
+Dx12Texture *find_cached_texture(Dx12GeState &s, std::uint64_t key) noexcept;
+
 bool record_directional_shadow_map(
     Dx12GeState &s, Dx12FramebufferTarget &target,
     const CloudCameraCandidate &camera,
@@ -3666,9 +3753,33 @@ bool record_directional_shadow_map(
             batch.draw.shader_pipe == GeShaderPipe::Building)
             continue;
 
-        ID3D12PipelineState *wanted_pipeline = batch.packed_0115
-            ? s.realtime_shadow_caster_packed_pipeline.Get()
-            : s.realtime_shadow_caster_pipeline.Get();
+        // Cutout casters need the texture the material pass uses. Framebuffer
+        // feedback sources are deliberately not resolved here: they are never
+        // cutout materials and doing so would drag the whole self-snapshot
+        // machinery into the depth pass.
+        std::uint32_t caster_srv = 0u;
+        std::uint32_t caster_sampler = 0u;
+        if (shadow.alpha_test_casters && s.realtime_shadow_caster_alpha_pipeline &&
+            batch.draw.texture_enabled && batch.draw.alpha_test_enabled &&
+            !batch.framebuffer_feedback) {
+            if (Dx12Texture *texture = find_cached_texture(s, texture_key(batch.draw));
+                texture != nullptr && texture->image) {
+                caster_srv = texture->srv_index;
+                caster_sampler = texture->sampler_index;
+            }
+        }
+        const bool caster_alpha = caster_srv != 0u;
+        ID3D12PipelineState *wanted_pipeline = caster_alpha
+            ? (batch.packed_0115 ? s.realtime_shadow_caster_packed_alpha_pipeline.Get()
+                                 : s.realtime_shadow_caster_alpha_pipeline.Get())
+            : (batch.packed_0115 ? s.realtime_shadow_caster_packed_pipeline.Get()
+                                 : s.realtime_shadow_caster_pipeline.Get());
+        if (caster_alpha) {
+            s.list->SetGraphicsRootDescriptorTable(2u, srv_gpu(s, caster_srv));
+            s.list->SetGraphicsRootDescriptorTable(3u, sampler_gpu(s, caster_sampler));
+            const std::uint32_t alpha_control = packed_alpha_control(batch.draw);
+            s.list->SetGraphicsRoot32BitConstants(1u, 1u, &alpha_control, 0u);
+        }
         if (wanted_pipeline != caster_pipeline) {
             s.list->SetPipelineState(wanted_pipeline);
             caster_pipeline = wanted_pipeline;
@@ -3688,9 +3799,13 @@ bool record_directional_shadow_map(
 
         const std::array<float, 16> caster_mvp = shadow_multiply_mat4(
             light_vp_out, batch.transform.model_to_world);
-        std::array<float, 16> caster_rows{};
+        std::array<float, 20> caster_rows{};
         shadow_matrix_rows(caster_mvp, caster_rows.data());
-        s.list->SetGraphicsRoot32BitConstants(0u, 16u, caster_rows.data(), 0u);
+        caster_rows[16] = batch.transform.uv_scale_u;
+        caster_rows[17] = batch.transform.uv_scale_v;
+        caster_rows[18] = batch.transform.uv_offset_u;
+        caster_rows[19] = batch.transform.uv_offset_v;
+        s.list->SetGraphicsRoot32BitConstants(0u, 20u, caster_rows.data(), 0u);
         if (probe_coverage && batch.vertex_count != 0u && probed_vertices < 4096u) {
             const std::uint32_t step = std::max<std::uint32_t>(1u, batch.vertex_count / 32u);
             for (std::uint32_t v = 0u; v < batch.vertex_count; v += step) {
@@ -4402,6 +4517,8 @@ bool create_backend(Dx12GeState &s, std::string &error) noexcept {
             s.realtime_shadows_available = false;
             s.realtime_shadow_caster_pipeline.Reset();
             s.realtime_shadow_caster_packed_pipeline.Reset();
+            s.realtime_shadow_caster_alpha_pipeline.Reset();
+            s.realtime_shadow_caster_packed_alpha_pipeline.Reset();
             s.realtime_shadow_pipeline.Reset();
             s.realtime_shadow_map = {};
         }
@@ -4455,6 +4572,8 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.cloud_composite_pipeline.Reset();
     s.realtime_shadow_caster_pipeline.Reset();
     s.realtime_shadow_caster_packed_pipeline.Reset();
+    s.realtime_shadow_caster_alpha_pipeline.Reset();
+    s.realtime_shadow_caster_packed_alpha_pipeline.Reset();
     s.realtime_shadow_pipeline.Reset();
     s.realtime_shadow_map = {};
     s.cloud_target_pixel_shader.Reset();
@@ -4490,6 +4609,7 @@ void destroy_backend(Dx12GeState &s) noexcept {
     s.vehicle_pixel_shader.Reset();
     s.realtime_shadow_caster_vertex_shader.Reset();
     s.realtime_shadow_caster_packed_vertex_shader.Reset();
+    s.realtime_shadow_caster_alpha_pixel_shader.Reset();
     s.realtime_shadow_pixel_shader.Reset();
     s.packed_0115_vertex_shader.Reset();
     s.vertex_shader.Reset();
