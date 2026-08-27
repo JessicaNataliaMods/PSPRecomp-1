@@ -1,0 +1,2122 @@
+{
+  "stage": "V8.12 generated code density",
+  "baseline_generated_cpp_bytes": 121704134,
+  "generated_cpp_bytes_before_this_run": 102644637,
+  "generated_cpp_bytes_after": 102644637,
+  "source_bytes_saved_this_run": 0,
+  "source_bytes_saved_from_baseline": 19059497,
+  "registered_entries_preserved": 181789,
+  "per_pc_registration_calls_collapsed_this_run": 0,
+  "scheduler_blocks_shared_this_run": 0,
+  "shared_local_jumps": 11299,
+  "shared_local_units": 221,
+  "compact_registration_units": 234,
+  "units": [
+    {
+      "path": "generated_unit_0000.cpp",
+      "bytes_before": 403757,
+      "bytes_after": 403757,
+      "entry_count": 643,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0001.cpp",
+      "bytes_before": 475041,
+      "bytes_after": 475041,
+      "entry_count": 953,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0002.cpp",
+      "bytes_before": 468802,
+      "bytes_after": 468802,
+      "entry_count": 794,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0003.cpp",
+      "bytes_before": 546850,
+      "bytes_after": 546850,
+      "entry_count": 1027,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0004.cpp",
+      "bytes_before": 475323,
+      "bytes_after": 475323,
+      "entry_count": 801,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0005.cpp",
+      "bytes_before": 405373,
+      "bytes_after": 405373,
+      "entry_count": 698,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0006.cpp",
+      "bytes_before": 428171,
+      "bytes_after": 428171,
+      "entry_count": 738,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0007.cpp",
+      "bytes_before": 455462,
+      "bytes_after": 455462,
+      "entry_count": 752,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0008.cpp",
+      "bytes_before": 442894,
+      "bytes_after": 442894,
+      "entry_count": 610,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0009.cpp",
+      "bytes_before": 472312,
+      "bytes_after": 472312,
+      "entry_count": 485,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0010.cpp",
+      "bytes_before": 470242,
+      "bytes_after": 470242,
+      "entry_count": 1003,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0011.cpp",
+      "bytes_before": 475826,
+      "bytes_after": 475826,
+      "entry_count": 867,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0012.cpp",
+      "bytes_before": 439870,
+      "bytes_after": 439870,
+      "entry_count": 601,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0013.cpp",
+      "bytes_before": 583788,
+      "bytes_after": 583788,
+      "entry_count": 1183,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0014.cpp",
+      "bytes_before": 531390,
+      "bytes_after": 531390,
+      "entry_count": 887,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0015.cpp",
+      "bytes_before": 545351,
+      "bytes_after": 545351,
+      "entry_count": 896,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0016.cpp",
+      "bytes_before": 475004,
+      "bytes_after": 475004,
+      "entry_count": 682,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0017.cpp",
+      "bytes_before": 485862,
+      "bytes_after": 485862,
+      "entry_count": 671,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0018.cpp",
+      "bytes_before": 445404,
+      "bytes_after": 445404,
+      "entry_count": 810,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0019.cpp",
+      "bytes_before": 579374,
+      "bytes_after": 579374,
+      "entry_count": 1016,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0020.cpp",
+      "bytes_before": 575711,
+      "bytes_after": 575711,
+      "entry_count": 1008,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0021.cpp",
+      "bytes_before": 572347,
+      "bytes_after": 572347,
+      "entry_count": 1028,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0022.cpp",
+      "bytes_before": 550176,
+      "bytes_after": 550176,
+      "entry_count": 943,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0023.cpp",
+      "bytes_before": 426450,
+      "bytes_after": 426450,
+      "entry_count": 804,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0024.cpp",
+      "bytes_before": 409615,
+      "bytes_after": 409615,
+      "entry_count": 958,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0025.cpp",
+      "bytes_before": 428741,
+      "bytes_after": 428741,
+      "entry_count": 818,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0026.cpp",
+      "bytes_before": 463467,
+      "bytes_after": 463467,
+      "entry_count": 686,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0027.cpp",
+      "bytes_before": 488414,
+      "bytes_after": 488414,
+      "entry_count": 940,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0028.cpp",
+      "bytes_before": 538915,
+      "bytes_after": 538915,
+      "entry_count": 1300,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0029.cpp",
+      "bytes_before": 601099,
+      "bytes_after": 601099,
+      "entry_count": 1343,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0030.cpp",
+      "bytes_before": 487446,
+      "bytes_after": 487446,
+      "entry_count": 849,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0031.cpp",
+      "bytes_before": 458208,
+      "bytes_after": 458208,
+      "entry_count": 771,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0032.cpp",
+      "bytes_before": 495077,
+      "bytes_after": 495077,
+      "entry_count": 919,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0033.cpp",
+      "bytes_before": 463645,
+      "bytes_after": 463645,
+      "entry_count": 1169,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0034.cpp",
+      "bytes_before": 449219,
+      "bytes_after": 449219,
+      "entry_count": 636,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0035.cpp",
+      "bytes_before": 412714,
+      "bytes_after": 412714,
+      "entry_count": 665,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0036.cpp",
+      "bytes_before": 359946,
+      "bytes_after": 359946,
+      "entry_count": 771,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0037.cpp",
+      "bytes_before": 392928,
+      "bytes_after": 392928,
+      "entry_count": 708,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0038.cpp",
+      "bytes_before": 498813,
+      "bytes_after": 498813,
+      "entry_count": 870,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0039.cpp",
+      "bytes_before": 484331,
+      "bytes_after": 484331,
+      "entry_count": 879,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0040.cpp",
+      "bytes_before": 540552,
+      "bytes_after": 540552,
+      "entry_count": 839,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0041.cpp",
+      "bytes_before": 487912,
+      "bytes_after": 487912,
+      "entry_count": 636,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0042.cpp",
+      "bytes_before": 524053,
+      "bytes_after": 524053,
+      "entry_count": 444,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0043.cpp",
+      "bytes_before": 450680,
+      "bytes_after": 450680,
+      "entry_count": 510,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0044.cpp",
+      "bytes_before": 414555,
+      "bytes_after": 414555,
+      "entry_count": 722,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0045.cpp",
+      "bytes_before": 438022,
+      "bytes_after": 438022,
+      "entry_count": 787,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0046.cpp",
+      "bytes_before": 377565,
+      "bytes_after": 377565,
+      "entry_count": 407,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0047.cpp",
+      "bytes_before": 400500,
+      "bytes_after": 400500,
+      "entry_count": 585,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0048.cpp",
+      "bytes_before": 383114,
+      "bytes_after": 383114,
+      "entry_count": 806,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0049.cpp",
+      "bytes_before": 411123,
+      "bytes_after": 411123,
+      "entry_count": 839,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0050.cpp",
+      "bytes_before": 379455,
+      "bytes_after": 379455,
+      "entry_count": 834,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0051.cpp",
+      "bytes_before": 400016,
+      "bytes_after": 400016,
+      "entry_count": 630,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0052.cpp",
+      "bytes_before": 423244,
+      "bytes_after": 423244,
+      "entry_count": 630,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0053.cpp",
+      "bytes_before": 421137,
+      "bytes_after": 421137,
+      "entry_count": 706,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0054.cpp",
+      "bytes_before": 400571,
+      "bytes_after": 400571,
+      "entry_count": 532,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0055.cpp",
+      "bytes_before": 384178,
+      "bytes_after": 384178,
+      "entry_count": 584,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0056.cpp",
+      "bytes_before": 435807,
+      "bytes_after": 435807,
+      "entry_count": 840,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0057.cpp",
+      "bytes_before": 469710,
+      "bytes_after": 469710,
+      "entry_count": 891,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0058.cpp",
+      "bytes_before": 494491,
+      "bytes_after": 494491,
+      "entry_count": 904,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0059.cpp",
+      "bytes_before": 466321,
+      "bytes_after": 466321,
+      "entry_count": 806,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0060.cpp",
+      "bytes_before": 446659,
+      "bytes_after": 446659,
+      "entry_count": 874,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0061.cpp",
+      "bytes_before": 428554,
+      "bytes_after": 428554,
+      "entry_count": 989,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0062.cpp",
+      "bytes_before": 589343,
+      "bytes_after": 589343,
+      "entry_count": 843,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0063.cpp",
+      "bytes_before": 466274,
+      "bytes_after": 466274,
+      "entry_count": 720,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0064.cpp",
+      "bytes_before": 481268,
+      "bytes_after": 481268,
+      "entry_count": 927,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0065.cpp",
+      "bytes_before": 442092,
+      "bytes_after": 442092,
+      "entry_count": 1001,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0066.cpp",
+      "bytes_before": 491189,
+      "bytes_after": 491189,
+      "entry_count": 898,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0067.cpp",
+      "bytes_before": 460995,
+      "bytes_after": 460995,
+      "entry_count": 858,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0068.cpp",
+      "bytes_before": 447972,
+      "bytes_after": 447972,
+      "entry_count": 761,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0069.cpp",
+      "bytes_before": 462618,
+      "bytes_after": 462618,
+      "entry_count": 728,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0070.cpp",
+      "bytes_before": 517952,
+      "bytes_after": 517952,
+      "entry_count": 876,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0071.cpp",
+      "bytes_before": 531301,
+      "bytes_after": 531301,
+      "entry_count": 1095,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0072.cpp",
+      "bytes_before": 513886,
+      "bytes_after": 513886,
+      "entry_count": 993,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0073.cpp",
+      "bytes_before": 494519,
+      "bytes_after": 494519,
+      "entry_count": 975,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0074.cpp",
+      "bytes_before": 487533,
+      "bytes_after": 487533,
+      "entry_count": 775,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0075.cpp",
+      "bytes_before": 481101,
+      "bytes_after": 481101,
+      "entry_count": 772,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0076.cpp",
+      "bytes_before": 505103,
+      "bytes_after": 505103,
+      "entry_count": 1149,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0077.cpp",
+      "bytes_before": 400915,
+      "bytes_after": 400915,
+      "entry_count": 852,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0078.cpp",
+      "bytes_before": 432078,
+      "bytes_after": 432078,
+      "entry_count": 864,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0079.cpp",
+      "bytes_before": 542539,
+      "bytes_after": 542539,
+      "entry_count": 547,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0080.cpp",
+      "bytes_before": 483894,
+      "bytes_after": 483894,
+      "entry_count": 868,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0081.cpp",
+      "bytes_before": 434525,
+      "bytes_after": 434525,
+      "entry_count": 915,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0082.cpp",
+      "bytes_before": 477630,
+      "bytes_after": 477630,
+      "entry_count": 796,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0083.cpp",
+      "bytes_before": 469590,
+      "bytes_after": 469590,
+      "entry_count": 889,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0084.cpp",
+      "bytes_before": 390802,
+      "bytes_after": 390802,
+      "entry_count": 844,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0085.cpp",
+      "bytes_before": 423302,
+      "bytes_after": 423302,
+      "entry_count": 581,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0086.cpp",
+      "bytes_before": 452420,
+      "bytes_after": 452420,
+      "entry_count": 604,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0087.cpp",
+      "bytes_before": 400157,
+      "bytes_after": 400157,
+      "entry_count": 833,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0088.cpp",
+      "bytes_before": 443118,
+      "bytes_after": 443118,
+      "entry_count": 741,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0089.cpp",
+      "bytes_before": 524423,
+      "bytes_after": 524423,
+      "entry_count": 802,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0090.cpp",
+      "bytes_before": 450012,
+      "bytes_after": 450012,
+      "entry_count": 895,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0091.cpp",
+      "bytes_before": 451174,
+      "bytes_after": 451174,
+      "entry_count": 839,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0092.cpp",
+      "bytes_before": 463238,
+      "bytes_after": 463238,
+      "entry_count": 785,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0093.cpp",
+      "bytes_before": 415174,
+      "bytes_after": 415174,
+      "entry_count": 608,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0094.cpp",
+      "bytes_before": 486119,
+      "bytes_after": 486119,
+      "entry_count": 992,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0095.cpp",
+      "bytes_before": 428895,
+      "bytes_after": 428895,
+      "entry_count": 680,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0096.cpp",
+      "bytes_before": 413950,
+      "bytes_after": 413950,
+      "entry_count": 965,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0097.cpp",
+      "bytes_before": 492216,
+      "bytes_after": 492216,
+      "entry_count": 1069,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0098.cpp",
+      "bytes_before": 465049,
+      "bytes_after": 465049,
+      "entry_count": 1232,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0099.cpp",
+      "bytes_before": 455294,
+      "bytes_after": 455294,
+      "entry_count": 938,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0100.cpp",
+      "bytes_before": 419191,
+      "bytes_after": 419191,
+      "entry_count": 1013,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0101.cpp",
+      "bytes_before": 508997,
+      "bytes_after": 508997,
+      "entry_count": 549,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0102.cpp",
+      "bytes_before": 504372,
+      "bytes_after": 504372,
+      "entry_count": 642,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0103.cpp",
+      "bytes_before": 515271,
+      "bytes_after": 515271,
+      "entry_count": 616,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0104.cpp",
+      "bytes_before": 574639,
+      "bytes_after": 574639,
+      "entry_count": 536,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0105.cpp",
+      "bytes_before": 556645,
+      "bytes_after": 556645,
+      "entry_count": 857,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0106.cpp",
+      "bytes_before": 514674,
+      "bytes_after": 514674,
+      "entry_count": 940,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0107.cpp",
+      "bytes_before": 548344,
+      "bytes_after": 548344,
+      "entry_count": 1034,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0108.cpp",
+      "bytes_before": 481569,
+      "bytes_after": 481569,
+      "entry_count": 738,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0109.cpp",
+      "bytes_before": 446181,
+      "bytes_after": 446181,
+      "entry_count": 849,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0110.cpp",
+      "bytes_before": 446468,
+      "bytes_after": 446468,
+      "entry_count": 805,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0111.cpp",
+      "bytes_before": 521459,
+      "bytes_after": 521459,
+      "entry_count": 967,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0112.cpp",
+      "bytes_before": 462960,
+      "bytes_after": 462960,
+      "entry_count": 921,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0113.cpp",
+      "bytes_before": 447286,
+      "bytes_after": 447286,
+      "entry_count": 997,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0114.cpp",
+      "bytes_before": 458611,
+      "bytes_after": 458611,
+      "entry_count": 718,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0115.cpp",
+      "bytes_before": 427905,
+      "bytes_after": 427905,
+      "entry_count": 692,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0116.cpp",
+      "bytes_before": 415095,
+      "bytes_after": 415095,
+      "entry_count": 728,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0117.cpp",
+      "bytes_before": 510251,
+      "bytes_after": 510251,
+      "entry_count": 729,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0118.cpp",
+      "bytes_before": 488362,
+      "bytes_after": 488362,
+      "entry_count": 821,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0119.cpp",
+      "bytes_before": 463308,
+      "bytes_after": 463308,
+      "entry_count": 846,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0120.cpp",
+      "bytes_before": 393869,
+      "bytes_after": 393869,
+      "entry_count": 859,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0121.cpp",
+      "bytes_before": 441257,
+      "bytes_after": 441257,
+      "entry_count": 651,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0122.cpp",
+      "bytes_before": 444778,
+      "bytes_after": 444778,
+      "entry_count": 643,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0123.cpp",
+      "bytes_before": 459697,
+      "bytes_after": 459697,
+      "entry_count": 662,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0124.cpp",
+      "bytes_before": 431364,
+      "bytes_after": 431364,
+      "entry_count": 773,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0125.cpp",
+      "bytes_before": 439821,
+      "bytes_after": 439821,
+      "entry_count": 654,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0126.cpp",
+      "bytes_before": 475838,
+      "bytes_after": 475838,
+      "entry_count": 730,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0127.cpp",
+      "bytes_before": 492563,
+      "bytes_after": 492563,
+      "entry_count": 1054,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0128.cpp",
+      "bytes_before": 418928,
+      "bytes_after": 418928,
+      "entry_count": 909,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0129.cpp",
+      "bytes_before": 418058,
+      "bytes_after": 418058,
+      "entry_count": 640,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0130.cpp",
+      "bytes_before": 458648,
+      "bytes_after": 458648,
+      "entry_count": 697,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0131.cpp",
+      "bytes_before": 500460,
+      "bytes_after": 500460,
+      "entry_count": 667,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0132.cpp",
+      "bytes_before": 496411,
+      "bytes_after": 496411,
+      "entry_count": 672,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0133.cpp",
+      "bytes_before": 496691,
+      "bytes_after": 496691,
+      "entry_count": 620,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0134.cpp",
+      "bytes_before": 457536,
+      "bytes_after": 457536,
+      "entry_count": 649,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0135.cpp",
+      "bytes_before": 501361,
+      "bytes_after": 501361,
+      "entry_count": 525,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0136.cpp",
+      "bytes_before": 553131,
+      "bytes_after": 553131,
+      "entry_count": 772,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0137.cpp",
+      "bytes_before": 488103,
+      "bytes_after": 488103,
+      "entry_count": 903,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0138.cpp",
+      "bytes_before": 378877,
+      "bytes_after": 378877,
+      "entry_count": 636,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0139.cpp",
+      "bytes_before": 487552,
+      "bytes_after": 487552,
+      "entry_count": 900,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0140.cpp",
+      "bytes_before": 502645,
+      "bytes_after": 502645,
+      "entry_count": 988,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0141.cpp",
+      "bytes_before": 441862,
+      "bytes_after": 441862,
+      "entry_count": 886,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0142.cpp",
+      "bytes_before": 432728,
+      "bytes_after": 432728,
+      "entry_count": 606,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0143.cpp",
+      "bytes_before": 479745,
+      "bytes_after": 479745,
+      "entry_count": 712,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0144.cpp",
+      "bytes_before": 446608,
+      "bytes_after": 446608,
+      "entry_count": 787,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0145.cpp",
+      "bytes_before": 466761,
+      "bytes_after": 466761,
+      "entry_count": 723,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0146.cpp",
+      "bytes_before": 494732,
+      "bytes_after": 494732,
+      "entry_count": 587,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0147.cpp",
+      "bytes_before": 469528,
+      "bytes_after": 469528,
+      "entry_count": 784,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0148.cpp",
+      "bytes_before": 479822,
+      "bytes_after": 479822,
+      "entry_count": 911,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0149.cpp",
+      "bytes_before": 508506,
+      "bytes_after": 508506,
+      "entry_count": 817,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0150.cpp",
+      "bytes_before": 539341,
+      "bytes_after": 539341,
+      "entry_count": 1035,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0151.cpp",
+      "bytes_before": 518816,
+      "bytes_after": 518816,
+      "entry_count": 671,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0152.cpp",
+      "bytes_before": 480096,
+      "bytes_after": 480096,
+      "entry_count": 765,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0153.cpp",
+      "bytes_before": 459827,
+      "bytes_after": 459827,
+      "entry_count": 685,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0154.cpp",
+      "bytes_before": 547949,
+      "bytes_after": 547949,
+      "entry_count": 527,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0155.cpp",
+      "bytes_before": 496739,
+      "bytes_after": 496739,
+      "entry_count": 742,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0156.cpp",
+      "bytes_before": 414534,
+      "bytes_after": 414534,
+      "entry_count": 782,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0157.cpp",
+      "bytes_before": 461121,
+      "bytes_after": 461121,
+      "entry_count": 796,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0158.cpp",
+      "bytes_before": 431303,
+      "bytes_after": 431303,
+      "entry_count": 724,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0159.cpp",
+      "bytes_before": 357910,
+      "bytes_after": 357910,
+      "entry_count": 397,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0160.cpp",
+      "bytes_before": 419858,
+      "bytes_after": 419858,
+      "entry_count": 661,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0161.cpp",
+      "bytes_before": 395225,
+      "bytes_after": 395225,
+      "entry_count": 727,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0162.cpp",
+      "bytes_before": 442818,
+      "bytes_after": 442818,
+      "entry_count": 711,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0163.cpp",
+      "bytes_before": 406725,
+      "bytes_after": 406725,
+      "entry_count": 641,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0164.cpp",
+      "bytes_before": 424140,
+      "bytes_after": 424140,
+      "entry_count": 599,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0165.cpp",
+      "bytes_before": 403170,
+      "bytes_after": 403170,
+      "entry_count": 508,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0166.cpp",
+      "bytes_before": 411312,
+      "bytes_after": 411312,
+      "entry_count": 658,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0167.cpp",
+      "bytes_before": 463691,
+      "bytes_after": 463691,
+      "entry_count": 973,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0168.cpp",
+      "bytes_before": 467659,
+      "bytes_after": 467659,
+      "entry_count": 630,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0169.cpp",
+      "bytes_before": 388022,
+      "bytes_after": 388022,
+      "entry_count": 488,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0170.cpp",
+      "bytes_before": 432381,
+      "bytes_after": 432381,
+      "entry_count": 891,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0171.cpp",
+      "bytes_before": 444396,
+      "bytes_after": 444396,
+      "entry_count": 1036,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0172.cpp",
+      "bytes_before": 478595,
+      "bytes_after": 478595,
+      "entry_count": 1099,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0173.cpp",
+      "bytes_before": 387114,
+      "bytes_after": 387114,
+      "entry_count": 728,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0174.cpp",
+      "bytes_before": 346174,
+      "bytes_after": 346174,
+      "entry_count": 854,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0175.cpp",
+      "bytes_before": 554578,
+      "bytes_after": 554578,
+      "entry_count": 1078,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0176.cpp",
+      "bytes_before": 522019,
+      "bytes_after": 522019,
+      "entry_count": 1101,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0177.cpp",
+      "bytes_before": 632014,
+      "bytes_after": 632014,
+      "entry_count": 1392,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0178.cpp",
+      "bytes_before": 546366,
+      "bytes_after": 546366,
+      "entry_count": 1148,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0179.cpp",
+      "bytes_before": 450295,
+      "bytes_after": 450295,
+      "entry_count": 762,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0180.cpp",
+      "bytes_before": 408642,
+      "bytes_after": 408642,
+      "entry_count": 1097,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0181.cpp",
+      "bytes_before": 428255,
+      "bytes_after": 428255,
+      "entry_count": 976,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0182.cpp",
+      "bytes_before": 467862,
+      "bytes_after": 467862,
+      "entry_count": 1036,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0183.cpp",
+      "bytes_before": 507627,
+      "bytes_after": 507627,
+      "entry_count": 1036,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0184.cpp",
+      "bytes_before": 455527,
+      "bytes_after": 455527,
+      "entry_count": 764,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0185.cpp",
+      "bytes_before": 444907,
+      "bytes_after": 444907,
+      "entry_count": 743,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0186.cpp",
+      "bytes_before": 414789,
+      "bytes_after": 414789,
+      "entry_count": 859,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0187.cpp",
+      "bytes_before": 464602,
+      "bytes_after": 464602,
+      "entry_count": 892,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0188.cpp",
+      "bytes_before": 513547,
+      "bytes_after": 513547,
+      "entry_count": 974,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0189.cpp",
+      "bytes_before": 422864,
+      "bytes_after": 422864,
+      "entry_count": 577,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0190.cpp",
+      "bytes_before": 473612,
+      "bytes_after": 473612,
+      "entry_count": 960,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0191.cpp",
+      "bytes_before": 484551,
+      "bytes_after": 484551,
+      "entry_count": 1010,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0192.cpp",
+      "bytes_before": 555425,
+      "bytes_after": 555425,
+      "entry_count": 840,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0193.cpp",
+      "bytes_before": 536385,
+      "bytes_after": 536385,
+      "entry_count": 710,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0194.cpp",
+      "bytes_before": 444831,
+      "bytes_after": 444831,
+      "entry_count": 930,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0195.cpp",
+      "bytes_before": 497000,
+      "bytes_after": 497000,
+      "entry_count": 805,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0196.cpp",
+      "bytes_before": 441129,
+      "bytes_after": 441129,
+      "entry_count": 895,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0197.cpp",
+      "bytes_before": 506861,
+      "bytes_after": 506861,
+      "entry_count": 912,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0198.cpp",
+      "bytes_before": 459168,
+      "bytes_after": 459168,
+      "entry_count": 738,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0199.cpp",
+      "bytes_before": 467809,
+      "bytes_after": 467809,
+      "entry_count": 767,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0200.cpp",
+      "bytes_before": 474826,
+      "bytes_after": 474826,
+      "entry_count": 816,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0201.cpp",
+      "bytes_before": 455512,
+      "bytes_after": 455512,
+      "entry_count": 829,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0202.cpp",
+      "bytes_before": 438447,
+      "bytes_after": 438447,
+      "entry_count": 779,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0203.cpp",
+      "bytes_before": 455702,
+      "bytes_after": 455702,
+      "entry_count": 822,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0204.cpp",
+      "bytes_before": 468613,
+      "bytes_after": 468613,
+      "entry_count": 939,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0205.cpp",
+      "bytes_before": 460511,
+      "bytes_after": 460511,
+      "entry_count": 1061,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0206.cpp",
+      "bytes_before": 475120,
+      "bytes_after": 475120,
+      "entry_count": 891,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0207.cpp",
+      "bytes_before": 448908,
+      "bytes_after": 448908,
+      "entry_count": 819,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0208.cpp",
+      "bytes_before": 447491,
+      "bytes_after": 447491,
+      "entry_count": 834,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0209.cpp",
+      "bytes_before": 432334,
+      "bytes_after": 432334,
+      "entry_count": 651,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0210.cpp",
+      "bytes_before": 473691,
+      "bytes_after": 473691,
+      "entry_count": 581,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0211.cpp",
+      "bytes_before": 511418,
+      "bytes_after": 511418,
+      "entry_count": 912,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0212.cpp",
+      "bytes_before": 417799,
+      "bytes_after": 417799,
+      "entry_count": 1058,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0213.cpp",
+      "bytes_before": 441089,
+      "bytes_after": 441089,
+      "entry_count": 1038,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0214.cpp",
+      "bytes_before": 409468,
+      "bytes_after": 409468,
+      "entry_count": 879,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0215.cpp",
+      "bytes_before": 345461,
+      "bytes_after": 345461,
+      "entry_count": 840,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0216.cpp",
+      "bytes_before": 429991,
+      "bytes_after": 429991,
+      "entry_count": 936,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0217.cpp",
+      "bytes_before": 401778,
+      "bytes_after": 401778,
+      "entry_count": 800,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0218.cpp",
+      "bytes_before": 408987,
+      "bytes_after": 408987,
+      "entry_count": 793,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0219.cpp",
+      "bytes_before": 372182,
+      "bytes_after": 372182,
+      "entry_count": 903,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0220.cpp",
+      "bytes_before": 16474,
+      "bytes_after": 16474,
+      "entry_count": 50,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0221.cpp",
+      "bytes_before": 32645,
+      "bytes_after": 32645,
+      "entry_count": 104,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0222.cpp",
+      "bytes_before": 94545,
+      "bytes_after": 94545,
+      "entry_count": 334,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0223.cpp",
+      "bytes_before": 102953,
+      "bytes_after": 102953,
+      "entry_count": 363,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0224.cpp",
+      "bytes_before": 55415,
+      "bytes_after": 55415,
+      "entry_count": 203,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0225.cpp",
+      "bytes_before": 88998,
+      "bytes_after": 88998,
+      "entry_count": 372,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0226.cpp",
+      "bytes_before": 16853,
+      "bytes_after": 16853,
+      "entry_count": 126,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0227.cpp",
+      "bytes_before": 10638,
+      "bytes_after": 10638,
+      "entry_count": 101,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": false
+    },
+    {
+      "path": "generated_unit_0228.cpp",
+      "bytes_before": 10065,
+      "bytes_after": 10065,
+      "entry_count": 92,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": false
+    },
+    {
+      "path": "generated_unit_0229.cpp",
+      "bytes_before": 9474,
+      "bytes_after": 9474,
+      "entry_count": 84,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": false
+    },
+    {
+      "path": "generated_unit_0230.cpp",
+      "bytes_before": 9069,
+      "bytes_after": 9069,
+      "entry_count": 40,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0231.cpp",
+      "bytes_before": 41630,
+      "bytes_after": 41630,
+      "entry_count": 153,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0232.cpp",
+      "bytes_before": 72111,
+      "bytes_after": 72111,
+      "entry_count": 264,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": true
+    },
+    {
+      "path": "generated_unit_0233.cpp",
+      "bytes_before": 14153,
+      "bytes_after": 14153,
+      "entry_count": 90,
+      "registration_lines_removed": 0,
+      "local_blocks_shared": 0,
+      "had_regcache": false
+    }
+  ]
+}

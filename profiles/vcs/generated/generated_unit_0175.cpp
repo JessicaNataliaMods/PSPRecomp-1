@@ -1156,6 +1156,19 @@ LOCAL_DISPATCH:
         AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
+// PSPRECOMP_V812_SHARED_SCHED_BLOCK: one scheduler-exact slow boundary per unit.
+LOCAL_SCHED_BOUNDARY:
+    ctx.pc = jump_target;
+    AOT_REGCACHE_SYNC_OUT();
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08AC0000:
     goto L_08AC0004;
 L_08AC0004:
@@ -1428,18 +1441,8 @@ L_08AC01F4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(4128));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0218:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_gpr_4 = (2236u << 16u);
@@ -1454,18 +1457,8 @@ L_08AC022C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0238:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_gpr_4 = (2237u << 16u);
@@ -1482,18 +1475,8 @@ L_08AC0254:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0260:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[6]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], ctx.gpr[20], aot_gpr_31};
@@ -1653,18 +1636,8 @@ L_08AC0388:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC03A8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -1738,18 +1711,8 @@ L_08AC0418:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0430:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -1823,18 +1786,8 @@ L_08AC04A0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC04B8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -1908,18 +1861,8 @@ L_08AC0528:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0540:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -1970,18 +1913,8 @@ L_08AC059C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC05B8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -2056,18 +1989,8 @@ L_08AC0630:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0648:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -2149,18 +2072,8 @@ L_08AC06D0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC06E8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2200,18 +2113,8 @@ L_08AC0730:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0744:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2243,35 +2146,15 @@ L_08AC0774:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0788:
     jump_target = aot_gpr_31;
     aot_gpr_2 = (0u | 0u);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0790:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -2341,18 +2224,8 @@ L_08AC0808:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0820:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2377,18 +2250,8 @@ L_08AC0848:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC085C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2410,18 +2273,8 @@ L_08AC0874:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0898:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2459,18 +2312,8 @@ L_08AC08D4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC08E8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2508,18 +2351,8 @@ L_08AC0924:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0938:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[5]{std::bit_cast<std::uint32_t>(ctx.fpr[20]), ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -2616,18 +2449,8 @@ L_08AC09FC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0A1C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -2665,18 +2488,8 @@ L_08AC0A58:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0A6C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -2780,18 +2593,8 @@ L_08AC0B20:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0B38:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -2895,18 +2698,8 @@ L_08AC0BEC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0C04:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[5]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], aot_gpr_31};
@@ -3104,18 +2897,8 @@ L_08AC0D4C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0D68:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -3183,18 +2966,8 @@ L_08AC0DD8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0DF0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -3298,18 +3071,8 @@ L_08AC0EA4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0EBC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -3389,18 +3152,8 @@ L_08AC0F3C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0F54:
     aot_gpr_4 = (0u | 1u);
     aot_gpr_5 = (2237u << 16u);
@@ -3410,18 +3163,8 @@ L_08AC0F54:
     aot_gpr_2 = (0u | 0u);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0F6C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3439,18 +3182,8 @@ L_08AC0F88:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0F98:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3470,18 +3203,8 @@ L_08AC0FBC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC0FCC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3501,18 +3224,8 @@ L_08AC0FF0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1000:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -3572,18 +3285,8 @@ L_08AC1068:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1080:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[5]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], aot_gpr_31};
@@ -3666,18 +3369,8 @@ L_08AC110C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC112C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[5]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], aot_gpr_31};
@@ -3735,18 +3428,8 @@ L_08AC1188:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC11A8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[5]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], aot_gpr_31};
@@ -3805,18 +3488,8 @@ L_08AC1208:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1228:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3832,18 +3505,8 @@ L_08AC123C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC124C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3862,18 +3525,8 @@ L_08AC126C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC127C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -3890,18 +3543,8 @@ L_08AC1294:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC12A4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -3926,18 +3569,8 @@ L_08AC12CC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC12E0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -3998,18 +3631,8 @@ L_08AC1360:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC137C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -4050,18 +3673,8 @@ L_08AC13CC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC13E8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4083,18 +3696,8 @@ L_08AC1414:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1424:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4122,18 +3725,8 @@ L_08AC144C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC145C:
     aot_gpr_4 = (0u | 1u);
     aot_gpr_5 = (2237u << 16u);
@@ -4143,18 +3736,8 @@ L_08AC145C:
     aot_gpr_2 = (0u | 1u);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1474:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -4223,18 +3806,8 @@ L_08AC14E8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1500:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -4292,18 +3865,8 @@ L_08AC1560:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1578:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -4414,18 +3977,8 @@ L_08AC1644:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1658:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(12), ctx.gpr[16]);
@@ -4524,18 +4077,8 @@ L_08AC172C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC173C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -4570,18 +4113,8 @@ L_08AC1774:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1784:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-48));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -4676,18 +4209,8 @@ L_08AC1824:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1840:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -4727,18 +4250,8 @@ L_08AC1878:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC188C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4755,18 +4268,8 @@ L_08AC189C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC18B4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -4794,18 +4297,8 @@ L_08AC18E0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC18FC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4822,18 +4315,8 @@ L_08AC190C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1924:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4850,18 +4333,8 @@ L_08AC1934:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC194C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4879,18 +4352,8 @@ L_08AC195C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1978:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -4907,18 +4370,8 @@ L_08AC1988:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC19A0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -4955,18 +4408,8 @@ L_08AC19D8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC19EC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -5004,18 +4447,8 @@ L_08AC1A30:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1A48:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -5032,18 +4465,8 @@ L_08AC1A58:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1A70:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -5079,18 +4502,8 @@ L_08AC1AB0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1AC4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -5126,18 +4539,8 @@ L_08AC1B04:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1B18:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -5169,18 +4572,8 @@ L_08AC1B48:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1B5C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -5197,18 +4590,8 @@ L_08AC1B74:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1B84:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-48));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -5266,18 +4649,8 @@ L_08AC1C0C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1C24:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-80));
     { const std::uint32_t aot_run_words[9]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], ctx.gpr[19], ctx.gpr[20], ctx.gpr[21], ctx.gpr[22], ctx.gpr[23], aot_gpr_31};
@@ -5477,18 +4850,8 @@ L_08AC1DD0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(80));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1E00:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -5524,18 +4887,8 @@ L_08AC1E30:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1E40:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -5643,18 +4996,8 @@ L_08AC1EEC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1F00:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -5762,18 +5105,8 @@ L_08AC1FAC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC1FC0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-64));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -5903,18 +5236,8 @@ L_08AC20D8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC20EC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(24), ctx.gpr[16]);
@@ -5969,18 +5292,8 @@ L_08AC2158:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC216C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -6012,18 +5325,8 @@ L_08AC2198:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC21A8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -6055,18 +5358,8 @@ L_08AC21D4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC21E4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -6087,18 +5380,8 @@ L_08AC21F4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC221C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -6125,18 +5408,8 @@ L_08AC2248:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2260:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -6226,18 +5499,8 @@ L_08AC2304:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2318:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-48));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -6369,18 +5632,8 @@ L_08AC2414:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC242C:
     aot_gpr_4 = (0u | 59u);
     aot_mem.aot_direct_store8(ctx.gpr[28] + static_cast<std::uint32_t>(10292), static_cast<std::uint8_t>(aot_gpr_4));
@@ -6395,18 +5648,8 @@ L_08AC242C:
     aot_mem.aot_direct_store32(aot_gpr_5 + static_cast<std::uint32_t>(0), aot_gpr_4);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2458:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(4), ctx.gpr[16]);
@@ -6485,18 +5728,8 @@ L_08AC24E0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC24F0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[4]{ctx.gpr[16], ctx.gpr[17], ctx.gpr[18], aot_gpr_31};
@@ -6600,34 +5833,14 @@ L_08AC25C0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC25D8:
     jump_target = aot_gpr_31;
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC25E0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-8744)));
@@ -6681,18 +5894,8 @@ L_08AC2690:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC269C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_gpr_6 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-8744)));
@@ -6709,18 +5912,8 @@ L_08AC26B8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC26C4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-80));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(56), ctx.gpr[17]);
@@ -6985,18 +6178,8 @@ L_08AC2924:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(80));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2958:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -7009,18 +6192,8 @@ L_08AC2968:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2974:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_fpr_12 = std::bit_cast<float>(aot_gpr_6);
@@ -7069,18 +6242,8 @@ L_08AC29E4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC29F8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-48));
     aot_fpr_12 = std::bit_cast<float>(aot_gpr_6);
@@ -7229,18 +6392,8 @@ L_08AC2B74:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2B98:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-64));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(28), ctx.gpr[16]);
@@ -7584,18 +6737,8 @@ L_08AC2DEC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2E24:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(12), ctx.gpr[16]);
@@ -7768,18 +6911,8 @@ L_08AC2F60:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2F70:
     aot_gpr_6 = (0u | 0u);
     aot_gpr_5 = (0u | 0u);
@@ -7801,34 +6934,14 @@ L_08AC2F94:
     jump_target = aot_gpr_31;
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2F9C:
     jump_target = aot_gpr_31;
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2FA4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -7842,18 +6955,8 @@ L_08AC2FB4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC2FC4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), aot_gpr_31);
@@ -7979,18 +7082,8 @@ L_08AC30AC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC30B8:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-9752)));
@@ -8087,18 +7180,8 @@ L_08AC314C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC3168:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     { const std::uint32_t aot_run_words[3]{ctx.gpr[16], ctx.gpr[17], aot_gpr_31};
@@ -8236,18 +7319,8 @@ L_08AC3268:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC327C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-48));
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-8744)));
@@ -8444,18 +7517,8 @@ L_08AC33F4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC3418:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(12), ctx.gpr[19]);
@@ -8796,18 +7859,8 @@ L_08AC3688:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC36A8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-1044)));
     aot_gpr_5 = (aot_gpr_4 ^ 4u);
@@ -8823,18 +7876,8 @@ L_08AC36A8:
     aot_gpr_2 = (aot_gpr_2 | aot_gpr_4);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC36D8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-1044)));
     aot_gpr_5 = (aot_gpr_4 ^ 2u);
@@ -8847,18 +7890,8 @@ L_08AC36D8:
     aot_gpr_2 = (aot_gpr_2 | aot_gpr_4);
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC36FC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(8), ctx.gpr[18]);
@@ -9714,18 +8747,8 @@ L_08AC3C74:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC3C94:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(8), ctx.gpr[18]);
@@ -9970,18 +8993,8 @@ L_08AC3E40:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
-    ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT();
-    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
-    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
-        ++local_redispatch_rounds;
-        AOT_REGCACHE_SYNC_IN();
-        local_transfers = 0u;
-        local_pc = ctx.pc;
-        entry_id = 0u;
-        goto LOCAL_DISPATCH;
-    }
-    return;
+    // PSPRECOMP_V812_SHARED_SCHED_JUMP
+    goto LOCAL_SCHED_BOUNDARY;
 L_08AC3E5C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), ctx.gpr[16]);
@@ -10184,1083 +9197,8 @@ void recomp_unit_0175(Runtime &rt, AllegrexContext &ctx) {
 
 void register_generated_unit_175(Runtime &runtime) {
     runtime.register_generated_unit(175u, 0x08AC0000u, 16384u, &recomp_unit_0175, &recomp_unit_0175_entry);
-    runtime.register_function(0x08AC0000u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0004u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0014u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC001Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC002Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0034u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0044u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC004Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC005Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0064u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0074u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0088u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0094u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC00A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC00B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC00D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC00D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC00E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0110u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0118u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0120u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0130u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0140u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0150u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC016Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0180u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0190u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC01F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0218u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC022Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0238u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0254u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0260u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02C8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC02F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0318u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC032Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC033Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC034Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC035Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0364u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0370u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0378u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0384u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0388u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC03F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0400u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0408u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0410u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0418u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0430u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC044Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0458u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0460u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0468u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC046Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0474u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0480u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0488u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0490u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0498u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC04FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0508u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0510u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0518u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0520u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0528u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0540u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0560u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0570u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC057Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0588u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC059Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC05F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0608u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0614u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0624u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0630u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0648u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0664u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0670u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0678u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC067Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0684u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC068Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0690u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0698u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC06A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC06B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC06C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC06D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC06E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0700u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC070Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0714u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0718u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0730u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0744u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC075Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0764u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0774u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0788u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0790u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC07F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0804u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0808u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0820u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC083Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0848u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC085Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0874u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0898u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC08B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC08C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC08CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC08D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC08E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0904u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0910u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC091Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0924u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0938u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0960u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC097Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0988u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC099Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09C8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC09FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A44u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A50u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A6Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0A9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AE0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0AFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B08u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B5Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0B9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BB8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BC8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BE0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BE8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0BECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C2Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C44u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C4Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C84u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0C90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CCCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0CFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D10u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D4Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D8Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0D98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DBCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0DF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E2Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E80u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E8Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0E98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EBCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EE0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0EF8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F6Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0F98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0FBCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0FCCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC0FF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1000u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1024u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1030u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC103Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1050u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1064u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1068u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1080u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10B0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC10F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC110Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC112Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC115Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1168u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1170u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1178u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1180u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1188u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC11A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC11D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC11E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC11ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC11F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1200u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1208u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1228u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC123Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC124Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC126Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC127Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1294u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC12A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC12C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC12CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC12E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1310u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1324u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC134Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1358u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1360u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC137Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC13ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC13C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC13CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC13E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1414u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1424u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC143Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1444u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC144Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC145Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1474u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1498u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14B0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC14E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1500u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1524u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1530u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC153Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1550u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC155Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1560u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1578u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15C8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC15D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1614u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1620u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1630u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1638u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1640u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1644u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1658u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC167Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1694u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1698u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC169Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC16A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC16ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC16C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1714u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1728u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC172Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC173Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1754u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1760u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1768u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1774u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1784u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC17F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1800u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1808u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1810u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC181Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1824u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1840u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1860u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1868u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1870u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1878u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC188Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC189Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC18B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC18CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC18E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC18FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC190Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1924u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1934u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC194Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC195Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1978u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1988u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19C8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC19ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1A90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1AB0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1AC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1ADCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1AE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B5Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1B84u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1BA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1BB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1BFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1C0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1C24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1C68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1C90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1C98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CE0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CE8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1CF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D08u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D50u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1D74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1DB0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1DC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1DD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E5Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1E84u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EB8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EC8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1ED0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1ED8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1EECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F44u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F80u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1F9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC1FF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2018u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2024u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC202Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2034u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC203Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2040u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC204Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2064u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC20D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC20D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC20ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2104u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC210Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2110u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC211Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC212Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2158u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC216Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC217Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2184u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2190u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2198u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC21F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC221Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2234u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2248u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2260u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2280u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2288u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2294u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22B0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC22ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2300u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2304u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2318u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2344u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2350u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2378u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2380u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC238Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC239Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC23F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2400u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2414u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC242Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2458u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2470u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC247Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2488u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2494u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC249Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC24F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC250Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2514u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2520u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC252Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2538u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2540u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2544u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2548u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2554u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2564u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2590u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC25B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC25C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC25D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC25E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2690u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC269Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC26B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC26C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2718u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2734u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2744u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2750u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2758u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2778u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2784u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC278Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC27C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC27D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC27D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC27F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2800u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2808u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2824u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2830u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2838u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC285Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2868u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2870u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28B0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC28F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2924u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2958u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2968u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2974u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC29B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC29D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC29E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC29F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2A54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2A74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2A84u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2AA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2AC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2AD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2AF8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2B98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2BECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2BF8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C50u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C7Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2C90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CB8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2CF8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D34u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D4Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D6Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D7Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D84u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2D98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DCCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2DECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E24u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2E98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2EA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2EB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2EBCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2EC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2ED0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2ED8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2EE8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F94u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2F9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC2FFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3010u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3034u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC303Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3044u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC304Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3060u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3068u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3070u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3078u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3084u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC308Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3094u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC309Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC30FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3100u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3104u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC310Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3118u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3124u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC312Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3134u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC313Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3144u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC314Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3168u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3180u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3188u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3194u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31B0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31C8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC31F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3200u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3208u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3214u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC321Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3220u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3228u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3230u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3238u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3240u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3248u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3250u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3258u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3260u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3268u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC327Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC32B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC32D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC32E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC32F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3300u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3308u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3310u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC331Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3324u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3330u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC333Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3344u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC334Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3358u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3370u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3378u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3380u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3388u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3390u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3398u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC33F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3418u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC343Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3444u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3454u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3460u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3468u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3470u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3478u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3480u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC348Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3494u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC349Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC34F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3508u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3510u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3518u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3520u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3528u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3530u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3538u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3540u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3548u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3550u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC355Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3578u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3590u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3598u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC35F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3600u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3608u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3610u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3618u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3620u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3628u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3630u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3638u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3640u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3648u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3650u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3658u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3660u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3668u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3674u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC367Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3688u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC36A8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC36D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC36FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3740u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3748u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC375Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3778u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC377Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3780u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3788u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3790u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3798u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37BCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37C4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37D4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37E0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC37F8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3800u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3808u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3818u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3828u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3830u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3834u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC383Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3848u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3858u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3860u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3864u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3870u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC387Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3888u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3890u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3898u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38A0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38B8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38CCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38E4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38ECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38F0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC38FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC390Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3914u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3918u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3920u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3928u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3930u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC393Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC394Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3954u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3958u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3964u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC396Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3978u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3980u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3984u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3990u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC399Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39A4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39ACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39B4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39C0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39D0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39D8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39DCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39E8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39F4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC39FCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A4Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A64u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A80u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A94u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3A9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AB0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AC8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3ADCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AE8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3AF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B10u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B1Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B34u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B44u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B4Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B7Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B94u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3B9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BACu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BB8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BC8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BE8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3BFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C04u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C10u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C2Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C34u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C3Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C44u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C50u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C6Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C74u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3C94u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CB8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CC4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CD0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CF0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3CFCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D2Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D54u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D7Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D94u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3D9Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DA4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DCCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DD4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DE0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DECu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3DF8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E0Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E14u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E2Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E34u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E40u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E5Cu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3E98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3EA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3EC0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3ED4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3EDCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3EE4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3EF4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F00u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F08u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F10u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F18u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F20u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F28u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F30u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F38u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F48u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F50u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F58u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F60u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F68u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F70u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F78u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F80u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F88u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F90u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3F98u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FA0u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FA8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FB4u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FBCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FCCu, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FD8u, &recomp_unit_0175, "recomp_unit_0175");
-    runtime.register_function(0x08AC3FF8u, &recomp_unit_0175, "recomp_unit_0175");
+    // PSPRECOMP_V812_COMPACT_REGISTRATION: same entry set, looped once in Runtime instead of source-expanded calls.
+    runtime.register_generated_entry_mask(0x08AC0000u, &recomp_unit_0175, "recomp_unit_0175",
+                                          kEntryMasks_recomp_unit_0175, 64u);
 }
 } // namespace psprecomp

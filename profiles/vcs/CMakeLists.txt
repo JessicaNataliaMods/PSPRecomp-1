@@ -406,10 +406,12 @@ if(PSPRECOMP_BUILD_PROFILE_TESTS)
 endif()
 
 if(WIN32)
+    # PSPRECOMP_V8121_PROBE_TIER2_LINK_FIX: vcs_runtime_log uses Tier-2 state in both DX12 probes.
     add_executable(vcs_dx12_probe
         tools/dx12_probe_main.cpp
         host/dx12_presenter.cpp
         host/vcs_runtime_log.cpp
+        host/vcs_tier2_superblocks.cpp
         host/vcs_config.cpp
         host/propershaders/ProperShadersConfig.cpp
         host/vcs_camera_input.cpp
@@ -418,10 +420,13 @@ if(WIN32)
     target_link_libraries(vcs_dx12_probe PRIVATE d3d12 dxgi d3dcompiler dxguid)
     vcs_set_runtime_output(vcs_dx12_probe)
 
+    # PSPRECOMP_V8123_GE_PROBE_RUNTIME_GLOBALS: isolated GE probe gets neutral draw-distance runtime globals.
     add_executable(vcs_dx12_ge_probe
         tools/dx12_ge_probe_main.cpp
+        tools/dx12_ge_probe_runtime_globals.cpp
         host/ge_gpu_backend_dx12.cpp
         host/vcs_runtime_log.cpp
+        host/vcs_tier2_superblocks.cpp
         host/vcs_config.cpp
         ${VCS_PROPER_SHADERS_SOURCES}
         host/vcs_camera_input.cpp

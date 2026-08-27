@@ -226,45 +226,8 @@ void recomp_unit_0230(Runtime &rt, AllegrexContext &ctx) {
 
 void register_generated_unit_230(Runtime &runtime) {
     runtime.register_generated_unit(230u, 0x08B9C000u, 16384u, &recomp_unit_0230, &recomp_unit_0230_entry);
-    runtime.register_function(0x08B9C000u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C0C4u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C344u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C3E8u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C600u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C6B8u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C828u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C870u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9C97Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CAC0u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CBBCu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CC1Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CC58u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CC88u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9CE50u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9D3BCu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9D65Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9D824u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9D8D0u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9D99Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DAE4u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DB1Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DBB0u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DBD8u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DC1Cu, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DC28u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DC48u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DC50u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DC70u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DCF0u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9DD90u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9E444u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9ED48u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9EF10u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9EF50u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9F0B0u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9F184u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9F1F4u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9FB60u, &recomp_unit_0230, "recomp_unit_0230");
-    runtime.register_function(0x08B9FCE4u, &recomp_unit_0230, "recomp_unit_0230");
+    // PSPRECOMP_V812_COMPACT_REGISTRATION: same entry set, looped once in Runtime instead of source-expanded calls.
+    runtime.register_generated_entry_mask(0x08B9C000u, &recomp_unit_0230, "recomp_unit_0230",
+                                          kEntryMasks_recomp_unit_0230, 61u);
 }
 } // namespace psprecomp

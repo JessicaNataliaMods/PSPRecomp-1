@@ -1849,8 +1849,9 @@ int main() {
         unaligned_aot.aot_store32_block(batch_vram, batch_write);
         std::uint32_t batch_vram_read[4]{};
         unaligned_aot.aot_load32_block(batch_vram, batch_vram_read);
-        require(!unaligned_aot.aot_try_load32_block(batch_vram, batch_try),
-                "AOT EDRAM block unexpectedly used RAM direct path");
+        const bool batch_vram_direct = unaligned_aot.aot_try_load32_block(batch_vram, batch_try);
+        require(batch_vram_direct == unaligned_memory.direct_fastmem_enabled(),
+                "AOT EDRAM block direct-path capability mismatch");
         for (std::size_t i = 0; i < 4u; ++i)
             require(batch_vram_read[i] == batch_write[i], "AOT 32-bit EDRAM block fallback failed");
 

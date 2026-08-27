@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -548,6 +549,24 @@ void Runtime::register_generated_unit(std::uint32_t unit_index,
     if (generated_unit_disabled_[unit_index] == 0u)
         generated_units_[unit_index] = function;
     generated_unit_entries_[unit_index] = entry_function;
+}
+
+// PSPRECOMP_V812_COMPACT_REGISTRATION
+void Runtime::register_generated_entry_mask(std::uint32_t unit_address,
+                                            RecompiledFunction function,
+                                            std::string_view name,
+                                            const std::uint64_t *entry_masks,
+                                            std::size_t group_count) {
+    if (function == nullptr || entry_masks == nullptr || group_count == 0u) return;
+    for (std::size_t group = 0; group < group_count; ++group) {
+        std::uint64_t bits = entry_masks[group];
+        while (bits != 0u) {
+            const auto bit = static_cast<std::uint32_t>(std::countr_zero(bits));
+            const auto slot = static_cast<std::uint32_t>(group * 64u) + bit;
+            register_function(unit_address + slot * 4u, function, std::string(name));
+            bits &= bits - 1u;
+        }
+    }
 }
 
 bool Runtime::invoke_isolated_aot(std::uint32_t address, AllegrexContext &ctx) {

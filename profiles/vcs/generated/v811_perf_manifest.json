@@ -7,16 +7,16 @@
     "generic_codegen": false,
     "vcs_codegen": false,
     "regcache_tool": false,
-    "ge_renderer_clangcl": true
+    "ge_renderer_clangcl": false
   },
   "dense_tables_rewritten": 0,
   "dense_slots_removed": 0,
   "compact_metadata_bytes_estimate": 0,
-  "local_link_sites": 11299,
+  "local_link_sites": 0,
   "nops_removed": 0,
   "adjacent_gotos_removed": 0,
-  "generated_source_bytes_before_this_run": 121704134,
-  "generated_source_bytes_after_this_run": 121704134,
+  "generated_source_bytes_before_this_run": 102643974,
+  "generated_source_bytes_after_this_run": 102643974,
   "generated_source_bytes_saved_this_run": 0,
   "units": []
 }

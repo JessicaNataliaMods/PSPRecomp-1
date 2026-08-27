@@ -4,15 +4,48 @@ This profile builds `VCSNative.exe` for the supported GTA: Vice City Stories PSP
 
 ## Quick build on Windows
 
-Run `BUILD_VCS.bat` from this directory for the normal performance build. Generated AOT stays at the maximum MSVC optimization level with AVX2, compiler `/MP`, MSBuild `/m` and persistent incremental objects. Host/runtime code may use whole-program optimization, but the 234 generated AOT translation units are explicitly compiled with `/GL-` so the final linker does not have to hold the entire generated corpus as LTCG IR. The current runtime fast paths remain enabled.
+The canonical Windows performance build is:
 
-`BUILD_VCS_FAST.bat` remains the corresponding fast incremental pipeline: generated AOT at O2 with LTCG disabled. No separate experimental max-performance build is used.
+```text
+profiles\vcs\BUILD_VCS_NINJA_CLANG.bat
+```
 
-The launchers automatically locate CMake from PATH, Visual Studio 2022 (including the bundled CMake component), `vswhere`, or a standard standalone CMake installation. `BUILD_VCS_FAST.bat` remains the quickest development/debug-oriented build.
+The validated toolchain is **CMake + Ninja + standalone clang-cl 22.1.8 + lld-link**. Visual Studio 2022 supplies the Windows SDK and MSVC C/C++ runtime/STL environment.
 
-For the single-configuration Ninja workflow used during incremental renderer and
-generated-code development, see [`../../docs/VCS_NINJA_BUILD.md`](../../docs/VCS_NINJA_BUILD.md).
+The current V8.12 pipeline first normalizes the V8.11 generated-code baseline and then applies the V8.12 code-density pass before configuring Ninja. The generated AOT corpus remains split into 234 translation units. General generated units use O2, the measured hot set uses the higher optimization tier, AVX2/native fast paths remain enabled, host/core LTO remains enabled and full-corpus AOT LTO remains disabled.
 
+The default build directory is:
+
+```text
+out\vcs-release-ninja-clangcl-v812
+```
+
+The executable is produced at:
+
+```text
+out\vcs-release-ninja-clangcl-v812\bin\Release\VCSNative.exe
+```
+
+`BUILD_VCS_NINJA.bat` is the older MSVC/Ninja reconstruction path. It is retained only for legacy/development reconstruction and is not the canonical V8.12 release build.
+
+## V8.12 generated code-density policy
+
+The generated C++ corpus is intentionally large because it is a static translation of the guest executable. Source-file size by itself does not determine runtime speed: comments, whitespace and long C++ spellings disappear during compilation.
+
+Runtime performance is affected by the **compiled native code footprint**, however. Excessive native text increases instruction-cache, iTLB and branch-predictor pressure. V8.12 therefore only performs source compaction where the transformation also preserves or improves the generated machine-code structure.
+
+V8.12 currently performs two semantics-preserving density transformations:
+
+1. The scheduler-visible V8.11 local redispatch fallback is shared once per generated unit instead of being source-expanded at every local boundary. The proven 256-transfer scheduler boundary and the bounded seven-round local redispatch policy are unchanged.
+2. Per-PC generated registration is reconstructed from the same V8.11 compact entry masks through one Runtime loop. This preserves the exact registered entry set and exact Runtime tables while removing hundreds of repeated registration call sites from each generated translation unit.
+
+The pass validates the expected 234 units, 181,789 registered generated entries and 11,299 scheduler-local links before the build continues. It writes:
+
+```text
+profiles\vcs\generated\v812_code_density_manifest.json
+```
+
+with the before/after generated-source byte counts.
 
 ## Source layout
 
@@ -21,7 +54,7 @@ config/       VCS profile configuration and executable metadata
 data/         Redistributable generated profile data
 generated/    AOT C++ generated from the supported executable
 host/         VCS HLE, bootstrap, renderer, audio, input and native fast paths
-scripts/      Maintained Windows build/run/benchmark scripts
+scripts/      Supporting Windows build/run/benchmark scripts
 tests/        Profile regression tests
 tools/        VCS-specific generator and maintenance tools
 third_party/  Bundled dependencies and license notices
@@ -36,8 +69,6 @@ The profile targets the ULUS-10160 PSP release currently used by the generated c
 
 The runtime expects a decrypted ELF and the game's `PSP_GAME/USRDIR` data from your own copy. This repository does not include decryption code.
 
-Use:
-
 ```powershell
 .\profiles\vcs\tools\prepare_game.ps1 `
   -ExtractedUmdRoot D:\VCS_EXTRACTED `
@@ -46,45 +77,36 @@ Use:
 
 The default destination is `profiles/vcs/game`, which is ignored by Git.
 
-## Build on Windows
+## Windows build requirements
 
-Fast development build:
+- Visual Studio 2022 with Desktop C++ tools and a Windows SDK.
+- Standalone LLVM/Clang 22 or newer. LLVM 22.1.8 is the validated baseline.
+- CMake and Ninja. The launcher uses the copies bundled with Visual Studio when available.
+- Python 3 for the generated-code transformation and validation steps.
 
-```text
-profiles\vcs\scripts\build_fast.bat
-```
+Ninja owns dependency tracking and compile parallelism. Re-running the build after a small ordinary source change only rebuilds affected objects. A generated-code density revision necessarily recompiles the generated units whose source changed.
 
-Optimized release build:
+## Optimization policy
 
-```text
-profiles\vcs\scripts\build_release.bat
-```
-
-Run with the default local game directory:
+Global aggressive inlining is deliberately avoided for the generated corpus. Previous measurements showed that making the entire AOT body larger can reduce performance even when individual blocks look more optimized. The current policy favors code density and instruction-cache locality:
 
 ```text
-profiles\vcs\scripts\play.bat
+general generated AOT  -> O2
+measured hot AOT       -> higher optimization tier
+full AOT LTO           -> OFF
+host/core LTO          -> ON
+AVX2/native fast paths -> ON
 ```
 
-Or pass a game root explicitly:
-
-```text
-profiles\vcs\scripts\play.bat D:\VCS_GAME_ROOT
-```
-
-For an uncapped CPU/GE measurement, use `profiles\vcs\scripts\bench.bat`.
-
-### Windows link memory
-
-The generated VCS corpus is intentionally excluded from MSVC whole-program IR in the normal release build. Later AOT cross-unit optimizations make whole-program analysis of all generated units unnecessarily expensive in linker memory. This does not disable per-unit `/Ox`; it only prevents those generated units from being deferred to link-time code generation. Host/runtime LTCG remains available, and the release linker prints LTCG status while it runs.
+The generated compact entry maps, register residency, scheduler-safe resident regions, trusted direct chains and V8.11 local redispatch remain part of the current baseline.
 
 ## Resolution configuration
 
-`profiles/vcs/config/VCSNative.ini` exposes both the presentation resolution and the internal render resolution.
+`profiles/vcs/config/VCSNative.ini` exposes both presentation and internal render resolution.
 
-`[Display] ResolutionMode` accepts `PSP`, `Desktop` or `Custom`. `Custom` uses `Width` and `Height`. With `Fullscreen=true`, VCSNative uses a borderless desktop-sized window; custom width/height still define the logical output surface used by the presentation/widescreen configuration.
+`[Display] ResolutionMode` accepts `PSP`, `Desktop` or `Custom`. `Custom` uses `Width` and `Height`. With `Fullscreen=true`, VCSNative uses a borderless desktop-sized window.
 
-`[Rendering] InternalResolutionMode` accepts `PSP`, `Scale`, `Desktop` or `Custom`. `Scale` uses `InternalScale`; `Custom` uses `InternalWidth` and `InternalHeight`. These settings control the native render target independently from the presentation window.
+`[Rendering] InternalResolutionMode` accepts `PSP`, `Scale`, `Desktop` or `Custom`. `Scale` uses `InternalScale`; `Custom` uses `InternalWidth` and `InternalHeight`.
 
 ## Regenerate VCS AOT code
 
@@ -94,12 +116,8 @@ The VCS profile keeps an address-aware generator target separate from the generi
 vcs_recomp
 ```
 
-Its source lives in `profiles/vcs/tools/vcs_codegen_main.cpp`. Profile-only lowering and measured native leaves belong there or under `host/`; they do not belong in the root PSPRecomp generator/runtime.
+Its source lives in `profiles/vcs/tools/vcs_codegen_main.cpp`. The canonical clang/Ninja build reapplies the maintained generated-code passes after regeneration.
 
-## Development history
+## Internal SAVE_REPRO diagnostics
 
-Old stage reports, validation notes and handoffs are stored under `profiles/vcs/progress`. That directory is intentionally ignored by the repository so development history does not pollute the public source tree.
-
-### Internal SAVE_REPRO diagnostics
-
-`VCSNative.ini` ships with `[Testing] SaveRepro=false`. This keeps the F8 checkpoint and F10 trace harness completely unavailable during normal play. Developers may temporarily set it to `true` for controlled debugging. `RESTORE_SAVE_REPRO.bat` explicitly opts the harness in for its own process and does not require changing the normal INI. These checkpoints are diagnostic snapshots, not supported gameplay save states.
+`VCSNative.ini` ships with `[Testing] SaveRepro=false`. The checkpoint/trace harness is diagnostic-only and is not a supported gameplay save-state mechanism.

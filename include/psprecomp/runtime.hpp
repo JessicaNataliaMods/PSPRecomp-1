@@ -517,6 +517,15 @@ public:
     void register_generated_unit(std::uint32_t unit_index, std::uint32_t unit_address,
                                  std::uint32_t unit_span, RecompiledFunction function,
                                  RecompiledEntryFunction entry_function = nullptr);
+    // V8.12: register all valid per-PC entries from the compact 64-slot
+    // occupancy masks already emitted for generated-unit dispatch. This
+    // preserves the exact legacy function/direct-chain tables while avoiding
+    // hundreds of source-level registration call sites per translation unit.
+    void register_generated_entry_mask(std::uint32_t unit_address,
+                                       RecompiledFunction function,
+                                       std::string_view name,
+                                       const std::uint64_t *entry_masks,
+                                       std::size_t group_count);
     [[nodiscard]] std::uint64_t dispatch_work_count() const noexcept { return dispatch_work_count_; }
 
     AllegrexContext &cpu() noexcept;

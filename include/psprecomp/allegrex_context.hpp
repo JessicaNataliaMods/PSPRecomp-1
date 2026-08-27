@@ -839,7 +839,11 @@ struct alignas(16) AllegrexContext {
         if (vfpu_ctrl[0] == 0xE4u && vfpu_ctrl[1] == 0xE4u && vfpu_ctrl[2] == 0u) {
             constexpr std::size_t s0i = vfpu_vector_lane_index(SourceRegister, Length, 0u);
             constexpr std::size_t t0i = vfpu_vector_lane_index(TargetRegister, Length, 0u);
-            float sum = vfpu[s0i] * vfpu[t0i];
+            // Preserve the architectural accumulation order exactly, including
+            // signed-zero behavior. clang-cl exposed a bit difference when the
+            // first product was used as the accumulator seed.
+            float sum = 0.0f;
+            sum += vfpu[s0i] * vfpu[t0i];
             if constexpr (Length >= 2u) {
                 constexpr std::size_t si = vfpu_vector_lane_index(SourceRegister, Length, 1u);
                 constexpr std::size_t ti = vfpu_vector_lane_index(TargetRegister, Length, 1u);
@@ -866,10 +870,11 @@ struct alignas(16) AllegrexContext {
         // VDOT prefix semantics use a four-lane view even for a shorter encoded vector.
         apply_vfpu_source_prefix_ct<4u, 0u>(source);
         apply_vfpu_source_prefix_ct<4u, 1u>(target);
-        const float result[1]{
-            source[0] * target[0] + source[1] * target[1] +
-            source[2] * target[2] + source[3] * target[3]
-        };
+        float result[1]{0.0f};
+        // Match execute_vfpu_vdot() lane-by-lane so /O2 cannot change the
+        // bit-visible grouping of the PSP VFPU dot product.
+        for (std::uint32_t lane = 0u; lane < 4u; ++lane)
+            result[0] += source[lane] * target[lane];
         write_vfpu_vector_with_destination_prefix_ct<DestinationScalarRegister, 1u>(result);
     }
 
@@ -1854,8 +1859,12 @@ struct alignas(16) AllegrexContext {
         };
         apply_vfpu_source_prefix_ct<4u, 0u>(final_row);
         apply_vfpu_source_prefix_ct<4u, 1u>(target);
-        result[Side - 1u] = final_row[0] * target[0] + final_row[1] * target[1] +
-                            final_row[2] * target[2] + final_row[3] * target[3];
+        // Keep the prefixed final row in the same accumulation order as the
+        // architectural/reference path. clang-cl may contract/reassociate the
+        // four-term expression differently, which is visible to VFPU bit-exact tests.
+        result[Side - 1u] = 0.0f;
+        for (std::uint32_t column = 0u; column < 4u; ++column)
+            result[Side - 1u] += final_row[column] * target[column];
         const std::uint32_t destination_prefix = vfpu_ctrl[2];
         constexpr std::uint32_t last_lane = Side - 1u;
         vfpu_ctrl[2] = ((destination_prefix & (1u << 8u)) << last_lane) |
