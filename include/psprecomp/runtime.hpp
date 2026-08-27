@@ -190,6 +190,12 @@ public:
     [[nodiscard]] bool invoke_chained_unit(AllegrexContext &ctx, std::uint32_t unit_index,
                                            GuestMemory::AotFastView *shared_aot_mem = nullptr);
 
+    // V8.11: scheduler-exact top-level local redispatch. Generated code keeps
+    // the proven 256-JR boundary, publishes ctx.pc, and asks Runtime to perform
+    // the same logical outer-dispatch accounting without paying PC->unit lookup
+    // and native function return/re-entry when it is safe to remain in-place.
+    [[nodiscard]] bool continue_generated_local_dispatch(AllegrexContext &ctx);
+
     // Compile-time direct chain shared implementation. V8.8 adds a trusted
     // specialization for title profiles that can prove at build time that the
     // target 16 KiB generated bucket contains no import/HLE/host replacement.
@@ -584,6 +590,9 @@ private:
     // ownership while native AOT frames may still be nested. Cleared at the
     // beginning of each outer Runtime dispatch.
     bool chain_context_invalidated_{};
+    // Enabled only inside Runtime::run's production outer loop when no outer
+    // dispatch observer/heartbeat/progress contract would be skipped.
+    bool local_redispatch_fastpath_active_{};
     // Per-runtime sampler ticket. Only touched when hotspot profiling is on;
     // keeping it local avoids contending on a process-global counter.
     std::uint64_t guest_hotspot_ticket_{};

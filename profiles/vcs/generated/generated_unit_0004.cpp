@@ -7,134 +7,30 @@
 #include <limits>
 
 namespace psprecomp {
-static const std::uint16_t kEntryIds_recomp_unit_0004[4058] = {
-    1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 5, 0, 6, 0, 0, 0, 0, 0,
-    0, 7, 0, 8, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    11, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 16, 0,
-    0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 21,
-    0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 26, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 28, 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
-    31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 33, 0, 0, 0, 34, 0, 0,
-    0, 35, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 37, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 40, 0,
-    41, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 44, 0, 45, 46, 0, 47, 0, 48, 49, 0, 50, 0, 0,
-    0, 0, 51, 0, 52, 53, 0, 54, 0, 0, 0, 55, 0, 56, 57, 0, 58, 0, 0, 0, 59, 60, 0, 61, 0, 62, 0, 0, 63, 0, 0, 64,
-    0, 65, 0, 0, 66, 0, 0, 0, 67, 0, 68, 0, 0, 0, 69, 0, 0, 0, 70, 0, 0, 0, 71, 0, 0, 72, 0, 0, 73, 0, 0, 74,
-    0, 75, 76, 0, 77, 0, 78, 0, 0, 0, 79, 0, 0, 80, 0, 0, 81, 0, 0, 82, 0, 83, 84, 0, 85, 0, 86, 0, 0, 0, 87, 0,
-    0, 88, 0, 0, 89, 0, 0, 90, 0, 91, 92, 0, 93, 0, 94, 0, 0, 0, 95, 0, 96, 0, 97, 0, 0, 98, 0, 0, 99, 0, 100, 101,
-    0, 102, 0, 103, 0, 0, 0, 104, 0, 105, 0, 106, 0, 0, 107, 0, 0, 108, 0, 109, 110, 0, 111, 0, 112, 0, 0, 0, 113, 114, 0, 115,
-    0, 0, 116, 0, 0, 117, 0, 118, 119, 0, 120, 0, 121, 0, 0, 0, 122, 0, 123, 0, 124, 0, 0, 125, 0, 0, 126, 0, 127, 128, 0, 129,
-    0, 130, 0, 0, 0, 131, 0, 132, 0, 133, 0, 0, 134, 0, 0, 135, 0, 136, 137, 0, 138, 0, 139, 0, 0, 0, 140, 0, 0, 0, 0, 141,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 143, 0, 144, 0, 145, 0, 0, 0, 0, 0, 146, 0, 0, 0, 0, 147, 0, 0, 0, 0, 148, 0, 0, 149, 0,
-    0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 151, 0, 0, 152, 0, 0, 0, 153, 0, 0, 0, 0, 154, 0,
-    0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 156, 0, 0, 0, 157, 0, 158, 0, 159, 0, 0, 160, 0, 0, 0,
-    161, 0, 0, 0, 0, 162, 0, 0, 0, 0, 163, 0, 0, 0, 0, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 165, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 166, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 167, 0, 0, 168, 0, 0, 0, 169, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 171, 0, 0, 172, 0, 0, 0, 0, 0, 0, 0, 0, 0, 173, 0, 0, 0, 0,
-    0, 0, 174, 0, 0, 0, 0, 175, 0, 0, 0, 176, 0, 177, 0, 0, 178, 179, 0, 0, 0, 180, 0, 0, 0, 181, 0, 0, 0, 182, 0, 0,
-    183, 0, 0, 184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 185, 0, 0, 186, 0, 0, 187, 0, 0, 0, 0, 0,
-    0, 188, 0, 0, 189, 0, 0, 190, 0, 0, 191, 0, 192, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 193, 0, 0, 194, 0, 0, 195, 0, 0,
-    0, 0, 196, 0, 0, 0, 0, 0, 0, 0, 0, 197, 0, 0, 0, 0, 0, 0, 198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 199, 200, 0, 0,
-    0, 0, 201, 0, 202, 0, 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 204, 0, 205, 0, 0, 206, 0, 0, 0, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 208, 0, 209, 0, 0, 0, 210, 0, 0,
-    0, 211, 0, 0, 0, 212, 0, 0, 213, 0, 0, 0, 0, 0, 214, 0, 0, 215, 0, 216, 217, 0, 0, 0, 0, 0, 218, 0, 0, 219, 0, 0,
-    220, 0, 221, 222, 0, 223, 0, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 225, 0, 226, 227, 0, 228, 0, 0, 229, 0, 230,
-    0, 0, 231, 0, 232, 233, 0, 234, 0, 0, 235, 0, 0, 0, 0, 0, 0, 0, 0, 236, 0, 237, 0, 0, 238, 0, 239, 240, 0, 241, 0, 0,
-    0, 242, 0, 0, 0, 0, 0, 243, 0, 0, 0, 244, 0, 245, 0, 0, 0, 0, 0, 0, 0, 0, 246, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 248, 0, 0, 249, 0,
-    250, 0, 251, 0, 0, 0, 0, 0, 0, 0, 252, 0, 0, 253, 0, 0, 0, 254, 255, 0, 256, 0, 0, 0, 0, 0, 0, 0, 257, 0, 0, 258,
-    0, 259, 0, 260, 0, 261, 262, 0, 0, 0, 263, 0, 264, 265, 0, 266, 0, 0, 0, 0, 0, 0, 0, 267, 0, 0, 268, 0, 0, 0, 269, 270,
-    0, 271, 0, 0, 0, 0, 0, 0, 0, 0, 0, 272, 0, 0, 273, 0, 0, 0, 0, 274, 0, 0, 0, 275, 0, 276, 0, 277, 0, 0, 0, 0,
-    278, 0, 0, 279, 0, 0, 0, 280, 0, 0, 0, 281, 0, 0, 0, 282, 283, 0, 284, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 285, 0, 286, 0, 287, 0, 288, 0, 289, 0, 0, 290, 0, 0, 0, 0, 0, 291, 0, 0, 0, 0, 0, 292, 0, 0, 0, 0, 0, 293, 0,
-    0, 0, 0, 0, 294, 0, 0, 0, 0, 0, 0, 0, 0, 0, 295, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 296, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 298, 0, 0, 0, 0, 0, 0, 299, 0, 0, 0, 0, 0, 0, 300, 0,
-    301, 0, 0, 0, 0, 0, 0, 0, 302, 0, 0, 0, 0, 0, 0, 0, 303, 0, 0, 0, 0, 0, 0, 0, 0, 0, 304, 0, 0, 305, 0, 0,
-    0, 0, 306, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 307, 308, 0, 309, 0, 0, 0, 0, 0, 0, 0, 0, 310, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 311, 0, 0, 0, 0, 0, 0, 0, 0, 312, 313, 0, 0, 0, 0, 0, 0, 0, 0, 314, 0, 0, 0, 0, 0, 0, 0, 315,
-    0, 0, 316, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 317, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 318, 0, 0, 0, 0, 0,
-    0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 321, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 322, 0, 0, 323, 0, 0, 0, 324, 0, 0, 0, 0, 325, 0, 0, 0, 0, 0, 0, 0, 326, 0, 0, 0, 0,
-    327, 0, 0, 328, 0, 0, 0, 0, 0, 0, 329, 0, 0, 0, 0, 0, 0, 330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 331, 332, 0, 0,
-    0, 0, 0, 0, 333, 0, 334, 0, 0, 0, 0, 0, 0, 335, 0, 336, 337, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 338, 0, 0, 339, 0, 0, 0, 340, 0, 0, 0, 0, 0, 341, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 342, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 343, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 344, 345, 0, 0, 0, 0, 346, 0, 347, 0, 0, 0, 0, 0,
-    0, 0, 0, 348, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 349, 0, 350, 0,
-    0, 351, 0, 0, 0, 0, 0, 0, 352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 353, 0, 354, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 356, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 357, 0, 0, 358, 0, 0, 0, 0, 0, 0, 0, 0, 0, 359, 0, 0, 360, 0, 0, 0,
-    0, 0, 361, 0, 0, 362, 0, 363, 0, 364, 0, 0, 365, 0, 0, 0, 366, 0, 0, 367, 0, 0, 0, 0, 0, 0, 368, 0, 369, 0, 370, 0,
-    0, 0, 371, 0, 372, 373, 0, 374, 0, 375, 0, 0, 376, 0, 377, 0, 0, 0, 378, 0, 0, 0, 0, 0, 0, 379, 0, 0, 380, 0, 0, 0,
-    0, 0, 0, 381, 0, 0, 382, 0, 0, 0, 0, 0, 0, 383, 0, 0, 384, 0, 0, 0, 0, 0, 0, 385, 0, 0, 386, 0, 0, 0, 0, 0,
-    0, 387, 0, 0, 388, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 389, 0, 0, 0, 0, 0, 0, 0, 0, 0, 390, 0, 0, 0, 391, 0, 0,
-    392, 0, 0, 0, 0, 0, 0, 0, 393, 0, 0, 394, 0, 0, 0, 0, 0, 0, 395, 0, 0, 396, 0, 0, 0, 0, 0, 0, 397, 0, 0, 398,
-    0, 0, 0, 0, 0, 0, 399, 0, 0, 400, 0, 0, 0, 0, 0, 0, 401, 0, 0, 402, 0, 0, 0, 0, 0, 0, 0, 0, 0, 403, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 404, 0, 405, 0, 0, 0, 406, 0, 0, 407, 0, 0, 0, 0, 0, 0, 0, 408, 0, 0, 409, 0, 0, 0, 0,
-    0, 0, 410, 0, 0, 411, 0, 0, 0, 0, 0, 0, 412, 0, 0, 413, 0, 0, 0, 0, 0, 0, 414, 0, 0, 415, 0, 0, 0, 0, 0, 0,
-    416, 0, 0, 417, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 418, 0, 0, 0, 0, 0, 0, 0, 0, 0, 419, 0, 0, 0, 420, 0, 0, 421,
-    0, 0, 0, 0, 0, 0, 0, 422, 0, 0, 423, 0, 0, 0, 0, 0, 0, 424, 0, 0, 425, 0, 0, 0, 0, 0, 0, 426, 0, 0, 427, 0,
-    0, 0, 0, 0, 0, 428, 0, 0, 429, 0, 0, 0, 0, 0, 0, 430, 0, 0, 431, 0, 0, 0, 0, 0, 0, 0, 0, 0, 432, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 433, 0, 434, 435, 0, 0, 0, 436, 0, 0, 437, 0, 0, 0, 0, 0, 0, 438, 0, 0, 439, 0, 0, 0, 0, 0,
-    0, 440, 0, 0, 441, 0, 0, 0, 0, 0, 0, 442, 0, 0, 443, 0, 0, 0, 0, 444, 0, 0, 0, 0, 0, 0, 445, 0, 0, 0, 446, 0,
-    0, 0, 447, 0, 0, 448, 0, 0, 0, 449, 0, 0, 450, 0, 0, 0, 451, 0, 0, 452, 0, 0, 0, 453, 0, 0, 454, 0, 0, 455, 0, 0,
-    0, 0, 0, 0, 456, 0, 0, 0, 457, 0, 458, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 459, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 460, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 461, 0,
-    0, 0, 0, 462, 0, 0, 0, 463, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 464, 465, 0, 0, 466, 0, 0, 0, 0, 0,
-    0, 467, 0, 0, 468, 0, 0, 0, 0, 0, 0, 0, 0, 0, 469, 0, 0, 470, 0, 0, 0, 0, 0, 0, 0, 0, 0, 471, 0, 0, 472, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 473, 0, 0, 474, 0, 0, 0, 0, 0, 0, 0, 0, 475, 0, 0, 0, 0, 0, 0, 476, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 477, 0, 0, 0, 0, 0, 0, 0, 478, 0, 0, 0, 479, 0, 0, 0, 0, 0, 0, 480,
-    0, 0, 0, 0, 0, 0, 481, 0, 0, 0, 482, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 483,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 484, 0, 0, 485, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 486, 0, 0, 487, 0, 488, 0, 489, 0, 490, 0, 491, 0, 0, 492, 0, 493, 0, 494, 0, 495, 0, 0, 496, 0,
-    0, 0, 497, 0, 498, 0, 0, 0, 499, 0, 0, 500, 0, 501, 0, 0, 502, 0, 503, 504, 0, 0, 505, 0, 506, 0, 0, 0, 0, 0, 0, 0,
-    0, 507, 0, 0, 0, 0, 0, 0, 0, 508, 509, 0, 510, 0, 511, 512, 0, 513, 0, 514, 0, 0, 0, 0, 0, 515, 0, 0, 0, 0, 516, 0,
-    0, 0, 0, 517, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 518, 0,
-    0, 0, 0, 519, 0, 0, 0, 0, 0, 520, 0, 0, 0, 521, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 522, 0, 0, 0, 523, 0, 0, 0, 0, 524, 0, 0, 0, 0, 0, 525, 0, 0, 0, 0, 526, 0, 527,
-    0, 0, 0, 0, 0, 528, 0, 0, 0, 0, 0, 529, 0, 0, 0, 0, 530, 0, 0, 0, 0, 531, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 532, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 533, 0, 534, 535, 0, 536, 0, 0, 537, 0, 538, 539, 0, 540, 0, 0, 541, 0, 542, 543, 0, 544, 0, 0, 545, 0, 546, 547, 0, 548, 0,
-    0, 0, 549, 0, 550, 551, 0, 552, 0, 0, 553, 0, 554, 555, 0, 556, 0, 0, 0, 0, 0, 0, 557, 0, 558, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 559, 0, 0, 0, 0, 0, 560, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 561, 0, 0, 0, 0, 0, 0, 562, 0, 0, 0, 0, 0, 0, 563, 0, 0, 0, 0, 0, 0,
-    564, 0, 0, 0, 0, 0, 0, 0, 565, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 566, 0, 0, 0, 567, 0, 0, 568, 0, 0, 0, 569, 0, 0, 0, 570, 0, 0, 571, 0, 0, 0, 0, 0, 0, 0, 0, 572, 0, 0, 573,
-    0, 0, 574, 0, 0, 575, 0, 0, 576, 0, 0, 577, 0, 0, 578, 0, 0, 579, 0, 0, 580, 0, 0, 581, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 582, 0, 0, 0, 0, 0, 583, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 584, 0, 0, 0, 585, 0, 0, 0, 0, 586, 0, 0, 0, 0, 587, 0, 0, 0, 588, 0, 0, 589, 0, 0,
-    0, 0, 590, 0, 0, 0, 0, 591, 0, 0, 592, 0, 0, 593, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 594, 0, 0, 0, 0, 0, 0, 595, 0, 596, 597, 0, 0, 598, 0, 599, 600, 0, 0, 601, 0, 602, 603, 0, 0, 604, 0, 605,
-    606, 0, 0, 607, 0, 608, 609, 0, 0, 610, 0, 611, 612, 0, 0, 613, 0, 614, 615, 0, 0, 616, 0, 617, 618, 0, 0, 619, 0, 620, 621, 0,
-    0, 622, 0, 623, 624, 0, 0, 625, 0, 626, 627, 0, 0, 628, 0, 629, 630, 0, 0, 631, 0, 632, 633, 0, 0, 634, 0, 635, 636, 0, 0, 637,
-    0, 638, 639, 0, 0, 640, 0, 641, 642, 0, 0, 643, 0, 644, 645, 0, 0, 646, 0, 647, 648, 0, 0, 649, 0, 650, 651, 0, 0, 652, 0, 653,
-    654, 0, 0, 655, 0, 656, 657, 0, 0, 658, 0, 659, 660, 0, 0, 661, 0, 662, 663, 0, 0, 664, 0, 665, 666, 0, 0, 667, 0, 668, 669, 0,
-    0, 670, 0, 671, 672, 0, 0, 673, 0, 674, 675, 0, 0, 676, 0, 677, 678, 0, 0, 679, 0, 680, 681, 0, 0, 682, 0, 683, 684, 0, 0, 685,
-    0, 686, 687, 0, 0, 688, 0, 689, 690, 0, 0, 691, 0, 692, 693, 0, 0, 694, 0, 695, 696, 0, 0, 697, 0, 698, 699, 0, 0, 700, 0, 701,
-    702, 0, 0, 703, 0, 704, 705, 0, 0, 706, 0, 707, 708, 0, 0, 709, 0, 710, 711, 0, 0, 712, 0, 713, 714, 0, 0, 715, 0, 716, 717, 0,
-    0, 718, 0, 719, 720, 0, 0, 721, 0, 722, 723, 0, 0, 724, 0, 725, 726, 0, 0, 727, 0, 728, 729, 0, 0, 730, 0, 731, 732, 0, 0, 733,
-    0, 734, 735, 0, 0, 736, 0, 737, 738, 0, 0, 739, 0, 740, 741, 0, 0, 742, 0, 743, 744, 0, 0, 745, 0, 746, 747, 0, 0, 748, 0, 749,
-    750, 0, 0, 751, 0, 752, 753, 0, 0, 754, 0, 755, 756, 0, 0, 0, 0, 0, 757, 0, 0, 0, 0, 0, 0, 0, 0, 758, 0, 0, 0, 0,
-    0, 0, 0, 759, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 760, 0, 0, 0, 0, 0, 0, 761, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 762, 0, 0, 0, 0, 763, 0, 0, 0, 0, 0, 0, 0, 0, 764, 0, 0, 765, 0, 0, 0, 0,
-    0, 0, 0, 0, 766, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 767, 0, 0, 768, 0, 769, 0, 0, 770, 0, 0, 0, 0, 0, 771, 0,
-    0, 0, 772, 0, 0, 0, 773, 0, 774, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 775, 0, 0, 776, 777, 0, 778, 0, 0, 779, 0, 0, 0, 0, 0, 0, 0, 0, 780, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 781, 0, 782, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 783, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 784, 0, 0, 0, 0, 785, 0, 0, 0, 0, 0, 786, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 787, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 788, 0, 0, 0, 0, 789, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 790, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 791, 0, 0, 792, 0, 0, 0, 0, 793, 0, 0, 794, 0, 0, 0, 795, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 796, 0, 0, 797, 0, 0, 0, 0,
-    798, 0, 0, 799, 0, 0, 0, 800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 801,
+// PSPRECOMP_V811_COMPACT_DISPATCH: 64-slot occupancy masks + per-group base id.
+static constexpr std::uint64_t kEntryMasks_recomp_unit_0004[64] = {
+    0x0001004A05010821ull, 0x8088088044022011ull, 0x0000002008808808ull, 0x2208000180000440ull,
+    0x2D69000544028042ull, 0x9244451292B168B4ull, 0xD254569245692456ull, 0xB49515A4B15A4A8Aull,
+    0x00020000845692A2ull, 0x4224004048420A80ull, 0x0800842112A20010ull, 0x0802401004480080ull,
+    0x0490000922232884ull, 0x3004080424801492ull, 0x2280089400000414ull, 0xA5A000AD241A4122ull,
+    0x004028822D2804B4ull, 0x9016240548000020ull, 0x0A884802C480B46Aull, 0x410412AA00058889ull,
+    0x4081010010004010ull, 0x0201600424010101ull, 0x0400400480806010ull, 0x0808448000040402ull,
+    0x0001A05030020409ull, 0x050C002004004112ull, 0x0500010250000008ull, 0x1200900000040080ull,
+    0x120452B4540912A4ull, 0x2200801204812048ull, 0x2009024090240901ull, 0x0240902409012280ull,
+    0x4812048091004009ull, 0x0481234010048120ull, 0x2489122444084812ull, 0x0000000004000510ull,
+    0x0000000000000000ull, 0x04C0008840000080ull, 0x0810090048024012ull, 0x8000044081101000ull,
+    0x4AA5548004800000ull, 0x420AD602014D2914ull, 0x0000220840000008ull, 0x00210820A1042200ull,
+    0x5A5A5A5A00000040ull, 0x082000000140B4B4ull, 0x0000010102040800ull, 0x0092492490091122ull,
+    0x2442110000082000ull, 0xA69A681000002484ull, 0x9A69A69A69A69A69ull, 0x69A69A69A69A69A6ull,
+    0xA69A69A69A69A69Aull, 0x9A69A69A69A69A69ull, 0x08041A69A69A69A6ull, 0x0900840004080008ull,
+    0x0000014441290010ull, 0x00100014002012C8ull, 0x0100084004001042ull, 0x0000000000000000ull,
+    0x0000000001121200ull, 0x0900000000000000ull, 0x0000000000000089ull, 0x0000000002000000ull,
+};
+static constexpr std::uint16_t kEntryBases_recomp_unit_0004[64] = {
+    1u, 11u, 22u, 28u, 35u, 51u, 75u, 102u, 130u, 143u, 155u, 166u, 174u, 188u, 201u, 211u,
+    231u, 247u, 259u, 278u, 294u, 301u, 311u, 319u, 327u, 338u, 348u, 355u, 361u, 381u, 392u, 404u,
+    416u, 428u, 440u, 456u, 460u, 460u, 467u, 477u, 484u, 497u, 517u, 522u, 532u, 549u, 561u, 566u,
+    582u, 590u, 606u, 638u, 670u, 702u, 734u, 759u, 766u, 775u, 784u, 791u, 791u, 796u, 798u, 801u,
 };
 void recomp_unit_0004_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
@@ -155,13 +51,25 @@ void recomp_unit_0004_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t dir
 // PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
+    std::uint32_t local_redispatch_rounds = 0u;
     std::uint32_t local_pc = ctx.pc;
     std::uint32_t entry_id = direct_entry_id;
 LOCAL_DISPATCH:
     {
     if (entry_id == 0u) {
         const std::uint32_t entry_delta = local_pc - 0x08814000u;
-        entry_id = (entry_delta < 16232u && (entry_delta & 3u) == 0u) ? kEntryIds_recomp_unit_0004[entry_delta >> 2u] : 0u;
+        entry_id = 0u;
+        if (entry_delta < 16232u && (entry_delta & 3u) == 0u) {
+            const std::uint32_t entry_slot = entry_delta >> 2u;
+            const std::uint32_t entry_group = entry_slot >> 6u;
+            const std::uint64_t entry_mask = kEntryMasks_recomp_unit_0004[entry_group];
+            const std::uint64_t entry_bit = 1ull << (entry_slot & 63u);
+            if ((entry_mask & entry_bit) != 0u) {
+                entry_id = static_cast<std::uint16_t>(
+                    kEntryBases_recomp_unit_0004[entry_group] +
+                    std::popcount(entry_mask & (entry_bit - 1ull)));
+            }
+        }
     }
     switch (entry_id) {
     case 1u: goto L_08814000;
@@ -974,9 +882,7 @@ LOCAL_DISPATCH:
 L_08814000:
     aot_fpr_13 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(180)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 <= aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814060;
       }
@@ -986,9 +892,7 @@ L_08814014:
     aot_fpr_13 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     aot_fpr_14 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(176)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814060;
       }
@@ -997,9 +901,7 @@ L_08814014:
 L_0881402C:
     aot_fpr_14 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(172)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 <= aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814060;
       }
@@ -1269,7 +1171,6 @@ L_08814294:
     }
 L_08814318:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 <= ctx.fpr[26])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     aot_gpr_4 = (ctx.gpr[21] + static_cast<std::uint32_t>(40));
       if (branch_taken) {
@@ -1346,7 +1247,6 @@ L_088143E4:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088143F4:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[30] < ctx.fpr[26])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(200)));
       if (branch_taken) {
@@ -1357,9 +1257,7 @@ L_088143F4:
 L_08814404:
     aot_fpr_13 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(188)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 <= ctx.fpr[26])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814444;
       }
@@ -1379,7 +1277,6 @@ L_08814418:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881443C:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814468;
       }
@@ -1406,7 +1303,6 @@ L_08814468:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814478:
     aot_gpr_31 = (0x08814480u);
-    // nop
     if (([&]() { /*PSPRECOMP_RESIDENT_SCHED_SAFE*/ if (rt.resident_generated_leaf_fast_allowed()) return rt.invoke_resident_generated_leaf<&vcs_resident_region_08B0C05C, 194u, 8u, 0x08B0C05Cu>(ctx, &aot_mem, ctx.pc, aot_gpr_4, aot_gpr_5, aot_gpr_6, ctx.gpr[7], ctx.gpr[16], ctx.gpr[28], aot_gpr_29, aot_gpr_31); AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_resident_scheduler_fallback<&recomp_unit_0194_entry, 194u, 8u, 0x08B0C05Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814480u) goto L_08814480;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814480:
@@ -1434,7 +1330,6 @@ L_08814488:
 L_088144C0:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(5844)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088144D8;
       }
@@ -1442,7 +1337,6 @@ L_088144C0:
     }
 L_088144CC:
     aot_gpr_31 = (0x088144D4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088144D4u) goto L_088144D4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088144D4:
@@ -1450,7 +1344,6 @@ L_088144D4:
     goto L_088144D8;
 L_088144D8:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088144EC;
       }
@@ -1458,7 +1351,6 @@ L_088144D8:
     }
 L_088144E0:
     aot_gpr_31 = (0x088144E8u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088144E8u) goto L_088144E8;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088144E8:
@@ -1482,7 +1374,6 @@ L_088144F4:
     }
 L_08814508:
     aot_gpr_31 = (0x08814510u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814510u) goto L_08814510;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814510:
@@ -1505,7 +1396,6 @@ L_0881451C:
     }
 L_0881452C:
     aot_gpr_31 = (0x08814534u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814534u) goto L_08814534;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814534:
@@ -1520,7 +1410,6 @@ L_08814540:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_2 + static_cast<std::uint32_t>(16)));
     aot_gpr_5 = (0u | 5u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08814554;
       }
@@ -1539,7 +1428,6 @@ L_08814554:
     }
 L_0881455C:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814584;
       }
@@ -1559,7 +1447,6 @@ L_08814570:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881457C:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088145C8;
       }
@@ -1583,7 +1470,6 @@ L_08814590:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088145A0:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088145B8;
       }
@@ -1613,7 +1499,6 @@ L_088145C8:
 L_088145D8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-9752)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814610;
       }
@@ -1628,7 +1513,6 @@ L_088145E4:
 L_088145F0:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814608;
       }
@@ -1661,7 +1545,6 @@ L_08814618:
 L_08814628:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-9752)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814660;
       }
@@ -1676,7 +1559,6 @@ L_08814634:
 L_08814640:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814658;
       }
@@ -1709,7 +1591,6 @@ L_08814668:
 L_08814678:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(-9752)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088146B0;
       }
@@ -1724,7 +1605,6 @@ L_08814684:
 L_08814690:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088146A8;
       }
@@ -1779,7 +1659,6 @@ L_088146D8:
 L_088146E4:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088146FC;
       }
@@ -1819,7 +1698,6 @@ L_0881471C:
     }
 L_08814724:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814758;
       }
@@ -1834,7 +1712,6 @@ L_0881472C:
 L_08814738:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814750;
       }
@@ -1869,7 +1746,6 @@ L_08814770:
     goto L_08814774;
 L_08814774:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088147A8;
       }
@@ -1884,7 +1760,6 @@ L_0881477C:
 L_08814788:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088147A0;
       }
@@ -1939,7 +1814,6 @@ L_088147D0:
 L_088147DC:
     ctx.gpr[18] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[18] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088147F4;
       }
@@ -1971,7 +1845,6 @@ L_08814804:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814814:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814868;
       }
@@ -1979,7 +1852,6 @@ L_08814814:
     }
 L_0881481C:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814850;
       }
@@ -1994,7 +1866,6 @@ L_08814824:
 L_08814830:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814848;
       }
@@ -2057,7 +1928,17 @@ L_0881487C:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_088148C4:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-384));
     aot_gpr_5 = (aot_gpr_5 << 4u);
@@ -2083,12 +1964,10 @@ L_088148C4:
     }
 L_0881491C:
     aot_gpr_31 = (0x08814924u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0023_entry, 23u, 617u, 0x088634F8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814924u) goto L_08814924;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814924:
     { const bool branch_taken = aot_gpr_2 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2119,7 +1998,6 @@ L_08814958:
     aot_gpr_5 = (0u | 32u);
     aot_gpr_4 = (aot_gpr_4 & 224u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_088149D4;
       }
@@ -2128,7 +2006,6 @@ L_08814958:
 L_0881496C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[28] + static_cast<std::uint32_t>(7728)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088149D4;
       }
@@ -2165,9 +2042,7 @@ L_08814998:
     aot_gpr_4 = (16256u << 16u);
     aot_fpr_14 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_088149D4;
       }
@@ -2182,7 +2057,6 @@ L_088149D4:
     aot_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(656))))));
     aot_gpr_4 = (aot_gpr_4 & 224u);
     { const bool branch_taken = aot_gpr_4 == ctx.gpr[17];
-    // nop
       if (branch_taken) {
           goto L_088149F8;
       }
@@ -2193,7 +2067,6 @@ L_088149E4:
     aot_gpr_5 = (0u | 64u);
     aot_gpr_4 = (aot_gpr_4 & 224u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2216,7 +2089,6 @@ L_088149F8:
       const std::uint32_t vfpu_words[4]{std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]), std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};
       aot_mem.aot_direct_store32_block(vfpu_address, vfpu_words); }
     aot_gpr_31 = (0x08814A10u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 58u, 0x089604E0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814A10u) goto L_08814A10;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814A10:
@@ -2268,12 +2140,10 @@ L_08814A44:
     }
 L_08814A54:
     aot_gpr_31 = (0x08814A5Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08960424, 87u, 0x08960424u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814A5Cu) goto L_08814A5C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814A5C:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814B90;
       }
@@ -2282,7 +2152,6 @@ L_08814A5C:
 L_08814A64:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[21] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814B4C;
       }
@@ -2292,7 +2161,6 @@ L_08814A70:
     aot_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(656))))));
     aot_gpr_4 = (aot_gpr_4 & 16u);
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814B4C;
       }
@@ -2301,7 +2169,6 @@ L_08814A70:
 L_08814A80:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[21] + static_cast<std::uint32_t>(6880)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(ctx.fpr[22])) && aot_fpr_12 == ctx.fpr[22])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     aot_gpr_4 = (aot_gpr_29 + static_cast<std::uint32_t>(112));
       if (branch_taken) {
@@ -2312,9 +2179,7 @@ L_08814A80:
 L_08814A94:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[21] + static_cast<std::uint32_t>(6884)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(ctx.fpr[22])) && aot_fpr_12 == ctx.fpr[22])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814AEC;
       }
@@ -2323,9 +2188,7 @@ L_08814A94:
 L_08814AA8:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[21] + static_cast<std::uint32_t>(6888)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(ctx.fpr[22])) && aot_fpr_12 == ctx.fpr[22])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814AEC;
       }
@@ -2466,7 +2329,6 @@ L_08814B1C:
 L_08814B4C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[21] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814B90;
       }
@@ -2476,7 +2338,6 @@ L_08814B58:
     aot_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(656))))));
     aot_gpr_4 = (aot_gpr_4 & 16u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814B90;
       }
@@ -2562,7 +2423,6 @@ L_08814BEC:
     aot_fpr_12 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[0]));
     aot_fpr_13 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
     aot_gpr_4 = (17194u << 16u);
       if (branch_taken) {
@@ -2573,9 +2433,7 @@ L_08814BEC:
 L_08814C08:
     aot_fpr_13 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 <= aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814C2C;
       }
@@ -2585,7 +2443,6 @@ L_08814C1C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 16u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08814C34;
       }
@@ -2619,7 +2476,6 @@ L_08814C54:
     aot_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(656))))));
     aot_gpr_4 = (aot_gpr_4 & 8u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814C80;
       }
@@ -2627,9 +2483,7 @@ L_08814C54:
     }
 L_08814C64:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[22] <= ctx.fpr[20])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814C80;
       }
@@ -2638,7 +2492,6 @@ L_08814C64:
 L_08814C74:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[21] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2647,7 +2500,6 @@ L_08814C74:
 L_08814C80:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814E90;
       }
@@ -2679,7 +2531,6 @@ L_08814C8C:
     ctx.gpr[30] = (ctx.gpr[30] & 255u);
     ctx.gpr[20] = (ctx.gpr[20] >> 8u);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     ctx.gpr[23] = (ctx.gpr[20] & 255u);
       if (branch_taken) {
@@ -2710,9 +2561,7 @@ L_08814CE8:
     aot_fpr_14 = std::bit_cast<float>(aot_gpr_4);
     aot_fpr_12 = aot_fpr_12 + aot_fpr_14;
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 <= aot_fpr_12)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08814D1C;
       }
@@ -2765,7 +2614,6 @@ L_08814D30:
 L_08814D5C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[21] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08814E88;
       }
@@ -2796,7 +2644,6 @@ L_08814D88:
     aot_gpr_4 = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_4 = (aot_gpr_4 + aot_gpr_6);
     { const bool branch_taken = ctx.gpr[20] == aot_gpr_4;
-    // nop
       if (branch_taken) {
           goto L_08814DF0;
       }
@@ -2822,7 +2669,6 @@ L_08814DC8:
     aot_gpr_6 = (aot_gpr_2 >> 8u);
     aot_gpr_4 = (aot_gpr_4 + ctx.gpr[7]);
     { const bool branch_taken = aot_gpr_6 != aot_gpr_4;
-    // nop
       if (branch_taken) {
           goto L_08814DF4;
       }
@@ -2836,7 +2682,6 @@ L_08814DF4:
     ctx.gpr[17] = (ctx.gpr[17] & 65535u);
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[17]) < 75 ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814D74;
       }
@@ -2844,7 +2689,6 @@ L_08814DF4:
     }
 L_08814E08:
     { const bool branch_taken = ctx.gpr[18] != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814E88;
       }
@@ -2887,7 +2731,6 @@ L_08814E28:
     goto L_08814E88;
 L_08814E88:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2896,7 +2739,6 @@ L_08814E88:
 L_08814E90:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[28] + static_cast<std::uint32_t>(-7080)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08814EAC;
       }
@@ -2906,7 +2748,6 @@ L_08814E9C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 16u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08814EE4;
       }
@@ -2929,7 +2770,6 @@ L_08814EAC:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814EDC:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2939,7 +2779,6 @@ L_08814EE4:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 29u);
     { const bool branch_taken = aot_gpr_4 == aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08814F14;
       }
@@ -2949,7 +2788,6 @@ L_08814EF4:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 30u);
     { const bool branch_taken = aot_gpr_4 == aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08814F14;
       }
@@ -2959,7 +2797,6 @@ L_08814F04:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[22] + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 31u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_088150B4;
       }
@@ -2968,7 +2805,6 @@ L_08814F04:
 L_08814F14:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[21] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -2992,7 +2828,6 @@ L_08814F38:
     goto L_08814F44;
 L_08814F44:
     aot_gpr_31 = (0x08814F4Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814F4Cu) goto L_08814F4C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814F4C:
@@ -3010,7 +2845,6 @@ L_08814F50:
 L_08814F68:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[17]) < 0;
-    // nop
       if (branch_taken) {
           goto L_08815028;
       }
@@ -3025,7 +2859,6 @@ L_08814F74:
     goto L_08814F80;
 L_08814F80:
     aot_gpr_31 = (0x08814F88u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814F88u) goto L_08814F88;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814F88:
@@ -3061,7 +2894,6 @@ L_08814F9C:
     goto L_08814FD4;
 L_08814FD4:
     aot_gpr_31 = (0x08814FDCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08814FDCu) goto L_08814FDC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08814FDC:
@@ -3075,7 +2907,6 @@ L_08814FE0:
 L_08814FE8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_2 + static_cast<std::uint32_t>(16)));
     { const bool branch_taken = aot_gpr_4 != ctx.gpr[16];
-    // nop
       if (branch_taken) {
           goto L_08814FFC;
       }
@@ -3083,7 +2914,6 @@ L_08814FE8:
     }
 L_08814FF4:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815028;
       }
@@ -3098,7 +2928,6 @@ L_08814FFC:
     goto L_08815008;
 L_08815008:
     aot_gpr_31 = (0x08815010u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815010u) goto L_08815010;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815010:
@@ -3112,7 +2941,6 @@ L_08815014:
 L_0881501C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(aot_gpr_2 + static_cast<std::uint32_t>(25)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815028;
       }
@@ -3132,7 +2960,6 @@ L_08815028:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881504C:
     { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[17]) < 0;
-    // nop
       if (branch_taken) {
           goto L_088150AC;
       }
@@ -3147,7 +2974,6 @@ L_08815054:
     goto L_08815060;
 L_08815060:
     aot_gpr_31 = (0x08815068u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 339u, 0x08B6572Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815068u) goto L_08815068;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815068:
@@ -3162,7 +2988,6 @@ L_08815074:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_2 + static_cast<std::uint32_t>(16)));
     aot_gpr_5 = (0u | 3u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_088150AC;
       }
@@ -3186,7 +3011,6 @@ L_0881509C:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088150AC:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088150D8;
       }
@@ -3226,7 +3050,17 @@ L_088150D8:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08815114:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-384));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(348), ctx.gpr[16]);
@@ -3272,7 +3106,6 @@ L_08815178:
     }
 L_08815180:
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08815340;
       }
@@ -3292,7 +3125,6 @@ L_08815188:
 L_088151A8:
     ctx.gpr[18] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[18] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088151C8;
       }
@@ -3302,7 +3134,6 @@ L_088151B4:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[18] + static_cast<std::uint32_t>(612)));
     aot_gpr_5 = (0u | 2u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_088151C8;
       }
@@ -3313,7 +3144,6 @@ L_088151C4:
     goto L_088151C8;
 L_088151C8:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815340;
       }
@@ -3333,7 +3163,6 @@ L_088151D0:
 L_088151F0:
     ctx.gpr[21] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[21] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815230;
       }
@@ -3346,7 +3175,6 @@ L_088151FC:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815204:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815214;
       }
@@ -3367,7 +3195,6 @@ L_08815218:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[21] + static_cast<std::uint32_t>(2276)));
     aot_gpr_5 = (0u | 2u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08815234;
       }
@@ -3386,7 +3213,6 @@ L_08815230:
     goto L_08815234;
 L_08815234:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815340;
       }
@@ -3406,7 +3232,6 @@ L_0881523C:
 L_0881525C:
     ctx.gpr[18] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[18] == 0u;
-    // nop
       if (branch_taken) {
           goto L_0881527C;
       }
@@ -3416,7 +3241,6 @@ L_08815268:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[18] + static_cast<std::uint32_t>(476)));
     aot_gpr_5 = (0u | 2u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_0881527C;
       }
@@ -3427,7 +3251,6 @@ L_08815278:
     goto L_0881527C;
 L_0881527C:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815340;
       }
@@ -3449,7 +3272,6 @@ L_08815284:
 L_088152AC:
     ctx.gpr[21] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[21] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815340;
       }
@@ -3474,7 +3296,6 @@ L_088152CC:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088152DC:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815300;
       }
@@ -3501,7 +3322,6 @@ L_088152EC:
       const std::uint32_t vfpu_words[4]{std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]), std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};
       aot_mem.aot_direct_store32_block(vfpu_address, vfpu_words); }
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_0881533C;
       }
@@ -3549,7 +3369,6 @@ L_0881533C:
     goto L_08815340;
 L_08815340:
     { const bool branch_taken = ctx.gpr[18] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154F8;
       }
@@ -3596,7 +3415,6 @@ L_08815348:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815384:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154F8;
       }
@@ -3604,12 +3422,10 @@ L_08815384:
     }
 L_0881538C:
     aot_gpr_31 = (0x08815394u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_compact_generated_leaf<&vcs_compact_leaf_08960424, 87u, 0x08960424u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815394u) goto L_08815394;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815394:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154F8;
       }
@@ -3617,7 +3433,6 @@ L_08815394:
     }
 L_0881539C:
     { const bool branch_taken = ctx.gpr[20] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154A0;
       }
@@ -3626,7 +3441,6 @@ L_0881539C:
 L_088153A4:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[16] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154A0;
       }
@@ -3636,9 +3450,7 @@ L_088153B0:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(6880)));
     aot_fpr_13 = std::bit_cast<float>(0u);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(aot_fpr_13)) && aot_fpr_12 == aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08815438;
       }
@@ -3648,9 +3460,7 @@ L_088153C8:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(6884)));
     aot_fpr_13 = std::bit_cast<float>(0u);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(aot_fpr_13)) && aot_fpr_12 == aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08815438;
       }
@@ -3660,9 +3470,7 @@ L_088153E0:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(6888)));
     aot_fpr_13 = std::bit_cast<float>(0u);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_12) || std::isnan(aot_fpr_13)) && aot_fpr_12 == aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08815438;
       }
@@ -3685,7 +3493,6 @@ L_088153F8:
       const std::uint32_t vfpu_words[4]{std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]), std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};
       aot_mem.aot_direct_store32_block(vfpu_address, vfpu_words); }
     aot_gpr_31 = (0x08815410u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 58u, 0x089604E0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815410u) goto L_08815410;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815410:
@@ -3817,7 +3624,6 @@ L_088154A0:
     aot_gpr_4 = (static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int8_t>(aot_mem.aot_direct_load8(aot_gpr_4 + static_cast<std::uint32_t>(656))))));
     aot_gpr_4 = (aot_gpr_4 & 16u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088154F8;
       }
@@ -3841,7 +3647,6 @@ L_088154C0:
       const std::uint32_t vfpu_words[4]{std::bit_cast<std::uint32_t>(vfpu_value[0]), std::bit_cast<std::uint32_t>(vfpu_value[1]), std::bit_cast<std::uint32_t>(vfpu_value[2]), std::bit_cast<std::uint32_t>(vfpu_value[3])};
       aot_mem.aot_direct_store32_block(vfpu_address, vfpu_words); }
     aot_gpr_31 = (0x088154DCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 58u, 0x089604E0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088154DCu) goto L_088154DC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088154DC:
@@ -3875,7 +3680,6 @@ L_088154DC:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088154F8:
     { const bool branch_taken = ctx.gpr[19] == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815B1C;
       }
@@ -3925,7 +3729,6 @@ L_08815540:
 L_08815568:
     ctx.gpr[19] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[19] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088155B4;
       }
@@ -3961,7 +3764,6 @@ L_088155B4:
     goto L_088155B8;
 L_088155B8:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815638;
       }
@@ -4034,7 +3836,6 @@ L_0881565C:
     aot_gpr_5 = (0u | 32u);
     aot_gpr_4 = (aot_gpr_4 & 224u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08815704;
       }
@@ -4043,7 +3844,6 @@ L_0881565C:
 L_0881567C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[28] + static_cast<std::uint32_t>(7728)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815704;
       }
@@ -4084,9 +3884,7 @@ L_088156B8:
     aot_gpr_4 = (16256u << 16u);
     aot_fpr_14 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08815704;
       }
@@ -4124,7 +3922,6 @@ L_08815728:
     aot_gpr_5 = (0u | 64u);
     aot_gpr_4 = (aot_gpr_4 & 224u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08815B1C;
       }
@@ -4192,9 +3989,7 @@ L_088157CC:
 L_088157EC:
     aot_fpr_12 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[20] <= aot_fpr_12)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_0881580C;
       }
@@ -4203,7 +3998,6 @@ L_088157EC:
 L_08815800:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[16] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815B1C;
       }
@@ -4216,7 +4010,6 @@ L_0881580C:
     aot_gpr_4 = (ctx.gpr[16] + aot_gpr_4);
     aot_gpr_4 = (aot_mem.aot_direct_load8(aot_gpr_4 + static_cast<std::uint32_t>(665)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815A78;
       }
@@ -4240,7 +4033,6 @@ L_08815828:
       aot_mem.aot_direct_store32_block(vfpu_address, vfpu_words); }
     ctx.fpr[20] = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(232)));
     aot_gpr_31 = (0x08815844u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0087_entry, 87u, 58u, 0x089604E0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815844u) goto L_08815844;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815844:
@@ -4265,7 +4057,6 @@ L_08815844:
     aot_gpr_4 = (0u < aot_gpr_4 ? 1u : 0u);
     aot_gpr_4 = (aot_gpr_4 & 255u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815874;
       }
@@ -4279,9 +4070,7 @@ L_08815874:
     aot_fpr_13 = std::bit_cast<float>(aot_gpr_4);
     aot_fpr_13 = ctx.fpr[20] - aot_fpr_13;
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08815898;
       }
@@ -4300,9 +4089,7 @@ L_08815898:
     aot_fpr_13 = std::bit_cast<float>(aot_gpr_4);
     aot_fpr_13 = ctx.fpr[20] + aot_fpr_13;
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 <= aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_088158BC;
       }
@@ -4341,7 +4128,6 @@ L_088158C0:
 L_08815904:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[16] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815A70;
       }
@@ -4414,7 +4200,6 @@ L_08815994:
     aot_gpr_6 = (aot_gpr_2 >> 8u);
     aot_gpr_4 = (aot_gpr_5 + aot_gpr_4);
     { const bool branch_taken = aot_gpr_6 != aot_gpr_4;
-    // nop
       if (branch_taken) {
           goto L_088159CC;
       }
@@ -4428,7 +4213,6 @@ L_088159CC:
     ctx.gpr[20] = (ctx.gpr[20] & 65535u);
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[20]) < 75 ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815920;
       }
@@ -4436,7 +4220,6 @@ L_088159CC:
     }
 L_088159E0:
     { const bool branch_taken = ctx.gpr[18] != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815A70;
       }
@@ -4483,7 +4266,6 @@ L_08815A0C:
     goto L_08815A70;
 L_08815A70:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815B1C;
       }
@@ -4505,7 +4287,6 @@ L_08815A84:
     aot_gpr_4 = (aot_mem.aot_direct_load8(aot_gpr_4 + static_cast<std::uint32_t>(665)));
     aot_gpr_5 = (0u | 16u);
     { const bool branch_taken = aot_gpr_4 != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08815AE8;
       }
@@ -4532,7 +4313,6 @@ L_08815AA0:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815AE0:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815B1C;
       }
@@ -4572,7 +4352,17 @@ L_08815B1C:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08815B48:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-96));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(52), std::bit_cast<std::uint32_t>(ctx.fpr[26]));
@@ -4613,7 +4403,6 @@ L_08815BBC:
     aot_gpr_4 = (20224u << 16u);
     aot_fpr_14 = std::bit_cast<float>(aot_gpr_4);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     aot_gpr_4 = (20224u << 16u);
       if (branch_taken) {
@@ -4641,7 +4430,6 @@ L_08815BF0:
 L_08815C08:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(5848)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815C1C;
       }
@@ -4649,7 +4437,6 @@ L_08815C08:
     }
 L_08815C14:
     aot_gpr_31 = (0x08815C1Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08815C1Cu) goto L_08815C1C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815C1C:
@@ -4670,7 +4457,6 @@ L_08815C30:
     aot_gpr_4 = (aot_gpr_4 + static_cast<std::uint32_t>(32304));
     aot_gpr_4 = (aot_mem.aot_direct_load8(aot_gpr_4 + static_cast<std::uint32_t>(2052)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -4679,7 +4465,6 @@ L_08815C30:
 L_08815C40:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[16] + static_cast<std::uint32_t>(6851)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815C68;
       }
@@ -4692,7 +4477,6 @@ L_08815C4C:
     aot_gpr_4 = (ctx.hi);
     aot_gpr_4 = (aot_gpr_4 < static_cast<std::uint32_t>(351) ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -4708,7 +4492,6 @@ L_08815C68:
     }
 L_08815C70:
     { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[22]) < 0;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -4745,7 +4528,6 @@ L_08815C94:
     }
 L_08815C9C:
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -4754,7 +4536,6 @@ L_08815C9C:
 L_08815CA4:
     aot_gpr_4 = (ctx.gpr[17] < static_cast<std::uint32_t>(1) ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088161A0;
       }
@@ -4762,7 +4543,6 @@ L_08815CA4:
     }
 L_08815CB0:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_088161A4;
       }
@@ -5025,7 +4805,6 @@ L_08815EF4:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08815F1C:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08816328;
       }
@@ -5298,7 +5077,6 @@ L_08816170:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816198:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -5486,7 +5264,6 @@ L_08816310:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816320:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08815F1C;
       }
@@ -5515,7 +5292,17 @@ L_08816328:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08816368:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-368));
     aot_gpr_4 = (16217u << 16u);
@@ -5957,7 +5744,17 @@ L_08816368:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_0881651C:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-80));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(40), ctx.gpr[16]);
@@ -5982,7 +5779,6 @@ L_0881651C:
 L_08816578:
     aot_fpr_13 = std::bit_cast<float>(0u);
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[0] < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
     aot_fpr_12 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[0]));
       if (branch_taken) {
@@ -6040,7 +5836,17 @@ L_088165E8:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08816604:
     aot_fpr_12 = ctx.fpr[24] - aot_fpr_12;
     { const bool branch_taken = 0u == 0u;
@@ -6143,7 +5949,6 @@ L_088166D0:
     aot_gpr_4 = (ctx.hi);
     aot_gpr_4 = (aot_gpr_4 < static_cast<std::uint32_t>(351) ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088167A8;
       }
@@ -6242,7 +6047,17 @@ L_088167A8:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_088167FC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-384));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(344), ctx.gpr[18]);
@@ -6296,7 +6111,6 @@ L_08816868:
 L_0881689C:
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[18]) < 8 ? 1u : 0u);
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088168B8;
       }
@@ -6312,7 +6126,6 @@ L_088168A8:
     }
 L_088168B0:
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088168C0;
       }
@@ -6333,7 +6146,6 @@ L_088168C0:
 L_088168C8:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[19] + static_cast<std::uint32_t>(6904)));
     { const bool branch_taken = aot_gpr_4 != ctx.gpr[18];
-    // nop
       if (branch_taken) {
           goto L_088168F8;
       }
@@ -6346,7 +6158,6 @@ L_088168D4:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088168DC:
     { const bool branch_taken = aot_gpr_2 == 0u;
-    // nop
       if (branch_taken) {
           goto L_088168F8;
       }
@@ -6360,7 +6171,6 @@ L_088168E4:
 L_088168EC:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_2 + static_cast<std::uint32_t>(0)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088169A8;
       }
@@ -6370,7 +6180,6 @@ L_088168F8:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[19] + static_cast<std::uint32_t>(6904)));
     aot_gpr_5 = (0u | 255u);
     { const bool branch_taken = aot_gpr_4 == aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08816960;
       }
@@ -6385,7 +6194,6 @@ L_08816910:
     ctx.gpr[20] = (aot_gpr_2 | 0u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[20] + static_cast<std::uint32_t>(0)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08816960;
       }
@@ -6394,7 +6202,6 @@ L_08816910:
 L_08816920:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_4 + static_cast<std::uint32_t>(0)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08816960;
       }
@@ -6402,7 +6209,6 @@ L_08816920:
     }
 L_0881692C:
     aot_gpr_31 = (0x08816934u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0199_entry, 199u, 229u, 0x08B21310u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816934u) goto L_08816934;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816934:
@@ -6414,7 +6220,6 @@ L_08816934:
     goto L_08816940;
 L_08816940:
     aot_gpr_31 = (0x08816948u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 413u, 0x08B65B0Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816948u) goto L_08816948;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816948:
@@ -6458,7 +6263,6 @@ L_088169A4:
     goto L_088169A8;
 L_088169A8:
     { const bool branch_taken = ctx.gpr[17] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088169BC;
       }
@@ -6474,7 +6278,6 @@ L_088169B8:
     goto L_088169BC;
 L_088169BC:
     { const bool branch_taken = ctx.gpr[20] != 0u;
-    // nop
       if (branch_taken) {
           goto L_088169CC;
       }
@@ -6482,7 +6285,6 @@ L_088169BC:
     }
 L_088169C4:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08816BD4;
       }
@@ -6639,7 +6441,6 @@ L_08816B60:
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816B74:
     { const bool branch_taken = 0u == 0u;
-    // nop
       if (branch_taken) {
           goto L_08816BC0;
       }
@@ -6703,7 +6504,17 @@ L_08816BD4:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08816C18:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-208));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(168), ctx.gpr[16]);
@@ -6731,7 +6542,6 @@ L_08816C18:
     }
 L_08816C84:
     aot_gpr_31 = (0x08816C8Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816C8Cu) goto L_08816C8C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816C8C:
@@ -6739,7 +6549,6 @@ L_08816C8C:
     goto L_08816C90;
 L_08816C90:
     aot_gpr_31 = (0x08816C98u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 558u, 0x089BAA88u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816C98u) goto L_08816C98;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816C98:
@@ -6753,7 +6562,6 @@ L_08816C98:
     }
 L_08816CA4:
     aot_gpr_31 = (0x08816CACu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CACu) goto L_08816CAC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CAC:
@@ -6761,7 +6569,6 @@ L_08816CAC:
     goto L_08816CB0;
 L_08816CB0:
     aot_gpr_31 = (0x08816CB8u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 561u, 0x089BAAA8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CB8u) goto L_08816CB8;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CB8:
@@ -6775,7 +6582,6 @@ L_08816CB8:
     }
 L_08816CC4:
     aot_gpr_31 = (0x08816CCCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CCCu) goto L_08816CCC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CCC:
@@ -6783,7 +6589,6 @@ L_08816CCC:
     goto L_08816CD0;
 L_08816CD0:
     aot_gpr_31 = (0x08816CD8u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 558u, 0x089BAA88u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CD8u) goto L_08816CD8;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CD8:
@@ -6797,7 +6602,6 @@ L_08816CD8:
     }
 L_08816CE4:
     aot_gpr_31 = (0x08816CECu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CECu) goto L_08816CEC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CEC:
@@ -6805,7 +6609,6 @@ L_08816CEC:
     goto L_08816CF0;
 L_08816CF0:
     aot_gpr_31 = (0x08816CF8u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 565u, 0x089BAAD0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816CF8u) goto L_08816CF8;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816CF8:
@@ -6820,7 +6623,6 @@ L_08816CF8:
     }
 L_08816D08:
     aot_gpr_31 = (0x08816D10u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816D10u) goto L_08816D10;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816D10:
@@ -6828,7 +6630,6 @@ L_08816D10:
     goto L_08816D14;
 L_08816D14:
     aot_gpr_31 = (0x08816D1Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 561u, 0x089BAAA8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816D1Cu) goto L_08816D1C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816D1C:
@@ -6842,7 +6643,6 @@ L_08816D1C:
     }
 L_08816D28:
     aot_gpr_31 = (0x08816D30u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 351u, 0x08B657E8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816D30u) goto L_08816D30;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816D30:
@@ -6850,7 +6650,6 @@ L_08816D30:
     goto L_08816D34;
 L_08816D34:
     aot_gpr_31 = (0x08816D3Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0109_entry, 109u, 569u, 0x089BAAFCu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08816D3Cu) goto L_08816D3C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08816D3C:
@@ -6922,7 +6721,6 @@ L_08816DEC:
     aot_mem.aot_direct_store32(ctx.gpr[19] + static_cast<std::uint32_t>(36), std::bit_cast<std::uint32_t>(aot_fpr_13));
     aot_fpr_13 = std::bit_cast<float>(aot_mem.aot_direct_load32(ctx.gpr[20] + static_cast<std::uint32_t>(0)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_12 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_13));
         goto L_08816E2C;
@@ -6933,7 +6731,6 @@ L_08816E2C:
     aot_fpr_13 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[26]));
     ctx.fpr[22] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_12));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_13 < aot_fpr_14)) ? 0x00800000u : 0u);
-    // nop
     if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_13 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_14));
         goto L_08816E48;
@@ -6944,7 +6741,6 @@ L_08816E48:
     aot_fpr_14 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[20]));
     ctx.fpr[26] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_13));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_14 <= aot_fpr_15)) ? 0x00800000u : 0u);
-    // nop
     if (((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_14 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_15));
         goto L_08816E64;
@@ -6955,7 +6751,6 @@ L_08816E64:
     aot_fpr_15 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[24]));
     ctx.fpr[20] = std::bit_cast<float>(std::bit_cast<std::uint32_t>(aot_fpr_14));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_15 <= ctx.fpr[16])) ? 0x00800000u : 0u);
-    // nop
     if (((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_15 = std::bit_cast<float>(std::bit_cast<std::uint32_t>(ctx.fpr[16]));
         goto L_08816E80;
@@ -6998,9 +6793,7 @@ L_08816EA0:
     aot_fpr_14 = std::bit_cast<float>(ctx.fpu_float_to_word_ct<3u>(ctx.fpr[19]));
     aot_fpr_14 = static_cast<float>(static_cast<std::int32_t>(std::bit_cast<std::uint32_t>(aot_fpr_14)));
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(ctx.fpr[2]) || std::isnan(aot_fpr_12)) && ctx.fpr[2] == aot_fpr_12)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08816F20;
       }
@@ -7008,9 +6801,7 @@ L_08816EA0:
     }
 L_08816F04:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[18] <= ctx.fpr[17])) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08816F20;
       }
@@ -7023,9 +6814,7 @@ L_08816F14:
     goto L_08816F20;
 L_08816F20:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((!(std::isnan(aot_fpr_14) || std::isnan(aot_fpr_13)) && aot_fpr_14 == aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = !((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08816F4C;
       }
@@ -7033,9 +6822,7 @@ L_08816F20:
     }
 L_08816F30:
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[16] <= aot_fpr_15)) ? 0x00800000u : 0u);
-    // nop
     { const bool branch_taken = ((ctx.fcr31 & 0x00800000u) != 0u);
-    // nop
       if (branch_taken) {
           goto L_08816F4C;
       }
@@ -7199,7 +6986,6 @@ L_088170D8:
 L_088170E8:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[28] + static_cast<std::uint32_t>(-7080)));
     { const bool branch_taken = aot_gpr_4 == 0u;
-    // nop
       if (branch_taken) {
           goto L_08817108;
       }
@@ -7263,7 +7049,17 @@ L_08817134:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08817190:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-16));
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[28] + static_cast<std::uint32_t>(5852)));
@@ -7279,7 +7075,6 @@ L_08817190:
     }
 L_088171AC:
     aot_gpr_31 = (0x088171B4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088171B4u) goto L_088171B4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088171B4:
@@ -7296,7 +7091,6 @@ L_088171B8:
     }
 L_088171C4:
     aot_gpr_31 = (0x088171CCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088171CCu) goto L_088171CC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088171CC:
@@ -7313,7 +7107,6 @@ L_088171D0:
     }
 L_088171DC:
     aot_gpr_31 = (0x088171E4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088171E4u) goto L_088171E4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088171E4:
@@ -7330,7 +7123,6 @@ L_088171E8:
     }
 L_088171F4:
     aot_gpr_31 = (0x088171FCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088171FCu) goto L_088171FC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088171FC:
@@ -7347,7 +7139,6 @@ L_08817200:
     }
 L_0881720C:
     aot_gpr_31 = (0x08817214u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817214u) goto L_08817214;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817214:
@@ -7364,7 +7155,6 @@ L_08817218:
     }
 L_08817224:
     aot_gpr_31 = (0x0881722Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881722Cu) goto L_0881722C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881722C:
@@ -7381,7 +7171,6 @@ L_08817230:
     }
 L_0881723C:
     aot_gpr_31 = (0x08817244u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817244u) goto L_08817244;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817244:
@@ -7398,7 +7187,6 @@ L_08817248:
     }
 L_08817254:
     aot_gpr_31 = (0x0881725Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881725Cu) goto L_0881725C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881725C:
@@ -7415,7 +7203,6 @@ L_08817260:
     }
 L_0881726C:
     aot_gpr_31 = (0x08817274u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817274u) goto L_08817274;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817274:
@@ -7432,7 +7219,6 @@ L_08817278:
     }
 L_08817284:
     aot_gpr_31 = (0x0881728Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881728Cu) goto L_0881728C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881728C:
@@ -7449,7 +7235,6 @@ L_08817290:
     }
 L_0881729C:
     aot_gpr_31 = (0x088172A4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088172A4u) goto L_088172A4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088172A4:
@@ -7466,7 +7251,6 @@ L_088172A8:
     }
 L_088172B4:
     aot_gpr_31 = (0x088172BCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088172BCu) goto L_088172BC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088172BC:
@@ -7483,7 +7267,6 @@ L_088172C0:
     }
 L_088172CC:
     aot_gpr_31 = (0x088172D4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088172D4u) goto L_088172D4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088172D4:
@@ -7500,7 +7283,6 @@ L_088172D8:
     }
 L_088172E4:
     aot_gpr_31 = (0x088172ECu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088172ECu) goto L_088172EC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088172EC:
@@ -7517,7 +7299,6 @@ L_088172F0:
     }
 L_088172FC:
     aot_gpr_31 = (0x08817304u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817304u) goto L_08817304;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817304:
@@ -7534,7 +7315,6 @@ L_08817308:
     }
 L_08817314:
     aot_gpr_31 = (0x0881731Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881731Cu) goto L_0881731C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881731C:
@@ -7551,7 +7331,6 @@ L_08817320:
     }
 L_0881732C:
     aot_gpr_31 = (0x08817334u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817334u) goto L_08817334;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817334:
@@ -7568,7 +7347,6 @@ L_08817338:
     }
 L_08817344:
     aot_gpr_31 = (0x0881734Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881734Cu) goto L_0881734C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881734C:
@@ -7585,7 +7363,6 @@ L_08817350:
     }
 L_0881735C:
     aot_gpr_31 = (0x08817364u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817364u) goto L_08817364;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817364:
@@ -7602,7 +7379,6 @@ L_08817368:
     }
 L_08817374:
     aot_gpr_31 = (0x0881737Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881737Cu) goto L_0881737C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881737C:
@@ -7619,7 +7395,6 @@ L_08817380:
     }
 L_0881738C:
     aot_gpr_31 = (0x08817394u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817394u) goto L_08817394;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817394:
@@ -7636,7 +7411,6 @@ L_08817398:
     }
 L_088173A4:
     aot_gpr_31 = (0x088173ACu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088173ACu) goto L_088173AC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088173AC:
@@ -7653,7 +7427,6 @@ L_088173B0:
     }
 L_088173BC:
     aot_gpr_31 = (0x088173C4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088173C4u) goto L_088173C4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088173C4:
@@ -7670,7 +7443,6 @@ L_088173C8:
     }
 L_088173D4:
     aot_gpr_31 = (0x088173DCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088173DCu) goto L_088173DC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088173DC:
@@ -7687,7 +7459,6 @@ L_088173E0:
     }
 L_088173EC:
     aot_gpr_31 = (0x088173F4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088173F4u) goto L_088173F4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088173F4:
@@ -7704,7 +7475,6 @@ L_088173F8:
     }
 L_08817404:
     aot_gpr_31 = (0x0881740Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881740Cu) goto L_0881740C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881740C:
@@ -7721,7 +7491,6 @@ L_08817410:
     }
 L_0881741C:
     aot_gpr_31 = (0x08817424u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817424u) goto L_08817424;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817424:
@@ -7738,7 +7507,6 @@ L_08817428:
     }
 L_08817434:
     aot_gpr_31 = (0x0881743Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881743Cu) goto L_0881743C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881743C:
@@ -7755,7 +7523,6 @@ L_08817440:
     }
 L_0881744C:
     aot_gpr_31 = (0x08817454u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817454u) goto L_08817454;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817454:
@@ -7772,7 +7539,6 @@ L_08817458:
     }
 L_08817464:
     aot_gpr_31 = (0x0881746Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881746Cu) goto L_0881746C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881746C:
@@ -7789,7 +7555,6 @@ L_08817470:
     }
 L_0881747C:
     aot_gpr_31 = (0x08817484u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817484u) goto L_08817484;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817484:
@@ -7806,7 +7571,6 @@ L_08817488:
     }
 L_08817494:
     aot_gpr_31 = (0x0881749Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881749Cu) goto L_0881749C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881749C:
@@ -7823,7 +7587,6 @@ L_088174A0:
     }
 L_088174AC:
     aot_gpr_31 = (0x088174B4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088174B4u) goto L_088174B4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088174B4:
@@ -7840,7 +7603,6 @@ L_088174B8:
     }
 L_088174C4:
     aot_gpr_31 = (0x088174CCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088174CCu) goto L_088174CC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088174CC:
@@ -7857,7 +7619,6 @@ L_088174D0:
     }
 L_088174DC:
     aot_gpr_31 = (0x088174E4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088174E4u) goto L_088174E4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088174E4:
@@ -7874,7 +7635,6 @@ L_088174E8:
     }
 L_088174F4:
     aot_gpr_31 = (0x088174FCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088174FCu) goto L_088174FC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088174FC:
@@ -7891,7 +7651,6 @@ L_08817500:
     }
 L_0881750C:
     aot_gpr_31 = (0x08817514u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817514u) goto L_08817514;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817514:
@@ -7908,7 +7667,6 @@ L_08817518:
     }
 L_08817524:
     aot_gpr_31 = (0x0881752Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881752Cu) goto L_0881752C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881752C:
@@ -7925,7 +7683,6 @@ L_08817530:
     }
 L_0881753C:
     aot_gpr_31 = (0x08817544u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817544u) goto L_08817544;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817544:
@@ -7942,7 +7699,6 @@ L_08817548:
     }
 L_08817554:
     aot_gpr_31 = (0x0881755Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881755Cu) goto L_0881755C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881755C:
@@ -7959,7 +7715,6 @@ L_08817560:
     }
 L_0881756C:
     aot_gpr_31 = (0x08817574u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817574u) goto L_08817574;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817574:
@@ -7976,7 +7731,6 @@ L_08817578:
     }
 L_08817584:
     aot_gpr_31 = (0x0881758Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881758Cu) goto L_0881758C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881758C:
@@ -7993,7 +7747,6 @@ L_08817590:
     }
 L_0881759C:
     aot_gpr_31 = (0x088175A4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088175A4u) goto L_088175A4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088175A4:
@@ -8010,7 +7763,6 @@ L_088175A8:
     }
 L_088175B4:
     aot_gpr_31 = (0x088175BCu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088175BCu) goto L_088175BC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088175BC:
@@ -8027,7 +7779,6 @@ L_088175C0:
     }
 L_088175CC:
     aot_gpr_31 = (0x088175D4u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088175D4u) goto L_088175D4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088175D4:
@@ -8044,7 +7795,6 @@ L_088175D8:
     }
 L_088175E4:
     aot_gpr_31 = (0x088175ECu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088175ECu) goto L_088175EC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088175EC:
@@ -8061,7 +7811,6 @@ L_088175F0:
     }
 L_088175FC:
     aot_gpr_31 = (0x08817604u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817604u) goto L_08817604;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817604:
@@ -8078,7 +7827,6 @@ L_08817608:
     }
 L_08817614:
     aot_gpr_31 = (0x0881761Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881761Cu) goto L_0881761C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881761C:
@@ -8095,7 +7843,6 @@ L_08817620:
     }
 L_0881762C:
     aot_gpr_31 = (0x08817634u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817634u) goto L_08817634;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817634:
@@ -8112,7 +7859,6 @@ L_08817638:
     }
 L_08817644:
     aot_gpr_31 = (0x0881764Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881764Cu) goto L_0881764C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881764C:
@@ -8129,7 +7875,6 @@ L_08817650:
     }
 L_0881765C:
     aot_gpr_31 = (0x08817664u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817664u) goto L_08817664;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817664:
@@ -8146,7 +7891,6 @@ L_08817668:
     }
 L_08817674:
     aot_gpr_31 = (0x0881767Cu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0881767Cu) goto L_0881767C;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_0881767C:
@@ -8163,7 +7907,6 @@ L_08817680:
     }
 L_0881768C:
     aot_gpr_31 = (0x08817694u);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08817694u) goto L_08817694;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08817694:
@@ -8180,7 +7923,6 @@ L_08817698:
     }
 L_088176A4:
     aot_gpr_31 = (0x088176ACu);
-    // nop
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_direct<&recomp_unit_0216_entry, 216u, 358u, 0x08B65844u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x088176ACu) goto L_088176AC;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_088176AC:
@@ -8196,7 +7938,17 @@ L_088176B0:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_088176C8:
     aot_mem.aot_direct_store8(aot_gpr_4 + static_cast<std::uint32_t>(0), static_cast<std::uint8_t>(0u));
     aot_mem.aot_direct_store32(aot_gpr_4 + static_cast<std::uint32_t>(4), 0u);
@@ -8216,7 +7968,6 @@ L_088176EC:
     ctx.gpr[9] = (aot_gpr_5 + static_cast<std::uint32_t>(17));
     ctx.gpr[9] = (static_cast<std::int32_t>(ctx.gpr[8]) < static_cast<std::int32_t>(ctx.gpr[9]) ? 1u : 0u);
     { const bool branch_taken = ctx.gpr[9] == 0u;
-    // nop
       if (branch_taken) {
           goto L_0881774C;
       }
@@ -8251,7 +8002,6 @@ L_0881774C:
     ctx.gpr[9] = (aot_gpr_5 + static_cast<std::uint32_t>(16));
     ctx.gpr[9] = (static_cast<std::int32_t>(ctx.gpr[9]) < static_cast<std::int32_t>(ctx.gpr[8]) ? 1u : 0u);
     { const bool branch_taken = ctx.gpr[9] == 0u;
-    // nop
       if (branch_taken) {
           goto L_088177A8;
       }
@@ -8284,7 +8034,6 @@ L_088177A8:
     aot_gpr_6 = (aot_gpr_6 & 65535u);
     aot_gpr_5 = (static_cast<std::int32_t>(aot_gpr_6) < 8 ? 1u : 0u);
     { const bool branch_taken = aot_gpr_5 != 0u;
-    // nop
       if (branch_taken) {
           goto L_088176EC;
       }
@@ -8342,7 +8091,6 @@ L_08817840:
     goto L_0881784C;
 L_0881784C:
     { const bool branch_taken = ctx.gpr[9] != aot_gpr_5;
-    // nop
       if (branch_taken) {
           goto L_08817860;
       }
@@ -8391,7 +8139,17 @@ L_08817898:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_088178A0:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-80));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(44), ctx.gpr[19]);
@@ -8419,7 +8177,6 @@ L_088178A0:
 L_0881790C:
     aot_gpr_4 = (aot_mem.aot_direct_load8(ctx.gpr[16] + static_cast<std::uint32_t>(301)));
     { const bool branch_taken = aot_gpr_4 != 0u;
-    // nop
       if (branch_taken) {
           goto L_08817930;
       }
@@ -8570,7 +8327,17 @@ L_08817A68:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08817A98:
     aot_mem.aot_direct_store8(aot_gpr_4 + static_cast<std::uint32_t>(0), static_cast<std::uint8_t>(0u));
     aot_mem.aot_direct_store32(aot_gpr_4 + static_cast<std::uint32_t>(4), 0u);
@@ -8580,7 +8347,17 @@ L_08817A98:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08817AAC:
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(-32));
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(16), ctx.gpr[18]);
@@ -8691,7 +8468,6 @@ L_08817C24:
 L_08817C30:
     { const float fs = aot_fpr_12; const float ft = ctx.fpr[20]; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) aot_fpr_12 = std::bit_cast<float>(0x7FC00000u); else aot_fpr_12 = fs * ft; }
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((aot_fpr_12 < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_12 = aot_fpr_12 - aot_fpr_13;
         goto L_08817C50;
@@ -8822,7 +8598,6 @@ L_08817DE0:
 L_08817DEC:
     { const float fs = ctx.fpr[20]; const float ft = aot_fpr_12; if ((std::isinf(fs) && ft == 0.0f) || (std::isinf(ft) && fs == 0.0f)) ctx.fpr[20] = std::bit_cast<float>(0x7FC00000u); else ctx.fpr[20] = fs * ft; }
     ctx.fcr31 = (ctx.fcr31 & ~0x00800000u) | (((ctx.fpr[20] < aot_fpr_13)) ? 0x00800000u : 0u);
-    // nop
     if (!((ctx.fcr31 & 0x00800000u) != 0u)) {
     aot_fpr_12 = ctx.fpr[20] - aot_fpr_13;
         goto L_08817E0C;
@@ -8932,7 +8707,17 @@ L_08817E1C:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08817F64:
     ctx.gpr[8] = (17664u << 16u);
     aot_fpr_14 = std::bit_cast<float>(ctx.gpr[8]);

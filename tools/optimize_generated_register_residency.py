@@ -11,7 +11,7 @@ ENTRY_RE=re.compile(r'(void\s+(recomp_unit_\d+)_entry\(Runtime &rt, AllegrexCont
 WRAPPER_RE_TEMPLATE=r'\nvoid\s+{name}\(Runtime &rt, AllegrexContext &ctx\)\s*\{{'
 # All generated chain helpers return bool and may mutate the full guest context.
 CHAIN_RE=re.compile(
-    r'(rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\))')
+    r'(rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\)|rt\.continue_generated_local_dispatch\(ctx\))')
 RESIDENT_RE=re.compile(
     r'(rt\.invoke_resident_generated_leaf<&(?P<fn>[A-Za-z_]\w*),\s*'
     r'(?P<unit>\d+)u,\s*(?P<entry>\d+)u,\s*(?P<pc>0x[0-9A-Fa-f]+)u>'
@@ -24,7 +24,7 @@ RETURN_RE=re.compile(r'\breturn;')
 
 
 
-CHAIN_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); const bool aot_regcache_same_ = \((rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\))\); if \(aot_regcache_same_\) AOT_REGCACHE_SYNC_IN\(\); else aot_regcache_valid = false; return aot_regcache_same_; \}\(\)\)')
+CHAIN_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); const bool aot_regcache_same_ = \((rt\.invoke_(?:chained_trusted_direct|chained_direct|compact_generated_leaf)<[^;\n]+?>\(ctx, &aot_mem\)|rt\.invoke_chained_call\(ctx, &aot_mem\)|rt\.continue_generated_local_dispatch\(ctx\))\); if \(aot_regcache_same_\) AOT_REGCACHE_SYNC_IN\(\); else aot_regcache_valid = false; return aot_regcache_same_; \}\(\)\)')
 RESIDENT_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ /\*PSPRECOMP_RESIDENT_SCHED_SAFE\*/ .*?return (?P<resident>rt\.invoke_resident_generated_leaf<[^;\n]+?>\(ctx, &aot_mem[^;\n]*\)); .*?return aot_regcache_same_; \}\(\)\)')
 NATIVE_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); (rt\.invoke_native_fast_path\([^;\n]+\)); AOT_REGCACHE_SYNC_IN\(\); \}\(\)\)')
 SIGNED_WRAP_RE=re.compile(r'\(\[&\]\(\) \{ AOT_REGCACHE_SYNC_OUT\(\); const bool aot_regcache_ok_ = (ctx\.execute_signed_(?:add|sub)\([^\)]*\)); AOT_REGCACHE_SYNC_IN\(\); return aot_regcache_ok_; \}\(\)\)')

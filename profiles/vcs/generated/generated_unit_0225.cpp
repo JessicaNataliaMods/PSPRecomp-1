@@ -6,135 +6,30 @@
 #include <limits>
 
 namespace psprecomp {
-static const std::uint16_t kEntryIds_recomp_unit_0225[4094] = {
-    1, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 7, 0, 0, 8, 0, 9, 0, 0, 0, 0, 0, 10, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 14,
-    15, 0, 0, 16, 0, 0, 0, 17, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0,
-    0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 22, 0, 23, 0, 0, 0, 0, 24,
-    25, 0, 0, 0, 0, 0, 26, 0, 0, 0, 27, 0, 28, 0, 0, 29, 0, 0, 0, 30, 31, 0, 32, 0, 0, 33, 0, 34, 0, 0, 0, 35,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 37, 0,
-    38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 40, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    45, 0, 46, 0, 0, 0, 47, 0, 0, 48, 0, 49, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 51, 0, 0, 0, 52, 0, 0, 0,
-    0, 0, 0, 0, 53, 0, 0, 54, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 60, 0, 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 62, 0, 0, 63, 0, 0, 64, 0, 0, 65, 0, 66, 0, 0, 67, 0, 68, 0, 0,
-    0, 0, 0, 69, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 71, 0, 0, 72, 0, 0, 0, 73, 0, 74, 0, 0, 0, 0, 75, 0, 0,
-    76, 0, 0, 77, 0, 0, 78, 0, 0, 79, 0, 0, 80, 0, 0, 81, 0, 0, 82, 0, 83, 0, 84, 0, 0, 85, 0, 0, 0, 0, 86, 0,
-    0, 0, 0, 0, 0, 87, 0, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0,
-    0, 0, 0, 0, 91, 92, 0, 0, 0, 93, 0, 0, 0, 0, 94, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 97, 0, 98, 0, 0, 99, 0, 0, 100, 0,
-    0, 101, 0, 0, 0, 0, 0, 102, 0, 0, 103, 0, 0, 0, 104, 0, 0, 0, 105, 0, 0, 106, 107, 0, 108, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 109, 110, 0, 0, 0, 111, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 115, 0,
-    0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117, 0, 0, 118, 0, 0, 0, 0, 0, 0, 119, 0, 0, 0, 120, 0, 0, 0, 0, 0,
-    121, 0, 0, 122, 0, 0, 0, 0, 0, 0, 123, 0, 0, 124, 0, 125, 0, 0, 126, 0, 127, 0, 0, 128, 129, 0, 0, 130, 0, 0, 0, 0,
-    131, 0, 0, 0, 0, 132, 0, 0, 0, 0, 133, 0, 0, 134, 0, 0, 0, 0, 0, 135, 0, 0, 0, 0, 0, 136, 0, 0, 137, 0, 0, 0,
-    0, 138, 0, 0, 0, 139, 0, 0, 0, 140, 0, 0, 0, 141, 0, 0, 0, 0, 142, 0, 0, 0, 0, 0, 0, 0, 143, 0, 0, 0, 0, 144,
-    0, 0, 0, 0, 0, 145, 0, 0, 0, 146, 0, 0, 0, 147, 0, 0, 0, 0, 0, 148, 0, 0, 0, 149, 0, 0, 0, 0, 0, 150, 0, 0,
-    0, 151, 0, 0, 152, 0, 0, 0, 153, 0, 0, 0, 0, 154, 0, 0, 0, 0, 0, 0, 155, 0, 0, 0, 0, 156, 0, 0, 157, 0, 158, 0,
-    0, 0, 159, 0, 0, 0, 0, 0, 160, 0, 0, 0, 0, 161, 0, 0, 0, 0, 0, 0, 0, 162, 0, 0, 163, 0, 0, 0, 0, 164, 0, 0,
-    0, 0, 0, 165, 0, 0, 0, 166, 0, 0, 0, 167, 0, 0, 0, 0, 168, 0, 0, 0, 169, 0, 0, 0, 0, 170, 0, 0, 171, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 172, 0, 0, 0, 0, 0, 0, 0, 0, 0, 173, 0, 0, 0, 0, 0, 0, 0, 174, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 175, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176, 0, 0, 0, 0, 0, 0, 177, 0, 0, 0, 178, 0, 0,
-    0, 0, 179, 0, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 181, 0, 0, 0, 0, 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 183, 0, 0, 0, 0, 0, 0, 0, 184, 0, 0, 0, 0, 0, 0, 0, 185, 0, 0, 0, 0, 0, 186, 0, 0, 0, 0, 0, 0, 0,
-    0, 187, 0, 0, 0, 0, 188, 0, 0, 0, 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 190, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 0, 0, 0, 192, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 193, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 195, 0, 0, 0, 196, 0, 0, 0, 0, 197,
-    0, 198, 0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 0, 0, 0, 0, 201, 0, 202, 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 204, 205, 0, 0, 0, 0,
-    0, 0, 206, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 0, 0, 0, 0, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 211,
-    0, 0, 0, 0, 0, 0, 0, 212, 0, 0, 0, 0, 0, 0, 0, 0, 213, 0, 0, 0, 0, 0, 214, 0, 0, 0, 0, 0, 0, 215, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 216, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 217, 0, 0, 0, 0, 0, 218, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 219, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 220, 0, 0, 0, 0, 0, 221, 0, 0, 222, 223, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    225, 0, 0, 226, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 227, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 229, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 230, 0, 231, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 232, 0, 0, 0, 0, 0, 0, 0, 233, 234, 235, 236, 237, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 238, 0, 0, 0, 0, 0, 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 241, 0, 242, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 243, 0, 0, 0, 0, 0, 244, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 245, 0, 0, 0, 0, 0, 0, 246, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 248, 0, 0, 0,
-    0, 0, 0, 249, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 250, 0, 0, 251, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 253, 0, 0, 0, 0, 0, 0, 254, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 256,
-    0, 0, 0, 0, 0, 0, 257, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 258, 0, 0, 259, 0, 0, 0, 260, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 261, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 262, 0, 0, 0, 0, 0, 0, 263, 0, 264, 0, 0, 0, 0, 265, 0, 0, 266, 0,
-    0, 0, 267, 0, 0, 0, 0, 0, 0, 268, 0, 0, 0, 0, 269, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 270, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 271, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 272, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 273, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 274, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 275, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 276, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 277, 0, 278, 0, 0, 0, 0, 0, 279, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 280, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 281, 0, 0, 0, 282, 0, 0, 0, 0, 0, 0, 0, 283, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 284,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 285, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 286, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 287, 0, 0, 0, 0, 0, 0, 0, 0, 0, 288, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 289, 0, 0, 0, 0, 0, 0, 290, 0, 291, 0, 0, 0, 0, 292, 0, 0, 0, 293, 0, 0, 294, 0,
-    0, 0, 0, 0, 295, 296, 0, 0, 0, 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 298, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 299, 0, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 301, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 302, 0, 0, 303, 0, 0, 0, 0, 0, 304, 0, 0, 0, 305, 0, 0, 0, 0, 0, 0, 0, 0, 0, 306, 307, 0, 0, 0,
-    0, 0, 308, 0, 0, 309, 0, 0, 310, 0, 0, 0, 0, 0, 311, 312, 0, 0, 0, 0, 0, 0, 313, 0, 0, 314, 0, 0, 0, 0, 315, 0,
-    0, 0, 0, 316, 0, 0, 317, 0, 0, 0, 0, 0, 0, 318, 319, 0, 0, 0, 0, 0, 0, 0, 320, 321, 0, 0, 0, 0, 0, 0, 322, 0,
-    0, 323, 0, 0, 0, 0, 324, 0, 0, 0, 0, 325, 0, 0, 326, 0, 327, 0, 0, 0, 0, 328, 329, 0, 0, 0, 0, 0, 0, 330, 331, 332,
-    0, 0, 0, 0, 0, 0, 333, 0, 0, 334, 0, 335, 0, 0, 336, 0, 0, 0, 0, 337, 0, 0, 0, 0, 0, 0, 0, 0, 338, 339, 0, 0,
-    340, 0, 0, 0, 0, 0, 341, 342, 0, 0, 0, 0, 343, 0, 0, 0, 0, 344, 0, 0, 345, 0, 0, 0, 0, 0, 0, 346, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 347, 0, 0, 0, 0, 0, 0, 0, 0, 0, 348, 0, 0, 0, 349, 0, 0, 0, 0, 0, 350, 351, 0, 0, 0, 0, 0,
-    0, 352, 0, 353, 0, 0, 0, 0, 354, 0, 0, 0, 0, 355, 0, 356, 0, 0, 0, 0, 0, 0, 0, 357, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 358, 0, 0, 0, 0, 0, 0, 0, 0, 0, 359, 360, 0, 0, 0, 361, 0, 0, 0, 362, 363, 0, 0, 0, 0, 0, 0, 0, 0, 364, 365,
-    0, 0, 0, 366, 0, 0, 0, 0, 367, 368, 0, 0, 0, 0, 0, 0, 369, 0, 0, 370, 0, 0, 0, 0, 0, 371, 0, 0, 0, 372,
+// PSPRECOMP_V811_COMPACT_DISPATCH: 64-slot occupancy masks + per-group base id.
+static constexpr std::uint64_t kEntryMasks_recomp_unit_0225[64] = {
+    0x0000000010529245ull, 0x0001000000000000ull, 0x0000028984100000ull, 0x8504000201000000ull,
+    0x440000008A589441ull, 0x0008040040024401ull, 0x0000000000000000ull, 0x0008019011010A45ull,
+    0x2949210200200401ull, 0x4254924921448208ull, 0x0008423010102020ull, 0x4948000000000000ull,
+    0x0000051801644482ull, 0x0000010000000000ull, 0x0000000000000000ull, 0x0440900240040000ull,
+    0x120824210994A409ull, 0x2088222084042222ull, 0x2120210452102112ull, 0x0101004012110888ull,
+    0x0040820422040100ull, 0x0020104201040404ull, 0x0000000000880000ull, 0x0000200000000000ull,
+    0x0000004284400001ull, 0x0000000000000000ull, 0x010A100000000000ull, 0x0000000000000000ull,
+    0x000840040C000000ull, 0x2041008080004002ull, 0x0040010400000800ull, 0x000E410000000000ull,
+    0x0000000000000009ull, 0x0000000000000000ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x0000000000000000ull, 0x0040000400010000ull, 0x0000000001400000ull, 0x000040100007C040ull,
+    0x0000104002801000ull, 0x0000000000000000ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x0000000810204080ull, 0x0000000000000000ull, 0x0000000000000120ull, 0x0000080000000000ull,
+    0x8102040000000000ull, 0x0000000000000040ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x0000022400000000ull, 0x0400420448502004ull, 0x0040040040040040ull, 0x0404400400414004ull,
+    0x0002000080000000ull, 0x4885020002008010ull, 0x0010001200101030ull, 0x4240C12418022090ull,
+    0xE061484240C06048ull, 0x081210C130084A40ull, 0x0080A10A06088020ull, 0x22090308C0311802ull,
+};
+static constexpr std::uint16_t kEntryBases_recomp_unit_0225[64] = {
+    1u, 11u, 12u, 19u, 25u, 38u, 45u, 45u, 57u, 69u, 87u, 96u, 101u, 113u, 114u, 114u,
+    121u, 138u, 151u, 165u, 175u, 183u, 191u, 193u, 194u, 200u, 200u, 204u, 204u, 209u, 216u, 220u,
+    225u, 227u, 227u, 227u, 227u, 227u, 230u, 232u, 240u, 245u, 245u, 245u, 245u, 250u, 250u, 252u,
+    253u, 257u, 258u, 258u, 258u, 261u, 271u, 276u, 284u, 286u, 295u, 302u, 316u, 333u, 347u, 358u,
 };
 void recomp_unit_0225_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
@@ -151,13 +46,25 @@ void recomp_unit_0225_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t dir
 // PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
+    std::uint32_t local_redispatch_rounds = 0u;
     std::uint32_t local_pc = ctx.pc;
     std::uint32_t entry_id = direct_entry_id;
 LOCAL_DISPATCH:
     {
     if (entry_id == 0u) {
         const std::uint32_t entry_delta = local_pc - 0x08B88000u;
-        entry_id = (entry_delta < 16376u && (entry_delta & 3u) == 0u) ? kEntryIds_recomp_unit_0225[entry_delta >> 2u] : 0u;
+        entry_id = 0u;
+        if (entry_delta < 16376u && (entry_delta & 3u) == 0u) {
+            const std::uint32_t entry_slot = entry_delta >> 2u;
+            const std::uint32_t entry_group = entry_slot >> 6u;
+            const std::uint64_t entry_mask = kEntryMasks_recomp_unit_0225[entry_group];
+            const std::uint64_t entry_bit = 1ull << (entry_slot & 63u);
+            if ((entry_mask & entry_bit) != 0u) {
+                entry_id = static_cast<std::uint16_t>(
+                    kEntryBases_recomp_unit_0225[entry_group] +
+                    std::popcount(entry_mask & (entry_bit - 1ull)));
+            }
+        }
     }
     switch (entry_id) {
     case 1u: goto L_08B88000;
@@ -639,7 +546,6 @@ L_08B883E8:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B883E8u, 0x696C4265u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B883FC:
-    // nop
     goto L_08B88400;
 L_08B88400:
     AOT_REGCACHE_SYNC_OUT();
@@ -664,7 +570,6 @@ L_08B8843C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B88440u, 0x616C5072u, "vfpu0 not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8844C:
-    // nop
     goto L_08B88450;
 L_08B88450:
     if (aot_gpr_19 == ctx.gpr[20]) {
@@ -751,8 +656,6 @@ L_08B88740:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B88744u, 0x08B3CEBCu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B88760:
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B88768u, 0x00002928u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B88770:
@@ -877,7 +780,6 @@ L_08B889E4:
     ctx.execute_vfpu_vcmp_ct<105u, 99u, 1u, 8u>();
     ctx.execute_vfpu_vscl_ct<101u, 87u, 114u, 1u>();
     ctx.execute_vfpu_vec3_ct<99u, 107u, 101u, 1u, 2u>();
-    // nop
     goto L_08B889F8;
 L_08B889F8:
     AOT_REGCACHE_SYNC_OUT();
@@ -915,7 +817,6 @@ L_08B88BCC:
 L_08B88BD8:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B88BD8u, 0x44454B43u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
-    // nop
     goto L_08B88BE0;
 L_08B88BE0:
     AOT_REGCACHE_SYNC_OUT();
@@ -968,7 +869,6 @@ L_08B88C90:
     rt.unsupported(0x08B88C90u, 0x72657355u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B88CA0:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 1u));
-    // nop
     goto L_08B88CA8;
 L_08B88CA8:
     AOT_REGCACHE_SYNC_OUT();
@@ -1238,7 +1138,6 @@ L_08B895B0:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B895B0u, 0x74666F53u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B895D4:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B895DCu, 0x08B583ECu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8964C:
@@ -1255,7 +1154,6 @@ L_08B89800:
     rt.unsupported(0x08B89804u, 0x08B58D9Cu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B89858:
     ctx.execute_vfpu_vhdp_ct<45u, 73u, 110u, 1u>();
-    // nop
     jump_target = aot_gpr_3;
     ctx.gpr[13] = (0x08B89868u);
     AOT_REGCACHE_SYNC_OUT();
@@ -1301,7 +1199,6 @@ L_08B89C68:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B89C68u, 0x0000002Eu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B89C6C:
-    // nop
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 1u));
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B89C74u, 0x494A2D43u, "cop2/vfpu not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1344,12 +1241,6 @@ L_08B89E2C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B89E2Cu, 0x203A7325u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B89E88:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B89EA0;
 L_08B89EA0:
     (void)(ctx.gpr[2] << 4u);
@@ -1390,12 +1281,6 @@ L_08B89FCC:
     aot_gpr_18 = (ctx.gpr[17] & 12850u);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B89FE4u, 0x44454B46u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A000;
 L_08B8A000:
     AOT_REGCACHE_SYNC_OUT();
@@ -1414,176 +1299,46 @@ L_08B8A588:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8A58Cu, 0x00972014u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8A5D8:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A658;
 L_08B8A658:
-    // nop
-    // nop
     goto L_08B8A660;
 L_08B8A660:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A718;
 L_08B8A718:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A738;
 L_08B8A738:
-    // nop
     goto L_08B8A73C;
 L_08B8A73C:
-    // nop
     goto L_08B8A740;
 L_08B8A740:
-    // nop
     goto L_08B8A744;
 L_08B8A744:
-    // nop
     goto L_08B8A748;
 L_08B8A748:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A790;
 L_08B8A790:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8A7B8;
 L_08B8A7B8:
-    // nop
-    // nop
-    // nop
     (void)(0u << 16u);
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
-    // nop
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
-    // nop
-    // nop
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
-    // nop
     aot_gpr_19 = (13107u << 16u);
-    // nop
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
-    // nop
     (void)(0u << 16u);
     (void)(0u << 16u);
     (void)(0u << 16u);
-    // nop
     goto L_08B8A830;
 L_08B8A830:
     AOT_REGCACHE_SYNC_OUT();
@@ -1616,15 +1371,23 @@ L_08B8AC1C:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08B8AC38:
     ctx.gpr[1] = (0u << 18u);
-    // nop
     (void)(ctx.hi);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8AC44u, 0x000003E8u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8AC54:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8AC58u, 0x000003E8u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8AC70:
@@ -1638,7 +1401,17 @@ L_08B8AC8C:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08B8AE14:
     jump_target = 0u;
     AOT_REGCACHE_SYNC_OUT();
@@ -1646,26 +1419,32 @@ L_08B8AE14:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08B8AE20:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8AE24u, 0x08BAACD4u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8AFAC:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8AFB4u, 0x08BAAE10u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B0A8:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
     if (0u != 0u) (void)(0u);
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B0B8u, 0x08BAAEE0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B0C4:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B0CCu, 0x08BAAEF0u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B0E0:
-    // nop
     ctx.pc = 0x02EABC00u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B0FC:
     AOT_REGCACHE_SYNC_OUT();
@@ -1682,46 +1461,16 @@ L_08B8B494:
     rt.unsupported(0x08B8B498u, 0x44525355u, "unsupported CFC1 control register"); AOT_REGCACHE_SYNC_OUT(); return;
     jump_target = ctx.gpr[1];
     ctx.gpr[10] = (0x08B8B4A4u);
-    // nop
     ctx.pc = jump_target;
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B8B4A4u) goto L_08B8B4A4;
     AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B4A4:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8B508;
 L_08B8B508:
-    // nop
     ctx.pc = 0x02EACB70u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B534:
-    // nop
-    // nop
     ctx.pc = 0x02EACC30u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B550:
-    // nop
     ctx.pc = 0x02EACC90u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B558:
     jump_target = 0u;
@@ -1729,7 +1478,17 @@ L_08B8B558:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08B8B56C:
     (void)(0u >> 0u);
     jump_target = 0u;
@@ -1752,52 +1511,22 @@ L_08B8B5A4:
     rt.unsupported(0x08B8B5A8u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B5B8:
     (void)(0u << (0u & 31u));
-    // nop
-    // nop
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B5CCu, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B5E8:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B5ECu, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B618:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(0u) >> 0u));
     (void)(0u >> 0u);
-    // nop
-    // nop
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B630u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B648:
     (void)(0u >> 0u);
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     (void)(0u >> 0u);
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8B678;
 L_08B8B678:
     (void)(0u >> 0u);
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8B6A8;
 L_08B8B6A8:
     AOT_REGCACHE_SYNC_OUT();
@@ -1809,25 +1538,16 @@ L_08B8B708:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B708u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B738:
-    // nop
-    // nop
     goto L_08B8B740;
 L_08B8B740:
-    // nop
-    // nop
-    // nop
-    // nop
     (void)(static_cast<std::uint32_t>(std::countl_zero(0u)));
-    // nop
     goto L_08B8B758;
 L_08B8B758:
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
-    // nop
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    // nop
     aot_gpr_19 = (13107u << 16u);
     aot_gpr_12 = (52429u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
@@ -1835,11 +1555,9 @@ L_08B8B758:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8B788;
 L_08B8B788:
-    // nop
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    // nop
     aot_gpr_19 = (13107u << 16u);
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
@@ -1849,10 +1567,8 @@ L_08B8B788:
     // PSP CACHE is a no-op in coherent host memory.
     goto L_08B8B7B8;
 L_08B8B7B8:
-    // nop
     (void)(0u << 16u);
     (void)(0u << 16u);
-    // nop
     goto L_08B8B7C8;
 L_08B8B7C8:
     (void)(0u << 16u);
@@ -1865,7 +1581,6 @@ L_08B8B7C8:
     aot_gpr_25 = (39322u << 16u);
     goto L_08B8B7E8;
 L_08B8B7E8:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B7ECu, 0x42700000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B87C:
@@ -1883,7 +1598,6 @@ L_08B8B93C:
     aot_gpr_25 = (39322u << 16u);
     aot_gpr_19 = (13107u << 16u);
     aot_gpr_19 = (13107u << 16u);
-    // nop
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
     aot_gpr_12 = (52429u << 16u);
@@ -1897,7 +1611,6 @@ L_08B8B964:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8B974u, 0x40000000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8B9A4:
-    // nop
     aot_gpr_12 = (52429u << 16u);
     aot_gpr_5 = (7864u << 16u);
     aot_gpr_12 = (52429u << 16u);
@@ -1910,7 +1623,6 @@ L_08B8B9C0:
     (void)(0u << 16u);
     goto L_08B8B9C8;
 L_08B8B9C8:
-    // nop
     ctx.gpr[6] = (26214u << 16u);
     ctx.gpr[6] = (26214u << 16u);
     (void)(0u << 16u);
@@ -1936,82 +1648,19 @@ L_08B8B9F8:
     aot_gpr_12 = (52429u << 16u);
     goto L_08B8BA10;
 L_08B8BA10:
-    // nop
     goto L_08B8BA14;
 L_08B8BA14:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BA30;
 L_08B8BA30:
-    // nop
-    // nop
-    // nop
     // PSP CACHE is a no-op in coherent host memory.
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BA50;
 L_08B8BA50:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BA84;
 L_08B8BA84:
-    // nop
-    // nop
-    // nop
     goto L_08B8BA90;
 L_08B8BA90:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BAD0;
 L_08B8BAD0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BB10;
 L_08B8BB10:
     (void)(aot_gpr_5 << 0u);
@@ -2047,12 +1696,10 @@ L_08B8BB70:
 L_08B8BB88:
     aot_gpr_5 = (58196u << 16u);
     aot_gpr_5 = (58196u << 16u);
-    // nop
     goto L_08B8BB94;
 L_08B8BB94:
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    // nop
     goto L_08B8BBA0;
 L_08B8BBA0:
     (void)(ctx.gpr[1] << 0u);
@@ -2237,10 +1884,8 @@ L_08B8BD98:
     goto L_08B8BD9C;
 L_08B8BD9C:
     ctx.gpr[21] = (49807u << 16u);
-    // nop
     // PSP CACHE is a no-op in coherent host memory.
     // PSP CACHE is a no-op in coherent host memory.
-    // nop
     goto L_08B8BDB0;
 L_08B8BDB0:
     (void)(ctx.gpr[1] << 0u);
@@ -2251,15 +1896,8 @@ L_08B8BDB0:
     goto L_08B8BDC4;
 L_08B8BDC4:
     (void)(static_cast<std::uint32_t>(static_cast<std::int32_t>(ctx.gpr[6]) >> (0u & 31u)));
-    // nop
-    // nop
     goto L_08B8BDD0;
 L_08B8BDD0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     (void)(0u << 0u);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BDE8u, 0x01010101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -2267,7 +1905,6 @@ L_08B8BDEC:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BDECu, 0x01010101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8BE14:
-    // nop
     (void)(0u << 0u);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BE1Cu, 0x01010101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -2290,15 +1927,9 @@ L_08B8BE8C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BE8Cu, 0x00010101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8BEA0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BEB4;
 L_08B8BEB4:
     (void)(ctx.gpr[1] << 0u);
-    // nop
     goto L_08B8BEBC;
 L_08B8BEBC:
     AOT_REGCACHE_SYNC_OUT();
@@ -2314,22 +1945,12 @@ L_08B8BF2C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BF2Cu, 0x00000101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8BF30:
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BF40;
 L_08B8BF40:
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BF50;
 L_08B8BF50:
-    // nop
     goto L_08B8BF54;
 L_08B8BF54:
-    // nop
     aot_gpr_12 = (52429u << 16u);
     aot_gpr_25 = (39322u << 16u);
     aot_gpr_12 = (52429u << 16u);
@@ -2355,28 +1976,12 @@ L_08B8BFA4:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08B8BFA4u, 0x00001770u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08B8BFC0:
-    // nop
-    // nop
-    // nop
     goto L_08B8BFCC;
 L_08B8BFCC:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BFE4;
 L_08B8BFE4:
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08B8BFF4;
 L_08B8BFF4:
-    // nop
-    // nop
-    // nop
     ctx.pc = 0x08B8C000u; AOT_REGCACHE_SYNC_OUT(); return;
 }
 

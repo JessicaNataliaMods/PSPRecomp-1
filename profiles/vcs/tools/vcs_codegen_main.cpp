@@ -89,7 +89,7 @@ std::string emit_regular(const psprecomp::DecodedInstruction &d, std::uint32_t p
     const auto uimm = static_cast<std::uint16_t>(d.immediate);
     std::ostringstream out;
     switch (d.kind) {
-    case psprecomp::OpcodeKind::Nop: out << "    // nop\n"; break;
+    case psprecomp::OpcodeKind::Nop: break;
     case psprecomp::OpcodeKind::Sync:
     case psprecomp::OpcodeKind::Cache:
         out << psprecomp::codegen::memory_ordering_statement(d.kind);

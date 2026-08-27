@@ -6,133 +6,30 @@
 #include <limits>
 
 namespace psprecomp {
-static const std::uint16_t kEntryIds_recomp_unit_0231[4003] = {
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3, 0,
-    0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0,
-    0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    18, 0, 19, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 29, 0, 0, 30,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 33, 0,
-    0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 41, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 0,
-    47, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49,
-    0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0,
-    63, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0,
-    67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 68, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0,
-    0, 73, 0, 74, 0, 0, 75, 76, 77, 0, 0, 0, 78, 79, 80, 81, 0, 0, 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 83, 0, 0, 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 85, 0, 0, 86, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 91, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 0, 98, 0, 0, 99,
-    0, 0, 100, 0, 0, 101, 0, 0, 102, 0, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 115, 0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 0, 0,
-    125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 0,
-    0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 130, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 131, 0, 0, 0, 0, 0, 0, 132, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 0, 134, 0, 135, 0, 0, 0, 136, 0,
-    0, 0, 0, 0, 0, 0, 0, 137, 0, 0, 0, 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 140, 0, 0, 0, 0, 0, 141, 0, 0, 0, 0, 142, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 144, 0, 0, 0, 0, 0, 145, 0, 0, 0, 0, 0, 146, 0, 0, 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 148, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 149,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 153,
+// PSPRECOMP_V811_COMPACT_DISPATCH: 64-slot occupancy masks + per-group base id.
+static constexpr std::uint64_t kEntryMasks_recomp_unit_0231[63] = {
+    0x0000001041000001ull, 0x0000000000000000ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x0000000800000000ull, 0x0000410020180001ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x1000100000000000ull, 0x0000101010000100ull, 0x000000000000000Dull, 0x0000000000000000ull,
+    0x0000000000000000ull, 0x0020010010000000ull, 0x0000000000000000ull, 0x0000000000000000ull,
+    0x0008040000000000ull, 0x0800000090820008ull, 0x0000000842000000ull, 0x0002101004000000ull,
+    0x0408000041000020ull, 0x0000000100000000ull, 0x0000000000000000ull, 0x8000004101010000ull,
+    0x0000100040000080ull, 0x0000210000000000ull, 0x1000000000000800ull, 0x0004000000000100ull,
+    0x1000104104104100ull, 0x0400800100110001ull, 0x120001040100F1CAull, 0x0000000040100000ull,
+    0x0000000000000000ull, 0x0000000000000000ull, 0x0000000000000000ull, 0x0000000000100000ull,
+    0x0400000000000002ull, 0x0000000000000000ull, 0x0000000020000000ull, 0x0000010000010002ull,
+    0x0000000000008000ull, 0x9400000000000000ull, 0x0000000080000924ull, 0x0000040000000000ull,
+    0x0000000100000000ull, 0x0000800002000020ull, 0x0001000800000000ull, 0x0000000000000000ull,
+    0x0040080000000000ull, 0x0000000800000000ull, 0x1001000000050000ull, 0x0400020001001000ull,
+    0x0000000101000010ull, 0x0000041010000100ull, 0x0000001000000000ull, 0x0000000000000000ull,
+    0x4500400020400000ull, 0x0001000000008080ull, 0x0010000021040000ull, 0x8000020000104104ull,
+    0x0040100000200000ull, 0x0000000000000000ull, 0x0000000400000000ull,
+};
+static constexpr std::uint16_t kEntryBases_recomp_unit_0231[63] = {
+    1u, 5u, 5u, 5u, 5u, 6u, 12u, 12u, 12u, 14u, 18u, 21u, 21u, 21u, 24u, 24u,
+    24u, 26u, 32u, 35u, 39u, 44u, 45u, 45u, 50u, 53u, 55u, 57u, 59u, 67u, 73u, 87u,
+    89u, 89u, 89u, 89u, 90u, 92u, 92u, 93u, 96u, 97u, 100u, 105u, 106u, 107u, 110u, 112u,
+    112u, 114u, 115u, 119u, 123u, 126u, 130u, 131u, 131u, 137u, 140u, 144u, 150u, 153u, 153u,
 };
 void recomp_unit_0231_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
@@ -149,13 +46,25 @@ void recomp_unit_0231_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t dir
 // PSPRECOMP_AOT_REGCACHE_END
     std::uint32_t jump_target = 0u;
     std::uint32_t local_transfers = 0u;
+    std::uint32_t local_redispatch_rounds = 0u;
     std::uint32_t local_pc = ctx.pc;
     std::uint32_t entry_id = direct_entry_id;
 LOCAL_DISPATCH:
     {
     if (entry_id == 0u) {
         const std::uint32_t entry_delta = local_pc - 0x08BA0000u;
-        entry_id = (entry_delta < 16012u && (entry_delta & 3u) == 0u) ? kEntryIds_recomp_unit_0231[entry_delta >> 2u] : 0u;
+        entry_id = 0u;
+        if (entry_delta < 16012u && (entry_delta & 3u) == 0u) {
+            const std::uint32_t entry_slot = entry_delta >> 2u;
+            const std::uint32_t entry_group = entry_slot >> 6u;
+            const std::uint64_t entry_mask = kEntryMasks_recomp_unit_0231[entry_group];
+            const std::uint64_t entry_bit = 1ull << (entry_slot & 63u);
+            if ((entry_mask & entry_bit) != 0u) {
+                entry_id = static_cast<std::uint16_t>(
+                    kEntryBases_recomp_unit_0231[entry_group] +
+                    std::popcount(entry_mask & (entry_bit - 1ull)));
+            }
+        }
     }
     switch (entry_id) {
     case 1u: goto L_08BA0000;
@@ -318,600 +227,28 @@ LOCAL_DISPATCH:
     }
     }
 L_08BA0000:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0060;
 L_08BA0060:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0078;
 L_08BA0078:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0090;
 L_08BA0090:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA048C;
 L_08BA048C:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0500;
 L_08BA0500:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA054C;
 L_08BA054C:
-    // nop
     goto L_08BA0550;
 L_08BA0550:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0574;
 L_08BA0574:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA05A0;
 L_08BA05A0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA05B8;
 L_08BA05B8:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA08B0;
 L_08BA08B0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA08F0;
 L_08BA08F0:
     AOT_REGCACHE_SYNC_OUT();
@@ -923,274 +260,29 @@ L_08BA0970:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA0970u, 0x42C80000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA0990:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA09B0;
 L_08BA09B0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0A00;
 L_08BA0A00:
-    // nop
     { const bool branch_taken = static_cast<std::int32_t>(ctx.gpr[8]) > 0;
-    // nop
       if (branch_taken) {
           goto L_08BA0A08;
       }
       goto L_08BA0A0C;
     }
 L_08BA0A08:
-    // nop
     goto L_08BA0A0C;
 L_08BA0A0C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA0A10u, 0x0A1F0A1Fu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA0D70:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0DA0;
 L_08BA0DA0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA0DD4;
 L_08BA0DD4:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     if (!([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_ok_ = ctx.execute_signed_add(4u, 0u, 0u); AOT_REGCACHE_SYNC_IN(); return aot_regcache_ok_; }())) { rt.arithmetic_overflow(0x08BA10A0u, 0x00002020u); AOT_REGCACHE_SYNC_OUT(); return; }
-    // nop
     goto L_08BA10A8;
 L_08BA10A8:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA10CC;
 L_08BA10CC:
     ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
@@ -1202,8 +294,6 @@ L_08BA110C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1114u, 0x00006E6Fu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1144:
-    // nop
-    // nop
     ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
     ctx.execute_vfpu_vscl_ct<110u, 97u, 104u, 1u>();
     AOT_REGCACHE_SYNC_OUT();
@@ -1216,10 +306,6 @@ L_08BA1170:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1174u, 0x00000078u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA117C:
-    // nop
-    // nop
-    // nop
-    // nop
     ctx.execute_vfpu_compare3_ct<99u, 111u, 114u, 1u, 6u>();
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1190u, 0x6963616Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1232,8 +318,6 @@ L_08BA1264:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1268u, 0x40F00000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1278:
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1280u, 0x00FF00FFu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA128C:
@@ -1253,24 +337,6 @@ L_08BA13C4:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA13C8u, 0x08C46D40u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1414:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1460u, 0x08CABC00u, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1460:
@@ -1281,7 +347,6 @@ L_08BA1478:
     aot_gpr_12 = (52429u << 16u);
     (void)(0u << 16u);
     ctx.gpr[21] = (49807u << 16u);
-    // nop
     aot_gpr_9 = (4059u << 16u);
     ctx.gpr[18] = (47299u << 16u);
     AOT_REGCACHE_SYNC_OUT();
@@ -1342,12 +407,7 @@ L_08BA17FC:
     rt.unsupported(0x08BA17FCu, 0x01020201u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA181C:
     (void)(0u >> (0u & 31u));
-    // nop
     (void)(aot_gpr_3 << 0u);
-    // nop
-    // nop
-    // nop
-    // nop
     (void)(ctx.gpr[1] << 4u);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA183Cu, 0x01030101u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1407,7 +467,6 @@ L_08BA1C68:
     rt.unsupported(0x08BA1C6Cu, 0xC0060A92u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1C80:
     aot_gpr_6 = (2706u << 16u);
-    // nop
     aot_gpr_6 = (2706u << 16u);
     aot_gpr_9 = (4059u << 16u);
     // PSP CACHE is a no-op in coherent host memory.
@@ -1425,51 +484,14 @@ L_08BA1CB0:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1CB4u, 0x08BAFA9Cu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1CF0:
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1D00;
 L_08BA1D00:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1D40;
 L_08BA1D40:
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1D50;
 L_08BA1D50:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1D80;
 L_08BA1D80:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1D84u, 0x00000015u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1DBC:
@@ -1504,7 +526,17 @@ L_08BA1E20:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08BA1E30:
     if (!([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_ok_ = ctx.execute_signed_add(5u, 0u, 0u); AOT_REGCACHE_SYNC_IN(); return aot_regcache_ok_; }())) { rt.arithmetic_overflow(0x08BA1E30u, 0x00002EE0u); AOT_REGCACHE_SYNC_OUT(); return; }
     goto L_08BA1E34;
@@ -1518,7 +550,17 @@ L_08BA1E38:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08BA1E3C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1E3Cu, 0x40400000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1531,101 +573,20 @@ L_08BA1E88:
     (void)(0u << 16u);
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
-    // nop
     goto L_08BA1EA0;
 L_08BA1EA0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1EE4;
 L_08BA1EE4:
-    // nop
-    // nop
-    // nop
     goto L_08BA1EF0;
 L_08BA1EF0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA1F50;
 L_08BA1F50:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1F54u, 0x77073096u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA1F78:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA1F78u, 0xE0D5E91Eu, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2350:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     aot_gpr_12 = (52429u << 16u);
     ctx.gpr[21] = (49807u << 16u);
     (void)(0u << 16u);
@@ -1660,8 +621,6 @@ L_08BA2404:
     aot_gpr_25 = (39322u << 16u);
     aot_gpr_12 = (52429u << 16u);
     aot_gpr_12 = (52429u << 16u);
-    // nop
-    // nop
     aot_gpr_12 = (52429u << 16u);
     ctx.gpr[21] = (49807u << 16u);
     (void)(0u << 16u);
@@ -1694,7 +653,6 @@ L_08BA2404:
     aot_gpr_25 = (39322u << 16u);
     aot_gpr_12 = (52429u << 16u);
     aot_gpr_12 = (52429u << 16u);
-    // nop
     goto L_08BA24E8;
 L_08BA24E8:
     AOT_REGCACHE_SYNC_OUT();
@@ -1741,7 +699,6 @@ L_08BA2A20:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA2A20u, 0x0000000Eu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2A2C:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA2A30u, 0x00000601u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2A7C:
@@ -1756,7 +713,6 @@ L_08BA2C80:
     rt.unsupported(0x08BA2C84u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
     ctx.pc = 0x02EC3570u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2D14:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA2D18u, 0x00000601u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2D64:
@@ -1765,11 +721,20 @@ L_08BA2D64:
     ctx.pc = 0x02EC3570u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA2DBC:
     jump_target = 0u;
-    // nop
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08BA2E8C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA2E8Cu, 0x00000601u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1787,17 +752,10 @@ L_08BA318C:
     rt.unsupported(0x08BA318Cu, 0x0000304Du, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA3240:
     if (ctx.gpr[2] != ctx.gpr[15]) {
-    // nop
         ctx.pc = 0x08BB6390u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
     }
     goto L_08BA3248;
 L_08BA3248:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA3260u, 0x45464153u, "cop1? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA32C0:
@@ -1822,18 +780,6 @@ L_08BA32F0:
     aot_gpr_12 = (52429u << 16u);
     goto L_08BA3330;
 L_08BA3330:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3360;
 L_08BA3360:
     AOT_REGCACHE_SYNC_OUT();
@@ -1845,31 +791,9 @@ L_08BA33E8:
     (void)(0u << 16u);
     aot_gpr_19 = (13107u << 16u);
     (void)(0u << 16u);
-    // nop
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA33FCu, 0x40000000u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA3410:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3460;
 L_08BA3460:
     AOT_REGCACHE_SYNC_OUT();
@@ -1917,15 +841,6 @@ L_08BA3480:
     // vflush: architectural no-op that retains VFPU prefixes
     goto L_08BA3520;
 L_08BA3520:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     (void)(ctx.gpr[26] << 0u);
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA3548u, 0x009600FAu, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
@@ -1970,218 +885,31 @@ L_08BA391C:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA391Cu, 0x42424242u, "unknown not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA393C:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA39C0;
 L_08BA39C0:
-    // nop
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA39C8u, 0x08BA3BFCu, "control flow in delay slot"); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA3A48:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3A60;
 L_08BA3A60:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3A74;
 L_08BA3A74:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3AD0;
 L_08BA3AD0:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3B08;
 L_08BA3B08:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3B20;
 L_08BA3B20:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3B38;
 L_08BA3B38:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3B50;
 L_08BA3B50:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3BA4;
 L_08BA3BA4:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3BFC;
 L_08BA3BFC:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     goto L_08BA3C54;
 L_08BA3C54:
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
-    // nop
     if (ctx.gpr[1] == 0u) (void)(0u);
     ctx.pc = 0x02E8E700u; (void)([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_call(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()); AOT_REGCACHE_SYNC_OUT(); return;
 L_08BA3CB0:
@@ -2194,7 +922,17 @@ L_08BA3CB0:
     local_pc = jump_target;
     if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
     ctx.pc = jump_target;
-    AOT_REGCACHE_SYNC_OUT(); return;
+    AOT_REGCACHE_SYNC_OUT();
+    // PSPRECOMP_V811_LOCAL_LINK: preserve the 256-transfer scheduler boundary, skip outer trampoline.
+    if (local_redispatch_rounds < 7u && rt.continue_generated_local_dispatch(ctx)) {
+        ++local_redispatch_rounds;
+        AOT_REGCACHE_SYNC_IN();
+        local_transfers = 0u;
+        local_pc = ctx.pc;
+        entry_id = 0u;
+        goto LOCAL_DISPATCH;
+    }
+    return;
 L_08BA3CD8:
     AOT_REGCACHE_SYNC_OUT();
     rt.unsupported(0x08BA3CD8u, 0x00000001u, "special? not lowered yet"); AOT_REGCACHE_SYNC_OUT(); return;

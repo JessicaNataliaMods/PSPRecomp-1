@@ -323,6 +323,22 @@ bool Runtime::account_dispatch_work(AllegrexContext &ctx, bool allow_preemption)
     return run_starvation_boundary(ctx);
 }
 
+// PSPRECOMP_V811_LOCAL_REDISPATCH
+bool Runtime::continue_generated_local_dispatch(AllegrexContext &ctx) {
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    (void)ctx;
+    return false;
+#else
+    // Do not retain a nested native chain frame across a boundary that the
+    // old implementation used to unwind. Top-level only keeps chain-depth
+    // semantics identical while removing the redundant outer trampoline.
+    if (!local_redispatch_fastpath_active_ || stopped_ || chain_depth_ != 0u ||
+        chain_context_invalidated_) return false;
+    if (!account_dispatch_work(ctx, true)) return false;
+    return !stopped_ && !chain_context_invalidated_;
+#endif
+}
+
 bool Runtime::invoke_chained_call(AllegrexContext &ctx, GuestMemory::AotFastView *shared_aot_mem) {
 #if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
     count_pc(ctx.pc);
@@ -847,6 +863,19 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
         std::uint64_t next_heartbeat = heartbeat_every;
         const RuntimeStarvationHook starvation = g_starvation_hook;
         const std::uint64_t starvation_every = starvation != nullptr ? g_starvation_interval : 0u;
+        // PSPRECOMP_V811_LOCAL_REDISPATCH_GATE
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        local_redispatch_fastpath_active_ =
+            progress_every == 0u && heartbeat_every == 0u &&
+            g_pre_dispatch_hook == nullptr && g_post_dispatch_hook == nullptr &&
+            std::getenv("PSPRECOMP_REPORT_DISPATCH_COUNT") == nullptr;
+#else
+        local_redispatch_fastpath_active_ = false;
+#endif
+        struct LocalRedispatchResetGuard {
+            bool &flag;
+            ~LocalRedispatchResetGuard() { flag = false; }
+        } local_redispatch_reset_guard{local_redispatch_fastpath_active_};
         std::uint64_t executed_dispatches = 0u;
         // V8.8 outer-dispatch fast path: GuestMemory guarantees that AotFastView
         // remains valid for the lifetime of the fixed PSP RAM/fastmem mapping.
