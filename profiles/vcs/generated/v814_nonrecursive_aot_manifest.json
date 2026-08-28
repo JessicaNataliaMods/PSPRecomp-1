@@ -1,0 +1,10 @@
+{
+  "stage": "V8.14 non-recursive AOT link engine",
+  "units": 234,
+  "linked_calls": 33441,
+  "return_hook_units": 221,
+  "generated_cpp_bytes": 119797555,
+  "scheduler_dispatch_interval_default": 1024,
+  "scheduler_tick_us_default": 256,
+  "native_call_stack_flattened": true
+}

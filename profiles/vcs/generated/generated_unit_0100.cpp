@@ -1091,6 +1091,30 @@ LOCAL_DISPATCH:
         AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
+// PSPRECOMP_V813_SHARED_JR_DISPATCH: one dynamic-JR reject/redispatch path per unit.
+LOCAL_JR_DISPATCH:
+    {
+        const std::uint32_t local_delta_v813 = jump_target - 0x08994000u;
+        if (local_delta_v813 >= 16380u || (local_delta_v813 & 3u) != 0u) {
+            ctx.pc = jump_target;
+            AOT_REGCACHE_SYNC_OUT();
+            // PSPRECOMP_V814_CONTINUATION_RETURN
+            Runtime::AotTailContinuation aot_cont_v814{};
+            if (rt.take_aot_tail_continuation(jump_target, aot_cont_v814)) {
+#if defined(__clang__) && defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+                [[clang::musttail]] return aot_cont_v814.function(
+                    rt, ctx, aot_cont_v814.entry_id, aot_mem);
+#else
+                aot_cont_v814.function(rt, ctx, aot_cont_v814.entry_id, aot_mem); return;
+#endif
+            }
+            return;
+        }
+    }
+    local_pc = jump_target;
+    entry_id = 0u;
+    goto LOCAL_DISPATCH;
+
 // PSPRECOMP_V812_SHARED_SCHED_BLOCK: one scheduler-exact slow boundary per unit.
 LOCAL_SCHED_BOUNDARY:
     ctx.pc = jump_target;
@@ -1204,8 +1228,21 @@ L_089940AC:
     aot_gpr_5 = (aot_gpr_29 + static_cast<std::uint32_t>(92));
     aot_gpr_31 = (0x089940BCu);
     ctx.gpr[6] = (0u | 8u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 14u, 0x089940BCu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089940BCu) goto L_089940BC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089940BC:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -1891,8 +1928,8 @@ L_089945D8:
     ctx.gpr[1] = (ctx.gpr[1] + aot_gpr_4);
     ctx.gpr[1] = (aot_mem.aot_direct_load32(ctx.gpr[1] + static_cast<std::uint32_t>(-4944)));
     jump_target = ctx.gpr[1];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_089945F0:
@@ -1900,8 +1937,21 @@ L_089945F0:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14892));
     aot_gpr_31 = (0x08994600u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 93u, 0x08994600u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994600u) goto L_08994600;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994600:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1914,8 +1964,21 @@ L_08994608:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14884));
     aot_gpr_31 = (0x08994618u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 95u, 0x08994618u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994618u) goto L_08994618;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994618:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1928,8 +1991,21 @@ L_08994620:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14876));
     aot_gpr_31 = (0x08994630u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 97u, 0x08994630u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994630u) goto L_08994630;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994630:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1942,8 +2018,21 @@ L_08994638:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14868));
     aot_gpr_31 = (0x08994648u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 99u, 0x08994648u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994648u) goto L_08994648;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994648:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1956,8 +2045,21 @@ L_08994650:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14860));
     aot_gpr_31 = (0x08994660u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 101u, 0x08994660u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994660u) goto L_08994660;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994660:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1970,8 +2072,21 @@ L_08994668:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14852));
     aot_gpr_31 = (0x08994678u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 103u, 0x08994678u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994678u) goto L_08994678;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994678:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1984,8 +2099,21 @@ L_08994680:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14844));
     aot_gpr_31 = (0x08994690u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 105u, 0x08994690u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994690u) goto L_08994690;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994690:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -1998,8 +2126,21 @@ L_08994698:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14836));
     aot_gpr_31 = (0x089946A8u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 107u, 0x089946A8u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089946A8u) goto L_089946A8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089946A8:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -2012,8 +2153,21 @@ L_089946B0:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14828));
     aot_gpr_31 = (0x089946C0u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 109u, 0x089946C0u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089946C0u) goto L_089946C0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089946C0:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -2251,8 +2405,21 @@ L_08994890:
     aot_mem.aot_direct_store32(aot_gpr_28 + static_cast<std::uint32_t>(7872), aot_gpr_4);
     aot_gpr_31 = (0x089948A0u);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(7864));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0112.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 136u, 0x089948A0u, 0x089C6318u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0112_entry(rt, ctx, 464u, aot_mem);
+#else
+        recomp_unit_0112_entry(rt, ctx, 464u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0112_entry, 112u, 464u, 0x089C6318u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089948A0u) goto L_089948A0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089948A0:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(7868)));
     aot_gpr_5 = (aot_gpr_4 < static_cast<std::uint32_t>(5) ? 1u : 0u);
@@ -2962,8 +3129,8 @@ L_08994E54:
     ctx.gpr[1] = (ctx.gpr[1] + aot_gpr_4);
     ctx.gpr[1] = (aot_mem.aot_direct_load32(ctx.gpr[1] + static_cast<std::uint32_t>(-4904)));
     jump_target = ctx.gpr[1];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08994E74:
@@ -3005,8 +3172,21 @@ L_08994EB0:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08994EBCu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 220u, 0x08994EBCu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994EBCu) goto L_08994EBC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994EBC:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3030,14 +3210,40 @@ L_08994ED8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08994EE4u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14620));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 225u, 0x08994EE4u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994EE4u) goto L_08994EE4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994EE4:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08994EF0u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 226u, 0x08994EF0u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994EF0u) goto L_08994EF0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994EF0:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3077,8 +3283,21 @@ L_08994F1C:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08994F28u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 231u, 0x08994F28u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994F28u) goto L_08994F28;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994F28:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3102,14 +3321,40 @@ L_08994F44:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08994F50u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14612));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 236u, 0x08994F50u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994F50u) goto L_08994F50;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994F50:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08994F5Cu);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 237u, 0x08994F5Cu, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994F5Cu) goto L_08994F5C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994F5C:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3149,8 +3394,21 @@ L_08994F88:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08994F94u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 242u, 0x08994F94u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994F94u) goto L_08994F94;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994F94:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3174,14 +3432,40 @@ L_08994FB0:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08994FBCu);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14604));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 247u, 0x08994FBCu, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994FBCu) goto L_08994FBC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994FBC:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08994FC8u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 248u, 0x08994FC8u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08994FC8u) goto L_08994FC8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08994FC8:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3221,8 +3505,21 @@ L_08994FF4:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08995000u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 253u, 0x08995000u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995000u) goto L_08995000;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995000:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3246,14 +3543,40 @@ L_0899501C:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08995028u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14596));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 258u, 0x08995028u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995028u) goto L_08995028;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995028:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08995034u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 259u, 0x08995034u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995034u) goto L_08995034;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995034:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3293,8 +3616,21 @@ L_08995060:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x0899506Cu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 264u, 0x0899506Cu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899506Cu) goto L_0899506C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899506C:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3318,14 +3654,40 @@ L_08995088:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08995094u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14588));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 269u, 0x08995094u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995094u) goto L_08995094;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995094:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x089950A0u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 270u, 0x089950A0u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089950A0u) goto L_089950A0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089950A0:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3365,8 +3727,21 @@ L_089950CC:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x089950D8u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 275u, 0x089950D8u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089950D8u) goto L_089950D8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089950D8:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3390,14 +3765,40 @@ L_089950F4:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08995100u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14580));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 280u, 0x08995100u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995100u) goto L_08995100;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995100:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x0899510Cu);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 281u, 0x0899510Cu, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899510Cu) goto L_0899510C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899510C:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3437,8 +3838,21 @@ L_08995138:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08995144u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 286u, 0x08995144u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995144u) goto L_08995144;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995144:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3462,14 +3876,40 @@ L_08995160:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x0899516Cu);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14572));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 291u, 0x0899516Cu, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899516Cu) goto L_0899516C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899516C:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08995178u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 292u, 0x08995178u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995178u) goto L_08995178;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995178:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3509,8 +3949,21 @@ L_089951A4:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x089951B0u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 297u, 0x089951B0u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089951B0u) goto L_089951B0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089951B0:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3534,14 +3987,40 @@ L_089951CC:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x089951D8u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14564));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 302u, 0x089951D8u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089951D8u) goto L_089951D8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089951D8:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x089951E4u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 303u, 0x089951E4u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089951E4u) goto L_089951E4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089951E4:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3581,8 +4060,21 @@ L_08995210:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x0899521Cu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 308u, 0x0899521Cu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899521Cu) goto L_0899521C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899521C:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3606,14 +4098,40 @@ L_08995238:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08995244u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14556));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 313u, 0x08995244u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995244u) goto L_08995244;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995244:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08995250u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 314u, 0x08995250u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995250u) goto L_08995250;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995250:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3653,8 +4171,21 @@ L_0899527C:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08995288u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 319u, 0x08995288u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995288u) goto L_08995288;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995288:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3678,14 +4209,40 @@ L_089952A4:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x089952B0u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14548));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 324u, 0x089952B0u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089952B0u) goto L_089952B0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089952B0:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x089952BCu);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 325u, 0x089952BCu, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089952BCu) goto L_089952BC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089952BC:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3725,8 +4282,21 @@ L_089952E8:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x089952F4u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 330u, 0x089952F4u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089952F4u) goto L_089952F4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089952F4:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3750,14 +4320,40 @@ L_08995310:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x0899531Cu);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14540));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 335u, 0x0899531Cu, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899531Cu) goto L_0899531C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899531C:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08995328u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 336u, 0x08995328u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995328u) goto L_08995328;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995328:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3797,8 +4393,21 @@ L_08995354:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08995360u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 341u, 0x08995360u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995360u) goto L_08995360;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995360:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -3822,14 +4431,40 @@ L_0899537C:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x08995388u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14532));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 346u, 0x08995388u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995388u) goto L_08995388;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995388:
     aot_gpr_4 = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08995394u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 347u, 0x08995394u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995394u) goto L_08995394;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995394:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -3869,8 +4504,21 @@ L_089953C0:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x089953CCu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 352u, 0x089953CCu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089953CCu) goto L_089953CC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089953CC:
     ctx.gpr[18] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[18] == 0u;
@@ -3894,14 +4542,40 @@ L_089953E8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     aot_gpr_31 = (0x089953F4u);
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14524));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 357u, 0x089953F4u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089953F4u) goto L_089953F4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089953F4:
     aot_gpr_4 = (ctx.gpr[16] | 0u);
     aot_gpr_31 = (0x08995400u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 358u, 0x08995400u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995400u) goto L_08995400;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995400:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -4610,14 +5284,40 @@ L_089958F0:
 L_089958F8:
     aot_gpr_31 = (0x08995900u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8200)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 442u, 0x08995900u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995900u) goto L_08995900;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995900:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8200)));
     aot_gpr_31 = (0x0899590Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(348), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 443u, 0x0899590Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899590Cu) goto L_0899590C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899590C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(352), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14372));
@@ -4665,14 +5365,40 @@ L_08995954:
 L_0899595C:
     aot_gpr_31 = (0x08995964u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8204)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 449u, 0x08995964u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995964u) goto L_08995964;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995964:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8204)));
     aot_gpr_31 = (0x08995970u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(356), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 450u, 0x08995970u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995970u) goto L_08995970;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995970:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(360), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14364));
@@ -4720,14 +5446,40 @@ L_089959B8:
 L_089959C0:
     aot_gpr_31 = (0x089959C8u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8208)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 456u, 0x089959C8u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089959C8u) goto L_089959C8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089959C8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8208)));
     aot_gpr_31 = (0x089959D4u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(364), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 457u, 0x089959D4u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089959D4u) goto L_089959D4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089959D4:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(368), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14356));
@@ -5111,14 +5863,40 @@ L_08995C60:
 L_08995C68:
     aot_gpr_31 = (0x08995C70u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8240)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 503u, 0x08995C70u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995C70u) goto L_08995C70;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995C70:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8240)));
     aot_gpr_31 = (0x08995C7Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(404), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 504u, 0x08995C7Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995C7Cu) goto L_08995C7C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995C7C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(408), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14284));
@@ -5166,14 +5944,40 @@ L_08995CC4:
 L_08995CCC:
     aot_gpr_31 = (0x08995CD4u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8244)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 510u, 0x08995CD4u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995CD4u) goto L_08995CD4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995CD4:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8244)));
     aot_gpr_31 = (0x08995CE0u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(412), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 511u, 0x08995CE0u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995CE0u) goto L_08995CE0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995CE0:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(416), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14276));
@@ -5221,14 +6025,40 @@ L_08995D28:
 L_08995D30:
     aot_gpr_31 = (0x08995D38u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8248)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 517u, 0x08995D38u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995D38u) goto L_08995D38;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995D38:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8248)));
     aot_gpr_31 = (0x08995D44u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(420), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 518u, 0x08995D44u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995D44u) goto L_08995D44;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995D44:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(424), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14268));
@@ -5276,14 +6106,40 @@ L_08995D8C:
 L_08995D94:
     aot_gpr_31 = (0x08995D9Cu);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8252)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 524u, 0x08995D9Cu, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995D9Cu) goto L_08995D9C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995D9C:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8252)));
     aot_gpr_31 = (0x08995DA8u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(428), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 525u, 0x08995DA8u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995DA8u) goto L_08995DA8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995DA8:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(432), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14260));
@@ -5331,14 +6187,40 @@ L_08995DF0:
 L_08995DF8:
     aot_gpr_31 = (0x08995E00u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8256)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 531u, 0x08995E00u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995E00u) goto L_08995E00;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995E00:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8256)));
     aot_gpr_31 = (0x08995E0Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(436), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 532u, 0x08995E0Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995E0Cu) goto L_08995E0C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995E0C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(440), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14252));
@@ -5478,14 +6360,40 @@ L_08995F00:
 L_08995F08:
     aot_gpr_31 = (0x08995F10u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8272)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 549u, 0x08995F10u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995F10u) goto L_08995F10;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995F10:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(8272)));
     aot_gpr_31 = (0x08995F1Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(456), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 550u, 0x08995F1Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08995F1Cu) goto L_08995F1C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08995F1C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(460), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14220));
@@ -5661,14 +6569,40 @@ L_08996060:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x08996078u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 570u, 0x08996078u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996078u) goto L_08996078;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996078:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x08996084u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(492), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 571u, 0x08996084u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996084u) goto L_08996084;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996084:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(496), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14184));
@@ -5694,14 +6628,40 @@ L_089960AC:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x089960C4u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 574u, 0x089960C4u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089960C4u) goto L_089960C4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089960C4:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x089960D0u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(500), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 575u, 0x089960D0u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089960D0u) goto L_089960D0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089960D0:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(504), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14176));
@@ -5847,14 +6807,40 @@ L_089961C4:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x089961DCu);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 593u, 0x089961DCu, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089961DCu) goto L_089961DC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089961DC:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x089961E8u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(528), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 594u, 0x089961E8u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089961E8u) goto L_089961E8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089961E8:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(532), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14184));
@@ -5896,14 +6882,40 @@ L_08996224:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x0899623Cu);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 599u, 0x0899623Cu, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899623Cu) goto L_0899623C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899623C:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x08996248u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(536), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 600u, 0x08996248u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996248u) goto L_08996248;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996248:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(540), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14176));
@@ -6048,14 +7060,40 @@ L_08996340:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x08996358u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 617u, 0x08996358u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996358u) goto L_08996358;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996358:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x08996364u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(564), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 618u, 0x08996364u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996364u) goto L_08996364;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996364:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(568), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14184));
@@ -6097,14 +7135,40 @@ L_089963A0:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x089963B8u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 623u, 0x089963B8u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089963B8u) goto L_089963B8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089963B8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x089963C4u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(572), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 624u, 0x089963C4u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089963C4u) goto L_089963C4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089963C4:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(576), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14176));
@@ -6300,14 +7364,40 @@ L_08996518:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x08996530u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 647u, 0x08996530u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996530u) goto L_08996530;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996530:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x0899653Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(604), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 648u, 0x0899653Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899653Cu) goto L_0899653C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899653C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(608), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14184));
@@ -6349,14 +7439,40 @@ L_08996578:
     ctx.gpr[16] = (aot_gpr_4 + aot_gpr_5);
     aot_gpr_31 = (0x08996590u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 653u, 0x08996590u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996590u) goto L_08996590;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996590:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(0)));
     aot_gpr_31 = (0x0899659Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(612), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 654u, 0x0899659Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899659Cu) goto L_0899659C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899659C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(616), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14176));
@@ -6548,14 +7664,40 @@ L_089966E8:
     ctx.gpr[16] = (aot_gpr_28 + aot_gpr_4);
     aot_gpr_31 = (0x089966F8u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(9432)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 677u, 0x089966F8u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089966F8u) goto L_089966F8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089966F8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(9432)));
     aot_gpr_31 = (0x08996704u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(644), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 678u, 0x08996704u, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996704u) goto L_08996704;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996704:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(648), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14184));
@@ -6595,14 +7737,40 @@ L_08996740:
     ctx.gpr[16] = (aot_gpr_28 + aot_gpr_4);
     aot_gpr_31 = (0x08996750u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(9416)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 683u, 0x08996750u, 0x08991550u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 311u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 311u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 311u, 0x08991550u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996750u) goto L_08996750;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996750:
     aot_gpr_4 = (aot_mem.aot_direct_load32(ctx.gpr[16] + static_cast<std::uint32_t>(9416)));
     aot_gpr_31 = (0x0899675Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(652), aot_gpr_2);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 684u, 0x0899675Cu, 0x08991574u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 314u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 314u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 314u, 0x08991574u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899675Cu) goto L_0899675C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899675C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(656), aot_gpr_2);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-14176));
@@ -6843,8 +8011,21 @@ L_089968FC:
     }
 L_08996904:
     aot_gpr_31 = (0x0899690Cu);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 713u, 0x0899690Cu, 0x089913B0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 286u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 286u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 286u, 0x089913B0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899690Cu) goto L_0899690C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899690C:
     { const bool branch_taken = aot_gpr_2 != 0u;
       if (branch_taken) {
@@ -6861,8 +8042,21 @@ L_08996914:
     }
 L_0899691C:
     aot_gpr_31 = (0x08996924u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 716u, 0x08996924u, 0x08991444u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 293u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 293u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 293u, 0x08991444u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996924u) goto L_08996924;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996924:
     aot_gpr_4 = (aot_gpr_2 | 0u);
     aot_gpr_5 = (aot_gpr_4 < static_cast<std::uint32_t>(8) ? 1u : 0u);
@@ -6878,8 +8072,8 @@ L_08996934:
     ctx.gpr[1] = (ctx.gpr[1] + aot_gpr_4);
     ctx.gpr[1] = (aot_mem.aot_direct_load32(ctx.gpr[1] + static_cast<std::uint32_t>(-4856)));
     jump_target = ctx.gpr[1];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_0899694C:
@@ -6887,8 +8081,21 @@ L_0899694C:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14076));
     aot_gpr_31 = (0x0899695Cu);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 719u, 0x0899695Cu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899695Cu) goto L_0899695C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899695C:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6901,8 +8108,21 @@ L_08996964:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14068));
     aot_gpr_31 = (0x08996974u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 721u, 0x08996974u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996974u) goto L_08996974;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996974:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6915,8 +8135,21 @@ L_0899697C:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14060));
     aot_gpr_31 = (0x0899698Cu);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 723u, 0x0899698Cu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899698Cu) goto L_0899698C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899698C:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6929,8 +8162,21 @@ L_08996994:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14052));
     aot_gpr_31 = (0x089969A4u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 725u, 0x089969A4u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089969A4u) goto L_089969A4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089969A4:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6943,8 +8189,21 @@ L_089969AC:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14044));
     aot_gpr_31 = (0x089969BCu);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 727u, 0x089969BCu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089969BCu) goto L_089969BC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089969BC:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6957,8 +8216,21 @@ L_089969C4:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14036));
     aot_gpr_31 = (0x089969D4u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 729u, 0x089969D4u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089969D4u) goto L_089969D4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089969D4:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6971,8 +8243,21 @@ L_089969DC:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14028));
     aot_gpr_31 = (0x089969ECu);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 731u, 0x089969ECu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089969ECu) goto L_089969EC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089969EC:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6985,8 +8270,21 @@ L_089969F4:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14020));
     aot_gpr_31 = (0x08996A04u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 733u, 0x08996A04u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996A04u) goto L_08996A04;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996A04:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -6999,8 +8297,21 @@ L_08996A0C:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14012));
     aot_gpr_31 = (0x08996A1Cu);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 735u, 0x08996A1Cu, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996A1Cu) goto L_08996A1C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996A1C:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -7019,8 +8330,21 @@ L_08996A24:
     }
 L_08996A30:
     aot_gpr_31 = (0x08996A38u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 738u, 0x08996A38u, 0x08991490u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 298u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 298u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 298u, 0x08991490u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996A38u) goto L_08996A38;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996A38:
     aot_gpr_4 = (aot_gpr_2 | 0u);
     aot_gpr_5 = (aot_gpr_4 < static_cast<std::uint32_t>(8) ? 1u : 0u);
@@ -7036,8 +8360,8 @@ L_08996A48:
     ctx.gpr[1] = (ctx.gpr[1] + aot_gpr_4);
     ctx.gpr[1] = (aot_mem.aot_direct_load32(ctx.gpr[1] + static_cast<std::uint32_t>(-4824)));
     jump_target = ctx.gpr[1];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08996A60:
@@ -7045,8 +8369,21 @@ L_08996A60:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14076));
     aot_gpr_31 = (0x08996A70u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 741u, 0x08996A70u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996A70u) goto L_08996A70;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996A70:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7059,8 +8396,21 @@ L_08996A78:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14068));
     aot_gpr_31 = (0x08996A88u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 743u, 0x08996A88u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996A88u) goto L_08996A88;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996A88:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7073,8 +8423,21 @@ L_08996A90:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14060));
     aot_gpr_31 = (0x08996AA0u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 745u, 0x08996AA0u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996AA0u) goto L_08996AA0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996AA0:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7087,8 +8450,21 @@ L_08996AA8:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14052));
     aot_gpr_31 = (0x08996AB8u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 747u, 0x08996AB8u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996AB8u) goto L_08996AB8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996AB8:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7101,8 +8477,21 @@ L_08996AC0:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14044));
     aot_gpr_31 = (0x08996AD0u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 749u, 0x08996AD0u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996AD0u) goto L_08996AD0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996AD0:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7115,8 +8504,21 @@ L_08996AD8:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14036));
     aot_gpr_31 = (0x08996AE8u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 751u, 0x08996AE8u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996AE8u) goto L_08996AE8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996AE8:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7129,8 +8531,21 @@ L_08996AF0:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14028));
     aot_gpr_31 = (0x08996B00u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 753u, 0x08996B00u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996B00u) goto L_08996B00;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996B00:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7143,8 +8558,21 @@ L_08996B08:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14020));
     aot_gpr_31 = (0x08996B18u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 755u, 0x08996B18u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996B18u) goto L_08996B18;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996B18:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -7157,8 +8585,21 @@ L_08996B20:
     aot_gpr_5 = (aot_gpr_28 + static_cast<std::uint32_t>(-14012));
     aot_gpr_31 = (0x08996B30u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 757u, 0x08996B30u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996B30u) goto L_08996B30;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996B30:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -7319,15 +8760,41 @@ L_08996C4C:
     aot_fpr_12 = std::bit_cast<float>(aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(9088)));
     aot_gpr_31 = (0x08996C58u);
     ctx.gpr[16] = (aot_gpr_28 + static_cast<std::uint32_t>(-13964));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 777u, 0x08996C58u, 0x08990C28u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 170u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 170u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 170u, 0x08990C28u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996C58u) goto L_08996C58;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996C58:
     aot_gpr_4 = (ctx.gpr[16] | 0u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
     aot_gpr_31 = (0x08996C68u);
     ctx.gpr[6] = (0u | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0099.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 778u, 0x08996C68u, 0x089915A4u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0099_entry(rt, ctx, 319u, aot_mem);
+#else
+        recomp_unit_0099_entry(rt, ctx, 319u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0099_entry, 99u, 319u, 0x089915A4u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996C68u) goto L_08996C68;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996C68:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_2 = (0u | 0u);
@@ -7479,8 +8946,8 @@ L_08996D58:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(736));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08996D78:
@@ -7644,8 +9111,21 @@ L_08996E9C:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x08996EA8u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 814u, 0x08996EA8u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996EA8u) goto L_08996EA8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996EA8:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -7669,13 +9149,39 @@ L_08996EC4:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08996ED0u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 819u, 0x08996ED0u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996ED0u) goto L_08996ED0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996ED0:
     aot_gpr_31 = (0x08996ED8u);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 820u, 0x08996ED8u, 0x089F5AC0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 309u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 309u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 309u, 0x089F5AC0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996ED8u) goto L_08996ED8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996ED8:
     aot_gpr_4 = (ctx.gpr[21] | 0u);
     aot_gpr_5 = (ctx.gpr[18] | 0u);
@@ -7713,8 +9219,21 @@ L_08996F18:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x08996F24u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 825u, 0x08996F24u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996F24u) goto L_08996F24;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996F24:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -7738,13 +9257,39 @@ L_08996F40:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08996F4Cu);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 830u, 0x08996F4Cu, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996F4Cu) goto L_08996F4C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996F4C:
     aot_gpr_31 = (0x08996F54u);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 831u, 0x08996F54u, 0x089F5AC0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 309u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 309u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 309u, 0x089F5AC0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996F54u) goto L_08996F54;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996F54:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     aot_gpr_31 = (0x08996F60u);
@@ -7784,8 +9329,21 @@ L_08996F9C:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x08996FA8u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 836u, 0x08996FA8u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996FA8u) goto L_08996FA8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996FA8:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -7809,13 +9367,39 @@ L_08996FC4:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08996FD0u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 841u, 0x08996FD0u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996FD0u) goto L_08996FD0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996FD0:
     aot_gpr_31 = (0x08996FD8u);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 842u, 0x08996FD8u, 0x089F5AC0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 309u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 309u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 309u, 0x089F5AC0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08996FD8u) goto L_08996FD8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08996FD8:
     aot_gpr_4 = (ctx.gpr[21] | 0u);
     aot_gpr_5 = (ctx.gpr[18] | 0u);
@@ -7854,8 +9438,21 @@ L_0899701C:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x08997028u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 847u, 0x08997028u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997028u) goto L_08997028;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997028:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -7879,13 +9476,39 @@ L_08997044:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997050u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 852u, 0x08997050u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997050u) goto L_08997050;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997050:
     aot_gpr_31 = (0x08997058u);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 853u, 0x08997058u, 0x089F5AC0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 309u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 309u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 309u, 0x089F5AC0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997058u) goto L_08997058;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997058:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     aot_gpr_31 = (0x08997064u);
@@ -7925,8 +9548,21 @@ L_089970A0:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x089970ACu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 858u, 0x089970ACu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089970ACu) goto L_089970AC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089970AC:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -7950,13 +9586,39 @@ L_089970C8:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x089970D4u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 863u, 0x089970D4u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089970D4u) goto L_089970D4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089970D4:
     aot_gpr_31 = (0x089970DCu);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 864u, 0x089970DCu, 0x089F5AC0u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 309u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 309u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 309u, 0x089F5AC0u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089970DCu) goto L_089970DC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089970DC:
     aot_gpr_4 = (ctx.gpr[21] | 0u);
     aot_gpr_5 = (ctx.gpr[18] | 0u);
@@ -8005,8 +9667,21 @@ L_0899713C:
     aot_mem.aot_direct_store32(aot_gpr_28 + static_cast<std::uint32_t>(7872), ctx.gpr[17]);
     aot_gpr_31 = (0x08997148u);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(7864));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0112.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 870u, 0x08997148u, 0x089C6318u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0112_entry(rt, ctx, 464u, aot_mem);
+#else
+        recomp_unit_0112_entry(rt, ctx, 464u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0112_entry, 112u, 464u, 0x089C6318u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997148u) goto L_08997148;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997148:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(7868)));
     { const bool branch_taken = aot_gpr_4 != ctx.gpr[16];
@@ -8029,8 +9704,21 @@ L_08997160:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x0899716Cu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 873u, 0x0899716Cu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899716Cu) goto L_0899716C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899716C:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -8054,13 +9742,39 @@ L_08997188:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997194u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 878u, 0x08997194u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997194u) goto L_08997194;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997194:
     aot_gpr_31 = (0x0899719Cu);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 879u, 0x0899719Cu, 0x089F5A5Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 300u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 300u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 300u, 0x089F5A5Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899719Cu) goto L_0899719C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899719C:
     ctx.gpr[7] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(524)));
     ctx.gpr[6] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(520)));
@@ -8092,8 +9806,21 @@ L_089971D0:
     ctx.gpr[17] = (0u | 0u);
     aot_gpr_31 = (0x089971DCu);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 883u, 0x089971DCu, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089971DCu) goto L_089971DC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089971DC:
     ctx.gpr[16] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[16] == 0u;
@@ -8117,13 +9844,39 @@ L_089971F8:
     aot_gpr_4 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997204u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 888u, 0x08997204u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997204u) goto L_08997204;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997204:
     aot_gpr_31 = (0x0899720Cu);
     aot_gpr_4 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 889u, 0x0899720Cu, 0x089F5A5Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 300u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 300u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 300u, 0x089F5A5Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899720Cu) goto L_0899720C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899720C:
     ctx.gpr[7] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(524)));
     ctx.gpr[6] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(520)));
@@ -8320,8 +10073,21 @@ L_08997368:
     aot_mem.aot_direct_store32(aot_gpr_28 + static_cast<std::uint32_t>(7872), ctx.gpr[17]);
     aot_gpr_31 = (0x08997374u);
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(7864));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0112.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 913u, 0x08997374u, 0x089C6318u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0112_entry(rt, ctx, 464u, aot_mem);
+#else
+        recomp_unit_0112_entry(rt, ctx, 464u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0112_entry, 112u, 464u, 0x089C6318u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997374u) goto L_08997374;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997374:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(7868)));
     { const bool branch_taken = aot_gpr_4 != ctx.gpr[16];
@@ -8382,8 +10148,21 @@ L_089973D0:
     aot_gpr_4 = (aot_gpr_28 + static_cast<std::uint32_t>(-15696));
     aot_gpr_31 = (0x089973E4u);
     aot_gpr_5 = (ctx.gpr[16] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 922u, 0x089973E4u, 0x08887B04u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 843u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 843u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 843u, 0x08887B04u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089973E4u) goto L_089973E4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089973E4:
     ctx.gpr[18] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(528)));
     ctx.gpr[17] = (0u | 1u);
@@ -8398,8 +10177,21 @@ L_089973F8:
     aot_gpr_4 = (aot_gpr_29 | 0u);
     aot_gpr_31 = (0x08997404u);
     aot_gpr_5 = (ctx.gpr[16] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 924u, 0x08997404u, 0x08887B30u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 846u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 846u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 846u, 0x08887B30u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997404u) goto L_08997404;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997404:
     ctx.gpr[17] = (ctx.gpr[17] + static_cast<std::uint32_t>(1));
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[17]) < static_cast<std::int32_t>(ctx.gpr[18]) ? 1u : 0u);
@@ -8413,8 +10205,21 @@ L_08997414:
     aot_gpr_4 = (ctx.gpr[22] | 0u);
     aot_gpr_31 = (0x08997420u);
     aot_gpr_5 = (aot_gpr_29 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 926u, 0x08997420u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997420u) goto L_08997420;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997420:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_28 + static_cast<std::uint32_t>(-9752)));
     { const bool branch_taken = ctx.gpr[16] != 0u;
@@ -8428,8 +10233,21 @@ L_0899742C:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x08997438u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 928u, 0x08997438u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997438u) goto L_08997438;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997438:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -8453,25 +10271,77 @@ L_08997450:
 L_08997458:
     aot_gpr_31 = (0x08997460u);
     aot_gpr_5 = (ctx.gpr[19] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 933u, 0x08997460u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997460u) goto L_08997460;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997460:
     aot_gpr_4 = (ctx.gpr[22] | 0u);
     aot_gpr_31 = (0x0899746Cu);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 934u, 0x0899746Cu, 0x08887B30u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 846u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 846u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 846u, 0x08887B30u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x0899746Cu) goto L_0899746C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_0899746C:
     aot_gpr_31 = (0x08997474u);
     aot_gpr_4 = (ctx.gpr[23] + static_cast<std::uint32_t>(-8144));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 935u, 0x08997474u, 0x089F5C7Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 340u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 340u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 340u, 0x089F5C7Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997474u) goto L_08997474;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997474:
     aot_gpr_4 = (ctx.gpr[21] | 0u);
     aot_gpr_31 = (0x08997480u);
     aot_gpr_5 = (ctx.gpr[20] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 936u, 0x08997480u, 0x08887B04u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 843u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 843u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 843u, 0x08887B04u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997480u) goto L_08997480;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997480:
     { const bool branch_taken = 0u == 0u;
       if (branch_taken) {
@@ -8492,8 +10362,21 @@ L_08997494:
     ctx.gpr[16] = (0u | 0u);
     aot_gpr_31 = (0x089974A0u);
     aot_gpr_4 = (0u | 2452u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 939u, 0x089974A0u, 0x08ABE278u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 466u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 466u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 466u, 0x08ABE278u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089974A0u) goto L_089974A0;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089974A0:
     ctx.gpr[17] = (aot_gpr_2 | 0u);
     { const bool branch_taken = ctx.gpr[17] == 0u;
@@ -8517,25 +10400,77 @@ L_089974B8:
 L_089974C0:
     aot_gpr_31 = (0x089974C8u);
     aot_gpr_5 = (ctx.gpr[19] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 944u, 0x089974C8u, 0x089F6390u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 420u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 420u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 420u, 0x089F6390u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089974C8u) goto L_089974C8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089974C8:
     aot_gpr_4 = (ctx.gpr[22] | 0u);
     aot_gpr_31 = (0x089974D4u);
     aot_gpr_5 = (aot_gpr_2 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 945u, 0x089974D4u, 0x08887B80u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 851u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 851u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 851u, 0x08887B80u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089974D4u) goto L_089974D4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089974D4:
     aot_gpr_31 = (0x089974DCu);
     aot_gpr_4 = (ctx.gpr[23] + static_cast<std::uint32_t>(-8144));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0124.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 946u, 0x089974DCu, 0x089F5C7Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0124_entry(rt, ctx, 340u, aot_mem);
+#else
+        recomp_unit_0124_entry(rt, ctx, 340u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0124_entry, 124u, 340u, 0x089F5C7Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089974DCu) goto L_089974DC;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089974DC:
     aot_gpr_4 = (ctx.gpr[21] | 0u);
     aot_gpr_31 = (0x089974E8u);
     aot_gpr_5 = (ctx.gpr[20] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0032.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 947u, 0x089974E8u, 0x08887B04u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0032_entry(rt, ctx, 843u, aot_mem);
+#else
+        recomp_unit_0032_entry(rt, ctx, 843u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0032_entry, 32u, 843u, 0x08887B04u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089974E8u) goto L_089974E8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089974E8:
     { std::uint32_t aot_run_words[11]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(548), aot_run_words);
@@ -8553,8 +10488,8 @@ L_089974E8:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(592));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_0899751C:
@@ -8693,8 +10628,21 @@ L_089976BC:
     ctx.gpr[11] = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x089976E4u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0063.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 959u, 0x089976E4u, 0x0890043Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0063_entry(rt, ctx, 90u, aot_mem);
+#else
+        recomp_unit_0063_entry(rt, ctx, 90u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0063_entry, 63u, 90u, 0x0890043Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x089976E4u) goto L_089976E4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_089976E4:
     ctx.gpr[16] = (ctx.gpr[16] + static_cast<std::uint32_t>(1));
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[16]) < 10 ? 1u : 0u);
@@ -8726,8 +10674,8 @@ L_089976F4:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(128));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_0899773C:
@@ -8872,8 +10820,21 @@ L_089978F8:
     ctx.gpr[11] = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997920u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0063.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 972u, 0x08997920u, 0x0890043Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0063_entry(rt, ctx, 90u, aot_mem);
+#else
+        recomp_unit_0063_entry(rt, ctx, 90u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0063_entry, 63u, 90u, 0x0890043Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997920u) goto L_08997920;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997920:
     ctx.gpr[16] = (ctx.gpr[16] + static_cast<std::uint32_t>(1));
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[16]) < 10 ? 1u : 0u);
@@ -8888,8 +10849,21 @@ L_08997930:
     aot_gpr_4 = (0u | 80u);
     aot_gpr_31 = (0x08997940u);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0018.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 974u, 0x08997940u, 0x0884C57Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0018_entry(rt, ctx, 46u, aot_mem);
+#else
+        recomp_unit_0018_entry(rt, ctx, 46u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0018_entry, 18u, 46u, 0x0884C57Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997940u) goto L_08997940;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997940:
     { std::uint32_t aot_run_words[16]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(56), aot_run_words);
@@ -8912,8 +10886,8 @@ L_08997940:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(128));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08997988:
@@ -9058,8 +11032,21 @@ L_08997B44:
     ctx.gpr[11] = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997B6Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0063.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 986u, 0x08997B6Cu, 0x0890043Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0063_entry(rt, ctx, 90u, aot_mem);
+#else
+        recomp_unit_0063_entry(rt, ctx, 90u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0063_entry, 63u, 90u, 0x0890043Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997B6Cu) goto L_08997B6C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997B6C:
     ctx.gpr[16] = (ctx.gpr[16] + static_cast<std::uint32_t>(1));
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[16]) < 10 ? 1u : 0u);
@@ -9074,8 +11061,21 @@ L_08997B7C:
     aot_gpr_4 = (0u | 80u);
     aot_gpr_31 = (0x08997B8Cu);
     aot_gpr_5 = (ctx.gpr[30] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0018.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 988u, 0x08997B8Cu, 0x0884C57Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0018_entry(rt, ctx, 46u, aot_mem);
+#else
+        recomp_unit_0018_entry(rt, ctx, 46u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0018_entry, 18u, 46u, 0x0884C57Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997B8Cu) goto L_08997B8C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997B8C:
     { std::uint32_t aot_run_words[16]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(56), aot_run_words);
@@ -9098,8 +11098,8 @@ L_08997B8C:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(128));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08997BD4:
@@ -9129,8 +11129,21 @@ L_08997C00:
     aot_gpr_5 = (ctx.gpr[17] | 0u);
     aot_gpr_31 = (0x08997C10u);
     ctx.gpr[6] = (ctx.gpr[16] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0018.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 991u, 0x08997C10u, 0x0884C57Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0018_entry(rt, ctx, 46u, aot_mem);
+#else
+        recomp_unit_0018_entry(rt, ctx, 46u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0018_entry, 18u, 46u, 0x0884C57Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997C10u) goto L_08997C10;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997C10:
     { std::uint32_t aot_run_words[3]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(32), aot_run_words);
@@ -9140,8 +11153,8 @@ L_08997C10:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08997C24:
@@ -9285,8 +11298,21 @@ L_08997DD8:
     ctx.gpr[11] = (ctx.gpr[18] | 0u);
     aot_gpr_31 = (0x08997E00u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0063.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 1003u, 0x08997E00u, 0x0890043Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0063_entry(rt, ctx, 90u, aot_mem);
+#else
+        recomp_unit_0063_entry(rt, ctx, 90u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0063_entry, 63u, 90u, 0x0890043Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997E00u) goto L_08997E00;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997E00:
     aot_gpr_4 = (0u | 7u);
     { const std::int32_t dividend = static_cast<std::int32_t>(ctx.gpr[17]); const std::int32_t divisor = static_cast<std::int32_t>(aot_gpr_4); if (divisor == 0) { ctx.lo = dividend >= 0 ? 0xFFFFFFFFu : 1u; ctx.hi = static_cast<std::uint32_t>(dividend); } else if (dividend == static_cast<std::int32_t>(0x80000000u) && divisor == -1) { ctx.lo = 0x80000000u; ctx.hi = 0u; } else { ctx.lo = static_cast<std::uint32_t>(dividend / divisor); ctx.hi = static_cast<std::uint32_t>(dividend % divisor); } }
@@ -9302,8 +11328,21 @@ L_08997E14:
     aot_gpr_5 = (ctx.gpr[23] | 0u);
     aot_gpr_31 = (0x08997E24u);
     ctx.gpr[6] = (0u | 16u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0088.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 1005u, 0x08997E24u, 0x089645DCu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0088_entry(rt, ctx, 36u, aot_mem);
+#else
+        recomp_unit_0088_entry(rt, ctx, 36u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0088_entry, 88u, 36u, 0x089645DCu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997E24u) goto L_08997E24;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997E24:
     aot_gpr_4 = (aot_mem.aot_direct_load8(aot_gpr_28 + static_cast<std::uint32_t>(-13800)));
     aot_gpr_4 = (aot_gpr_4 & 3u);
@@ -9349,8 +11388,21 @@ L_08997E24:
     ctx.gpr[11] = (0u | 1u);
     aot_gpr_31 = (0x08997E7Cu);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(0), 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0063.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 1006u, 0x08997E7Cu, 0x0890043Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0063_entry(rt, ctx, 90u, aot_mem);
+#else
+        recomp_unit_0063_entry(rt, ctx, 90u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0063_entry, 63u, 90u, 0x0890043Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997E7Cu) goto L_08997E7C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997E7C:
     ctx.gpr[17] = (ctx.gpr[17] + static_cast<std::uint32_t>(1));
     aot_gpr_4 = (static_cast<std::int32_t>(ctx.gpr[17]) < 16 ? 1u : 0u);
@@ -9365,8 +11417,21 @@ L_08997E8C:
     aot_gpr_4 = (0u | 83u);
     aot_gpr_31 = (0x08997E9Cu);
     aot_gpr_5 = (ctx.gpr[22] | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0100->0018.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0100_entry, 1008u, 0x08997E9Cu, 0x0884C57Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0018_entry(rt, ctx, 46u, aot_mem);
+#else
+        recomp_unit_0018_entry(rt, ctx, 46u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0018_entry, 18u, 46u, 0x0884C57Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08997E9Cu) goto L_08997E9C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08997E9C:
     { std::uint32_t aot_run_words[16]{};
       aot_mem.aot_direct_load32_block(aot_gpr_29 + static_cast<std::uint32_t>(120), aot_run_words);
@@ -9389,8 +11454,8 @@ L_08997E9C:
     }
     jump_target = aot_gpr_31;
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(192));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08997EE4:

@@ -1282,6 +1282,10 @@ struct GeAsyncWorkerState {
     std::thread thread;
     psprecomp::Runtime *runtime{};
     bool stop_requested{};
+    // PSPRECOMP_V815_ASYNC_GE_OVERLAP: presentation owns the backend only between GE tasks.
+    bool presentation_requested{};
+    bool worker_busy{};
+    std::uint64_t present_safe_points{};
     std::atomic<bool> started{false};
     std::deque<GeAsyncTask> pending;
     std::unordered_map<std::uint32_t, std::shared_ptr<std::atomic<std::uint32_t>>> live_stalls;
@@ -1300,13 +1304,15 @@ GeAsyncWorkerState ge_async{};
 thread_local bool ge_async_worker_thread = false;
 
 bool ge_async_enabled() noexcept {
-    // V5 SYNC RECOVERY: the experimental async scheduler is quarantined after
-    // repeated boot->gameplay deadlocks.  Ignore the legacy PSPRECOMP_GE_ASYNC
-    // variable so a stale shell/BAT cannot silently re-enable the broken path.
-    // Re-entry is development-only and requires an explicit new opt-in.
+    // PSPRECOMP_V815_ASYNC_GE_OVERLAP: VCSNative opts this in at process startup. Keeping the profile
+    // layer environment-gated preserves unit-test isolation and a zero-cost
+    // PSPRECOMP_GE_ASYNC=0 rollback without another build.
     static const bool enabled = [] {
-        const char *value = std::getenv("PSPRECOMP_GE_ASYNC_EXPERIMENTAL");
-        return value != nullptr && *value != '\0' && std::strcmp(value, "0") != 0;
+        const char *value = std::getenv("PSPRECOMP_GE_ASYNC");
+        return value != nullptr && *value != '\0' &&
+               std::strcmp(value, "0") != 0 &&
+               std::strcmp(value, "false") != 0 && std::strcmp(value, "FALSE") != 0 &&
+               std::strcmp(value, "off") != 0 && std::strcmp(value, "OFF") != 0;
     }();
     return enabled;
 }
@@ -1318,6 +1324,8 @@ bool ge_async_running() noexcept {
 void ge_async_worker_main();
 void ge_async_drain_completions();
 bool ge_async_wait_idle(psprecomp::Runtime &runtime);
+bool ge_async_begin_presentation(psprecomp::Runtime &runtime);
+void ge_async_end_presentation() noexcept;
 bool ge_async_wait_list(psprecomp::Runtime &runtime, std::uint32_t id);
 bool ge_async_check_fatal(psprecomp::Runtime &runtime);
 void ge_async_stop_worker();
@@ -1345,8 +1353,12 @@ void ge_async_start_worker(psprecomp::Runtime &runtime) {
     if (ge_async.started.load(std::memory_order_acquire)) return;
     ge_async.runtime = &runtime;
     ge_async.stop_requested = false;
+    ge_async.presentation_requested = false;
+    ge_async.worker_busy = false;
     ge_async.started.store(true, std::memory_order_release);
     ge_async.thread = std::thread(&ge_async_worker_main);
+    // PSPRECOMP_V8151_WORKER_LOG: runtime proof that the asynchronous consumer actually started.
+    vcs::runtime_log_line("v8151 ge_async_worker_started=1");
 }
 
 struct GeAsyncLifetimeGuard {
@@ -6631,8 +6643,12 @@ void ge_async_worker_main() {
         psprecomp::Runtime *runtime = nullptr;
         {
             std::unique_lock lock(ge_async.mutex);
-            ge_async.cv.wait(lock, [] { return ge_async.stop_requested || !ge_async.pending.empty(); });
+            ge_async.cv.wait(lock, [] {
+                return ge_async.stop_requested ||
+                       (!ge_async.presentation_requested && !ge_async.pending.empty());
+            });
             if (ge_async.stop_requested && ge_async.pending.empty()) break;
+            ge_async.worker_busy = true;
             task = std::move(ge_async.pending.front());
             ge_async.pending.pop_front();
             runtime = ge_async.runtime;
@@ -6643,6 +6659,7 @@ void ge_async_worker_main() {
                 found->second.state == GeListState::Error) {
                 ge_async.live_stalls.erase(task.id);
                 ge_async.outstanding.fetch_sub(1u, std::memory_order_acq_rel);
+                ge_async.worker_busy = false;
                 ge_async.cv.notify_all();
                 continue;
             }
@@ -6665,6 +6682,7 @@ void ge_async_worker_main() {
             }
             ++ge_async.completed;
             ge_async.outstanding.fetch_sub(1u, std::memory_order_acq_rel);
+            ge_async.worker_busy = false;
             if (!ok && !ge_async.fatal.load(std::memory_order_acquire)) {
                 ge_async.fatal_reason = "Asynchronous GE display-list execution failed";
                 ge_async.fatal.store(true, std::memory_order_release);
@@ -6688,6 +6706,8 @@ void ge_async_stop_worker() {
     std::lock_guard lock(ge_async.mutex);
     ge_async.started.store(false, std::memory_order_release);
     ge_async.runtime = nullptr;
+    ge_async.presentation_requested = false;
+    ge_async.worker_busy = false;
     ge_async.pending.clear();
     ge_async.live_stalls.clear();
     ge_async.completions.clear();
@@ -6746,6 +6766,43 @@ bool ge_async_wait_idle(psprecomp::Runtime &runtime) {
     runtime.memory().memory_barrier();
     ge_async_drain_completions();
     return ge_async_check_fatal(runtime);
+}
+
+// PSPRECOMP_V815_PRESENT_SAFEPOINT
+bool ge_async_begin_presentation(psprecomp::Runtime &runtime) {
+    if (!ge_async_enabled() || !ge_async.started.load(std::memory_order_acquire)) return true;
+    const auto begin = std::chrono::steady_clock::now();
+    {
+        std::unique_lock lock(ge_async.mutex);
+        ge_async.presentation_requested = true;
+        ge_async.cv.notify_all();
+        ge_async.cv.wait(lock, [] {
+            return !ge_async.worker_busy || ge_async.fatal.load(std::memory_order_acquire) ||
+                   ge_async.stop_requested;
+        });
+        ge_async.last_wait_ns.store(
+            static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now() - begin).count()),
+            std::memory_order_release);
+    }
+    runtime.memory().memory_barrier();
+    ge_async_drain_completions();
+    if (!ge_async_check_fatal(runtime)) {
+        ge_async_end_presentation();
+        return false;
+    }
+    return true;
+}
+
+void ge_async_end_presentation() noexcept {
+    if (!ge_async.started.load(std::memory_order_acquire)) return;
+    {
+        std::lock_guard lock(ge_async.mutex);
+        if (!ge_async.presentation_requested) return;
+        ge_async.presentation_requested = false;
+        ++ge_async.present_safe_points;
+    }
+    ge_async.cv.notify_all();
 }
 
 bool ge_async_wait_list(psprecomp::Runtime &runtime, std::uint32_t id) {
@@ -7246,6 +7303,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     {
         std::lock_guard lock(ge_async.mutex);
         ge_async.stop_requested = false;
+        ge_async.presentation_requested = false;
+        ge_async.worker_busy = false;
+        ge_async.present_safe_points = 0u;
         ge_async.fatal.store(false, std::memory_order_release);
         ge_async.fatal_reason.clear();
         ge_async.submitted = 0u;
@@ -8863,10 +8923,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             ctx.set_gpr(2, phase < blank ? 1u : 0u);
         });
     auto wait_vblank = [](psprecomp::Runtime &rt, psprecomp::AllegrexContext &ctx) {
-        // The display consumes the completed GE frame.  This is a real PSP
-        // visibility boundary: allow guest/GE overlap during the frame, then
-        // wait only here before framebuffer presentation and vblank callbacks.
-        if (!ge_async_wait_idle(rt)) return;
+        // PSPRECOMP_V815_PRESENT_SAFEPOINT: VBlank itself is not a global GE DrawSync.
+        // Keep CPU/GE overlap alive through callbacks/telemetry and acquire the
+        // renderer safe-point only immediately around frame finalization below.
         ++display_vblank_index;
         // First-boot frontend + native pause-menu mouse state.  TITLES.PMF
         // completion is signalled directly by the MPEG HLE, so this vblank path
@@ -9118,6 +9177,19 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             display_state.buffer_width,
             display_state.pixel_format,
         };
+        // PSPRECOMP_V815_PRESENT_SAFEPOINT: the GE worker owns the native
+        // backend while it records a display list.  Keep the entire vblank
+        // hand-off (display target selection, Project2DFX and final submit)
+        // behind the same gate.  Previously the gate was taken only after
+        // set_display_framebuffer()/project2dfx_render_frame(), which left
+        // those calls racing the worker and was the source of the black
+        // post-intro frame seen when async GE was enabled.
+        const bool ge_present_gate_active = ge_async_running();
+        if (!ge_async_begin_presentation(rt)) return;
+        struct GePresentationRelease {
+            bool active;
+            ~GePresentationRelease() { if (active) ge_async_end_presentation(); }
+        } ge_presentation_release{ge_present_gate_active};
         capture_frame_if_requested(rt.memory(), displayed);
         dump_ram_if_requested(rt.memory());
         ge_gpu_backend_set_display_framebuffer(display_state.frame_buffer);
@@ -9187,6 +9259,10 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         if (gpu_frame_ready) dump_gpu_internal_frame_if_requested(display_vblank_index);
         if (perf_timing_enabled())
             frame_time_stats.present_time += std::chrono::steady_clock::now() - present_entry;
+        if (ge_presentation_release.active) {
+            ge_async_end_presentation();
+            ge_presentation_release.active = false;
+        }
         limit_frame_rate();
         // limit_frame_rate() may advance virtual_time_us when the host misses the
         // target. Seal the audio timeline immediately at that corrected guest
@@ -11692,7 +11768,10 @@ void report_present_stats() {
 }
 
 void install_starvation_preemption() {
-    const std::uint64_t interval = parse_environment_u64("PSPRECOMP_TIME_TICK_DISPATCHES", 256u);
+    // PSPRECOMP_V814_BATCHED_SCHEDULER_CLOCK: batch the same virtual-time slope into fewer host callbacks.
+    // tick_us remains interval/4, so guest time advances at the same 0.25 us per
+    // logical dispatch; only preemption polling granularity changes (64 -> 256 us).
+    const std::uint64_t interval = parse_environment_u64("PSPRECOMP_TIME_TICK_DISPATCHES", 1024u);
     execution_clock_dispatch_interval = interval;
     frozen_clock_guard_limit = parse_environment_u64(
         "PSPRECOMP_FROZEN_CLOCK_GUARD_DISPATCHES", 5'000'000u);

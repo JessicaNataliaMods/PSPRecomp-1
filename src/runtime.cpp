@@ -903,6 +903,11 @@ void Runtime::run(std::uint32_t entry, std::uint64_t max_dispatches) {
         // local-dispatch safety boundary).
         auto outer_aot_mem = memory_.aot_fast_view();
         for (; executed_dispatches < max_dispatches && !stopped_; ++executed_dispatches) {
+            // PSPRECOMP_V814_CLEAR_CONTINUATIONS_AT_OUTER_DISPATCH
+            // Reaching Runtime is an architectural boundary. Any optimized
+            // native continuation still present must be discarded so HLE,
+            // yields, long jumps and thread switches cannot retain stale frames.
+            clear_aot_tail_continuations();
             const std::uint32_t before = cpu_.pc;
             chain_context_invalidated_ = false;
             const std::int32_t dispatch_thread_uid = g_runtime_thread_uid;

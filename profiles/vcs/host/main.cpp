@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <limits>
 #include <filesystem>
 #include <iostream>
@@ -160,6 +161,29 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
     SetUnhandledExceptionFilter(&vcs_unhandled_exception_filter);
 #endif
+    // PSPRECOMP_V815_PRODUCTION_DEFAULTS
+    // PSPRECOMP_V8151_FORCE_PRODUCTION_ON
+    // PSPRECOMP_V8155_HARD_FORCE_ASYNC: the asynchronous GE path is available
+    // for explicit benchmark runs, but stays off for the normal launcher until
+    // its first post-intro frame is fully validated. Requiring a dedicated
+    // opt-in also prevents an inherited PSPRECOMP_GE_ASYNC=1 from producing a
+    // black frame on a normal launch.
+    const char *async_opt_in_text = std::getenv("PSPRECOMP_V8155_ENABLE_ASYNC");
+    const bool async_opt_in = async_opt_in_text != nullptr && *async_opt_in_text != '\0' &&
+        std::strcmp(async_opt_in_text, "0") != 0 &&
+        std::strcmp(async_opt_in_text, "false") != 0 &&
+        std::strcmp(async_opt_in_text, "FALSE") != 0 &&
+        std::strcmp(async_opt_in_text, "off") != 0 &&
+        std::strcmp(async_opt_in_text, "OFF") != 0;
+#ifdef _WIN32
+    _putenv_s("PSPRECOMP_V8151_FORCE_SYNC", "");
+    _putenv_s("PSPRECOMP_GE_ASYNC", async_opt_in ? "1" : "0");
+    _putenv_s("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", async_opt_in ? "1" : "0");
+#else
+    unsetenv("PSPRECOMP_V8151_FORCE_SYNC");
+    setenv("PSPRECOMP_GE_ASYNC", async_opt_in ? "1" : "0", 1);
+    setenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", async_opt_in ? "1" : "0", 1);
+#endif
     try {
         const std::filesystem::path executable_directory =
             native_executable_directory(argc > 0 ? argv[0] : nullptr);
@@ -170,6 +194,19 @@ int main(int argc, char **argv) {
         vcs::initialize_vcs_configuration(executable_directory);
         const vcs::VcsConfiguration &configuration = vcs::vcs_configuration();
         vcs::runtime_log_initialize(configuration);
+        vcs::runtime_log_line(std::string("v8155 hard_force_async=") +
+                              (async_opt_in ? "1" : "0") +
+                              " parallel_vertex=" + (async_opt_in ? "1" : "0") +
+                              " opt_in=PSPRECOMP_V8155_ENABLE_ASYNC");
+        // PSPRECOMP_V8151_ACTIVATION_LOG: prove the production defaults reached this executable.
+        {
+            const char *async_env = std::getenv("PSPRECOMP_GE_ASYNC");
+            const char *decode_env = std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE");
+            vcs::runtime_log_line(std::string("v8151 activation ge_async_env=") +
+                (async_env != nullptr ? async_env : "<unset>") +
+                " parallel_vertex_env=" +
+                (decode_env != nullptr ? decode_env : "<unset>"));
+        }
         vcs::runtime_log_line(std::string("bootstrap executable=") + executable.string());
         vcs::runtime_log_line(std::string("bootstrap root=") + root.string());
         vcs::runtime_log_line(std::string("rendering backend=") +

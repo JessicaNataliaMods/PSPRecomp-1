@@ -13,6 +13,22 @@ void require(bool condition, const char *message) {
     if (!condition) throw std::runtime_error(message);
 }
 
+void clear_environment_value(const char *name) {
+#if defined(_WIN32)
+    _putenv_s(name, "");
+#else
+    unsetenv(name);
+#endif
+}
+
+void set_environment_value(const char *name, const char *value) {
+#if defined(_WIN32)
+    _putenv_s(name, value);
+#else
+    setenv(name, value, 1);
+#endif
+}
+
 } // namespace
 
 int main() {
@@ -214,13 +230,29 @@ int main() {
                    << "Mist=0.67\n"
                    << "DayProgression=-0.12\n";
         }
+        // Exercise both sides of the DX12 defaulting contract.  A test runner
+        // may inherit these variables from a previous benchmark, so clear
+        // them before checking the safe defaults.
+        clear_environment_value("PSPRECOMP_GE_ASYNC");
+        clear_environment_value("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE");
         vcs::initialize_vcs_configuration(root);
         const char *async_default = std::getenv("PSPRECOMP_GE_ASYNC");
         const char *parallel_decode_default = std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE");
         require(async_default != nullptr && std::string(async_default) == "0",
-                "DirectX12 sync-recovery must force legacy GE async off");
+                "DirectX12 must default GE async off when no override is supplied");
         require(parallel_decode_default != nullptr && std::string(parallel_decode_default) == "0",
-                "DirectX12 stable recovery must force parallel vertex decode off");
+                "DirectX12 must default parallel vertex decode off when no override is supplied");
+
+        // An explicit launcher/benchmark override must survive configuration
+        // loading; this is what allows the production VCS launcher to enable
+        // overlap without making the generic config parser game-specific.
+        set_environment_value("PSPRECOMP_GE_ASYNC", "1");
+        set_environment_value("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", "1");
+        vcs::initialize_vcs_configuration(root);
+        require(std::string(std::getenv("PSPRECOMP_GE_ASYNC")) == "1",
+                "DirectX12 configuration overwrote an explicit GE async override");
+        require(std::string(std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE")) == "1",
+                "DirectX12 configuration overwrote an explicit parallel decode override");
         const auto &proper = vcs::vcs_configuration().proper_shaders;
         require(proper.enabled && proper.building_pipe.enabled && !proper.skin_pipe.enabled &&
                 proper.vehicle_pipe.enabled && !proper.vehicle_pipe.palette_classifier,

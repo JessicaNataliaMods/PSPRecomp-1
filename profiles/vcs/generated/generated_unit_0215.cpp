@@ -32,6 +32,139 @@ static constexpr std::uint16_t kEntryBases_recomp_unit_0215[64] = {
     401u, 417u, 424u, 438u, 456u, 471u, 487u, 501u, 516u, 528u, 539u, 559u, 576u, 589u, 611u, 629u,
     652u, 666u, 683u, 693u, 702u, 715u, 731u, 740u, 745u, 760u, 773u, 785u, 796u, 808u, 821u, 832u,
 };
+
+// PSPRECOMP_V813_HOT_DENSE_DISPATCH: one indexed load on the measured hot units;
+// masks remain for exact registration/correctness proof.
+alignas(64) static constexpr std::uint16_t kEntryIdsV813_recomp_unit_0215[4076] = {
+    1u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 2u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 3u, 0u, 0u, 0u, 0u, 0u, 0u, 4u, 0u, 5u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 6u, 0u, 0u, 7u, 0u, 0u, 8u, 0u, 0u, 9u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 10u, 0u, 11u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 12u, 0u, 0u, 0u, 0u, 0u, 0u, 13u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 14u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 15u, 0u, 16u, 0u, 0u, 17u, 0u, 0u, 18u, 0u, 0u, 0u, 19u, 0u, 0u, 0u, 0u, 0u, 0u, 20u, 21u, 0u, 0u, 0u, 0u, 22u, 0u, 23u, 0u, 24u, 0u,
+    0u, 0u, 0u, 0u, 25u, 0u, 26u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 27u, 0u, 0u, 0u, 0u, 28u, 0u, 0u, 0u, 0u, 0u, 0u, 29u, 0u, 0u, 0u, 0u,
+    0u, 30u, 0u, 0u, 0u, 0u, 0u, 31u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 32u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 33u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 34u, 0u, 0u, 0u, 0u, 0u, 0u, 35u, 0u, 0u, 36u, 0u, 0u, 0u, 37u, 0u, 0u, 0u, 0u, 38u, 0u, 39u, 0u, 0u, 0u, 0u, 40u,
+    0u, 0u, 0u, 0u, 0u, 0u, 41u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 42u, 0u, 0u, 43u, 0u, 0u, 44u, 0u, 45u, 0u, 0u, 0u,
+    0u, 46u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 47u, 0u, 48u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 49u, 0u, 0u, 0u, 0u, 50u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    51u, 0u, 0u, 0u, 0u, 52u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 53u, 0u, 54u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 55u, 0u, 0u, 0u, 0u, 0u, 0u, 56u, 0u, 0u, 57u, 0u, 0u, 0u, 58u, 0u,
+    0u, 59u, 0u, 0u, 0u, 0u, 0u, 60u, 0u, 0u, 61u, 0u, 62u, 0u, 0u, 0u, 0u, 0u, 63u, 0u, 64u, 65u, 0u, 0u, 0u, 66u, 0u, 0u, 0u, 67u, 0u, 0u,
+    68u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 69u, 0u, 0u, 70u, 0u, 71u, 72u, 0u, 0u, 0u, 0u, 0u, 0u, 73u, 0u, 0u, 0u, 74u, 0u, 0u, 0u, 0u, 0u, 75u,
+    0u, 0u, 76u, 0u, 0u, 77u, 0u, 0u, 78u, 0u, 0u, 79u, 0u, 0u, 80u, 0u, 0u, 81u, 0u, 0u, 82u, 0u, 0u, 83u, 0u, 84u, 0u, 85u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 86u, 0u, 0u, 87u, 0u, 0u, 0u, 0u, 88u, 0u, 0u, 0u, 0u, 0u, 89u, 0u, 0u, 0u, 90u, 0u, 91u, 0u, 0u, 92u,
+    0u, 0u, 0u, 93u, 0u, 0u, 94u, 0u, 0u, 0u, 0u, 95u, 0u, 0u, 96u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 97u, 98u, 0u, 0u, 99u, 0u, 100u, 0u,
+    0u, 0u, 101u, 0u, 0u, 102u, 0u, 0u, 103u, 104u, 0u, 0u, 105u, 0u, 0u, 106u, 0u, 0u, 0u, 0u, 107u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 108u, 0u, 0u, 0u, 0u, 109u, 0u, 0u, 0u, 110u, 111u, 0u, 112u, 0u, 113u, 0u, 0u, 0u, 114u, 0u, 0u, 0u, 115u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 116u, 0u, 0u, 0u, 0u, 117u, 0u, 0u, 118u, 0u, 0u, 0u, 0u, 119u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 120u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 121u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 122u, 0u, 123u, 0u, 0u, 124u, 0u, 125u, 0u, 126u, 0u, 0u, 127u,
+    0u, 0u, 128u, 0u, 0u, 129u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    130u, 0u, 131u, 0u, 0u, 0u, 132u, 0u, 0u, 133u, 0u, 134u, 0u, 135u, 0u, 0u, 136u, 137u, 0u, 138u, 0u, 139u, 0u, 140u, 0u, 0u, 0u, 0u, 0u, 141u, 142u, 0u,
+    143u, 0u, 0u, 144u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 145u, 0u, 146u, 0u, 0u, 147u, 0u, 148u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 149u, 0u, 150u,
+    0u, 151u, 0u, 152u, 0u, 0u, 153u, 0u, 154u, 0u, 0u, 0u, 155u, 0u, 0u, 156u, 0u, 0u, 157u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 158u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 159u, 0u, 0u, 160u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 161u, 0u, 0u, 0u, 0u, 0u, 162u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 163u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 164u, 0u, 165u, 0u, 166u,
+    0u, 167u, 0u, 0u, 0u, 0u, 0u, 0u, 168u, 0u, 0u, 0u, 0u, 0u, 169u, 0u, 0u, 0u, 170u, 0u, 0u, 0u, 0u, 171u, 0u, 0u, 0u, 0u, 172u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 173u, 0u, 0u, 0u, 0u, 174u, 0u, 0u, 175u, 0u, 0u, 0u, 176u, 0u, 0u, 177u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 178u, 0u, 0u, 0u, 0u, 179u, 0u, 0u, 0u, 0u, 0u, 180u, 0u, 181u, 0u, 182u, 0u, 183u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 184u, 0u, 185u, 0u, 186u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 187u, 0u, 0u, 0u, 0u, 188u, 0u,
+    0u, 0u, 189u, 0u, 0u, 190u, 191u, 0u, 0u, 0u, 192u, 0u, 0u, 193u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 194u, 0u, 0u, 0u, 0u, 195u, 0u, 196u, 0u, 197u,
+    0u, 198u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 199u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 200u, 0u, 0u, 201u, 0u, 0u, 0u, 0u, 0u, 202u, 0u, 0u, 0u, 0u,
+    0u, 0u, 203u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 204u, 0u, 0u, 0u, 0u, 0u, 0u, 205u, 0u, 0u, 0u, 0u, 206u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 207u, 0u, 0u, 0u, 208u, 0u, 0u, 209u, 0u, 210u, 211u, 0u, 0u, 0u, 212u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 213u, 0u, 0u, 0u, 214u, 0u,
+    0u, 215u, 0u, 216u, 217u, 0u, 0u, 0u, 0u, 0u, 218u, 0u, 219u, 0u, 0u, 0u, 220u, 0u, 0u, 221u, 0u, 0u, 0u, 0u, 222u, 0u, 0u, 0u, 0u, 0u, 0u, 223u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 224u, 0u, 0u, 0u, 225u, 0u, 0u, 0u, 226u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 227u, 0u, 0u, 0u, 228u,
+    0u, 0u, 229u, 0u, 230u, 231u, 0u, 0u, 0u, 232u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 233u, 0u, 0u, 0u, 234u, 0u, 0u, 235u, 0u, 0u, 236u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 237u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 238u, 0u, 0u, 0u, 239u, 0u, 0u, 240u, 0u, 241u, 242u,
+    0u, 0u, 0u, 243u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 244u, 0u, 0u, 0u, 245u, 0u, 0u, 246u, 0u, 247u, 248u, 0u, 0u, 249u, 0u, 0u, 0u, 250u, 0u,
+    0u, 0u, 0u, 0u, 0u, 251u, 0u, 0u, 0u, 0u, 0u, 0u, 252u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 253u, 0u, 0u, 0u, 0u, 0u, 254u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 255u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 256u, 0u, 0u, 0u, 257u, 0u, 0u, 258u, 0u, 259u, 260u,
+    0u, 0u, 0u, 261u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 262u, 0u, 0u, 0u, 263u, 0u, 0u, 264u, 0u, 265u, 266u, 0u, 0u, 0u, 0u, 0u, 0u, 267u, 0u,
+    0u, 0u, 0u, 0u, 0u, 268u, 0u, 269u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 270u, 0u, 0u, 271u, 0u, 0u, 0u, 0u, 0u, 272u, 0u, 0u, 0u, 0u,
+    0u, 0u, 273u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 274u, 0u, 0u, 0u, 0u, 0u, 0u, 275u, 0u, 0u, 0u, 0u, 276u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 277u, 0u, 0u, 0u, 278u, 0u, 0u, 0u, 279u, 280u, 0u, 0u, 0u, 281u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 282u, 0u, 0u, 0u, 283u, 0u, 0u, 0u, 284u,
+    285u, 0u, 286u, 0u, 287u, 0u, 288u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 289u, 0u, 290u, 0u, 0u, 0u, 291u, 0u, 0u, 292u, 0u, 0u, 0u, 0u, 293u, 0u, 0u, 0u,
+    0u, 0u, 0u, 294u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 295u, 0u, 0u, 296u, 0u, 0u, 0u, 297u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 298u, 0u, 0u,
+    0u, 299u, 0u, 0u, 0u, 300u, 301u, 0u, 0u, 0u, 302u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 303u, 0u, 0u, 0u, 304u, 0u, 0u, 0u, 305u, 0u, 306u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 307u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 308u, 0u, 0u, 0u, 309u, 0u, 0u, 0u, 310u, 311u, 0u, 0u,
+    0u, 312u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 313u, 0u, 0u, 0u, 314u, 0u, 0u, 0u, 315u, 0u, 316u, 0u, 0u, 317u, 0u, 0u, 0u, 0u, 318u, 0u, 0u, 0u,
+    0u, 0u, 319u, 0u, 0u, 0u, 0u, 0u, 0u, 320u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 321u, 0u, 0u, 0u, 0u, 0u, 322u, 0u, 0u, 0u, 0u, 0u, 323u,
+    0u, 324u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 325u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 326u, 0u, 0u, 0u, 327u, 0u,
+    0u, 328u, 0u, 329u, 330u, 0u, 0u, 0u, 331u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 332u, 0u, 0u, 0u, 333u, 0u, 0u, 334u, 0u, 335u, 336u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 337u, 0u, 0u, 0u, 0u, 0u, 338u, 0u, 0u, 0u, 339u, 0u, 340u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 341u, 0u, 0u, 0u, 0u, 0u, 342u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 343u, 0u, 0u, 344u, 0u, 0u, 0u, 0u, 0u, 0u, 345u, 0u, 0u, 0u, 346u, 0u, 0u, 347u, 0u, 348u, 0u, 0u, 0u, 0u,
+    349u, 0u, 350u, 0u, 351u, 0u, 352u, 0u, 0u, 353u, 0u, 354u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 355u, 0u, 356u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 357u, 0u, 0u, 358u, 0u, 359u, 0u, 0u, 360u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 361u, 0u, 362u, 0u, 363u, 0u, 0u,
+    364u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 365u, 366u, 367u, 0u, 0u, 368u, 0u, 0u, 0u, 369u, 0u, 0u, 0u, 370u, 0u, 371u, 0u, 0u, 0u, 372u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 373u, 0u, 374u, 375u, 376u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 377u, 0u,
+    378u, 0u, 379u, 380u, 0u, 0u, 0u, 0u, 0u, 381u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 382u, 0u, 383u, 0u, 384u, 0u,
+    385u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 386u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 387u, 0u, 388u, 0u, 0u, 0u, 389u, 0u, 0u, 0u, 390u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 391u, 0u, 0u, 392u, 0u, 0u, 0u, 393u, 0u, 394u, 0u, 0u, 0u, 395u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 396u, 0u, 0u, 397u, 0u, 0u, 0u, 0u, 0u, 0u, 398u, 0u, 399u, 0u, 0u, 0u, 400u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 401u, 0u, 0u, 402u, 0u, 0u, 0u, 0u, 403u, 0u, 0u, 0u, 404u, 0u, 0u, 405u, 0u, 0u, 0u, 406u, 407u, 0u, 0u, 0u, 0u, 408u, 0u,
+    409u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 410u, 0u, 411u, 0u, 0u, 0u, 412u, 413u, 0u, 0u, 0u, 0u, 0u, 414u, 0u, 415u, 0u, 0u, 416u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 417u, 0u, 418u, 419u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 420u, 0u, 421u,
+    422u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 423u, 0u, 0u, 0u, 0u, 0u, 0u,
+    424u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 425u, 0u, 0u, 0u, 0u, 0u, 426u, 0u, 427u, 0u, 0u, 0u, 0u, 428u, 0u, 0u, 429u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 430u, 0u, 0u, 0u, 0u, 0u, 431u, 0u, 0u, 0u, 0u, 0u, 432u, 433u, 0u, 0u, 0u, 0u, 434u, 0u, 435u, 0u, 0u, 0u, 0u, 0u, 0u, 436u, 0u, 0u, 437u,
+    438u, 0u, 0u, 439u, 0u, 0u, 440u, 0u, 441u, 442u, 0u, 0u, 443u, 0u, 444u, 0u, 0u, 0u, 445u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 446u,
+    0u, 0u, 447u, 0u, 0u, 0u, 0u, 448u, 0u, 0u, 0u, 449u, 0u, 0u, 0u, 0u, 0u, 450u, 0u, 0u, 451u, 0u, 0u, 452u, 453u, 0u, 454u, 0u, 0u, 0u, 455u, 0u,
+    456u, 0u, 0u, 0u, 0u, 0u, 0u, 457u, 0u, 458u, 0u, 0u, 0u, 459u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 460u, 0u, 461u, 0u, 0u, 0u, 462u, 0u, 463u, 0u,
+    464u, 465u, 0u, 0u, 0u, 0u, 0u, 466u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 467u, 0u, 0u, 0u, 0u, 0u, 468u, 0u, 0u, 0u, 469u, 0u, 470u,
+    0u, 0u, 0u, 0u, 0u, 0u, 471u, 0u, 0u, 472u, 473u, 0u, 0u, 474u, 0u, 475u, 0u, 476u, 0u, 477u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 478u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 479u, 0u, 0u, 480u, 0u, 0u, 481u, 0u, 0u, 0u, 482u, 0u, 0u, 0u, 0u, 0u, 0u, 483u, 0u, 484u, 0u, 485u, 486u, 0u,
+    487u, 0u, 0u, 488u, 0u, 0u, 489u, 0u, 490u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 491u, 0u, 492u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 493u, 0u,
+    494u, 0u, 0u, 0u, 0u, 0u, 495u, 0u, 0u, 496u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 497u, 0u, 0u, 0u, 0u, 498u, 0u, 499u, 0u, 0u, 500u, 0u, 0u, 0u,
+    501u, 0u, 0u, 502u, 0u, 0u, 503u, 0u, 0u, 0u, 504u, 0u, 0u, 0u, 0u, 0u, 0u, 505u, 0u, 0u, 506u, 0u, 507u, 0u, 0u, 508u, 509u, 0u, 0u, 0u, 510u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 511u, 0u, 0u, 0u, 0u, 512u, 0u, 0u, 513u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 514u, 0u, 0u, 515u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 516u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 517u, 0u, 0u, 518u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 519u, 0u, 520u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 521u, 0u, 522u, 0u, 0u, 0u, 523u, 524u, 0u, 525u, 0u, 526u, 0u, 0u, 527u, 0u, 0u, 0u,
+    0u, 0u, 0u, 528u, 0u, 529u, 0u, 530u, 0u, 0u, 531u, 0u, 0u, 532u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 533u, 0u, 0u, 534u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 535u, 0u, 0u, 0u, 0u, 536u, 537u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 538u, 0u,
+    0u, 539u, 0u, 0u, 540u, 0u, 0u, 541u, 0u, 0u, 0u, 542u, 0u, 0u, 0u, 0u, 543u, 0u, 544u, 0u, 0u, 0u, 0u, 0u, 545u, 546u, 547u, 0u, 548u, 0u, 0u, 0u,
+    0u, 0u, 0u, 549u, 0u, 550u, 0u, 551u, 0u, 0u, 0u, 0u, 0u, 0u, 552u, 0u, 0u, 553u, 0u, 0u, 0u, 0u, 554u, 0u, 0u, 555u, 0u, 556u, 0u, 0u, 557u, 558u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 559u, 0u, 0u, 560u, 0u, 561u, 0u, 0u, 562u, 563u, 0u, 0u, 0u, 0u, 564u, 0u, 565u, 0u, 0u, 0u, 566u, 0u, 0u,
+    0u, 0u, 0u, 0u, 567u, 568u, 569u, 0u, 570u, 0u, 0u, 0u, 571u, 0u, 0u, 0u, 0u, 0u, 572u, 0u, 0u, 573u, 0u, 574u, 0u, 0u, 0u, 0u, 0u, 0u, 575u, 0u,
+    0u, 576u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 577u, 0u, 0u, 578u, 579u, 0u, 580u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 581u, 0u, 0u,
+    582u, 0u, 0u, 0u, 0u, 0u, 0u, 583u, 584u, 0u, 0u, 585u, 0u, 0u, 586u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 587u, 0u, 0u, 588u, 0u,
+    0u, 0u, 0u, 0u, 0u, 589u, 0u, 0u, 590u, 0u, 0u, 0u, 591u, 0u, 0u, 0u, 592u, 593u, 0u, 594u, 0u, 595u, 0u, 0u, 596u, 0u, 0u, 0u, 597u, 0u, 598u, 0u,
+    0u, 599u, 0u, 0u, 600u, 0u, 601u, 0u, 0u, 602u, 603u, 0u, 604u, 0u, 605u, 0u, 606u, 607u, 0u, 0u, 608u, 0u, 0u, 0u, 0u, 609u, 0u, 0u, 0u, 0u, 0u, 610u,
+    0u, 0u, 0u, 0u, 611u, 0u, 0u, 0u, 0u, 612u, 0u, 613u, 614u, 0u, 615u, 0u, 616u, 0u, 617u, 0u, 0u, 0u, 618u, 619u, 620u, 0u, 621u, 0u, 0u, 0u, 622u, 623u,
+    0u, 624u, 0u, 0u, 0u, 0u, 0u, 625u, 0u, 0u, 626u, 627u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 628u, 0u,
+    0u, 629u, 0u, 0u, 630u, 0u, 631u, 0u, 0u, 0u, 632u, 0u, 0u, 0u, 0u, 633u, 634u, 0u, 0u, 0u, 635u, 636u, 637u, 0u, 0u, 0u, 638u, 0u, 639u, 0u, 640u, 0u,
+    641u, 0u, 0u, 0u, 0u, 0u, 0u, 642u, 0u, 643u, 644u, 0u, 645u, 0u, 0u, 646u, 647u, 0u, 648u, 0u, 0u, 649u, 0u, 0u, 650u, 0u, 651u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 652u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 653u, 0u, 0u, 0u, 0u, 654u, 0u, 0u, 655u, 0u, 0u, 0u, 0u, 656u, 0u, 0u,
+    0u, 0u, 0u, 657u, 0u, 0u, 0u, 658u, 0u, 0u, 0u, 0u, 659u, 0u, 0u, 660u, 0u, 0u, 0u, 661u, 0u, 662u, 0u, 0u, 0u, 663u, 0u, 664u, 0u, 0u, 665u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 666u, 0u, 667u, 0u, 668u, 669u, 0u, 670u, 0u, 0u, 671u, 0u, 672u, 0u, 673u, 0u, 674u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    675u, 0u, 0u, 0u, 676u, 0u, 0u, 0u, 0u, 0u, 0u, 677u, 0u, 678u, 679u, 0u, 0u, 0u, 680u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 681u, 0u, 0u, 0u, 682u, 0u,
+    0u, 0u, 0u, 0u, 0u, 683u, 0u, 684u, 685u, 0u, 0u, 0u, 686u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 687u, 0u, 0u, 688u, 0u, 0u, 0u, 689u, 0u, 690u,
+    0u, 691u, 0u, 0u, 0u, 0u, 0u, 692u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 693u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 694u, 0u, 0u, 0u, 695u, 0u, 0u, 0u, 696u, 0u, 697u, 0u, 0u, 0u, 698u, 0u, 0u, 699u, 0u, 700u, 0u, 0u, 0u, 701u, 0u, 0u,
+    0u, 0u, 702u, 0u, 0u, 703u, 0u, 0u, 0u, 704u, 0u, 705u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 706u, 0u, 707u, 0u, 708u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 709u, 0u, 0u, 0u, 0u, 710u, 0u, 0u, 0u, 0u, 0u, 0u, 711u, 0u, 0u, 712u, 713u, 0u, 0u, 0u, 714u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 715u, 0u, 0u, 716u, 0u, 0u, 717u, 0u, 0u, 718u, 719u, 0u, 0u, 0u, 720u, 0u, 721u, 0u, 0u, 722u,
+    0u, 723u, 0u, 724u, 0u, 0u, 0u, 725u, 0u, 726u, 0u, 0u, 727u, 0u, 0u, 728u, 0u, 0u, 0u, 0u, 729u, 0u, 0u, 0u, 0u, 730u, 0u, 0u, 0u, 0u, 0u, 0u,
+    731u, 0u, 732u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 733u, 0u, 734u, 0u, 0u, 0u, 0u, 0u, 735u, 0u, 736u, 0u, 737u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 738u, 0u, 0u, 0u, 0u, 0u, 739u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 740u, 0u, 0u, 741u, 0u, 0u,
+    0u, 0u, 0u, 0u, 742u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 743u, 0u, 0u, 0u, 0u, 744u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    745u, 0u, 746u, 0u, 0u, 747u, 748u, 0u, 0u, 0u, 749u, 0u, 0u, 750u, 0u, 0u, 0u, 0u, 751u, 0u, 0u, 0u, 752u, 0u, 0u, 0u, 0u, 0u, 0u, 753u, 754u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 755u, 0u, 0u, 756u, 0u, 757u, 0u, 0u, 0u, 0u, 758u, 0u, 0u, 0u, 0u, 0u, 0u, 759u, 0u, 0u, 0u, 0u, 0u, 0u,
+    760u, 0u, 761u, 0u, 762u, 0u, 0u, 0u, 0u, 0u, 763u, 0u, 0u, 0u, 764u, 0u, 0u, 0u, 0u, 0u, 0u, 765u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 766u, 0u, 767u, 0u, 0u, 0u, 768u, 0u, 0u, 0u, 0u, 769u, 0u, 0u, 0u, 770u, 0u, 0u, 0u, 0u, 0u, 0u, 771u, 0u, 772u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 773u, 0u, 0u, 0u, 0u, 0u, 0u, 774u, 0u, 775u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 776u, 0u, 0u, 777u, 0u,
+    0u, 0u, 0u, 0u, 778u, 0u, 779u, 0u, 0u, 0u, 0u, 0u, 0u, 780u, 781u, 0u, 0u, 0u, 0u, 0u, 782u, 0u, 783u, 0u, 0u, 0u, 0u, 784u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 785u, 0u, 0u, 0u, 0u, 0u, 0u, 786u, 787u, 0u, 0u, 0u, 0u, 0u, 0u, 788u, 0u, 0u, 0u, 0u, 0u, 789u, 0u, 790u, 0u,
+    0u, 0u, 0u, 0u, 0u, 791u, 792u, 0u, 0u, 0u, 0u, 0u, 0u, 793u, 0u, 0u, 0u, 0u, 794u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 795u, 0u,
+    0u, 0u, 0u, 0u, 0u, 796u, 0u, 797u, 0u, 0u, 798u, 0u, 0u, 0u, 799u, 0u, 0u, 0u, 0u, 800u, 0u, 0u, 801u, 0u, 0u, 0u, 0u, 0u, 0u, 802u, 0u, 803u,
+    0u, 0u, 0u, 804u, 0u, 0u, 0u, 0u, 0u, 0u, 805u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 806u, 0u, 0u, 0u, 0u, 0u, 0u, 807u, 0u, 0u,
+    0u, 808u, 0u, 0u, 0u, 809u, 0u, 0u, 0u, 0u, 810u, 0u, 0u, 0u, 0u, 0u, 0u, 811u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 812u, 0u, 0u, 0u, 813u, 0u,
+    0u, 814u, 0u, 0u, 0u, 0u, 0u, 0u, 815u, 0u, 0u, 0u, 816u, 0u, 0u, 0u, 817u, 0u, 0u, 0u, 0u, 0u, 0u, 818u, 819u, 0u, 0u, 820u, 0u, 0u, 0u, 0u,
+    0u, 0u, 0u, 821u, 0u, 0u, 0u, 0u, 822u, 0u, 0u, 823u, 0u, 0u, 0u, 0u, 0u, 0u, 824u, 0u, 825u, 0u, 0u, 0u, 826u, 0u, 0u, 0u, 0u, 0u, 0u, 827u,
+    0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 828u, 0u, 0u, 0u, 0u, 0u, 0u, 829u, 0u, 0u, 0u, 0u, 830u, 0u, 0u, 0u, 0u, 831u, 0u, 0u, 0u,
+    0u, 0u, 0u, 832u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 833u, 0u, 0u, 0u, 834u, 0u, 0u, 835u, 0u, 0u, 0u, 0u, 0u, 0u, 836u, 0u, 0u, 0u, 837u, 0u,
+    0u, 0u, 838u, 0u, 0u, 0u, 0u, 0u, 0u, 839u, 0u, 840u,
+};
 void recomp_unit_0215_entry(Runtime &rt, AllegrexContext &ctx, std::uint16_t direct_entry_id, GuestMemory::AotFastView &aot_mem) {
 // PSPRECOMP_AOT_REGCACHE_BEGIN
 // PSPRECOMP_AOT_REGCACHE_META gprs=2,4,29,5,3,6 fprs=12,2,4,0 gpr_occ=4231 fpr_occ=103 gpr_total=7053 fpr_total=290
@@ -58,18 +191,8 @@ LOCAL_DISPATCH:
     {
     if (entry_id == 0u) {
         const std::uint32_t entry_delta = local_pc - 0x08B60000u;
-        entry_id = 0u;
-        if (entry_delta < 16304u && (entry_delta & 3u) == 0u) {
-            const std::uint32_t entry_slot = entry_delta >> 2u;
-            const std::uint32_t entry_group = entry_slot >> 6u;
-            const std::uint64_t entry_mask = kEntryMasks_recomp_unit_0215[entry_group];
-            const std::uint64_t entry_bit = 1ull << (entry_slot & 63u);
-            if ((entry_mask & entry_bit) != 0u) {
-                entry_id = static_cast<std::uint16_t>(
-                    kEntryBases_recomp_unit_0215[entry_group] +
-                    std::popcount(entry_mask & (entry_bit - 1ull)));
-            }
-        }
+        entry_id = (entry_delta < 16304u && (entry_delta & 3u) == 0u)
+            ? kEntryIdsV813_recomp_unit_0215[entry_delta >> 2u] : 0u;
     }
     switch (entry_id) {
     case 1u: goto L_08B60000;
@@ -918,6 +1041,30 @@ LOCAL_DISPATCH:
         AOT_REGCACHE_SYNC_OUT(); return;
     }
     }
+// PSPRECOMP_V813_SHARED_JR_DISPATCH: one dynamic-JR reject/redispatch path per unit.
+LOCAL_JR_DISPATCH:
+    {
+        const std::uint32_t local_delta_v813 = jump_target - 0x08B60000u;
+        if (local_delta_v813 >= 16304u || (local_delta_v813 & 3u) != 0u) {
+            ctx.pc = jump_target;
+            AOT_REGCACHE_SYNC_OUT();
+            // PSPRECOMP_V814_CONTINUATION_RETURN
+            Runtime::AotTailContinuation aot_cont_v814{};
+            if (rt.take_aot_tail_continuation(jump_target, aot_cont_v814)) {
+#if defined(__clang__) && defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+                [[clang::musttail]] return aot_cont_v814.function(
+                    rt, ctx, aot_cont_v814.entry_id, aot_mem);
+#else
+                aot_cont_v814.function(rt, ctx, aot_cont_v814.entry_id, aot_mem); return;
+#endif
+            }
+            return;
+        }
+    }
+    local_pc = jump_target;
+    entry_id = 0u;
+    goto LOCAL_DISPATCH;
+
 // PSPRECOMP_V812_SHARED_SCHED_BLOCK: one scheduler-exact slow boundary per unit.
 LOCAL_SCHED_BOUNDARY:
     ctx.pc = jump_target;
@@ -944,8 +1091,21 @@ L_08B60000:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(24), ctx.gpr[31]);
     ctx.gpr[31] = (0x08B60030u);
     aot_gpr_4 = (aot_gpr_6 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0214.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 2u, 0x08B60030u, 0x08B5F758u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0214_entry(rt, ctx, 763u, aot_mem);
+#else
+        recomp_unit_0214_entry(rt, ctx, 763u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0214_entry, 214u, 763u, 0x08B5F758u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B60030u) goto L_08B60030;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B60030:
     aot_gpr_5 = (aot_gpr_2 | 0u);
     ctx.gpr[11] = (0u | 32u);
@@ -988,8 +1148,8 @@ L_08B60074:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(24)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6009C:
@@ -1042,8 +1202,8 @@ L_08B600EC:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(24)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60110:
@@ -1054,8 +1214,8 @@ L_08B60110:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(24)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6012C:
@@ -1067,8 +1227,21 @@ L_08B6012C:
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(40), ctx.gpr[31]);
     ctx.gpr[31] = (0x08B6014Cu);
     aot_gpr_5 = (0u | 1u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0214.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 14u, 0x08B6014Cu, 0x08B5F43Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0214_entry(rt, ctx, 726u, aot_mem);
+#else
+        recomp_unit_0214_entry(rt, ctx, 726u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0214_entry, 214u, 726u, 0x08B5F43Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B6014Cu) goto L_08B6014C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B6014C:
     aot_gpr_5 = (16u << 16u);
     ctx.gpr[11] = (aot_gpr_5 + static_cast<std::uint32_t>(-1));
@@ -1106,8 +1279,21 @@ L_08B60198:
     aot_gpr_4 = (aot_gpr_29 + static_cast<std::uint32_t>(24));
     ctx.gpr[31] = (0x08B601A4u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(24), aot_gpr_6);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0214.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 18u, 0x08B601A4u, 0x08B5F7D8u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0214_entry(rt, ctx, 775u, aot_mem);
+#else
+        recomp_unit_0214_entry(rt, ctx, 775u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0214_entry, 214u, 775u, 0x08B5F7D8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B601A4u) goto L_08B601A4;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B601A4:
     aot_gpr_5 = (aot_gpr_2 | 0u);
     aot_gpr_6 = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(24)));
@@ -1154,8 +1340,21 @@ L_08B601E8:
 L_08B601F0:
     ctx.gpr[31] = (0x08B601F8u);
     aot_mem.aot_direct_store32(aot_gpr_29 + static_cast<std::uint32_t>(28), ctx.gpr[11]);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0214.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 24u, 0x08B601F8u, 0x08B5F7D8u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0214_entry(rt, ctx, 775u, aot_mem);
+#else
+        recomp_unit_0214_entry(rt, ctx, 775u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0214_entry, 214u, 775u, 0x08B5F7D8u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B601F8u) goto L_08B601F8;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B601F8:
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(28)));
     ctx.gpr[11] = (0u | 1u);
@@ -1180,8 +1379,8 @@ L_08B60218:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(40)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6023C:
@@ -1190,8 +1389,21 @@ L_08B6023C:
     aot_gpr_4 = (aot_gpr_3 + aot_gpr_5);
     ctx.gpr[31] = (0x08B60250u);
     aot_gpr_4 = (aot_mem.aot_direct_load32(aot_gpr_4 + static_cast<std::uint32_t>(-4)));
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0214.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 28u, 0x08B60250u, 0x08B5F758u)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0214_entry(rt, ctx, 763u, aot_mem);
+#else
+        recomp_unit_0214_entry(rt, ctx, 763u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0214_entry, 214u, 763u, 0x08B5F758u>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B60250u) goto L_08B60250;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B60250:
     aot_gpr_4 = (ctx.gpr[11] << 5u);
     aot_gpr_4 = (aot_gpr_4 - aot_gpr_2);
@@ -1200,8 +1412,8 @@ L_08B60250:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(40)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6026C:
@@ -1277,8 +1489,8 @@ L_08B60330:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(40)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6033C:
@@ -1355,8 +1567,8 @@ L_08B603DC:
     goto L_08B603E8;
 L_08B603E8:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B603F0:
@@ -1528,8 +1740,8 @@ L_08B605F8:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60604:
@@ -1544,20 +1756,20 @@ L_08B6061C:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60628:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60630:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60648:
@@ -1573,8 +1785,8 @@ L_08B60650:
     goto L_08B60654;
 L_08B60654:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60664:
@@ -1587,8 +1799,8 @@ L_08B60674:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60680:
@@ -1629,8 +1841,8 @@ L_08B606B8:
     }
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B606D4:
@@ -1649,72 +1861,72 @@ L_08B606E4:
     ctx.gpr[1] = (ctx.gpr[1] + aot_gpr_4);
     ctx.gpr[1] = (aot_mem.aot_direct_load32(ctx.gpr[1] + static_cast<std::uint32_t>(-25032)));
     jump_target = ctx.gpr[1];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B606FC:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25416));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60708:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25396));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60714:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25340));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60720:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25288));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6072C:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25220));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60738:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25188));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60744:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25152));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60750:
     aot_gpr_2 = (2233u << 16u);
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_2 + static_cast<std::uint32_t>(-25128));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6075C:
@@ -1723,8 +1935,8 @@ L_08B6075C:
     goto L_08B60764;
 L_08B60764:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6076C:
@@ -1765,8 +1977,8 @@ L_08B607C0:
     }
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B607D8:
@@ -1782,8 +1994,8 @@ L_08B607F0:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B607FC:
@@ -1796,8 +2008,8 @@ L_08B6080C:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(0)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60818:
@@ -1812,8 +2024,8 @@ L_08B6082C:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60838:
@@ -1968,8 +2180,8 @@ L_08B6094C:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(12)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B6095C:
@@ -2031,8 +2243,8 @@ L_08B609C0:
     }
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B609E4:
@@ -2047,8 +2259,8 @@ L_08B609E4:
       aot_mem.aot_direct_store32_block(aot_gpr_5 + static_cast<std::uint32_t>(0), aot_run_words); }
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(aot_gpr_5 + static_cast<std::uint32_t>(32), 0u);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60A28:
@@ -2075,8 +2287,8 @@ L_08B60A54:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60A60:
@@ -2098,8 +2310,8 @@ L_08B60A70:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60A7C:
@@ -2114,8 +2326,8 @@ L_08B60A88:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60A94:
@@ -2178,8 +2390,21 @@ L_08B60B18:
 L_08B60B24:
     ctx.gpr[31] = (0x08B60B2Cu);
     aot_gpr_4 = (aot_gpr_5 | 0u);
+    // PSPRECOMP_V814_LINKED_CALL: non-recursive generated call 0215->0174.
+#if defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+    AOT_REGCACHE_SYNC_OUT();
+    if (rt.prepare_aot_linked_call(ctx, &recomp_unit_0215_entry, 134u, 0x08B60B2Cu, 0x08ABE29Cu)) {
+#if defined(__clang__)
+        [[clang::musttail]] return recomp_unit_0174_entry(rt, ctx, 468u, aot_mem);
+#else
+        recomp_unit_0174_entry(rt, ctx, 468u, aot_mem); return;
+#endif
+    }
+    return;
+#else
     if (([&]() { AOT_REGCACHE_SYNC_OUT(); const bool aot_regcache_same_ = (rt.invoke_chained_trusted_direct<&recomp_unit_0174_entry, 174u, 468u, 0x08ABE29Cu>(ctx, &aot_mem)); if (aot_regcache_same_) AOT_REGCACHE_SYNC_IN(); else aot_regcache_valid = false; return aot_regcache_same_; }()) && ctx.pc == 0x08B60B2Cu) goto L_08B60B2C;
     AOT_REGCACHE_SYNC_OUT(); return;
+#endif
 L_08B60B2C:
     { const bool branch_taken = 0u == 0u;
     aot_gpr_4 = (aot_gpr_2 | 0u);
@@ -2369,8 +2594,8 @@ L_08B60C48:
     }
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(256));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60C7C:
@@ -2390,8 +2615,8 @@ L_08B60CA8:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(48)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60CB4:
@@ -2538,8 +2763,8 @@ L_08B60DF0:
     }
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(208));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60E20:
@@ -2553,8 +2778,8 @@ L_08B60E34:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(32)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60E40:
@@ -2567,8 +2792,8 @@ L_08B60E50:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60E5C:
@@ -2582,8 +2807,8 @@ L_08B60E5C:
     aot_gpr_4 = (aot_gpr_4 + ctx.gpr[10]);
     jump_target = ctx.gpr[31];
     aot_gpr_3 = (aot_gpr_4 + ctx.gpr[9]);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60E84:
@@ -2619,8 +2844,8 @@ L_08B60EB8:
     goto L_08B60EC0;
 L_08B60EC0:
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60EC8:
@@ -2724,8 +2949,8 @@ L_08B60FB4:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(0)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B60FD8:
@@ -2933,8 +3158,8 @@ L_08B61190:
     aot_gpr_3 = (aot_gpr_6 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B611A8:
@@ -3582,8 +3807,8 @@ L_08B61718:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B61738:
@@ -4082,8 +4307,8 @@ L_08B61BA0:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(32)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B61BAC:
@@ -4140,8 +4365,8 @@ L_08B61BEC:
 L_08B61C00:
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_6 + 0u);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B61C08:
@@ -4513,8 +4738,8 @@ L_08B61F4C:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(128)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(144));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B61F5C:
@@ -4555,8 +4780,8 @@ L_08B61FC0:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(128)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(144));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B61FD0:
@@ -4643,8 +4868,8 @@ L_08B62080:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(128)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(160));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B620A0:
@@ -5035,8 +5260,8 @@ L_08B623E8:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(96)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(112));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B623F8:
@@ -5247,8 +5472,8 @@ L_08B625B8:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(96)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(112));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B625C8:
@@ -5278,8 +5503,8 @@ L_08B625F4:
 L_08B625F8:
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62600:
@@ -5421,8 +5646,8 @@ L_08B62718:
     aot_gpr_2 = (aot_gpr_5 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62728:
@@ -5489,8 +5714,8 @@ L_08B627B0:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(48)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B627BC:
@@ -5508,8 +5733,8 @@ L_08B627E4:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(32)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B627F0:
@@ -5547,8 +5772,8 @@ L_08B6285C:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(48)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(64));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62868:
@@ -5609,15 +5834,15 @@ L_08B628D0:
 L_08B628D4:
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(aot_gpr_5 + static_cast<std::uint32_t>(12), ctx.gpr[7]);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B628DC:
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(aot_gpr_5 + static_cast<std::uint32_t>(0), aot_gpr_2);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B628E4:
@@ -5671,8 +5896,8 @@ L_08B62958:
     ctx.gpr[31] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(16)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62964:
@@ -5723,8 +5948,8 @@ L_08B6299C:
     aot_gpr_3 = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(4)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B629F8:
@@ -6020,8 +6245,8 @@ L_08B62C3C:
 L_08B62C40:
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(ctx.gpr[10] + static_cast<std::uint32_t>(0), aot_gpr_2);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62C48:
@@ -6066,8 +6291,8 @@ L_08B62CA0:
     aot_mem.aot_direct_store32(ctx.gpr[10] + static_cast<std::uint32_t>(16), ctx.gpr[8]);
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(ctx.gpr[10] + static_cast<std::uint32_t>(20), ctx.gpr[9]);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62CAC:
@@ -6141,8 +6366,8 @@ L_08B62D40:
 L_08B62D44:
     jump_target = ctx.gpr[31];
     aot_gpr_2 = (aot_gpr_4 + 0u);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62D4C:
@@ -6362,8 +6587,8 @@ L_08B62EAC:
     aot_gpr_6 = (aot_gpr_6 | aot_gpr_3);
     aot_fpr_0 = std::bit_cast<float>(aot_gpr_6);
     jump_target = ctx.gpr[31];
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B62EF8:
@@ -6632,8 +6857,8 @@ L_08B630F8:
     aot_gpr_2 = (aot_gpr_3 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(32));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63118:
@@ -6720,8 +6945,8 @@ L_08B631B8:
     aot_gpr_2 = (aot_gpr_6 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B631C8:
@@ -6774,8 +6999,8 @@ L_08B63220:
     aot_gpr_2 = (ctx.gpr[8] + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63230:
@@ -6832,8 +7057,8 @@ L_08B6329C:
     aot_gpr_2 = (aot_gpr_4 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63358:
@@ -6946,8 +7171,8 @@ L_08B6342C:
     aot_gpr_2 = (0u + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63460:
@@ -7028,8 +7253,8 @@ L_08B634FC:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(0)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(48));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63530:
@@ -7272,8 +7497,8 @@ L_08B63774:
     aot_gpr_2 = (aot_gpr_3 + 0u);
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63790:
@@ -7340,8 +7565,8 @@ L_08B63818:
     ctx.gpr[16] = (aot_mem.aot_direct_load32(aot_gpr_29 + static_cast<std::uint32_t>(0)));
     jump_target = ctx.gpr[31];
     aot_gpr_29 = (aot_gpr_29 + static_cast<std::uint32_t>(16));
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63828:
@@ -7636,8 +7861,8 @@ L_08B63AB8:
 L_08B63AD0:
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(aot_gpr_2 + static_cast<std::uint32_t>(32), aot_gpr_3);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63AD8:
@@ -7693,8 +7918,8 @@ L_08B63B3C:
     aot_mem.aot_direct_store32(ctx.gpr[10] + static_cast<std::uint32_t>(28), 0u);
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(ctx.gpr[10] + static_cast<std::uint32_t>(32), 0u);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63B58:
@@ -7998,8 +8223,8 @@ L_08B63DE0:
     aot_gpr_5 = (ctx.gpr[9] + ctx.gpr[10]);
     jump_target = ctx.gpr[31];
     aot_mem.aot_direct_store32(aot_gpr_4 + static_cast<std::uint32_t>(32), aot_gpr_5);
-    local_pc = jump_target;
-    if (++local_transfers < 256u) { entry_id = 0u; goto LOCAL_DISPATCH; }
+    // PSPRECOMP_V813_JR_FAST_EXIT: preserve the exact 256-transfer boundary; common JR path is shared.
+    if (++local_transfers < 256u) goto LOCAL_JR_DISPATCH;
     // PSPRECOMP_V812_SHARED_SCHED_JUMP
     goto LOCAL_SCHED_BOUNDARY;
 L_08B63DEC:

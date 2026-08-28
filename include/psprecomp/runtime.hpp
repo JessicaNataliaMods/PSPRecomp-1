@@ -4,6 +4,8 @@
 #include "psprecomp/guest_memory.hpp"
 #include "psprecomp/nid_registry.hpp"
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -333,6 +335,86 @@ public:
             ctx, shared_aot_mem);
     }
 
+    // PSPRECOMP_V814_AOT_CONTINUATION_ENGINE
+    // Flatten compile-time-known generated calls into explicit guest continuations.
+    // The normal path no longer nests giant generated C++ frames: the caller
+    // publishes architectural registers, stores its exact return entry, and the
+    // generated target is reached by a clang tail jump. A guest `jr $ra` pops the
+    // continuation and tail-jumps back. Any outer Runtime/HLE boundary discards
+    // the optimization stack and resumes through the canonical PC dispatcher.
+    struct AotTailContinuation {
+        RecompiledEntryFunction function{};
+        std::uint16_t entry_id{};
+        std::uint16_t reserved{};
+        std::uint32_t return_pc{};
+        std::uint64_t switch_generation{};
+    };
+    static constexpr std::size_t kAotTailContinuationCapacity = 256u;
+
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool prepare_aot_linked_call(
+        AllegrexContext &ctx, RecompiledEntryFunction return_function,
+        std::uint16_t return_entry_id, std::uint32_t return_pc,
+        std::uint32_t target_pc) {
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        (void)return_function; (void)return_entry_id; (void)return_pc;
+        ctx.pc = target_pc;
+        return false;
+#else
+        // Observed/instrumented runs deliberately fall back to Runtime so their
+        // dispatch boundaries remain visible. Capacity exhaustion is also a
+        // correctness-preserving outer-dispatch fallback, never a recursive call.
+        if (g_runtime_chain_observers_active || return_function == nullptr ||
+            aot_tail_continuation_depth_ >= kAotTailContinuationCapacity || stopped_ ||
+            chain_context_invalidated_) {
+            ctx.pc = target_pc;
+            return false;
+        }
+        ctx.pc = target_pc;
+        // Charge exactly one logical chained dispatch. Keep the hot no-boundary
+        // case entirely inline: an out-of-line account_dispatch_work() here would
+        // simply replace one wrapper with another at every linked call site.
+        const std::uint64_t interval = g_runtime_starvation_interval_fast;
+        if (interval != 0u) {
+            ++dispatches_since_import_;
+            if (dispatches_since_import_ >= interval && !run_starvation_boundary(ctx))
+                return false;
+        }
+        if (stopped_ || chain_context_invalidated_) return false;
+        AotTailContinuation &slot = aot_tail_continuations_[aot_tail_continuation_depth_++];
+        slot.function = return_function;
+        slot.entry_id = return_entry_id;
+        slot.return_pc = return_pc;
+        slot.switch_generation = g_runtime_thread_switch_generation_fast;
+        return true;
+#endif
+    }
+
+    [[nodiscard]] PSPRECOMP_RUNTIME_FORCEINLINE bool take_aot_tail_continuation(
+        std::uint32_t return_pc, AotTailContinuation &out) noexcept {
+#if !defined(PSPRECOMP_AOT_PRODUCTION_FASTPATHS)
+        (void)return_pc; (void)out;
+        return false;
+#else
+        if (aot_tail_continuation_depth_ == 0u) return false;
+        const AotTailContinuation &slot = aot_tail_continuations_[aot_tail_continuation_depth_ - 1u];
+        // A PSP ownership transition invalidates every native continuation. The
+        // guest PC/$ra state remains authoritative, so dropping the optimization
+        // stack simply falls back to normal outer dispatch.
+        if (slot.switch_generation != g_runtime_thread_switch_generation_fast) {
+            aot_tail_continuation_depth_ = 0u;
+            return false;
+        }
+        if (slot.return_pc != return_pc || slot.function == nullptr) return false;
+        out = slot;
+        --aot_tail_continuation_depth_;
+        return true;
+#endif
+    }
+
+    PSPRECOMP_RUNTIME_FORCEINLINE void clear_aot_tail_continuations() noexcept {
+        aot_tail_continuation_depth_ = 0u;
+    }
+
     // Profile-selected compact generated leaves. Unlike V8.7 body inlining,
     // the translated leaf exists once out-of-line and callers only bypass the
     // giant generated-unit entry switch. Eligibility is intentionally external
@@ -593,6 +675,8 @@ private:
     std::uint32_t generated_unit_span_{};
     bool generated_unit_layout_valid_{true};
     std::uint32_t direct_base_{};
+    std::array<AotTailContinuation, kAotTailContinuationCapacity> aot_tail_continuations_{};
+    std::uint32_t aot_tail_continuation_depth_{};
     std::uint32_t chain_depth_{};
     std::uint32_t chain_depth_limit_{};
     // Set only when a scheduler safe-point actually changes PSP execution

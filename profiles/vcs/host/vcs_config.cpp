@@ -769,13 +769,17 @@ void initialize_vcs_configuration(const std::filesystem::path &executable_direct
                               config.rendering.backend == RenderingBackend::DirectX12
                                   ? "directx12" : "software");
     }
-    // V5 STABLE RECOVERY2: return every unproven scheduler/CPU-renderer
-    // experiment to the last gameplay-stable V4 AMD/UMA baseline.  Both GE
-    // async and parallel vertex decode are quarantined in production, and old
-    // inherited environment flags are deliberately ignored.
+    // PSPRECOMP_V8155_PRESERVE_EXPLICIT_GE_FLAGS
+    // Keep the conservative DX12 defaults for an otherwise unconfigured
+    // process, but do not overwrite an explicit runtime choice.  The VCS
+    // launcher opts into GE/vertex overlap before loading this configuration;
+    // unconditionally forcing these values to zero here silently disabled the
+    // worker and serialized the guest CPU with the graphics queue.
     if (config.rendering.backend == RenderingBackend::DirectX12) {
-        set_environment_value("PSPRECOMP_GE_ASYNC", "0");
-        set_environment_value("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", "0");
+        if (std::getenv("PSPRECOMP_GE_ASYNC") == nullptr)
+            set_environment_value("PSPRECOMP_GE_ASYNC", "0");
+        if (std::getenv("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE") == nullptr)
+            set_environment_value("PSPRECOMP_GE_PARALLEL_VERTEX_DECODE", "0");
     }
     const InternalResolutionDimensions internal =
         resolve_internal_resolution(config.rendering);

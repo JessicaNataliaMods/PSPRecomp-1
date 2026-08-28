@@ -1,8 +1,10 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
+set "PSPRECOMP_V8151_FORCE_SYNC="
+
 rem ================================================================
-rem VCS V8.12.5 - Ninja + clang-cl performance/code-density launcher
+rem VCS V8.15.5 - hard-forced async GE + parallel vertex production path
 rem Put this file in PSPRecomp\profiles\vcs.
 rem ================================================================
 
@@ -21,9 +23,23 @@ if not exist "%PROFILE%\tools\apply_v8123_ge_probe_globals_fix.py" goto MISSING_
 if not exist "%PROFILE%\tools\dx12_ge_probe_runtime_globals.cpp" goto MISSING_OVERLAY
 if not exist "%PROFILE%\tools\apply_v8124_boot_regression_fix.py" goto MISSING_OVERLAY
 if not exist "%PROFILE%\tools\apply_v8125_registration_origin_fix.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\apply_v813_cpu_hotpath.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tests\check_v813_cpu_hotpath.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\apply_v814_nonrecursive_aot.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tests\check_v814_nonrecursive_aot.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\apply_v815_async_ge_overlap.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tests\check_v815_async_ge_overlap.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\apply_v8151_force_activation.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tests\check_v8151_force_activation.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\force_v8151_rebuild.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\verify_v8151_binary.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\apply_v8155_hard_force_async.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tests\check_v8155_hard_force_async.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\force_v8155_rebuild.py" goto MISSING_OVERLAY
+if not exist "%PROFILE%\tools\verify_v8155_binary.py" goto MISSING_OVERLAY
 
 echo ================================================================
-echo VCS V8.12.5 - CPU / GENERATED CODE-DENSITY BUILD
+echo VCS V8.15.5 - HARD-FORCE ASYNC GE BUILD
 echo Ninja + clang-cl + lld-link
 echo Repository: %REPO%
 echo ================================================================
@@ -87,7 +103,7 @@ if errorlevel 1 goto FAIL
 
 echo.
 if exist "%PROFILE%\generated\v812_code_density_manifest.json" goto HAVE_V812_SOURCE
-echo [0/10] Preparing V8.11 baseline for first V8.12 application...
+echo [0/16] Preparing V8.11 baseline for first V8.12 application...
 %PY% "%PROFILE%\tools\apply_v811_perf.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v811_perf.py" "%REPO%" --check
@@ -97,7 +113,7 @@ if errorlevel 1 goto FAIL
 goto AFTER_V811_BASELINE
 
 :HAVE_V812_SOURCE
-echo [0/10] Existing V8.12 source detected.
+echo [0/16] Existing V8.12 source detected.
 echo        Repairing the old compact-registration origin bug BEFORE strict V8.12 validation...
 %PY% "%PROFILE%\tools\apply_v8125_registration_origin_fix.py" "%REPO%"
 if errorlevel 1 goto FAIL
@@ -106,7 +122,7 @@ if errorlevel 1 goto FAIL
 
 :AFTER_V811_BASELINE
 echo.
-echo [1/10] Applying/validating V8.12 generated code-density pass...
+echo [1/16] Applying/validating V8.12 generated code-density pass...
 %PY% "%PROFILE%\tools\apply_v812_code_density.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v812_code_density.py" "%REPO%" --check
@@ -115,28 +131,28 @@ if errorlevel 1 goto FAIL
 if errorlevel 1 goto FAIL
 
 echo.
-echo [2/10] Applying V8.12.1 DX12 probe link fix...
+echo [2/16] Applying V8.12.1 DX12 probe link fix...
 %PY% "%PROFILE%\tools\apply_v8121_probe_link_fix.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v8121_probe_link_fix.py" "%REPO%" --check
 if errorlevel 1 goto FAIL
 
 echo.
-echo [3/10] Applying V8.12.3 isolated GE-probe runtime globals fix...
+echo [3/16] Applying V8.12.3 isolated GE-probe runtime globals fix...
 %PY% "%PROFILE%\tools\apply_v8123_ge_probe_globals_fix.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v8123_ge_probe_globals_fix.py" "%REPO%" --check
 if errorlevel 1 goto FAIL
 
 echo.
-echo [4/10] Applying V8.12.4 boot/runtime regression fix...
+echo [4/16] Applying V8.12.4 boot/runtime regression fix...
 %PY% "%PROFILE%\tools\apply_v8124_boot_regression_fix.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v8124_boot_regression_fix.py" "%REPO%" --check
 if errorlevel 1 goto FAIL
 
 echo.
-echo [5/10] Applying/validating V8.12.5 registration-origin + VDOT fix...
+echo [5/16] Applying/validating V8.12.5 registration-origin + VDOT fix...
 %PY% "%PROFILE%\tools\apply_v8125_registration_origin_fix.py" "%REPO%"
 if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tools\apply_v8125_registration_origin_fix.py" "%REPO%" --check
@@ -146,7 +162,57 @@ if errorlevel 1 goto FAIL
 %PY% "%PROFILE%\tests\check_v812_code_density.py"
 if errorlevel 1 goto FAIL
 
-echo [6/10] Configuring clang-cl / lld-link / Ninja...
+echo.
+echo [6/16] Applying/validating V8.13.1 structural prerequisite...
+%PY% "%PROFILE%\tools\apply_v813_cpu_hotpath.py" "%REPO%"
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tools\apply_v813_cpu_hotpath.py" "%REPO%" --check
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tests\check_v813_cpu_hotpath.py"
+if errorlevel 1 goto FAIL
+
+echo.
+echo [7/16] Applying/validating V8.14 non-recursive AOT link engine...
+%PY% "%PROFILE%\tools\apply_v814_nonrecursive_aot.py" "%REPO%"
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tools\apply_v814_nonrecursive_aot.py" "%REPO%" --check
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tests\check_v814_nonrecursive_aot.py"
+if errorlevel 1 goto FAIL
+
+echo.
+echo [8/16] Applying/validating V8.15 async GE overlap (V8.15.4 monotonic checker)...
+%PY% "%PROFILE%\tools\apply_v815_async_ge_overlap.py" "%REPO%"
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tools\apply_v815_async_ge_overlap.py" "%REPO%" --check
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tests\check_v815_async_ge_overlap.py"
+if errorlevel 1 goto FAIL
+
+echo.
+echo [9/16] Applying V8.15.1 force-activation + runtime proof...
+%PY% "%PROFILE%\tools\apply_v8151_force_activation.py" "%REPO%"
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tools\apply_v8151_force_activation.py" "%REPO%" --check
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tests\check_v8151_force_activation.py"
+if errorlevel 1 goto FAIL
+
+echo.
+echo [10/16] Applying V8.15.5 hard-force async + parallel vertex...
+%PY% "%PROFILE%\tools\apply_v8155_hard_force_async.py" "%REPO%"
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tools\apply_v8155_hard_force_async.py" "%REPO%" --check
+if errorlevel 1 goto FAIL
+%PY% "%PROFILE%\tests\check_v8155_hard_force_async.py"
+if errorlevel 1 goto FAIL
+
+echo.
+echo [11/16] Invalidating stale host objects and old VCSNative.exe...
+%PY% "%PROFILE%\tools\force_v8155_rebuild.py" "%BUILD%"
+if errorlevel 1 goto FAIL
+
+echo [12/16] Configuring clang-cl / lld-link / Ninja...
 "%CMAKE%" -S "%REPO%" -B "%BUILD%" -G Ninja ^
   "-DCMAKE_MAKE_PROGRAM=%NINJA%" ^
   "-DCMAKE_CXX_COMPILER=%CLANG_CL%" ^
@@ -175,22 +241,31 @@ echo [6/10] Configuring clang-cl / lld-link / Ninja...
 if errorlevel 1 goto FAIL
 
 echo.
-echo [7/10] Building VCSNative...
+echo [13/16] Building VCSNative...
 "%CMAKE%" --build "%BUILD%" --parallel %JOBS% --target VCSNative
+if errorlevel 1 goto FAIL
+set "BIN=%BUILD%\bin\Release"
+%PY% "%PROFILE%\tools\verify_v8155_binary.py" "%BIN%\VCSNative.exe"
 if errorlevel 1 goto FAIL
 
 echo.
-echo [8/10] Building/running regression tests...
+echo [14/16] Building/running regression tests...
 "%CMAKE%" --build "%BUILD%" --parallel %JOBS% --target psprecomp_tests vcs_profile_tests vcs_config_tests audio_resampler_tests vfpu_tier2_tests vcs_bootstrap_paths_tests vcs_dx12_probe vcs_dx12_ge_probe
 if errorlevel 1 goto FAIL
 "%CTEST%" --test-dir "%BUILD%" --output-on-failure
 if errorlevel 1 goto TEST_FAIL
 
-set "BIN=%BUILD%\bin\Release"
+rem V8.15: exercise the async scheduler explicitly; ordinary unit tests stay sync
+rem because only VCSNative main installs the production default.
+set "PSPRECOMP_GE_ASYNC=1"
+"%BUILD%\bin\Release\vcs_profile_tests.exe"
+if errorlevel 1 goto TEST_FAIL
+set "PSPRECOMP_GE_ASYNC="
+
 if not exist "%BIN%\VCSNative.exe" goto FAIL
 
 echo.
-echo [9/10] Running DX12 probes...
+echo [15/16] Running DX12 probes...
 "%BIN%\vcs_dx12_probe.exe"
 if errorlevel 1 goto FAIL
 set "PSPRECOMP_DX12_GE_STRICT=1"
@@ -202,15 +277,28 @@ set "PSPRECOMP_DX12_BATCH_MERGE=1"
 "%BIN%\vcs_dx12_ge_probe.exe"
 if errorlevel 1 goto FAIL
 set "PSPRECOMP_DX12_GE_STRICT="
+set "PSPRECOMP_GE_PARALLEL_VERTEX_DECODE="
+set "PSPRECOMP_GE_DIRECT_NONINDEXED_DRAW="
+set "PSPRECOMP_DX12_PACKED_0115="
+set "PSPRECOMP_DX12_NATIVE_INDEXED_DRAW="
+set "PSPRECOMP_DX12_BATCH_MERGE="
 
 if exist "%PROFILE%\config\VCSNative.ini" copy /Y "%PROFILE%\config\VCSNative.ini" "%BIN%\VCSNative.ini" >nul
 
 echo.
-echo [10/10] Done.
+echo [16/16] Done.
 for %%F in ("%BIN%\VCSNative.exe") do echo VCSNative.exe size: %%~zF bytes
 if exist "%PROFILE%\generated\v812_code_density_manifest.json" (
   %PY% -c "import json,pathlib; p=pathlib.Path(r'%PROFILE%\generated\v812_code_density_manifest.json'); d=json.loads(p.read_text()); print('Generated CPP: {:.2f} MiB  cumulative saved: {:.2f} MiB'.format(d['generated_cpp_bytes_after']/1048576, d['source_bytes_saved_from_baseline']/1048576))"
 )
+if exist "%PROFILE%\generated\v813_cpu_hotpath_manifest.json" (
+  %PY% -c "import json,pathlib; p=pathlib.Path(r'%PROFILE%\generated\v813_cpu_hotpath_manifest.json'); d=json.loads(p.read_text()); print('V8.13: JR fast sites={}  hot dense units={}  hot dense entries={}  generated CPP={:.2f} MiB'.format(d['jr_sites'], d['hot_dense_units'], d['hot_dense_entries'], d['generated_cpp_bytes']/1048576))"
+)
+if exist "%PROFILE%\generated\v814_nonrecursive_aot_manifest.json" (
+  %PY% -c "import json,pathlib; p=pathlib.Path(r'%PROFILE%\generated\v814_nonrecursive_aot_manifest.json'); d=json.loads(p.read_text()); print('V8.14: nonrecursive linked calls={}  return-hook units={}  scheduler={}/{}us'.format(d['linked_calls'], d['return_hook_units'], d['scheduler_dispatch_interval_default'], d['scheduler_tick_us_default']))"
+)
+echo V8.15.5: async GE=HARD-ON  parallel vertex decode=HARD-ON  present safe-point=current task only
+echo V8.15.5: binary marker verification PASSED; inherited sync variables cannot disable production.
 echo ================================================================
 echo BUILD OK
 echo EXE: %BIN%\VCSNative.exe
@@ -221,7 +309,7 @@ exit /b 0
 echo ERROR: put BUILD_VCS_NINJA_CLANG.bat in PSPRecomp\profiles\vcs.
 exit /b 20
 :MISSING_OVERLAY
-echo ERROR: V8.11/V8.12/V8.12.1/V8.12.3/V8.12.4/V8.12.5 overlay files are missing under profiles\vcs.
+echo ERROR: V8.11 through V8.15 overlay files are missing under profiles\vcs.
 exit /b 21
 :NO_VS
 echo ERROR: Visual Studio 2022 C++ environment not found in the standard Program Files path.
@@ -243,5 +331,5 @@ exit /b 7
 echo ERROR: regression tests failed.
 exit /b 8
 :FAIL
-echo ERROR: V8.12.5 build failed. See the first error above.
+echo ERROR: V8.15.3 build failed. See the first error above.
 exit /b 1
