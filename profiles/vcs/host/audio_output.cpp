@@ -347,8 +347,15 @@ void advance_locked(AudioState &state, std::uint64_t guest_time_us) {
     // device prebuffer, it stops being the watermark and other PSP channels
     // are allowed to advance normally.
     const ChannelStream &output2 = state.channels[kOutput2Channel];
+    // A slow host can miss the normal startup reserve without the guest audio
+    // producer actually having stopped.  Use the already configured recovery
+    // reserve as the stale-producer threshold.  Previously an ordinary >93 ms
+    // frame on the 8-block configuration released the watermark and committed
+    // silence before Output2 could deliver its next buffer, causing dropouts and
+    // permanent A/V drift on weaker PCs.  This does not deepen normal playback
+    // latency; it only waits longer before declaring Output2 dead during a stall.
     const std::uint64_t producer_grace =
-        static_cast<std::uint64_t>(state.prebuffer_blocks) * kBlockFrames;
+        static_cast<std::uint64_t>(state.recovery_prebuffer_blocks) * kBlockFrames;
     const std::uint64_t unclamped_sealed_frame = sealed_frame;
     sealed_frame = audio_output_master_seal_frame(
         guest_frame, sealed_frame, output2.active, output2.cursor, producer_grace);

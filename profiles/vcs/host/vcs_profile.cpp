@@ -10215,11 +10215,20 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                 // PSP ignores an invalid VAG pointer, leaving the voice configured.
                 set_success(ctx); return;
             }
+            // Games are allowed to repeat SetVoice while a voice is active.
+            // This updates metadata; it is not a retrigger.  Rewinding on every
+            // identical call makes continuously-maintained vehicle voices play
+            // the first VAG block over and over and can sound like an eternal
+            // loop.  Only a genuinely different source configuration starts a
+            // new decoder stream; KeyOn remains the explicit retrigger path.
+            const bool source_changed = voice->type != SasVoiceType::Vag ||
+                voice->data_address != address || voice->data_size != size ||
+                voice->loop != (loop != 0);
             voice->type = SasVoiceType::Vag;
             voice->data_address = address;
             voice->data_size = size;
             voice->loop = loop != 0;
-            sas_reset_decoder(*voice);
+            if (source_changed) sas_reset_decoder(*voice);
             if (voice->on) voice->playing = true;
             set_success(ctx);
         });
@@ -12937,6 +12946,19 @@ bool run_profile_self_tests(std::string &error) {
             // unchanged (the old stub) made those voices completely inaudible.
             configure_voice(sas_loop_data, 1u);
             key_on_voice0();
+
+            // Repeating SetVoice with identical metadata is a parameter update,
+            // not an implicit KeyOn.  Vehicle audio code may do this while the
+            // engine voice is live; rewinding here traps it on the first block.
+            sas_state.voices[0].decode_offset = 16u;
+            sas_state.voices[0].history1 = 321;
+            sas_state.voices[0].history2 = -123;
+            configure_voice(sas_loop_data, 1u);
+            require(sas_state.voices[0].decode_offset == 16u &&
+                        sas_state.voices[0].history1 == 321 &&
+                        sas_state.voices[0].history2 == -123,
+                    "identical SAS SetVoice rewound an active VAG decoder");
+
             for (std::uint32_t frame = 0u; frame < 0x100u; ++frame) {
                 wlan_runtime.memory().store16(sas_output + frame * 4u, static_cast<std::uint16_t>(1000));
                 wlan_runtime.memory().store16(sas_output + frame * 4u + 2u,
