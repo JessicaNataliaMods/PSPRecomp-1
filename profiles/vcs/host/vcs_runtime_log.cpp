@@ -95,7 +95,7 @@ void runtime_log_initialize(const VcsConfiguration &configuration) {
            << " entity_leaf_inline=1 entity_leaf_scheduler_accounting=1 entity_leaf_resume_pc_fix=1"
            << " ge_async_default=0 parallel_vertex_decode_default=0 ge_async_opt_in=PSPRECOMP_V8155_ENABLE_ASYNC"
            << " v5_vfpu_fast_quarantined=1 native_vfpu_088b1780_v4=1"
-           << " dx12_execute_indirect_default=0 indirect_buffer_mb=4"
+           << " dx12_execute_indirect_default=nvidia indirect_buffer_mb=16"
            << " ge_async_quarantined=1 ge_async_present_safepoint=1 ge_async_hard_force=0 parallel_vertex_decode_quarantined=1 legacy_perf_env_ignored=1"
            << " amd_uma_compat=1 uma_msaa_guard=1 packed0115_amd_stride=12"
            << " pipe_shadow_failsafe=1 material_shadow_scalar_probe=1"

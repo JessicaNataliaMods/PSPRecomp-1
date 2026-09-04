@@ -9074,7 +9074,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                             runtime_log_line(tier2_line.str());
                         }
 #endif
-                        if (vcs_configuration().diagnostics.guest_hotspot_profile &&
+                        if (psprecomp::g_guest_hotspot_profile_enabled &&
                             ++guest_hotspot_perf_windows >= 5u) {
                             report_guest_hotspot_window(display_vblank_index);
                             guest_hotspot_perf_windows = 0u;
@@ -9120,7 +9120,86 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                                << " list_us=" << (ge_us > accounted ? ge_us - accounted : 0)
                                << " ge_commands=" << ge_commands_this_vblank
                                << "\n";
-                    write_diag_line(phase_line);
+                    // PERF telemetry already preserves a 60-vblank aggregate
+                    // below. Avoid the per-frame stderr write in that mode: on
+                    // Windows the console flush itself measurably distorts the
+                    // frame whose phases are being measured.
+                    if (!perf_telemetry_enabled()) write_diag_line(phase_line);
+
+                    // The console line above is useful while profiling, but it
+                    // disappears when bench.bat closes. Preserve a low-volume
+                    // 60-vblank aggregate in VCSNative.log so a completed run
+                    // can be analysed after the fact without logging every
+                    // frame through the runtime-log mutex.
+                    static vcs::GePhaseTotals phase_window{};
+                    static std::uint64_t phase_window_frames{};
+                    static std::uint64_t phase_window_ge_us{};
+                    static std::uint64_t phase_window_list_us{};
+                    static std::uint64_t phase_window_commands{};
+                    phase_window.pixel_loop_ns += phases.pixel_loop_ns;
+                    phase_window.triangles += phases.triangles;
+                    phase_window.draw_setup_ns += phases.draw_setup_ns;
+                    phase_window.texture_upload_ns += phases.texture_upload_ns;
+                    phase_window.vertex_decode_ns += phases.vertex_decode_ns;
+                    phase_window.gpu_stage_ns += phases.gpu_stage_ns;
+                    phase_window.triangle_prep_ns += phases.triangle_prep_ns;
+                    phase_window.gpu_accumulate_ns += phases.gpu_accumulate_ns;
+                    phase_window.primitives += phases.primitives;
+                    phase_window.vertices += phases.vertices;
+                    phase_window.hardware_draws += phases.hardware_draws;
+                    phase_window.hardware_vertices += phases.hardware_vertices;
+                    phase_window.fast_0115_draws += phases.fast_0115_draws;
+                    phase_window.fast_0115_vertices += phases.fast_0115_vertices;
+                    phase_window.packed_0115_candidates += phases.packed_0115_candidates;
+                    phase_window.packed_0115_accepted += phases.packed_0115_accepted;
+                    phase_window.packed_0115_vertices += phases.packed_0115_vertices;
+                    phase_window.cpu_decode_draws += phases.cpu_decode_draws;
+                    phase_window.cpu_decode_vertices += phases.cpu_decode_vertices;
+                    phase_window.flat_shaded_draws += phases.flat_shaded_draws;
+                    phase_window_ge_us += static_cast<std::uint64_t>(
+                        std::max<std::int64_t>(0, ge_us));
+                    phase_window_list_us += static_cast<std::uint64_t>(
+                        std::max<std::int64_t>(0, ge_us - accounted));
+                    phase_window_commands += ge_commands_this_vblank;
+                    ++phase_window_frames;
+                    if (phase_window_frames >= perf_telemetry_interval()) {
+                        const std::uint64_t n = phase_window_frames;
+                        const auto avg_us = [n](std::uint64_t ns) {
+                            return ns / (1000u * n);
+                        };
+                        std::ostringstream aggregate_line;
+                        aggregate_line << "GE_PHASE window=" << n
+                                       << " vblank=" << display_vblank_index
+                                       << " ge_us_avg=" << (phase_window_ge_us / n)
+                                       << " pixel_us_avg=" << avg_us(phase_window.pixel_loop_ns)
+                                       << " setup_us_avg=" << avg_us(phase_window.draw_setup_ns)
+                                       << " texupload_us_avg=" << avg_us(phase_window.texture_upload_ns)
+                                       << " vdecode_us_avg=" << avg_us(phase_window.vertex_decode_ns)
+                                       << " stage_us_avg=" << avg_us(phase_window.gpu_stage_ns)
+                                       << " triprep_us_avg=" << avg_us(phase_window.triangle_prep_ns)
+                                       << " accum_us_avg=" << avg_us(phase_window.gpu_accumulate_ns)
+                                       << " list_us_avg=" << (phase_window_list_us / n)
+                                       << " triangles=" << phase_window.triangles
+                                       << " draws=" << phase_window.primitives
+                                       << " verts=" << phase_window.vertices
+                                       << " hw_draws=" << phase_window.hardware_draws
+                                       << " hw_verts=" << phase_window.hardware_vertices
+                                       << " fast0115_draws=" << phase_window.fast_0115_draws
+                                       << " fast0115_verts=" << phase_window.fast_0115_vertices
+                                       << " packed_candidates=" << phase_window.packed_0115_candidates
+                                       << " packed_accepted=" << phase_window.packed_0115_accepted
+                                       << " packed_verts=" << phase_window.packed_0115_vertices
+                                       << " cpu_decode_draws=" << phase_window.cpu_decode_draws
+                                       << " cpu_decode_verts=" << phase_window.cpu_decode_vertices
+                                       << " flat_draws=" << phase_window.flat_shaded_draws
+                                       << " ge_commands=" << phase_window_commands;
+                        runtime_log_line(aggregate_line.str());
+                        phase_window = {};
+                        phase_window_frames = 0u;
+                        phase_window_ge_us = 0u;
+                        phase_window_list_us = 0u;
+                        phase_window_commands = 0u;
+                    }
                     ge_commands_this_vblank = 0u;
                     vcs::reset_ge_phase_totals();
                 }
