@@ -1,6 +1,72 @@
 # High-FPS audio / animation timing (2026-09-05)
 
-Base: `efa4728` (the current checkout, not a historical reference build).
+Historical timing work started at `efa4728`; revisions 4–5 were applied on
+`32f4b08`. Current user-tested checkout: `3afd892` (`tentativa de corrigir audio ingame`).
+
+## Estado confirmado pelo usuário — 2026-09-05
+
+Build: revisão 5, `VCSNative.exe` compilado em 05/09/2026 às 14:45:35.
+Após testar cutscene e provocar a derrapagem, o usuário informou que os sons
+em loop durante o gameplay aparentemente foram corrigidos. Isso é validação
+da reprodução relatada, não uma garantia sobre todos os sons ou missões.
+
+### Correção dos loops: o que preservar
+
+O VCS acumula comandos em dois buffers, e a thread de áudio os consome depois.
+Com vários frames de gameplay entre consumos, duas situações eram possíveis:
+
+1. START seguido de STOP deixava ambos os bits marcados. Como o consumidor
+   executa STOP antes de START, religava o som já cancelado. Um STOP novo agora
+   cancela o START ainda pendente. STOP seguido de START continua permitido.
+2. A consulta de reprodução olhava apenas o SAS, que ainda não havia recebido
+   o START pendente. O jogo podia considerar o canal terminado antes de começar
+   e perder o controle sobre ele. A consulta agora inclui os dois buffers;
+   cada canal visitado pelo consumidor tem seu START pendente removido.
+
+Implementação a preservar ao regenerar código:
+
+* `host/vcs_audio_commands.hpp`: ordem dos comandos e máscara dos canais
+  pendentes, com empacotamento de 24 + 4 bits.
+* `generated/generated_unit_0001.cpp`: consulta `0x0880A5FC`, cancelamento
+  `0x0880A6A4`, consumo `0x0880AE90`.
+* `tests/vcs_frame_timing_tests.cpp`: 510 sequências START/STOP, estados dos
+  buffers e guardas contra remoção dos pontos de integração gerados.
+
+Não substituir isso por timeout de sons, limitação de FPS ou mudanças gerais
+de envelope: motores, buzinas e derrapagens podem legitimamente usar loops.
+Não remover a correção de root motion ao investigar áudio.
+
+Evidência do log da revisão 5, execução 15:01:39–15:04:26:
+`cancelled_starts=1`, `pending_owner_guards=2281`, `rejected_on=0`.
+Os contadores mostram que os novos caminhos foram acionados; não equivalem
+à quantidade de sons presos. O caminho anterior de aborto de lote permaneceu
+inativo (`aborted_batches=0`, `recovered_stops=0`).
+
+### Pendente: rádio da primeira cena na cutscene seguinte
+
+O usuário esclareceu que a primeira cena usa uma rádio do jogo. Ao pular para
+a próxima cutscene (Victor e o sargento no escritório), às vezes continua
+ouvindo essa rádio. Tratar como problema separado dos loops SAS de gameplay.
+A sincronização labial também não deve ser declarada totalmente resolvida.
+
+O log desta execução registra:
+
+* 15:01:56.414: encerra decoder 0 de `EMOTION.AT3`, sample 102400.
+* 15:01:56.462: cria novamente decoder 0 de `EMOTION.AT3`, buffer `0x08BFEC80`.
+* 15:01:56.507: seek para sample 0; a rádio volta a ser decodificada.
+* 15:01:59.550: encerra a rádio; em seguida abre `CITY.AT3`.
+* `JERA1.AT3`, presente na reprodução anterior da cena do escritório, não
+  aparece nessa execução.
+
+Na reabertura, `ATRAC_SOURCE` registra `direct_buffer=0` e
+`fallback_candidates=1`: a identificação foi pelo conteúdo do buffer, sem
+associação direta a uma leitura de arquivo. Isso não prova se o jogo pediu
+a faixa errada, se o buffer conservou dados antigos ou se o identificador
+escolheu uma fonte incorreta. É o próximo ponto de investigação. O log
+mostra uma reabertura efetiva da rádio, não apenas uma pequena cauda de PCM
+na fila de saída. Não aplicar um flush global como se isso explicasse tudo.
+
+Não abrir o jogo automaticamente. O usuário realiza os testes visuais.
 
 ## Changes
 
@@ -78,11 +144,13 @@ Core / EOF / retrigger, 30–240 FPS clock accumulation over one minute, mixed
 3/12 ms frames, and the production host audio queue with a fake waveOut device.
 
 `ATRAC_TIMELINE` records source samples versus guest microseconds once per source
-second. `PSPRECOMP_GAME_TIMING_DIAG=1` adds deduplicated render-frame animation
-time and the guest game clock. `AUDIO_TIMING_REVISION=3` identifies this build.
+second. Audio Diagnostics (or `PSPRECOMP_GAME_TIMING_DIAG=1`) adds deduplicated
+render-frame animation time and the guest game clock. `AUDIO_TIMING_REVISION=5`
+identifies the user-tested build described above.
 
-These tests do not prove that every looping in-game sound is fixed. The exact
-in-game loop reproduction and subjective lip sync still require validation.
+These tests do not prove that every looping in-game sound is fixed. The user
+has now reported success for the gameplay loop reproduction; cutscene source
+selection and subjective lip sync remain separate, unresolved validation items.
 
 During isolated automated runs, sending Cross+Start to skip TITLES reproduced
 an access violation on BOTH the pre-change executable and the patched one:
