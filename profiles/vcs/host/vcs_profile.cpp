@@ -1,4 +1,5 @@
 #include "vcs_profile.hpp"
+#include "vcs_audio_commands.hpp"
 #include "vcs_native_fast_paths.hpp"
 #include "audio_output.hpp"
 #include "display_window.hpp"
@@ -1750,6 +1751,19 @@ struct SasState {
 };
 
 SasState sas_state{};
+std::uint64_t sas_key_on_calls{}, sas_key_off_calls{}, sas_key_on_rejected{}, sas_key_off_rejected{};
+std::uint64_t sas_abort_batches{}, sas_abort_stops{};
+
+bool sas_key_off(SasVoiceState &voice) noexcept {
+    ++sas_key_off_calls;
+    if (voice.paused || !voice.on) {
+        ++sas_key_off_rejected;
+        return false;
+    }
+    voice.on = false;
+    voice.envelope_phase = SasEnvelopePhase::Release;
+    return true;
+}
 std::uint64_t sas_core_mix_calls{};
 std::uint64_t sas_core_with_mix_calls{};
 
@@ -1774,6 +1788,32 @@ void sas_refresh_end_flags() noexcept {
 }
 
 void sas_log_mix_checkpoint(const char *kind, std::uint64_t count) {
+    static std::uint64_t last_summary_us{};
+    if (vcs_configuration().audio.diagnostics &&
+        (virtual_time_us < last_summary_us || virtual_time_us - last_summary_us >= 1'000'000u)) {
+        last_summary_us = virtual_time_us;
+        std::uint32_t playing{}, on{}, paused{}, releasing{}, loops{};
+        for (std::size_t i = 0; i < sas_state.voices.size(); ++i) {
+            const auto &v = sas_state.voices[i];
+            const auto bit = 1u << i;
+            if (v.playing) playing |= bit;
+            if (v.on) on |= bit;
+            if (v.paused) paused |= bit;
+            if (v.playing && v.loop) loops |= bit;
+            if (v.playing && v.envelope_phase == SasEnvelopePhase::Release) releasing |= bit;
+        }
+        std::ostringstream line;
+        line << "SAS_LIFECYCLE guest_us=" << virtual_time_us
+             << " playing=" << psprecomp::hex32(playing) << " on=" << psprecomp::hex32(on)
+             << " paused=" << psprecomp::hex32(paused) << " release=" << psprecomp::hex32(releasing)
+             << " loops=" << psprecomp::hex32(loops) << " keyon=" << sas_key_on_calls
+             << " keyoff=" << sas_key_off_calls << " rejected_on=" << sas_key_on_rejected
+             << " rejected_off=" << sas_key_off_rejected << " aborted_batches=" << sas_abort_batches
+             << " recovered_stops=" << sas_abort_stops
+             << " cancelled_starts=" << audio_pending_start_cancellations
+             << " pending_owner_guards=" << audio_pending_owner_protections;
+        runtime_log_line(line.str());
+    }
     if (!sas_audio_diagnostics_enabled()) return;
     if (count <= 8u || (count % 256u) == 0u) {
         std::cerr << "[sas] " << kind << " call=" << count
@@ -7141,6 +7181,22 @@ bool unlocked_game_timing_enabled() noexcept {
     return configured_game_frame_rate() > 30u;
 }
 
+float game_clock_increment(unsigned clock, std::uint32_t current, float milliseconds) noexcept {
+    static std::array<FractionalGameClock, 2> clocks{};
+    return clocks[clock & 1u].increment(current, milliseconds, unlocked_game_timing_enabled());
+}
+
+void finish_aborted_audio_stops(std::uint32_t low, std::uint32_t high,
+                                std::uint32_t failed_channel) {
+    ++sas_abort_batches;
+    if (!sas_state.initialized) return;
+    const auto mask = remaining_audio_stops(low, high, failed_channel);
+    for (std::uint32_t i = 0; i < 28u; ++i) {
+        if ((mask & (1u << i)) != 0u && sas_key_off(sas_state.voices[i]))
+            ++sas_abort_stops;
+    }
+}
+
 const char *thread_state_name(ThreadState state) {
     switch (state) {
     case ThreadState::Created: return "Created";
@@ -7253,7 +7309,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     }
     std::cerr << "[frame-rate] target=" << configured_game_frame_rate()
               << " virtual_display=" << virtual_display_refresh_hz() << " Hz\n";
-    runtime_log_line("AUDIO_TIMING_REVISION=3 live_sas_end_flags=1 unlocked_timestep=1 root_motion_scale=1 sas_silent_clock=1");
+    runtime_log_line("AUDIO_TIMING_REVISION=5 live_sas_end_flags=1 unlocked_timestep=1 root_motion_scale=1 sas_silent_clock=1 abort_stop_drain=1 ordered_audio_commands=1 pending_voice_ownership=1 fractional_game_clocks=1");
     file_table = FileTable{};
     for (auto &[address, state] : mpeg_contexts) close_video_decoder(state);
     mpeg_contexts.clear();
@@ -8939,7 +8995,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         // Keep CPU/GE overlap alive through callbacks/telemetry and acquire the
         // renderer safe-point only immediately around frame finalization below.
         ++display_vblank_index;
-        if (std::getenv("PSPRECOMP_GAME_TIMING_DIAG") != nullptr &&
+        if ((vcs_configuration().audio.diagnostics || std::getenv("PSPRECOMP_GAME_TIMING_DIAG") != nullptr) &&
             rt.memory().contains(ctx.gpr[28] + 7660u, 108u)) {
             static std::uint32_t previous_frame = 0u;
             static std::uint64_t next_report = 0u;
@@ -9866,6 +9922,13 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             state.next_file_offset = std::min(read_size, parsed.file_size);
             state.write_offset = buffer_size == 0u ? 0u : read_size % buffer_size;
             state.source_path = identify_atrac_source(buffer, header_bytes, parsed);
+            if (vcs_configuration().audio.diagnostics) {
+                std::ostringstream line;
+                line << "ATRAC_LIFECYCLE event=create id=" << id << " guest_us=" << virtual_time_us
+                     << " buffer=" << psprecomp::hex32(buffer)
+                     << " source=" << state.source_path.filename().string();
+                runtime_log_line(line.str());
+            }
             if (!state.source_path.empty()) {
                 const std::string source_name = state.source_path.filename().string();
                 if (source_name.rfind("NEWS_", 0u) == 0u) {
@@ -9897,6 +9960,13 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         [get_atrac](psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
             auto *state = get_atrac(ctx.gpr[4]);
             if (!state) { ctx.set_gpr(2, kAtracErrorBadId); return; }
+            if (vcs_configuration().audio.diagnostics) {
+                std::ostringstream line;
+                line << "ATRAC_LIFECYCLE event=release id=" << ctx.gpr[4]
+                     << " guest_us=" << virtual_time_us << " sample=" << state->sample_position
+                     << " source=" << state->source_path.filename().string();
+                runtime_log_line(line.str());
+            }
             close_atrac_decoder(*state);
             *state = AtracContextState{};
             set_success(ctx);
@@ -10062,6 +10132,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
                      (state->sample_position - samples) / state->header.sample_rate)) {
                 std::ostringstream line;
                 line << "ATRAC_TIMELINE source=" << state->source_path.filename().string()
+                     << " id=" << ctx.gpr[4]
                      << " guest_us=" << virtual_time_us
                      << " sample=" << state->sample_position
                      << " rate=" << state->header.sample_rate;
@@ -10190,6 +10261,13 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
             auto *state = get_atrac(ctx.gpr[4]);
             if (!state) { ctx.set_gpr(2, kAtracErrorBadId); return; }
             const std::uint32_t sample = std::min(ctx.gpr[5], state->header.total_samples);
+            if (vcs_configuration().audio.diagnostics) {
+                std::ostringstream line;
+                line << "ATRAC_LIFECYCLE event=seek id=" << ctx.gpr[4] << " guest_us=" << virtual_time_us
+                     << " old_sample=" << state->sample_position << " sample=" << sample
+                     << " source=" << state->source_path.filename().string();
+                runtime_log_line(line.str());
+            }
             const std::uint32_t bytes_first = ctx.gpr[6];
             const std::uint32_t frame = sample / atrac_samples_per_frame(*state);
             const std::uint64_t pos64 = static_cast<std::uint64_t>(state->header.data_offset) +
@@ -10399,7 +10477,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         [](psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
             auto *voice = sas_voice(ctx.gpr[4], static_cast<std::int32_t>(ctx.gpr[5]), ctx);
             if (!voice) return;
+            ++sas_key_on_calls;
             if (voice->paused || voice->on) {
+                ++sas_key_on_rejected;
                 ctx.set_gpr(2, kSasErrorVoicePaused); return;
             }
             sas_reset_decoder(*voice);
@@ -10421,15 +10501,9 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
         [](psprecomp::Runtime &, psprecomp::AllegrexContext &ctx) {
             auto *voice = sas_voice(ctx.gpr[4], static_cast<std::int32_t>(ctx.gpr[5]), ctx);
             if (!voice) return;
-            if (voice->paused || !voice->on) {
+            if (!sas_key_off(*voice)) {
                 ctx.set_gpr(2, kSasErrorVoicePaused); return;
             }
-            voice->on = false;
-            voice->envelope_phase = SasEnvelopePhase::Release;
-            // A release rate of zero never walks the envelope down, so a looping
-            // voice keyed off here would sound forever.  Log it: this is the
-            // remaining suspect for the vehicle engine that keeps running under
-            // the pause menu.
             if (sas_audio_diagnostics_enabled())
                 std::cerr << "[sas] keyoff voice=" << static_cast<std::int32_t>(ctx.gpr[5])
                           << " loop=" << voice->loop
@@ -12200,6 +12274,40 @@ bool run_profile_self_tests(std::string &error) {
             sas_step_envelope(voice);
             require(!voice.playing && !voice.on,
                     "completed SAS envelope retained its KeyOn latch");
+        }
+
+        // Replay a sample-cache failure at every point in the 28-channel
+        // command batch. Unvisited KeyOff commands must still reach SAS;
+        // unrelated/earlier channels and paused voices retain PSP semantics.
+        {
+            const SasState previous = sas_state;
+            for (std::uint32_t failed = 0; failed < 28u; ++failed) {
+                sas_state = SasState{};
+                sas_state.initialized = true;
+                for (auto &voice : sas_state.voices) {
+                    voice.playing = voice.on = voice.loop = true;
+                    voice.envelope_height = kSasEnvelopeMaximum;
+                }
+                constexpr auto low = 0x008082A5u;
+                constexpr auto high = 0xFFFFFFF9u; // only the low 4 bits are channels
+                finish_aborted_audio_stops(low, high, failed);
+                for (std::uint32_t i = 0; i < 32u; ++i) {
+                    const bool stop = i < 28u && i > failed &&
+                        (i < 24u ? ((low >> i) & 1u) : ((high >> (i - 24u)) & 1u));
+                    auto &voice = sas_state.voices[i];
+                    require(voice.on != stop, "aborted VCS batch lost or invented a KeyOff");
+                    for (unsigned sample = 0; sample < kSasFallbackReleaseSamples; ++sample)
+                        sas_step_envelope(voice);
+                    require(voice.playing != stop, "aborted VCS batch left a stopped loop playing");
+                }
+            }
+            sas_state.voices[27].paused = true;
+            sas_state.voices[27].on = true;
+            finish_aborted_audio_stops(0u, 8u, 0u);
+            require(sas_state.voices[27].on, "abort drain bypassed SAS paused KeyOff semantics");
+            require(remaining_audio_stops(~0u, ~0u, 32u) == 0u,
+                    "invalid abort channel produced stop commands");
+            sas_state = previous;
         }
 
         // A silent envelope changes gain, not the source clock. Even an

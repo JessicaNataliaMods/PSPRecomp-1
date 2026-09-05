@@ -1,4 +1,5 @@
 #include "vcs_frame_timing.hpp"
+#include "vcs_audio_commands.hpp"
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -7,6 +8,63 @@
 #include <string>
 
 int main() {
+    // Multiple render frames can enqueue commands before one audio batch.
+    // Exhaust every start/stop order up to eight commands; last request wins,
+    // including STOP->START (a legitimate retrigger) and START->STOP.
+    for (unsigned length = 1; length <= 8; ++length) {
+        for (unsigned sequence = 0; sequence < (1u << length); ++sequence) {
+            std::uint32_t starts = 0, stops = 0;
+            bool requested = false;
+            for (unsigned n = 0; n < length; ++n) {
+                requested = ((sequence >> n) & 1u) != 0;
+                if (requested) starts |= 1u;
+                else {
+                    stops |= 1u;
+                    starts = vcs::stop_queued_audio_start(starts, 1u);
+                }
+            }
+            bool playing = false;
+            if (stops & 1u) playing = false;
+            if (starts & 1u) playing = true;
+            if (playing != requested) {
+                std::cerr << "Audio command order restarted a stopped voice\n";
+                return 1;
+            }
+        }
+    }
+    for (unsigned voice = 0; voice < 28; ++voice) {
+        const auto bit = 1u << voice;
+        const auto low = voice < 24 ? bit : 0u;
+        const auto high = voice >= 24 ? 1u << (voice - 24u) : 0u;
+        for (unsigned extra_frames = 1; extra_frames <= 8; ++extra_frames) {
+            for (unsigned frame = 0; frame < extra_frames; ++frame) {
+                if (vcs::audio_end_flags_with_pending_starts(~0u, low, high, 0, 0, false) != ~bit ||
+                    vcs::audio_end_flags_with_pending_starts(~0u, 0, 0, low, high, true) != ~bit)
+                    return 1;
+            }
+        }
+        if (vcs::audio_end_flags_with_pending_starts(~0u, 0, 0, low, high, false) != ~0u ||
+            vcs::audio_end_flags_with_pending_starts(~0u, 0, 0, 0, 0, true) != ~0u)
+            return 1; // consumed/aborted batches must not hide a real EOF
+    }
+    for (unsigned fps : {30u, 60u, 100u, 120u, 144u, 200u, 240u}) {
+        vcs::FractionalGameClock clock;
+        std::uint32_t counter = 0;
+        double measured = 0;
+        for (unsigned frame = 0; frame < fps * 60; ++frame) {
+            const float ms = 1000.0f / fps;
+            measured += ms;
+            counter += static_cast<std::uint32_t>(clock.increment(counter, ms, true));
+        }
+        if (std::abs(counter - measured) >= 1.001) {
+            std::cerr << "Integer game clock drift at FPS " << fps << '\n';
+            return 1;
+        }
+        // Pause preserves the fraction; external reset discards it.
+        if (clock.increment(counter, 0, true) != 0 || clock.increment(123u, 0.25f, true) != 0 ||
+            clock.increment(123u, 0.75f, true) != 1 || clock.increment(124u, 0.5f, false) != 0.5f)
+            return 1;
+    }
     for (const unsigned fps : {30u, 60u, 100u, 120u, 144u, 200u, 240u}) {
         double seconds = 0.0;
         for (unsigned frame = 0; frame < fps * 60u; ++frame) {
@@ -74,6 +132,9 @@ int main() {
     const std::string source{std::istreambuf_iterator<char>(generated), {}};
     const auto begin = source.find("L_08A11438:\n");
     const auto end = source.find("L_08A11440:\n", begin);
+    if (source.find("vcs::game_clock_increment(0u, ctx.gpr[6], aot_fpr_16)") == std::string::npos ||
+        source.find("vcs::game_clock_increment(1u, aot_gpr_5, aot_fpr_12)") == std::string::npos)
+        return 1;
     if (begin == std::string::npos || end == std::string::npos ||
         source.substr(begin, end - begin).find("vcs::game_minimum_timestep(") == std::string::npos) {
         std::cerr << "Generated CTimer high-FPS patch is missing\n";
@@ -89,5 +150,19 @@ int main() {
             return 1;
         }
     }
-    std::cout << "VCS frame timing and root motion: 30/60/100/120/144/200/240 FPS PASS\n";
+    {
+        std::ifstream input(std::filesystem::path(__FILE__).parent_path().parent_path()
+                            / "generated/generated_unit_0001.cpp");
+        const std::string code{std::istreambuf_iterator<char>(input), {}};
+        const auto at = code.find("L_0880AB48:\n");
+        if (code.find("vcs::audio_end_flags_with_pending_starts(") == std::string::npos ||
+            code.find("vcs::stop_queued_audio_start(aot_mem.aot_direct_load32(aot_gpr_4), aot_gpr_6)") == std::string::npos)
+            return 1;
+        if (at == std::string::npos ||
+            code.substr(at, 500).find("vcs::finish_aborted_audio_stops(") == std::string::npos) {
+            std::cerr << "Generated audio abort KeyOff drain is missing\n";
+            return 1;
+        }
+    }
+    std::cout << "VCS frame timing, root motion and audio abort hook: PASS\n";
 }

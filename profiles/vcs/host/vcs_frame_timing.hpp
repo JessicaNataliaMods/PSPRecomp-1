@@ -1,8 +1,32 @@
 #pragma once
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 
 namespace vcs {
 bool unlocked_game_timing_enabled() noexcept;
+// Keep the fractional millisecond discarded by the stock per-frame integer
+// counters. Detect external resets/clamps from the next observed counter.
+struct FractionalGameClock {
+    double remainder{};
+    std::uint32_t expected{};
+    bool valid{};
+    float increment(std::uint32_t current, float milliseconds, bool unlocked) noexcept {
+        if (!unlocked || !std::isfinite(milliseconds) || milliseconds < 0.0f || milliseconds > 1000000.0f) {
+            valid = false;
+            remainder = 0.0;
+            return milliseconds;
+        }
+        if (!valid || current != expected) remainder = 0.0;
+        const double total = milliseconds + remainder;
+        const auto whole = static_cast<std::uint32_t>(total);
+        remainder = total - whole;
+        expected = current + whole;
+        valid = true;
+        return static_cast<float>(whole);
+    }
+};
+float game_clock_increment(unsigned clock, std::uint32_t current, float milliseconds) noexcept;
 
 // CTimer uses 50 units per second. Its stock minimum of 0.5 means 10 ms,
 // regardless of the real frame duration: above 100 FPS animation time outruns

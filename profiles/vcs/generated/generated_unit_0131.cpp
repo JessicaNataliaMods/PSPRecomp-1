@@ -4199,6 +4199,7 @@ L_08A11340:
     }
     goto L_08A11358;
 L_08A11358:
+    aot_fpr_16 = vcs::game_clock_increment(0u, ctx.gpr[6], aot_fpr_16);
     aot_fpr_16 = std::bit_cast<float>(ctx.fpu_float_to_word_ct<1u>(aot_fpr_16));
     ctx.gpr[7] = (std::bit_cast<std::uint32_t>(aot_fpr_16));
     { const bool branch_taken = 0u == 0u;
@@ -4240,6 +4241,7 @@ L_08A11398:
     }
     goto L_08A113B0;
 L_08A113B0:
+    aot_fpr_12 = vcs::game_clock_increment(1u, aot_gpr_5, aot_fpr_12);
     aot_fpr_12 = std::bit_cast<float>(ctx.fpu_float_to_word_ct<1u>(aot_fpr_12));
     ctx.gpr[6] = (std::bit_cast<std::uint32_t>(aot_fpr_12));
     { const bool branch_taken = 0u == 0u;

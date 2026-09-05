@@ -4,6 +4,40 @@ Base: `efa4728` (the current checkout, not a historical reference build).
 
 ## Changes
 
+* Revision 5 handles render/audio command ordering, not SAS envelope timeouts.
+  A later stop cancels an unconsumed producer start (`0x0880A6A4`), while
+  STOP->START still retriggers. The VCS playing query (`0x0880A5FC`) considers
+  pending starts in both command buffers, so an extra render update cannot
+  observe a false EOF and drop ownership before KeyOn. Each consumer visit
+  retires its start bit (`0x0880AE90`); stale completed batches never hide EOF.
+  Tests exhaust all 510 start/stop sequences of lengths 1–8 and both pending
+  buffer phases for each channel. A negative control using the original
+  independent masks fails with "Audio command order restarted a stopped voice".
+* Revision 5 carries fractional milliseconds for the two CTimer integer
+  counters at `0x08A11358/0x08A113B0`. The confirmed reproduction loses about
+  350 ms relative to animation time in an eight-second interval. Stock mode,
+  time scale, pause, and root-motion code remain unchanged. External counter
+  changes reset the carry; tests check 60 seconds at 30–240 FPS with <1 ms
+  cumulative quantization error. This does not remove the host device queue
+  or establish an exact visual lip-sync offset without another user test.
+* The revision 4 reproduction reported `aborted_batches=0`: its abort drain
+  did not explain the confirmed stuck skid. Revision 5 logs cancelled starts
+  and protected pending owners independently of that older path.
+
+* Revision 4 (based on `32f4b08`) preserves unvisited KeyOff commands when
+  `0x0880AB48` abandons a command batch because a sample is unavailable. The
+  stock exit clears the batch-ready flag without reaching the remaining
+  channels. Stops in words `0x08BB4AA8/0x08BB4AAC` must be drained first.
+  Tests inject a failure at each of the 28 channels, check the 24+4 bit
+  packing, and verify unrelated and paused voices are unaffected. This fixes
+  a lost-command path, not a verified reproduction of every reported loop.
+* Revision 4 logs SAS lifecycle counters/masks once per guest second and
+  ATRAC create/release/seek events, including decoder IDs. Game-clock evidence
+  is enabled with Audio Diagnostics too. A fresh user reproduction is needed
+  to determine whether the cutscene issue is an unreleased decoder, a seek on
+  the previous stream, or output latency. No new cutscene timing adjustment,
+  FPS limit, root-motion change, or timeout on legitimate loops is introduced.
+
 * Revision 3 fixes the root-motion regression exposed by removing the timer
   floor. Ped code at `0x0891997C` multiplies displacement by **0.5** when
   timestep < 0.5, while cutscene-object code at `0x08A199DC` divides by **0.5**.
