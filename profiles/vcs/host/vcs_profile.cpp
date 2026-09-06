@@ -7181,6 +7181,14 @@ bool unlocked_game_timing_enabled() noexcept {
     return configured_game_frame_rate() > 30u;
 }
 
+void trace_stream_request(std::uint32_t current, std::uint32_t requested, std::uint32_t events) {
+    if (!vcs_configuration().audio.diagnostics) return;
+    std::ostringstream line;
+    line << "STREAM_REQUEST guest_us=" << virtual_time_us << " current=" << current
+         << " requested=" << requested << " events=" << events;
+    runtime_log_line(line.str());
+}
+
 float game_clock_increment(unsigned clock, std::uint32_t current, float milliseconds) noexcept {
     static std::array<FractionalGameClock, 2> clocks{};
     return clocks[clock & 1u].increment(current, milliseconds, unlocked_game_timing_enabled());
@@ -7309,7 +7317,7 @@ void install_profile(psprecomp::Runtime &runtime, std::uint32_t user_arena_start
     }
     std::cerr << "[frame-rate] target=" << configured_game_frame_rate()
               << " virtual_display=" << virtual_display_refresh_hz() << " Hz\n";
-    runtime_log_line("AUDIO_TIMING_REVISION=5 live_sas_end_flags=1 unlocked_timestep=1 root_motion_scale=1 sas_silent_clock=1 abort_stop_drain=1 ordered_audio_commands=1 pending_voice_ownership=1 fractional_game_clocks=1");
+    runtime_log_line("AUDIO_TIMING_REVISION=6 live_sas_end_flags=1 unlocked_timestep=1 root_motion_scale=1 sas_silent_clock=1 abort_stop_drain=1 ordered_audio_commands=1 pending_voice_ownership=1 fractional_game_clocks=1 stream_source_transition=1");
     file_table = FileTable{};
     for (auto &[address, state] : mpeg_contexts) close_video_decoder(state);
     mpeg_contexts.clear();

@@ -2,6 +2,14 @@
 #include <cstdint>
 
 namespace vcs {
+inline bool stream_request_needs_new_source(std::uint32_t current, std::uint32_t requested) noexcept {
+    return current != requested;
+}
+inline std::uint32_t stream_open_event_bits(std::uint32_t current, std::uint32_t requested) noexcept {
+    // OPEN=1, STOP=4. STOP also cancels an old in-progress refill before OPEN.
+    return stream_request_needs_new_source(current, requested) ? 5u : 1u;
+}
+void trace_stream_request(std::uint32_t current, std::uint32_t requested, std::uint32_t events);
 // Host-only diagnostics; never used to decide guest audio state.
 inline std::uint64_t audio_pending_start_cancellations{};
 inline std::uint64_t audio_pending_owner_protections{};

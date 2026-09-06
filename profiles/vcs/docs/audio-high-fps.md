@@ -70,6 +70,24 @@ Não abrir o jogo automaticamente. O usuário realiza os testes visuais.
 
 ## Changes
 
+* Revision 6 (based on `2d6006e`) addresses the stream-request branch, not the
+  confirmed SAS/gameplay fixes. At `0x08AABAA0`, an existing READY flag allowed
+  a request for a different track to become SEEK (event 2) on the current
+  decoder; a preload-only request could be ignored altogether. Compare the
+  requested ID with the active stream ID at `0x08BD5AE4` before either action.
+  A different ID takes the existing open path at `0x08AABAC4`, with STOP|OPEN
+  (events 4|1), so an in-progress old refill cannot bypass teardown. Same-ID
+  seeks and preload no-ops retain the stock behavior. Requests while the
+  initial busy flag is set retain the existing behavior; this is not a new
+  generalized streaming scheduler or a change to custom-track filename lookup.
+* Revision 6 tests replay READY transitions for radio/cutscene IDs, same-ID
+  requests, preload-only calls, and a refill in progress. A negative control
+  with the original identity-blind branch fails: "New cutscene request retained
+  the previous audio source". Integration guards check both generated labels.
+  `STREAM_REQUEST` logs current/requested IDs and event bits. User validation
+  of the intermittent office transition is still required; the test proves
+  this faulty branch, not that every wrong-track symptom has the same cause.
+
 * Revision 5 handles render/audio command ordering, not SAS envelope timeouts.
   A later stop cancels an unconsumed producer start (`0x0880A6A4`), while
   STOP->START still retriggers. The VCS playing query (`0x0880A5FC`) considers

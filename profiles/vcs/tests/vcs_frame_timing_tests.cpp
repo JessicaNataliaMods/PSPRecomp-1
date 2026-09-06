@@ -8,6 +8,41 @@
 #include <string>
 
 int main() {
+    // Replay the READY-source branch for radio/cutscene transitions, including
+    // preload-only calls. An old READY bit must not turn a new file into a
+    // seek on the existing decoder, or silently ignore its preload.
+    for (std::uint32_t current : {0u, 1u, 8u, 9u, 50u, 110u, 111u, ~0u}) {
+        for (std::uint32_t requested : {0u, 1u, 8u, 9u, 50u, 110u, 111u}) {
+            for (bool preload : {false, true}) {
+                for (bool refilling : {false, true}) {
+                    std::uint32_t events = 0;
+                    if (vcs::stream_request_needs_new_source(current, requested))
+                        events = vcs::stream_open_event_bits(current, requested);
+                    else if (!preload) events = 2u; // stock same-source seek
+                    auto decoder_source = current;
+                    bool loading = refilling;
+                    if (events & 4u) loading = false;
+                    if (!loading && (events & 1u)) decoder_source = requested;
+                    // A seek changes position, never the decoder's source.
+                    if (decoder_source != requested) {
+                        std::cerr << "New cutscene request retained the previous audio source\n";
+                        return 1;
+                    }
+                    if (current == requested && events != (preload ? 0u : 2u)) return 1;
+                }
+            }
+        }
+    }
+    {
+        std::ifstream input(std::filesystem::path(__FILE__).parent_path().parent_path()
+                            / "generated/generated_unit_0169.cpp");
+        const std::string code{std::istreambuf_iterator<char>(input), {}};
+        const auto begin = code.find("L_08AABAA0:\n");
+        const auto end = code.find("L_08AABAD8:\n", begin);
+        if (begin == std::string::npos || end == std::string::npos ||
+            code.substr(begin, end - begin).find("vcs::stream_request_needs_new_source(") == std::string::npos ||
+            code.substr(begin, end - begin).find("vcs::stream_open_event_bits(") == std::string::npos) return 1;
+    }
     // Multiple render frames can enqueue commands before one audio batch.
     // Exhaust every start/stop order up to eight commands; last request wins,
     // including STOP->START (a legitimate retrigger) and START->STOP.
